@@ -13,7 +13,7 @@ export default function Home() {
       <div>
         {" "}
         <h1>Welcome to Next.js PWA!</h1>
-        <p>PWA를 설치해서 앱처럼 사용해보세요!</p>
+        <p>PWA를 설치해서 앱처럼 사용해보세요!!!!</p>
         <PWAInstallButton />
       </div>
     </>
