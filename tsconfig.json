@@ -1,0 +1,30 @@
+{
+  "compilerOptions": {
+    "outDir": "public", // 변환된 JS 파일 저장 위치
+    "target": "es5",
+    "lib": ["dom", "dom.iterable", "esnext", "WebWorker"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": false,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+    "incremental": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "types": ["jest"]
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".eslintrc.js",
+    "src/**/*",
+    "src/service-worker/sw.ts",
+    "public/sw.JS"
+  ],
+  "exclude": ["node_modules"]
+}
