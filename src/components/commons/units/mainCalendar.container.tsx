@@ -1,22 +1,15 @@
 import { useEffect, useState } from "react";
 import {
   Arrow,
-  Background,
-  BottomNav,
-  ButtonWrapper,
   CalendarIcon,
   Container,
   DateDisplay,
   DateWrapper,
   DaysOfWeekContainer,
   DaysOfWeekWrapper,
-  FinalButton,
   MatchCard,
   MatchCardsContainer,
   MatchTimeLabel,
-  NavItem,
-  PageHeader,
-  PageTitle,
   RecordButton,
   Team,
   TeamName,
@@ -28,7 +21,7 @@ import { formatDate, formatDate2 } from "../../../commons/libraries/utils";
 
 export default function MainCalendarPage() {
   // cardCount 상태에 따라 MatchCard가 반복되어 렌더링됩니다.
-  const [cardCount, setCardCount] = useState(5);
+  const [cardCount, setCardCount] = useState(3);
 
   const [currentDate, setCurrentDate] = useState("");
 
@@ -38,14 +31,6 @@ export default function MainCalendarPage() {
 
   return (
     <Container>
-      <Background>
-        <PageHeader>
-          <PageTitle>2025 총장배 야구대회</PageTitle>
-          <ButtonWrapper>
-            <FinalButton>심판등록</FinalButton>
-          </ButtonWrapper>
-        </PageHeader>
-      </Background>
       <DaysOfWeekContainer>
         <DaysOfWeekWrapper>
           <Arrow>&lt;</Arrow>
@@ -57,7 +42,6 @@ export default function MainCalendarPage() {
           <Arrow>&gt;</Arrow>
         </DaysOfWeekWrapper>
       </DaysOfWeekContainer>
-
       <MatchCardsContainer>
         {Array.from({ length: cardCount }).map((_, index) => (
           <MatchCard key={index}>
@@ -77,12 +61,6 @@ export default function MainCalendarPage() {
           </MatchCard>
         ))}
       </MatchCardsContainer>
-
-      <BottomNav>
-        <NavItem>경기일정</NavItem>
-        <NavItem>팀순위</NavItem>
-        <NavItem>선수기록</NavItem>
-      </BottomNav>
     </Container>
   );
 }
