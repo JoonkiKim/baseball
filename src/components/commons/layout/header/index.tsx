@@ -1,4 +1,5 @@
 import styled from "@emotion/styled";
+import Link from "next/link";
 
 // ─── 헤더 영역 (배경 + 날짜 영역 포함) ─────────────────────────────
 export const Background = styled.div`
@@ -69,6 +70,7 @@ export const ButtonWrapper = styled.div`
 export const FinalButton = styled.button`
   background: #bdbdbd;
   border: none;
+  text-align: center;
   border-radius: 4px;
   padding: 8px 16px;
   font-family: "Inter-Regular", sans-serif;
@@ -103,9 +105,11 @@ export default function LayoutHeader() {
       <PageHeader>
         <PageTitle>2025 총장배 야구대회</PageTitle>
       </PageHeader>
-      <ButtonWrapper>
-        <FinalButton>심판등록</FinalButton>
-      </ButtonWrapper>
+      <Link href="/refreeRegistration" passHref>
+        <ButtonWrapper as="a">
+          <FinalButton>심판등록</FinalButton>
+        </ButtonWrapper>
+      </Link>
     </Background>
   );
 }

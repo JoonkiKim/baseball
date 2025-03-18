@@ -18,6 +18,7 @@ import {
   VsText,
 } from "./mainCalendar.style";
 import { formatDate, formatDate2 } from "../../../commons/libraries/utils";
+import Link from "next/link";
 
 export default function MainCalendarPage() {
   // cardCount 상태에 따라 MatchCard가 반복되어 렌더링됩니다.
@@ -28,6 +29,8 @@ export default function MainCalendarPage() {
   useEffect(() => {
     setCurrentDate(formatDate2(new Date())); // 현재 날짜를 포맷팅
   }, []);
+
+  // 팀순위로 이동
 
   return (
     <Container>
@@ -57,7 +60,9 @@ export default function MainCalendarPage() {
                 <TeamScore>9</TeamScore>
               </Team>
             </TeamsContainer>
-            <RecordButton>경기기록</RecordButton>
+            <Link href="/teamRegistration" passHref>
+              <RecordButton as="a">경기기록</RecordButton>
+            </Link>
           </MatchCard>
         ))}
       </MatchCardsContainer>

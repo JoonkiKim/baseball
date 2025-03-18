@@ -1,4 +1,5 @@
 import styled from "@emotion/styled";
+import Link from "next/link";
 
 // ─── 하단 네비게이션 ─────────────────────────────
 export const BottomNavWrapper = styled.div`
@@ -89,15 +90,21 @@ export default function LayoutNavigation() {
   return (
     <>
       <BottomNavWrapper>
-        <BottomNav>
-          <NavItem>경기일정</NavItem>
-        </BottomNav>
-        <BottomNav>
-          <NavItem>팀순위</NavItem>
-        </BottomNav>
-        <BottomNav>
-          <NavItem>선수기록</NavItem>
-        </BottomNav>
+        <Link href="/" passHref>
+          <BottomNav as="a">
+            <NavItem>경기일정</NavItem>
+          </BottomNav>
+        </Link>
+        <Link href="/ranking" passHref>
+          <BottomNav as="a">
+            <NavItem>팀순위</NavItem>
+          </BottomNav>
+        </Link>
+        <Link href="/playerStats" passHref>
+          <BottomNav as="a">
+            <NavItem>선수기록</NavItem>
+          </BottomNav>
+        </Link>
       </BottomNavWrapper>
     </>
   );

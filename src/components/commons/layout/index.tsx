@@ -4,8 +4,8 @@ import { useRouter } from "next/router";
 import LayoutHeader from "./header";
 import LayoutNavigation from "./navigation";
 
-// **특정 주소에서는 헤더를 안보여주고 싶다면, 변수에 해당 주소를 담아서 그 주소랑 일치하면 헤더를 안보여주게 할 수 있음
-const HIDDEN_HEADERS = [""];
+// 여기서만 보여주게 하자
+const SHOW_NAV = ["/playerStats", "/ranking", "/"];
 
 interface ILayoutProps {
   children: JSX.Element;
@@ -16,14 +16,14 @@ export default function Layout(props: ILayoutProps): JSX.Element {
   // 아래의 asPath를 찍어보면 지금 주소가 어디인지 확인할 수 있다
   console.log(router.asPath);
 
-  const isHiddenHeader = HIDDEN_HEADERS.includes(router.asPath);
+  const isShowNav = SHOW_NAV.includes(router.asPath);
   //
 
   return (
     <div>
-      {!isHiddenHeader && <LayoutHeader />}
+      <LayoutHeader />
       <div>{props.children}</div>
-      <LayoutNavigation />
+      {isShowNav && <LayoutNavigation />}
     </div>
   );
 }
