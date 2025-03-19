@@ -12,7 +12,7 @@ export const GameRecordContainer = styled.div`
   width: 90%;
   max-width: 768px;
   margin: 0 auto;
-  margin-top: 140px;
+  margin-top: 120px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -92,7 +92,7 @@ export const ControlButtonsRow = styled.div`
 `;
 
 export const ControlButton = styled.button`
-  background-color: #fff;
+  background-color: #bdbdbd;
   border: 1px solid #999;
   padding: 10px 20px;
   font-size: 14px;
@@ -101,7 +101,7 @@ export const ControlButton = styled.button`
   font-family: "Inter-Regular", sans-serif;
 
   &:hover {
-    background-color: #f7f7f7;
+    background-color: #bdbdbd;
   }
 
   ${small} {
@@ -118,7 +118,9 @@ export const InningScoreContainer = styled.div`
   /* height: 20vh; */
   border-bottom: 1px solid #ccc;
   text-align: center;
-  padding: 16px 0;
+  /* padding: 16px 0; */
+  padding-top: 4vh;
+  padding-bottom: 4vh;
 `;
 
 // "이번 이닝 득점" 문구
@@ -145,7 +147,7 @@ export const InningScoreControls = styled.div`
 `;
 
 export const ScoreButton = styled.button`
-  background-color: #fff;
+  background-color: #bdbdbd;
   border: 1px solid #999;
   border-radius: 4px;
   font-size: 18px;
@@ -154,7 +156,7 @@ export const ScoreButton = styled.button`
   cursor: pointer;
 
   &:hover {
-    background-color: #f7f7f7;
+    background-color: #bdbdbd;
   }
 
   ${small} {
@@ -179,13 +181,14 @@ export const ScoreDisplay = styled.div`
 export const PlayersRow = styled.div`
   display: flex;
   width: 100%;
-  /* height: 30vh; */
+  height: 25vh;
   border-bottom: 1px solid #ccc;
 `;
 
 export const PlayerBox = styled.div`
+  /* margin-top: 8vh; */
   flex: 1;
-  padding: 12px;
+  /* padding: 12px; */
   border-right: 1px solid #ccc;
   text-align: center;
 
@@ -195,8 +198,10 @@ export const PlayerBox = styled.div`
 `;
 
 export const PlayerInfo = styled.div`
+  /* margin-top: 7vh; */
   font-weight: 500;
-  margin-bottom: 8px;
+  margin-top: 5vh;
+  /* margin-bottom: 8px; */
 
   ${small} {
     font-size: 14px;
@@ -211,8 +216,9 @@ export const PlayerInfo = styled.div`
 
 // "선수교체" 버튼
 export const PlayerChangeButton = styled.button`
-  background-color: #fff;
+  background-color: #bdbdbd;
   border: 1px solid #999;
+  margin-top: 5vh;
   padding: 8px 12px;
   font-size: 14px;
   cursor: pointer;
@@ -220,7 +226,7 @@ export const PlayerChangeButton = styled.button`
   font-family: "Inter-Regular", sans-serif;
 
   &:hover {
-    background-color: #f7f7f7;
+    background-color: #bdbdbd;
   }
 
   ${small} {
@@ -234,7 +240,7 @@ export const PlayerChangeButton = styled.button`
 export const RecordActionsRow = styled.div`
   display: grid;
   width: 100%;
-  /* height: 15vh; */
+  height: 12.5vh;
   grid-template-columns: repeat(4, 1fr);
   border-bottom: 1px solid #ccc;
   padding: 12px 0;
@@ -242,14 +248,14 @@ export const RecordActionsRow = styled.div`
 
 export const RecordActionButton = styled.button`
   border: 1px solid #999;
-  background-color: #fff;
+  background-color: #bdbdbd;
   font-size: 14px;
   padding: 16px 0;
   cursor: pointer;
   font-family: "Inter-Regular", sans-serif;
 
   &:hover {
-    background-color: #f7f7f7;
+    background-color: #bdbdbd;
   }
 
   ${small} {

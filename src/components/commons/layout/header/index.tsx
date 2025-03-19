@@ -103,7 +103,9 @@ export default function LayoutHeader() {
   return (
     <Background>
       <PageHeader>
-        <PageTitle>2025 총장배 야구대회</PageTitle>
+        <Link href="/" passHref>
+          <PageTitle as="a">2025 총장배 야구대회</PageTitle>
+        </Link>
       </PageHeader>
       <Link href="/refreeRegistration" passHref>
         <ButtonWrapper as="a">

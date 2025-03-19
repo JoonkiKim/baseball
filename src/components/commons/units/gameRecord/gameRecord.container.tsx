@@ -20,6 +20,11 @@ import {
   RecordActionButton,
   ScoreBoardWrapper,
 } from "./gameRecord.style";
+import HitModal from "../../modals/hitModal";
+import OutModal from "../../modals/outModal";
+import EtcModal from "../../modals/etcModal";
+import DefenseChangeModal from "../../modals/defenseChange";
+import GameOverModal from "../../modals/gameOverModal";
 
 export default function GameRecordPage() {
   // 상단 이닝 헤더 (첫 번째 열: "Team", 이후 1~9, R, H)
@@ -93,17 +98,39 @@ export default function GameRecordPage() {
     setThisInningScore((prev) => (prev > 0 ? prev - 1 : 0));
   };
 
+  // 모달 상태
+  const [isHitModalOpen, setIsHitModalOpen] = useState(false);
+  const [isOutModalOpen, setIsOutModalOpen] = useState(false);
+  const [isEtcModalOpen, setIsEtcModalOpen] = useState(false);
+  const [isChangeModalOpen, setIsChangeModalOpen] = useState(false);
+  const [isGameEndModalOpen, setIsGameEndModalOpen] = useState(false);
+
   // 공수교대 / 경기종료 버튼
   const handleDefenseChange = () => {
-    alert("공수교대!");
-  };
-  const handleGameEnd = () => {
-    alert("경기종료!");
+    setIsChangeModalOpen(true);
   };
 
-  // 하단 기록 버튼
+  const handleGameEnd = () => {
+    setIsGameEndModalOpen(true);
+  };
+
+  // 하단 기록 버튼 클릭
   const handleRecordAction = (action: string) => {
-    alert(`기록: ${action}`);
+    if (action === "안타") {
+      // 안타 버튼을 누르면 모달 오픈
+      setIsHitModalOpen(true);
+    } else if (action === "아웃") {
+      // 아웃 버튼을 누르면 모달 오픈
+      setIsOutModalOpen(true);
+    } else if (action === "etc") {
+      // etc 버튼을 누르면 모달 오픈
+      setIsEtcModalOpen(true);
+    } else if (action === "볼넷/사구") {
+      // 볼넷사구구 버튼을 누르면 모달 오픈
+      alert(`기록: ${action}`);
+    } else {
+      alert("다시 선택해주세요");
+    }
   };
 
   return (
@@ -182,6 +209,16 @@ export default function GameRecordPage() {
           etc
         </RecordActionButton>
       </RecordActionsRow>
+      {/* 모달 */}
+      {isHitModalOpen && <HitModal setIsHitModalOpen={setIsHitModalOpen} />}
+      {isOutModalOpen && <OutModal setIsOutModalOpen={setIsOutModalOpen} />}
+      {isEtcModalOpen && <EtcModal setIsEtcModalOpen={setIsEtcModalOpen} />}
+      {isChangeModalOpen && (
+        <DefenseChangeModal setIsChangeModalOpen={setIsChangeModalOpen} />
+      )}
+      {isGameEndModalOpen && (
+        <GameOverModal setIsGameEndModalOpen={setIsGameEndModalOpen} />
+      )}
     </GameRecordContainer>
   );
 }

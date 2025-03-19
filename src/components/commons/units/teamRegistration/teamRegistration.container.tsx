@@ -14,6 +14,7 @@ import {
   PositionDropdown,
   NextButton,
 } from "./teamRegistration.style";
+import RecordStartModal from "../../modals/recordStart";
 
 interface PlayerInfo {
   order: number | string;
@@ -69,10 +70,10 @@ export default function TeamRegistrationPageComponent() {
     setOpenPositionRow(null);
   };
 
+  const [isModalOpen, setIsModalOpen] = useState(false);
   // "다음" 버튼 클릭 시
   const handleNext = () => {
-    router.push("/records");
-    alert("다음 단계로 이동합니다.");
+    setIsModalOpen(true);
   };
 
   return (
@@ -134,6 +135,7 @@ export default function TeamRegistrationPageComponent() {
 
       {/* 하단 버튼 */}
       <NextButton onClick={handleNext}>다음</NextButton>
+      {isModalOpen && <RecordStartModal setIsModalOpen={setIsModalOpen} />}
     </Container>
   );
 }
