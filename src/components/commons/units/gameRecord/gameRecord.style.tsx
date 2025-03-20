@@ -12,6 +12,7 @@ export const GameRecordContainer = styled.div`
   width: 90%;
   max-width: 768px;
   margin: 0 auto;
+  /* height: 100%; */
   margin-top: 120px;
   display: flex;
   flex-direction: column;
@@ -21,7 +22,12 @@ export const GameRecordContainer = styled.div`
 
 export const ScoreBoardWrapper = styled.div`
   width: 100%;
-  /* height: 20vh; */
+  height: calc((100vh - 120px) * 0.2);
+  /* background-color: aqua; */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 `;
 
 /** ─────────────────────────────────────────────────────────
@@ -38,7 +44,8 @@ export const InningHeader = styled.div`
 
 export const InningCell = styled.div`
   text-align: center;
-  padding: 12px 0;
+  /* padding: 12px 0; */
+  padding: 1vh 0;
   font-weight: 600;
 
   ${small} {
@@ -60,12 +67,13 @@ export const TeamScoreRow = styled.div`
   display: grid;
   grid-template-columns: repeat(12, 1fr); /* 12개 열 */
   width: 100%;
-  border-bottom: 1px solid #ccc;
+  /* border-bottom: 1px solid #ccc; */
 `;
 
 export const TeamScoreCell = styled.div`
   text-align: center;
-  padding: 12px 0;
+  /* padding: 12px 0; */
+  padding: 1vh 0;
   font-weight: 400;
 
   ${small} {
@@ -84,11 +92,17 @@ export const TeamScoreCell = styled.div`
  *  ───────────────────────────────────────────────────────── */
 export const ControlButtonsRow = styled.div`
   display: flex;
+  flex-direction: row;
+  justify-content: center;
+  /* background-color: red; */
   width: 100%;
-  /* height: 15vh; */
+
+  height: calc((100vh - 120px) * 0.1);
   justify-content: space-around;
+  border-top: 1px solid #ccc;
   border-bottom: 1px solid #ccc;
-  padding: 12px 0;
+  /* padding: 12px 0; */
+  padding: 1vh 0;
 `;
 
 export const ControlButton = styled.button`
@@ -114,11 +128,21 @@ export const ControlButton = styled.button`
  *  4) 이번 이닝 득점 (텍스트 + ± 버튼)
  *  ───────────────────────────────────────────────────────── */
 export const InningScoreContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
   width: 100%;
-  /* height: 20vh; */
+
+  /* background-color: purple; */
+  /* height: 25vh; */
+
+  height: calc((100vh - 120px) * 0.25);
   border-bottom: 1px solid #ccc;
   text-align: center;
   /* padding: 16px 0; */
+
   padding-top: 4vh;
   padding-bottom: 4vh;
 `;
@@ -180,8 +204,12 @@ export const ScoreDisplay = styled.div`
  *  ───────────────────────────────────────────────────────── */
 export const PlayersRow = styled.div`
   display: flex;
+
+  /* background-color: blue; */
   width: 100%;
-  height: 25vh;
+  /* height: 30vh; */
+
+  height: calc((100vh - 120px) * 0.3);
   border-bottom: 1px solid #ccc;
 `;
 
@@ -239,8 +267,12 @@ export const PlayerChangeButton = styled.button`
  *  ───────────────────────────────────────────────────────── */
 export const RecordActionsRow = styled.div`
   display: grid;
+
+  /* background-color: yellow; */
   width: 100%;
-  height: 12.5vh;
+  /* height: 15vh; */
+
+  height: calc((100vh - 120px) * 0.15);
   grid-template-columns: repeat(4, 1fr);
   border-bottom: 1px solid #ccc;
   padding: 12px 0;

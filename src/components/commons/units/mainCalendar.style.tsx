@@ -1,4 +1,5 @@
 import styled from "@emotion/styled";
+import DatePicker from "react-datepicker";
 
 // ─── 전체 컨테이너 ─────────────────────────────
 export const Container = styled.div`
@@ -385,5 +386,90 @@ export const RecordButton = styled.button`
   @media only screen and (min-width: 769px) {
     padding: 8px 16px;
     font-size: 12px;
+  }
+`;
+
+export const StyledDatePicker = styled(DatePicker)`
+  /* 전체 캘린더 컨테이너 스타일 */
+  .react-datepicker {
+    font-family: "Inter-Regular", sans-serif;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  /* 헤더 영역 */
+  .react-datepicker__header {
+    background-color: #5db075;
+    border: none;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    padding: 12px 0;
+  }
+
+  .react-datepicker__current-month {
+    font-size: 18px;
+    color: #ffffff;
+    font-weight: 600;
+  }
+
+  /* 네비게이션 버튼 (이전, 다음) */
+  .react-datepicker__navigation {
+    top: 14px;
+    line-height: 1.7rem;
+    border: none;
+    cursor: pointer;
+  }
+
+  .react-datepicker__navigation--previous {
+    margin-left: 10px;
+  }
+
+  .react-datepicker__navigation--next {
+    margin-right: 10px;
+  }
+
+  /* 요일 이름 */
+  .react-datepicker__day-name {
+    font-size: 14px;
+    color: #333;
+    font-weight: 500;
+    margin: 0.2rem;
+  }
+
+  /* 날짜 셀 스타일 */
+  .react-datepicker__day {
+    width: 2.5rem;
+    height: 2.5rem;
+    line-height: 2.5rem;
+    margin: 0.2rem;
+    font-size: 14px;
+    color: #333;
+    transition: background-color 0.2s ease-in-out;
+    cursor: pointer;
+  }
+
+  .react-datepicker__day:hover {
+    background-color: #f0f0f0;
+    border-radius: 4px;
+  }
+
+  /* 선택된 날짜 스타일 */
+  .react-datepicker__day--selected,
+  .react-datepicker__day--keyboard-selected {
+    background-color: #bdbdbd;
+    color: #ffffff;
+    border-radius: 4px;
+  }
+
+  /* 오늘 날짜 스타일 */
+  .react-datepicker__day--today {
+    border: 1px solid #5db075;
+    border-radius: 4px;
+  }
+
+  /* 월 컨테이너 패딩 */
+  .react-datepicker__month-container {
+    padding: 8px;
   }
 `;

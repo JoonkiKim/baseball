@@ -78,7 +78,7 @@ export default function GameOverModal(props: IModalProps) {
   return (
     <ModalOverlay>
       <ModalContainer>
-        <ModalTitle>공수를 교대하시겠습니까?</ModalTitle>
+        <ModalTitle>경기를 종료하시겠습니까?</ModalTitle>
         <ModalButton onClick={() => handleTypeSelect("예")}>예</ModalButton>
         <ModalCancleButton onClick={() => handleTypeSelect("아니오")}>
           아니오
