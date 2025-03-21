@@ -96,7 +96,7 @@ export default function MainCalendarPage() {
 
                   zIndex: 999,
                   left: "50%",
-                  transform: "translateX(-50%) scale(2)", // 2배 확대
+                  transform: "translateX(-50%) scale(1.2)", // 2배 확대
                   transformOrigin: "top center",
                 }}
               >
