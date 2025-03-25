@@ -31,7 +31,7 @@ export const ModalButton = styled.button`
   width: 100%;
   margin-bottom: 10px;
   padding: 12px;
-  background-color: #5cb85c;
+  background-color: #0f0f70;
   border: none;
   color: #fff;
   font-size: 16px;
@@ -39,7 +39,7 @@ export const ModalButton = styled.button`
   cursor: pointer;
 
   &:hover {
-    background-color: #4cae4c;
+    background-color: #0f0f70;
   }
 `;
 

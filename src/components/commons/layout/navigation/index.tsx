@@ -30,7 +30,7 @@ export const BottomNavWrapper = styled.div`
 export const BottomNav = styled.div`
   background: #ffffff;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   box-sizing: border-box;
@@ -41,29 +41,20 @@ export const BottomNav = styled.div`
   }
 
   /* 기본값 (Medium: 481px ~ 768px) */
-  height: 75px;
+  height: 10vh;
   width: 33.33%;
+`;
 
-  /* Small: 480px 이하 */
-  @media only screen and (max-width: 480px) {
-    height: 70px;
-    width: 33.33%;
-  }
-  /* Large: 769px ~ 1024px */
-  @media only screen and (min-width: 769px) and (max-width: 1024px) {
-    height: 80px;
-    width: 33.33%;
-  }
-  /* Extra Large: 1025px 이상 */
-  @media only screen and (min-width: 1025px) {
-    height: 83px;
-    width: 33.33%;
-  }
+export const NavIcon = styled.img`
+  width: 24px;
+  height: 24px;
 `;
 
 export const NavItem = styled.div`
-  font-family: "Inter-Regular", sans-serif;
-  font-weight: 400;
+  /* background-color: red; */
+  margin-top: 10px;
+
+  font-weight: 500;
   color: #000;
   text-align: center;
   font-size: 16px; /* 기본값 (Medium) */
@@ -92,17 +83,26 @@ export default function LayoutNavigation() {
       <BottomNavWrapper>
         <Link href="/" passHref>
           <BottomNav as="a">
+            <NavIcon src="/images/calendar-linear.png"></NavIcon>
             <NavItem>경기일정</NavItem>
           </BottomNav>
         </Link>
         <Link href="/ranking" passHref>
           <BottomNav as="a">
+            <NavIcon src="/images/trophy.png"></NavIcon>
             <NavItem>팀순위</NavItem>
           </BottomNav>
         </Link>
         <Link href="/playerStats" passHref>
           <BottomNav as="a">
+            <NavIcon src="/images/stat.png"></NavIcon>
             <NavItem>선수기록</NavItem>
+          </BottomNav>
+        </Link>
+        <Link href="/refreeRegistration" passHref>
+          <BottomNav as="a">
+            <NavIcon src="/images/ref.png"></NavIcon>
+            <NavItem>심판등록</NavItem>
           </BottomNav>
         </Link>
       </BottomNavWrapper>

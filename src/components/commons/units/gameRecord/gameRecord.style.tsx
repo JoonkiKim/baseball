@@ -280,14 +280,15 @@ export const RecordActionsRow = styled.div`
 
 export const RecordActionButton = styled.button`
   border: 1px solid #999;
-  background-color: #bdbdbd;
-  font-size: 14px;
+  background-color: #0f0f70;
+  font-size: 12px;
   padding: 16px 0;
+  color: #ffffff;
   cursor: pointer;
   font-family: "Inter-Regular", sans-serif;
 
   &:hover {
-    background-color: #bdbdbd;
+    background-color: #0f0f70;
   }
 
   ${small} {
@@ -295,9 +296,9 @@ export const RecordActionButton = styled.button`
     padding: 12px 0;
   }
   ${medium} {
-    font-size: 13px;
+    font-size: 16px;
   }
   ${large}, ${xlarge} {
-    font-size: 14px;
+    font-size: 20px;
   }
 `;

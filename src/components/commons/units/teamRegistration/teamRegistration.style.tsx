@@ -1,20 +1,19 @@
 import styled from "@emotion/styled";
 
-// ─── 공통 미디어 쿼리 구간 ────────────────────────────────────────────────────
-const small = "@media only screen and (max-width: 480px)"; // Small
+// ─── 공통 미디어 쿼리 ──────────────────────────────────────────────
+const small = "@media only screen and (max-width: 480px)";
 const medium =
-  "@media only screen and (min-width: 481px) and (max-width: 768px)"; // Medium
+  "@media only screen and (min-width: 481px) and (max-width: 768px)";
 const large =
-  "@media only screen and (min-width: 769px) and (max-width: 1024px)"; // Large
-const xlarge = "@media only screen and (min-width: 1025px)"; // Extra Large
+  "@media only screen and (min-width: 769px) and (max-width: 1024px)";
+const xlarge = "@media only screen and (min-width: 1025px)";
 
-// ─── 메인 컨테이너 ──────────────────────────────────────────────────────────
+// ─── 기존 스타일 컴포넌트 ─────────────────────────────────────────
 export const Container = styled.div`
   margin-top: 140px;
   width: 100%;
   max-width: 768px;
-  min-height: 1000px; // 이걸로 포지션 드롭다운 여유를 만들어줌
-
+  min-height: 1000px;
   margin-left: auto;
   margin-right: auto;
   padding: 0 20px;
@@ -30,7 +29,6 @@ export const Container = styled.div`
   }
 `;
 
-// ─── 상단 타이틀 (관악사 야구부) ─────────────────────────────────────────────
 export const Title = styled.h1`
   text-align: center;
   font-family: "Inter-SemiBold", sans-serif;
@@ -48,32 +46,30 @@ export const Title = styled.h1`
   }
 `;
 
-// ─── 선수 목록을 감싸는 래퍼 ────────────────────────────────────────────────
 export const PlayerList = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 12px; /* 각 행 간 간격 */
+  gap: 12px;
 `;
 
-// ─── 개별 선수 행 (예: 1 김지찬 CF) ─────────────────────────────────────────
 export const PlayerRow = styled.div`
   display: grid;
-  grid-template-columns: 40px 1fr 1fr;
+  grid-template-columns: 40px 0.6fr 1fr;
   align-items: center;
   border-bottom: 1px solid #ddd;
   padding: 8px 0;
 
   ${small} {
-    grid-template-columns: 30px 1fr 1fr;
+    grid-template-columns: 30px 0.6fr 1fr;
     padding: 6px 0;
   }
 `;
 
-// ─── 타순 번호 영역 ─────────────────────────────────────────────────────────
 export const OrderNumber = styled.div`
   text-align: center;
   font-family: "Inter-Regular", sans-serif;
   font-size: 16px;
+  margin-left: 2vh;
 
   ${small} {
     font-size: 14px;
@@ -86,21 +82,30 @@ export const OrderNumber = styled.div`
   }
 `;
 
-// ─── 선수명 + 돋보기 아이콘 묶음 ────────────────────────────────────────────
 export const NameWrapper = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: 0; /* gap 제거 */
   margin-left: 10px;
 `;
+// 기존 PlayerName는 그대로 두되, 이제 입력필드용 컴포넌트를 따로 생성합니다.
 
-// ─── 선수명 (이미 등록된 경우: 텍스트, 미등록: "선수명 입력") ──────────────
-export const PlayerName = styled.span<{ isPlaceholder?: boolean }>`
+// ─── 새로운 선수명 입력 필드 ───────────────────────────────────────
+export const PlayerNameInput = styled.input`
   font-family: "Inter-Regular", sans-serif;
   font-size: 16px;
-  margin-right: 10px;
-  color: ${(props) => (props.isPlaceholder ? "#999" : "#000")};
+  /* margin-right 제거 */
+  text-align: center;
+  width: 20vh;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #000;
+  /* background-color: red; */
+  &::placeholder {
+    color: #999;
+  }
 
   ${small} {
     font-size: 14px;
@@ -113,11 +118,11 @@ export const PlayerName = styled.span<{ isPlaceholder?: boolean }>`
   }
 `;
 
-// ─── 돋보기 아이콘 ──────────────────────────────────────────────────────────
 export const SearchIcon = styled.img`
   width: 18px;
   height: 18px;
   cursor: pointer;
+  /* background-color: red; */
 
   ${small} {
     width: 16px;
@@ -125,8 +130,6 @@ export const SearchIcon = styled.img`
   }
 `;
 
-// ─── 포지션 래퍼 ────────────────────────────────────────────────────────────
-// 드롭다운이 나타날 수 있도록 relative 설정
 export const PositionWrapper = styled.div`
   display: flex;
   align-items: center;
@@ -135,7 +138,6 @@ export const PositionWrapper = styled.div`
   cursor: pointer;
 `;
 
-// ─── 포지션 텍스트 (이미 등록된 경우: C, SS, CF 등, 미등록: "포지션 입력 ▼") ─
 export const PositionText = styled.span<{ isPlaceholder?: boolean }>`
   font-family: "Inter-Regular", sans-serif;
   font-size: 16px;
@@ -162,11 +164,10 @@ export const PositionDropdown = styled.ul`
   list-style: none;
   background: #fff;
   border: 1px solid #ccc;
-  border-top: none; /* 상단 border 제거 */
+  border-top: none;
   z-index: 999;
-
   box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.15);
-  border-radius: 0 0 4px 4px; /* 하단만 둥글게 처리 */
+  border-radius: 0 0 4px 4px;
 
   li {
     text-align: center;
@@ -180,11 +181,10 @@ export const PositionDropdown = styled.ul`
   }
 `;
 
-// ─── 하단 버튼 ──────────────────────────────────────────────────────────────
 export const NextButton = styled.button`
   margin-top: 30px;
   display: block;
-  margin-left: auto; /* 오른쪽 정렬 예시 */
+  margin-left: auto;
   font-family: "Inter-Regular", sans-serif;
   font-size: 16px;
   padding: 10px 20px;

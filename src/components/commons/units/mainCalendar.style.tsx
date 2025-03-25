@@ -5,6 +5,7 @@ import DatePicker from "react-datepicker";
 export const Container = styled.div`
   margin-top: 120px; /* 헤더 높이와 동일 */
   box-sizing: border-box;
+  margin-bottom: 80px;
   background: #ffffff;
   min-height: 500px;
   display: flex;
@@ -58,7 +59,6 @@ export const PageHeader = styled.div`
 `;
 
 export const PageTitle = styled.h1`
-  font-family: "Inter-SemiBold", sans-serif;
   font-weight: 600;
   color: #ffffff;
   margin: 0;
@@ -87,7 +87,9 @@ export const DaysOfWeekContainer = styled.div`
   flex-direction: row;
   align-items: center;
   justify-content: center;
+  /* background-color: red; */
   padding: 16px; /* 기본값 */
+  margin-top: 2vh;
 
   /* Small */
   @media only screen and (max-width: 480px) {
@@ -111,35 +113,21 @@ export const DaysOfWeekWrapper = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;
+  /* background-color: red; */
   justify-content: space-between;
-  width: 90%; /* 기본값 */
-
-  /* Small */
-  @media only screen and (max-width: 480px) {
-    width: 100%;
-  }
-  /* Medium */
-  @media only screen and (min-width: 481px) and (max-width: 768px) {
-    width: 95%;
-  }
-  /* Large */
-  @media only screen and (min-width: 769px) and (max-width: 1024px) {
-    width: 90%;
-  }
-  /* Extra Large */
-  @media only screen and (min-width: 1025px) {
-    width: 90%;
-  }
+  width: 95%; /* 기본값 */
 `;
 
 export const DateWrapper = styled.div`
-  position: relative;
-  display: inline-block;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  /* background-color: red; */
 `;
 
 export const Arrow = styled.div`
-  font-family: "Inter-Regular", sans-serif;
-  font-weight: 400;
+  font-weight: 1000;
   color: #000;
   font-size: 16px; /* 기본값 */
 
@@ -158,11 +146,11 @@ export const Arrow = styled.div`
 `;
 
 export const DateDisplay = styled.div`
-  font-family: "Inter-Regular", sans-serif;
   align-self: center;
-  font-weight: 400;
+  font-weight: 1000;
   color: #000;
   font-size: 20px; /* 기본값 */
+  margin-right: 13px;
 
   /* Small */
   @media only screen and (max-width: 480px) {
@@ -179,37 +167,15 @@ export const DateDisplay = styled.div`
 `;
 
 export const CalendarIcon = styled.img`
-  position: absolute;
-  left: calc(100% + 10px);
-  top: 55%;
-  transform: translateY(-50%);
-  width: 21px; /* 기본값 */
+  width: 25px; /* 기본값 */
   height: 21px;
   object-fit: cover;
-
-  /* Small */
-  @media only screen and (max-width: 480px) {
-    width: 18px;
-    height: 18px;
-    left: calc(100% + 8px);
-  }
-  /* Medium */
-  @media only screen and (min-width: 481px) and (max-width: 768px) {
-    width: 20px;
-    height: 20px;
-    left: calc(100% + 9px);
-  }
-  /* Large & Extra Large */
-  @media only screen and (min-width: 769px) {
-    width: 21px;
-    height: 21px;
-    left: calc(100% + 10px);
-  }
 `;
 
-// ─── 경기 카드 목록 ─────────────────────────────
 export const MatchCardsContainer = styled.div`
   display: flex;
+  /* background-color: red; */
+  margin-top: 2%;
   flex-direction: column;
   gap: 16px; /* 기본값 */
   padding: 16px; /* 기본값 */
@@ -236,7 +202,10 @@ export const MatchCard = styled.div`
   align-items: center;
   justify-content: space-between;
   border-bottom: 1px solid #e8e8e8;
-  padding: 8px 0; /* 기본값 */
+  padding: 8px 0;
+  /* background-color: red; */
+  height: 10vh;
+  /* margin-top: 10px; */
 
   /* Small */
   @media only screen and (max-width: 480px) {
@@ -253,7 +222,6 @@ export const MatchCard = styled.div`
 `;
 
 export const MatchTimeLabel = styled.div`
-  font-family: "Inter-Medium", sans-serif;
   font-weight: 500;
   color: #000;
   margin-right: 8px;
@@ -276,6 +244,7 @@ export const MatchTimeLabel = styled.div`
 export const TeamsContainer = styled.div`
   display: flex;
   align-items: center;
+  /* background-color: red; */
   flex: 1;
   justify-content: center;
   gap: 16px; /* 기본값 */
@@ -298,50 +267,52 @@ export const Team = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+  /* background-color: aqua; */
+  min-width: 50px;
+  min-height: 45px;
 `;
 
 export const TeamName = styled.div`
-  font-family: "Inter-Medium", sans-serif;
   font-weight: 500;
   color: #000;
   font-size: 16px; /* 기본값 */
-
-  /* Small */
-  @media only screen and (max-width: 480px) {
-    font-size: 14px;
-  }
-  /* Medium */
-  @media only screen and (min-width: 481px) and (max-width: 768px) {
-    font-size: 15px;
-  }
-  /* Large & Extra Large */
-  @media only screen and (min-width: 769px) {
-    font-size: 16px;
-  }
+  margin-bottom: 7px;
 `;
 
-export const TeamScore = styled.div`
-  font-family: "Inter-Medium", sans-serif;
+export const TeamScore = styled.div<{ isWinner?: boolean }>`
   font-weight: 500;
-  color: #000;
+  color: ${({ isWinner }) => (isWinner ? "red" : "#000")};
   font-size: 12px; /* 기본값 */
+`;
 
-  /* Small */
-  @media only screen and (max-width: 480px) {
-    font-size: 10px;
-  }
-  /* Medium */
-  @media only screen and (min-width: 481px) and (max-width: 768px) {
-    font-size: 11px;
-  }
-  /* Large & Extra Large */
-  @media only screen and (min-width: 769px) {
-    font-size: 12px;
-  }
+export const StatusBox = styled.div<{ status: string }>`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 60px;
+  height: 22px;
+  background-color: ${({ status }) =>
+    status === "경기종료"
+      ? "#000000"
+      : status === "경기예정"
+      ? "#F3A231"
+      : "#37DC21"};
+  color: white;
+  font-size: 10px;
+  font-weight: 500;
+  border-radius: 50px;
+  margin-bottom: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+`;
+
+export const TeamsWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
 `;
 
 export const VsText = styled.div`
-  font-family: "Inter-Medium", sans-serif;
   font-weight: 500;
   margin: 0 8px;
   font-size: 16px; /* 기본값 */
@@ -364,35 +335,25 @@ export const VsText = styled.div`
 `;
 
 export const RecordButton = styled.button`
-  background: #bdbdbd;
-  border: none;
+  background: #ffffff;
+  border: 1px solid #e8e8e8;
   border-radius: 4px;
-  font-family: "Inter-Regular", sans-serif;
   cursor: pointer;
-  padding: 8px 16px; /* 기본값 */
+  /* padding: 8px 16px; */
   font-size: 12px; /* 기본값 */
+  min-width: 60px;
+  min-height: 30px;
+  text-align: center;
 
-  /* Small */
-  @media only screen and (max-width: 480px) {
-    padding: 6px 12px;
-    font-size: 10px;
-  }
-  /* Medium */
-  @media only screen and (min-width: 481px) and (max-width: 768px) {
-    padding: 7px 14px;
-    font-size: 11px;
-  }
-  /* Large & Extra Large */
-  @media only screen and (min-width: 769px) {
-    padding: 8px 16px;
-    font-size: 12px;
-  }
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 `;
 
 export const StyledDatePicker = styled(DatePicker)`
   /* 전체 캘린더 컨테이너 스타일 */
   .react-datepicker {
-    font-family: "Inter-Regular", sans-serif;
     border: 1px solid #e0e0e0;
     border-radius: 8px;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);

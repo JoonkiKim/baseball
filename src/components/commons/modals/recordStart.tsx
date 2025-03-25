@@ -32,16 +32,12 @@ export const ModalButton = styled.button`
   width: 100%;
   margin-bottom: 10px;
   padding: 12px;
-  background-color: #5cb85c;
+  background-color: #0f0f70;
   border: none;
   color: #fff;
   font-size: 16px;
   border-radius: 4px;
   cursor: pointer;
-
-  &:hover {
-    background-color: #4cae4c;
-  }
 `;
 
 export const ModalCancleButton = styled.button`

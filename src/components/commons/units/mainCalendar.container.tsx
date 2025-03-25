@@ -16,6 +16,7 @@ import {
   MatchCardsContainer,
   MatchTimeLabel,
   RecordButton,
+  StatusBox,
   Team,
   TeamName,
   TeamsContainer,
@@ -23,18 +24,66 @@ import {
   VsText,
 } from "./mainCalendar.style";
 
-export default function MainCalendarPage() {
-  // 카드(경기) 갯수
-  const [cardCount, setCardCount] = useState(3);
+// Match 객체에 대한 타입 정의
+interface Match {
+  time: string;
+  team1: string;
+  team1Score?: number;
+  team2: string;
+  team2Score?: number;
+  gameStatus: string;
+}
 
+export default function MainCalendarPage() {
   // react-datepicker에서 사용할 날짜 (Date 타입)
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
 
   // 달력이 열려 있는지 여부 (수동 제어용)
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
+  // 경기 데이터 배열 (Match 객체들의 배열)
+  const [matches, setMatches] = useState<Match[]>([
+    {
+      time: "09:00",
+      team1: "자연대",
+      team1Score: 9,
+      team2: "공대",
+      team2Score: 16,
+      gameStatus: "경기종료",
+    },
+    {
+      time: "11:00",
+      team1: "자연대",
+      team1Score: 9,
+      team2: "건환공",
+      team2Score: 6,
+      gameStatus: "경기종료",
+    },
+    {
+      time: "14:00",
+      team1: "관악사",
+      team1Score: 10,
+      team2: "공대",
+      team2Score: 6,
+      gameStatus: "5회초",
+    },
+    {
+      time: "16:30",
+      team1: "건환공",
+
+      team2: "자연대",
+      gameStatus: "경기예정",
+    },
+    {
+      time: "19:00",
+      team1: "자연대",
+      team2: "공대",
+      gameStatus: "경기예정",
+    },
+  ]);
+
   useEffect(() => {
-    // 초기값: 오늘 날짜 (이미 new Date()이므로 별도 처리 필요 없음)
+    // 초기값: 오늘 날짜 (이미 new Date()로 설정되어 있음)
   }, []);
 
   // 왼쪽 Arrow 클릭 시: 날짜 하루 감소
@@ -82,7 +131,7 @@ export default function MainCalendarPage() {
 
             {/* 달력 아이콘 클릭 시 달력 토글 */}
             <CalendarIcon
-              src="/images/calendar.png"
+              src="/images/calendar-linear.png"
               alt="Calendar Icon"
               style={{ cursor: "pointer" }}
               onClick={handleCalendarIconClick}
@@ -93,10 +142,9 @@ export default function MainCalendarPage() {
               <div
                 style={{
                   position: "absolute",
-
                   zIndex: 999,
                   left: "50%",
-                  transform: "translateX(-50%) scale(1.2)", // 2배 확대
+                  transform: "translateX(-50%) scale(1.2)",
                   transformOrigin: "top center",
                 }}
               >
@@ -114,25 +162,53 @@ export default function MainCalendarPage() {
       </DaysOfWeekContainer>
 
       <MatchCardsContainer>
-        {Array.from({ length: cardCount }).map((_, index) => (
-          <MatchCard key={index}>
-            <MatchTimeLabel>11:00</MatchTimeLabel>
-            <TeamsContainer>
-              <Team>
-                <TeamName>건환공</TeamName>
-                <TeamScore>6</TeamScore>
-              </Team>
-              <VsText>vs</VsText>
-              <Team>
-                <TeamName>자연대</TeamName>
-                <TeamScore>9</TeamScore>
-              </Team>
-            </TeamsContainer>
-            <Link href="/teamRegistration" passHref>
-              <RecordButton as="a">경기기록</RecordButton>
-            </Link>
-          </MatchCard>
-        ))}
+        {matches.map((match, index) => {
+          // 두 점수가 모두 있을 경우에만 비교하여 승자를 결정
+          const team1IsWinner =
+            match.team1Score !== undefined &&
+            match.team2Score !== undefined &&
+            match.team1Score > match.team2Score;
+          const team2IsWinner =
+            match.team1Score !== undefined &&
+            match.team2Score !== undefined &&
+            match.team2Score > match.team1Score;
+
+          return (
+            <MatchCard key={index}>
+              <MatchTimeLabel>{match.time}</MatchTimeLabel>
+              <TeamsContainer>
+                <Team>
+                  <TeamName>{match.team1}</TeamName>
+                  <TeamScore isWinner={team1IsWinner}>
+                    {match.team1Score}
+                  </TeamScore>
+                </Team>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    marginBottom: "20px",
+                  }}
+                >
+                  <StatusBox status={match.gameStatus}>
+                    {match.gameStatus}
+                  </StatusBox>
+                  <VsText>vs</VsText>
+                </div>
+                <Team>
+                  <TeamName>{match.team2}</TeamName>
+                  <TeamScore isWinner={team2IsWinner}>
+                    {match.team2Score}
+                  </TeamScore>
+                </Team>
+              </TeamsContainer>
+              <Link href="/teamRegistration" passHref>
+                <RecordButton as="a">경기기록</RecordButton>
+              </Link>
+            </MatchCard>
+          );
+        })}
       </MatchCardsContainer>
     </Container>
   );
