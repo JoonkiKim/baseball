@@ -22,25 +22,28 @@ export const ModalContainer = styled.div`
 `;
 
 export const ModalTitle = styled.h2`
-  margin-bottom: 20px;
-  font-size: 18px;
+  margin-bottom: 50px;
+  margin-top: 30px;
+  font-size: 30px;
+
+  font-family: "KBO-Dia-Gothic_medium";
+  font-weight: 300;
 `;
 
 export const ModalButton = styled.button`
   display: block;
   width: 100%;
-  margin-bottom: 10px;
+  height: 48px;
+  margin-bottom: 30px;
   padding: 12px;
-  background-color: #0f0f70;
+  background-color: rgba(0, 0, 0, 0.75);
   border: none;
   color: #fff;
   font-size: 16px;
-  border-radius: 4px;
+  border-radius: 100px;
+  font-family: "KBO-Dia-Gothic_medium";
+  font-weight: 300;
   cursor: pointer;
-
-  &:hover {
-    background-color: #0f0f70;
-  }
 `;
 
 interface IModalProps {

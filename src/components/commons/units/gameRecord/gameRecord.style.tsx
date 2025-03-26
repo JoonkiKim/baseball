@@ -9,179 +9,205 @@ const xlarge = "@media only screen and (min-width: 1025px)";
 
 // 메인 컨테이너
 export const GameRecordContainer = styled.div`
-  width: 90%;
-  max-width: 768px;
-  margin: 0 auto;
-  /* height: 100%; */
+  width: 100%;
+  /* max-width: 768px; */
   margin-top: 120px;
+  background-color: rgba(0, 0, 0, 0.05);
   display: flex;
   flex-direction: column;
   align-items: center;
-  font-family: "Inter-Regular", sans-serif;
 `;
 
 export const ScoreBoardWrapper = styled.div`
-  width: 100%;
+  width: calc((100% - 2px));
+  /* margin-top: 2vh; */
+  margin-top: calc((100vh - 120px) * 0.01);
   height: calc((100vh - 120px) * 0.2);
-  /* background-color: aqua; */
+  background-color: #ffffff;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  border: 1px solid black;
+  border-radius: 10px;
 `;
 
 /** ─────────────────────────────────────────────────────────
- *  1) 상단 이닝 헤더
- *  팀 이름 열 + 이닝(1~9) + R + H = 총 12개 열
- *  ───────────────────────────────────────────────────────── */
+ *  1) 상단 이닝 헤더 (총 12열: 이닝(1~9) + R + H)
+ * ───────────────────────────────────────────────────────── */
 export const InningHeader = styled.div`
   display: grid;
-  grid-template-columns: repeat(12, 1fr); /* 12개 열 */
+  grid-template-columns: repeat(12, 1fr);
   width: 100%;
-
+  height: 33%;
+  align-items: center;
   border-bottom: 1px solid #ccc;
+  /* background-color: red; */
 `;
 
 export const InningCell = styled.div`
   text-align: center;
-  /* padding: 12px 0; */
-  padding: 1vh 0;
+  /* padding-top: 1vh; */
+  /* background-color: red; */
+  /* padding-bottom: 1vh; */
   font-weight: 600;
-
   ${small} {
-    font-size: 12px;
+    font-size: 15px;
   }
   ${medium} {
-    font-size: 14px;
+    font-size: 20px;
   }
   ${large}, ${xlarge} {
-    font-size: 15px;
+    font-size: 20px;
   }
 `;
 
 /** ─────────────────────────────────────────────────────────
- *  2) 각 팀 득점 표시
- *  (예: [팀이름, 0, 2, 4, ..., R, H])
- *  ───────────────────────────────────────────────────────── */
-export const TeamScoreRow = styled.div`
+ *  2) 팀 이름과 점수를 한 행으로 구성 (총 12열)
+ *     첫 번째 열: 팀 이름 (별도 스타일)
+ *     나머지 11열: 이닝별 점수 (팀 점수 셀)
+ * ───────────────────────────────────────────────────────── */
+export const TeamRow = styled.div`
   display: grid;
-  grid-template-columns: repeat(12, 1fr); /* 12개 열 */
+  grid-template-columns: repeat(12, 1fr); /* 12개의 동일한 너비 */
   width: 100%;
+  align-items: center;
   /* border-bottom: 1px solid #ccc; */
+  /* background-color: aqua; */
+  height: 33%;
+`;
+
+export const TeamNameCell = styled.div`
+  text-align: center;
+  padding: 1vh 0;
+  font-weight: 500;
+  font-family: "KBO-Dia-Gothic_medium";
+  font-style: normal;
+
+  ${small} {
+    font-size: 10px;
+  }
+  ${medium} {
+    font-size: 12px;
+  }
+  ${large}, ${xlarge} {
+    font-size: 14px;
+  }
 `;
 
 export const TeamScoreCell = styled.div`
   text-align: center;
-  /* padding: 12px 0; */
+  font-family: "KBO-Dia-Gothic_light";
   padding: 1vh 0;
   font-weight: 400;
-
   ${small} {
-    font-size: 12px;
+    font-size: 15px;
   }
   ${medium} {
-    font-size: 14px;
+    font-size: 20px;
   }
   ${large}, ${xlarge} {
-    font-size: 15px;
+    font-size: 20px;
   }
 `;
 
 /** ─────────────────────────────────────────────────────────
  *  3) 공수교대 / 경기종료 버튼 섹션
- *  ───────────────────────────────────────────────────────── */
+ * ───────────────────────────────────────────────────────── */
 export const ControlButtonsRow = styled.div`
+  width: 100%;
+  height: calc((100vh - 120px) * 0.15);
+  border-bottom: 1px solid #ccc;
+  /* padding: 1vh 0; */
   display: flex;
   flex-direction: row;
+  align-items: center;
   justify-content: center;
-  /* background-color: red; */
-  width: 100%;
+  padding-top: 1vh;
+  /* background-color: aqua; */
+`;
 
-  height: calc((100vh - 120px) * 0.1);
-  justify-content: space-around;
-  border-top: 1px solid #ccc;
-  border-bottom: 1px solid #ccc;
-  /* padding: 12px 0; */
-  padding: 1vh 0;
+export const ControlButtonsWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+
+  justify-content: space-between;
+  align-items: flex-end; /* 요소들을 아래쪽 정렬 */
+  width: 90%;
+  /* background-color: red; */
+  padding-top: 2vh;
 `;
 
 export const ControlButton = styled.button`
-  background-color: #bdbdbd;
+  background-color: #000000;
+  height: calc((100vh - 120px) * 0.044);
+  width: calc((100vh - 120px) * 0.11);
   border: 1px solid #999;
-  padding: 10px 20px;
-  font-size: 14px;
+  font-family: "KBO-Dia-Gothic_bold";
+  font-weight: bold;
+
+  font-size: 12px;
+  color: #ffffff;
   cursor: pointer;
   border-radius: 4px;
-  font-family: "Inter-Regular", sans-serif;
-
-  &:hover {
-    background-color: #bdbdbd;
-  }
 
   ${small} {
-    padding: 8px 16px;
+    /* padding: 8px 16px; */
     font-size: 12px;
   }
 `;
 
 /** ─────────────────────────────────────────────────────────
- *  4) 이번 이닝 득점 (텍스트 + ± 버튼)
- *  ───────────────────────────────────────────────────────── */
+ *  4) 이번 이닝 득점 섹션
+ * ───────────────────────────────────────────────────────── */
 export const InningScoreContainer = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-
   width: 100%;
-
-  /* background-color: purple; */
-  /* height: 25vh; */
-
-  height: calc((100vh - 120px) * 0.25);
+  height: calc((100vh - 120px) * 0.15);
   border-bottom: 1px solid #ccc;
   text-align: center;
-  /* padding: 16px 0; */
-
   padding-top: 4vh;
   padding-bottom: 4vh;
 `;
 
-// "이번 이닝 득점" 문구
 export const InningScoreTitle = styled.div`
-  margin-bottom: 8px;
+  /* margin-bottom: 8px; */
+  font-family: "KBO-Dia-Gothic_bold";
+  font-weight: bold;
   font-weight: 500;
-
   ${small} {
-    font-size: 14px;
+    font-size: 20px;
   }
   ${medium} {
-    font-size: 15px;
+    font-size: 23px;
   }
   ${large}, ${xlarge} {
-    font-size: 16px;
+    font-size: 24px;
   }
 `;
 
-// 득점 조절(± 버튼 + 득점수)
 export const InningScoreControls = styled.div`
   display: inline-flex;
+  /* background-color: red; */
   align-items: center;
   gap: 16px;
 `;
 
 export const ScoreButton = styled.button`
-  background-color: #bdbdbd;
-  border: 1px solid #999;
+  background-color: #000000;
+  border: none;
+  color: #ffffff;
   border-radius: 4px;
-  font-size: 18px;
+  font-size: 16px;
+  font-family: "KBO-Dia-Gothic_bold";
+  font-weight: bold;
+  font-weight: 500;
   width: 40px;
   height: 40px;
   cursor: pointer;
-
-  &:hover {
-    background-color: #bdbdbd;
-  }
 
   ${small} {
     width: 32px;
@@ -191,114 +217,167 @@ export const ScoreButton = styled.button`
 `;
 
 export const ScoreDisplay = styled.div`
-  font-size: 20px;
+  font-size: 48px;
   min-width: 24px;
   text-align: center;
+  font-family: "KBO-Dia-Gothic_light";
+
   ${small} {
-    font-size: 16px;
+    font-size: 48px;
   }
 `;
 
 /** ─────────────────────────────────────────────────────────
- *  5) 현재 타자 / 투수 정보 (2개 박스)
- *  ───────────────────────────────────────────────────────── */
+ *  5) 현재 타자 / 투수 정보 섹션
+ * ───────────────────────────────────────────────────────── */
+
 export const PlayersRow = styled.div`
   display: flex;
-
-  /* background-color: blue; */
   width: 100%;
-  /* height: 30vh; */
-
-  height: calc((100vh - 120px) * 0.3);
+  height: calc((100vh - 120px) * 0.37);
   border-bottom: 1px solid #ccc;
 `;
-
 export const PlayerBox = styled.div`
-  /* margin-top: 8vh; */
   flex: 1;
-  /* padding: 12px; */
   border-right: 1px solid #ccc;
-  text-align: center;
-
+  padding: 1rem;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative; /* 자식의 절대 위치 지정 가능하도록 */
   &:last-child {
     border-right: none;
   }
 `;
 
-export const PlayerInfo = styled.div`
-  /* margin-top: 7vh; */
-  font-weight: 500;
-  margin-top: 5vh;
-  /* margin-bottom: 8px; */
-
-  ${small} {
-    font-size: 14px;
-  }
-  ${medium} {
-    font-size: 15px;
-  }
-  ${large}, ${xlarge} {
-    font-size: 16px;
-  }
-`;
-
-// "선수교체" 버튼
 export const PlayerChangeButton = styled.button`
-  background-color: #bdbdbd;
-  border: 1px solid #999;
-  margin-top: 5vh;
-  padding: 8px 12px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: #000;
+  color: #fff;
+  border: none;
+  /* border-radius: 4px; */
+  font-family: "KBO-Dia-Gothic_bold";
   font-size: 14px;
+  padding: 0.5rem 1rem;
   cursor: pointer;
-  border-radius: 4px;
-  font-family: "Inter-Regular", sans-serif;
-
   &:hover {
-    background-color: #bdbdbd;
+    opacity: 0.8;
   }
-
   ${small} {
     font-size: 12px;
   }
+`;
+
+export const PlayerWrapper = styled.div`
+  /* 선수 정보들을 flex 컨테이너로 중앙 정렬 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+  /* background-color: red; */
+  width: 100%;
+  height: 60%;
+`;
+
+export const PlayerPosition = styled.div`
+  /* 버튼 아래쪽에 배치되도록 상단 마진을 넉넉히 줌 */
+  font-family: "KBO-Dia-Gothic_light";
+  color: rgba(0, 0, 0, 0.5);
+  /* 반응형 폰트 크기 */
+  ${small} {
+    font-size: 20px;
+  }
+  ${medium} {
+    font-size: 24px;
+  }
+  ${large}, ${xlarge} {
+    font-size: 26px;
+  }
+`;
+
+export const PlayerInfo = styled.div`
+  /* 버튼 아래쪽에 배치되도록 상단 마진을 넉넉히 줌 */
+  /* margin-top: 3rem; */
+  font-weight: 500;
+  line-height: 1.4;
+
+  /* 반응형 폰트 크기 */
+  ${small} {
+    font-size: 32px;
+  }
+  ${medium} {
+    font-size: 35px;
+  }
+  ${large}, ${xlarge} {
+    font-size: 36px;
+  }
+`;
+
+interface PlayerExWrapperProps {
+  count: number;
+}
+
+export const PlayerExWrapper = styled.div<PlayerExWrapperProps>`
+  display: flex;
+  flex-direction: row;
+  justify-content: ${({ count }) => (count === 1 ? "center" : "space-between")};
+  /* background-color: aqua; */
+  width: 15vh;
+`;
+
+export const EliteBox = styled.div`
+  width: 50px;
+  height: 17px;
+  background-color: #ff0004;
+  font-family: "KBO-Dia-Gothic_light";
+  color: #ffffff;
+  border-radius: 35px;
+  text-align: center;
+`;
+
+export const WildCardBox = styled.div`
+  width: 50px;
+  height: 17px;
+  background-color: #f3a231;
+  font-family: "KBO-Dia-Gothic_light";
+  color: #ffffff;
+  border-radius: 35px;
+  text-align: center;
 `;
 
 /** ─────────────────────────────────────────────────────────
- *  6) 하단 기록 입력 버튼 (안타 / 볼넷·사구 / 아웃 / etc)
- *  ───────────────────────────────────────────────────────── */
+ *  6) 하단 기록 입력 버튼 섹션
+ * ───────────────────────────────────────────────────────── */
 export const RecordActionsRow = styled.div`
   display: grid;
-
-  /* background-color: yellow; */
   width: 100%;
-  /* height: 15vh; */
-
-  height: calc((100vh - 120px) * 0.15);
+  height: calc((100vh - 120px) * 0.12);
   grid-template-columns: repeat(4, 1fr);
-  border-bottom: 1px solid #ccc;
-  padding: 12px 0;
+  /* border-bottom: 1px solid #ccc; */
+  /* padding: 12px 0; */
 `;
 
 export const RecordActionButton = styled.button`
-  border: 1px solid #999;
+  border: 1px solid #0f0f70;
   background-color: #0f0f70;
-  font-size: 12px;
-  padding: 16px 0;
+  font-family: "KBO-Dia-Gothic_bold";
+  font-weight: bold;
+  font-size: 20px;
+  /* padding: 16px 0; */
   color: #ffffff;
-  cursor: pointer;
-  font-family: "Inter-Regular", sans-serif;
-
-  &:hover {
-    background-color: #0f0f70;
-  }
 
   ${small} {
-    font-size: 12px;
-    padding: 12px 0;
+    font-size: 20px;
+    /* padding: 12px 0; */
   }
   ${medium} {
-    font-size: 16px;
+    font-size: 24px;
   }
   ${large}, ${xlarge} {
-    font-size: 20px;
+    font-size: 25px;
   }
 `;

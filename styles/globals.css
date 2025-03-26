@@ -13,3 +13,24 @@ a {
 * {
   box-sizing: border-box;
 }
+/* 예: global.css 혹은 emotion의 Global 스타일에서 */
+@font-face {
+  font-family: "KBO-Dia-Gothic_bold";
+  src: url("/fonts/KBO-Dia-Gothic_bold.woff") format("woff");
+  font-weight: bold;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "KBO-Dia-Gothic_medium";
+  src: url("/fonts/KBO-Dia-Gothic_medium.woff") format("woff");
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "KBO-Dia-Gothic_light";
+  src: url("/fonts/KBO-Dia-Gothic_light.woff") format("woff");
+  font-weight: 300;
+  font-style: normal;
+}
