@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import Link from "next/link";
-import { formatDate2 } from "../../../commons/libraries/utils";
+import { useRouter } from "next/router";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
@@ -23,6 +22,7 @@ import {
   TeamScore,
   VsText,
 } from "./mainCalendar.style";
+import { formatDate2 } from "../../../commons/libraries/utils";
 
 // Match 객체에 대한 타입 정의
 interface Match {
@@ -35,6 +35,8 @@ interface Match {
 }
 
 export default function MainCalendarPage() {
+  const router = useRouter();
+
   // react-datepicker에서 사용할 날짜 (Date 타입)
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
 
@@ -70,7 +72,6 @@ export default function MainCalendarPage() {
     {
       time: "16:30",
       team1: "건환공",
-
       team2: "자연대",
       gameStatus: "경기예정",
     },
@@ -117,6 +118,15 @@ export default function MainCalendarPage() {
     setIsCalendarOpen(false);
   };
 
+  // 경기기록 버튼 클릭 시 gameStatus에 따라 라우팅 처리
+  const handleRecordClick = (gameStatus: string) => {
+    if (gameStatus === "경기종료") {
+      router.push("/result");
+    } else {
+      router.push("/records");
+    }
+  };
+
   return (
     <Container>
       <DaysOfWeekContainer>
@@ -144,7 +154,7 @@ export default function MainCalendarPage() {
                   position: "absolute",
                   zIndex: 999,
                   left: "50%",
-                  transform: "translateX(-50%) scale(1.2)",
+                  transform: "translateX(-50%) translateY(60%) scale(1.2)",
                   transformOrigin: "top center",
                 }}
               >
@@ -203,9 +213,10 @@ export default function MainCalendarPage() {
                   </TeamScore>
                 </Team>
               </TeamsContainer>
-              <Link href="/teamRegistration" passHref>
-                <RecordButton as="a">경기기록</RecordButton>
-              </Link>
+              {/* RecordButton 클릭 시 gameStatus에 따라 라우팅 */}
+              <RecordButton onClick={() => handleRecordClick(match.gameStatus)}>
+                경기기록
+              </RecordButton>
             </MatchCard>
           );
         })}

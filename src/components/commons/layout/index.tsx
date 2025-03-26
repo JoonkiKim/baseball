@@ -13,7 +13,7 @@ interface ILayoutProps {
 
 export default function Layout(props: ILayoutProps): JSX.Element {
   const router = useRouter();
-  // 아래의 asPath를 찍어보면 지금 주소가 어디인지 확인할 수 있다
+
   console.log(router.asPath);
 
   const isShowNav = SHOW_NAV.includes(router.asPath);
@@ -22,7 +22,7 @@ export default function Layout(props: ILayoutProps): JSX.Element {
   return (
     <div>
       <LayoutHeader />
-      <div>{props.children}</div>
+      <div style={{ backgroundColor: "white" }}>{props.children}</div>
       {isShowNav && <LayoutNavigation />}
     </div>
   );
