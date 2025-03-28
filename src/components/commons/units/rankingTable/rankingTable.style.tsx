@@ -9,7 +9,7 @@ const large =
 const xlarge = "@media only screen and (min-width: 1025px)"; // Extra Large
 
 export const RankingContainer = styled.div`
-  margin-top: 140px;
+  margin-top: 190px;
 `;
 
 // 그룹 선택 영역 (예: "A조 ▼")
@@ -27,20 +27,21 @@ export const GroupSelector = styled.div`
   width: 70%;
   text-align: center;
   background-color: black;
+  font-family: "KBO-Dia-Gothic_bold";
   color: white;
   border-radius: 25px;
-  font-size: 15px;
-  padding: 2%;
-  height: 10%;
+  font-size: 12px;
+  padding: 2px;
+  height: 5%;
 `;
 
 // 표를 감싸는 래퍼 (가로 스크롤용 오버플로우 설정)
 export const TableWrapper = styled.div`
-  width: 100%;
+  width: 95%;
   margin-top: 20px;
   margin-bottom: 50px;
   padding: 0 20px;
-  overflow-x: auto; // 테이블이 화면보다 넓어지면 가로 스크롤
+  /* margin-right: 5vh; */
 
   ${small} {
     padding: 0 10px;
@@ -56,18 +57,17 @@ export const TableWrapper = styled.div`
 // 실제 테이블 스타일
 export const RankingTable = styled.table`
   width: 100%;
-  border-collapse: collapse;
-  min-width: 480px; // 컬럼이 많을 경우 최소 너비 확보 (필요 시 조정)
 
+  /* background-color: red; */
   thead {
-    background-color: #f9f9f9;
+    /* background-color: #f9f9f9; */
     tr {
       th {
-        font-family: "Inter-SemiBold", sans-serif;
+        font-family: "KBO-Dia-Gothic_light";
         font-weight: 600;
-        color: #000;
+        color: rgba(0, 0, 0, 0.5);
         padding: 12px;
-        border-bottom: 1px solid #ddd;
+        /* border-bottom: 1px solid #ddd; */
         text-align: center;
 
         ${small} {
@@ -93,7 +93,7 @@ export const RankingTable = styled.table`
       }
 
       td {
-        font-family: "Inter-Regular", sans-serif;
+        font-family: "KBO-Dia-Gothic_medium";
         font-weight: 400;
         color: #000;
         text-align: center;

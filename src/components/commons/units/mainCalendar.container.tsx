@@ -122,6 +122,8 @@ export default function MainCalendarPage() {
   const handleRecordClick = (gameStatus: string) => {
     if (gameStatus === "경기종료") {
       router.push("/result");
+    } else if (gameStatus === "경기예정") {
+      router.push("/teamRegistration");
     } else {
       router.push("/records");
     }

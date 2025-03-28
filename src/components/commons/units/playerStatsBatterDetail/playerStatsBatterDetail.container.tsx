@@ -1,20 +1,17 @@
 import React, { useState } from "react";
-import Link from "next/link";
 import {
   RankingContainer,
   TableWrapper,
   RankingTable,
-  RankingTableP,
   TableTitle,
   ArrowIcon,
-  MoreButton,
-} from "./playerStats.style"; // 스타일 임포트
+} from "./playerStatsBatterDetail.style"; // 스타일 임포트
 
-export default function StatsPage() {
-  // 타자 기록 더미 데이터 (30개)
+export default function StatsPageBatterDetail() {
+  // 타자 기록 더미 데이터 (30개, rank 속성 제거)
   const initialHitterStats = [
     {
-      player: "선수 1(팀A)",
+      player: "박병호(관악사)",
       ab: 20,
       hits: 12,
       avg: 0.312,
@@ -24,7 +21,7 @@ export default function StatsPage() {
       ops: 1.0,
     },
     {
-      player: "선수 2(팀B)",
+      player: "김지찬(포토스)",
       ab: 20,
       hits: 12,
       avg: 0.312,
@@ -34,7 +31,7 @@ export default function StatsPage() {
       ops: 0.89,
     },
     {
-      player: "선수 3(팀C)",
+      player: "이재천(아라쥐)",
       ab: 20,
       hits: 12,
       avg: 0.312,
@@ -44,7 +41,7 @@ export default function StatsPage() {
       ops: 1.08,
     },
     {
-      player: "선수 4(팀D)",
+      player: "이정후(포토스)",
       ab: 19,
       hits: 5,
       avg: 0.263,
@@ -54,7 +51,7 @@ export default function StatsPage() {
       ops: 0.69,
     },
     {
-      player: "선수 5(팀E)",
+      player: "이치수(관악사)",
       ab: 20,
       hits: 5,
       avg: 0.25,
@@ -64,7 +61,7 @@ export default function StatsPage() {
       ops: 0.75,
     },
     {
-      player: "선수 6(팀F)",
+      player: "홍길동(팀A)",
       ab: 18,
       hits: 10,
       avg: 0.278,
@@ -74,7 +71,7 @@ export default function StatsPage() {
       ops: 0.8,
     },
     {
-      player: "선수 7(팀G)",
+      player: "김철수(팀B)",
       ab: 22,
       hits: 15,
       avg: 0.341,
@@ -84,7 +81,7 @@ export default function StatsPage() {
       ops: 0.86,
     },
     {
-      player: "선수 8(팀H)",
+      player: "이영희(팀C)",
       ab: 21,
       hits: 13,
       avg: 0.31,
@@ -94,7 +91,7 @@ export default function StatsPage() {
       ops: 0.85,
     },
     {
-      player: "선수 9(팀I)",
+      player: "박영수(팀D)",
       ab: 19,
       hits: 11,
       avg: 0.289,
@@ -104,7 +101,7 @@ export default function StatsPage() {
       ops: 0.77,
     },
     {
-      player: "선수 10(팀J)",
+      player: "최민수(팀E)",
       ab: 20,
       hits: 14,
       avg: 0.35,
@@ -114,7 +111,7 @@ export default function StatsPage() {
       ops: 1.06,
     },
     {
-      player: "선수 11(팀K)",
+      player: "한지민(팀F)",
       ab: 18,
       hits: 9,
       avg: 0.25,
@@ -124,7 +121,7 @@ export default function StatsPage() {
       ops: 0.73,
     },
     {
-      player: "선수 12(팀L)",
+      player: "서현우(팀G)",
       ab: 23,
       hits: 16,
       avg: 0.348,
@@ -134,7 +131,7 @@ export default function StatsPage() {
       ops: 0.98,
     },
     {
-      player: "선수 13(팀M)",
+      player: "조민준(팀H)",
       ab: 20,
       hits: 10,
       avg: 0.3,
@@ -144,7 +141,7 @@ export default function StatsPage() {
       ops: 0.79,
     },
     {
-      player: "선수 14(팀N)",
+      player: "강민재(팀I)",
       ab: 21,
       hits: 12,
       avg: 0.286,
@@ -154,7 +151,7 @@ export default function StatsPage() {
       ops: 0.86,
     },
     {
-      player: "선수 15(팀O)",
+      player: "유승민(팀J)",
       ab: 19,
       hits: 8,
       avg: 0.211,
@@ -164,7 +161,7 @@ export default function StatsPage() {
       ops: 0.75,
     },
     {
-      player: "선수 16(팀P)",
+      player: "오민석(팀K)",
       ab: 20,
       hits: 11,
       avg: 0.275,
@@ -174,7 +171,7 @@ export default function StatsPage() {
       ops: 0.83,
     },
     {
-      player: "선수 17(팀Q)",
+      player: "김예린(팀L)",
       ab: 22,
       hits: 14,
       avg: 0.318,
@@ -184,7 +181,7 @@ export default function StatsPage() {
       ops: 0.93,
     },
     {
-      player: "선수 18(팀R)",
+      player: "박지훈(팀M)",
       ab: 20,
       hits: 12,
       avg: 0.3,
@@ -194,7 +191,7 @@ export default function StatsPage() {
       ops: 0.88,
     },
     {
-      player: "선수 19(팀S)",
+      player: "이수민(팀N)",
       ab: 19,
       hits: 10,
       avg: 0.263,
@@ -204,7 +201,7 @@ export default function StatsPage() {
       ops: 0.8,
     },
     {
-      player: "선수 20(팀T)",
+      player: "정민호(팀O)",
       ab: 21,
       hits: 13,
       avg: 0.31,
@@ -214,7 +211,7 @@ export default function StatsPage() {
       ops: 0.92,
     },
     {
-      player: "선수 21(팀U)",
+      player: "선수21(팀P)",
       ab: 20,
       hits: 11,
       avg: 0.305,
@@ -224,7 +221,7 @@ export default function StatsPage() {
       ops: 0.87,
     },
     {
-      player: "선수 22(팀V)",
+      player: "선수22(팀Q)",
       ab: 19,
       hits: 9,
       avg: 0.263,
@@ -234,7 +231,7 @@ export default function StatsPage() {
       ops: 0.77,
     },
     {
-      player: "선수 23(팀W)",
+      player: "선수23(팀R)",
       ab: 22,
       hits: 13,
       avg: 0.295,
@@ -244,7 +241,7 @@ export default function StatsPage() {
       ops: 0.86,
     },
     {
-      player: "선수 24(팀X)",
+      player: "선수24(팀S)",
       ab: 21,
       hits: 12,
       avg: 0.286,
@@ -254,7 +251,7 @@ export default function StatsPage() {
       ops: 0.83,
     },
     {
-      player: "선수 25(팀Y)",
+      player: "선수25(팀T)",
       ab: 20,
       hits: 10,
       avg: 0.28,
@@ -264,7 +261,7 @@ export default function StatsPage() {
       ops: 0.8,
     },
     {
-      player: "선수 26(팀Z)",
+      player: "선수26(팀U)",
       ab: 23,
       hits: 15,
       avg: 0.326,
@@ -274,7 +271,7 @@ export default function StatsPage() {
       ops: 0.98,
     },
     {
-      player: "선수 27(팀AA)",
+      player: "선수27(팀V)",
       ab: 20,
       hits: 11,
       avg: 0.295,
@@ -284,7 +281,7 @@ export default function StatsPage() {
       ops: 0.86,
     },
     {
-      player: "선수 28(팀BB)",
+      player: "선수28(팀W)",
       ab: 19,
       hits: 10,
       avg: 0.263,
@@ -294,7 +291,7 @@ export default function StatsPage() {
       ops: 0.805,
     },
     {
-      player: "선수 29(팀CC)",
+      player: "선수29(팀X)",
       ab: 21,
       hits: 13,
       avg: 0.31,
@@ -304,7 +301,7 @@ export default function StatsPage() {
       ops: 0.915,
     },
     {
-      player: "선수 30(팀DD)",
+      player: "선수30(팀Y)",
       ab: 20,
       hits: 12,
       avg: 0.3,
@@ -315,60 +312,16 @@ export default function StatsPage() {
     },
   ];
 
-  // 투수 기록 더미 데이터 (30개)
-  const initialPitcherStats = [
-    { player: "투수 1(팀A)", so: 12 },
-    { player: "투수 2(팀B)", so: 10 },
-    { player: "투수 3(팀C)", so: 8 },
-    { player: "투수 4(팀D)", so: 8 },
-    { player: "투수 5(팀E)", so: 9 },
-    { player: "투수 6(팀F)", so: 11 },
-    { player: "투수 7(팀G)", so: 7 },
-    { player: "투수 8(팀H)", so: 10 },
-    { player: "투수 9(팀I)", so: 8 },
-    { player: "투수 10(팀J)", so: 9 },
-    { player: "투수 11(팀K)", so: 12 },
-    { player: "투수 12(팀L)", so: 6 },
-    { player: "투수 13(팀M)", so: 8 },
-    { player: "투수 14(팀N)", so: 10 },
-    { player: "투수 15(팀O)", so: 9 },
-    { player: "투수 16(팀P)", so: 11 },
-    { player: "투수 17(팀Q)", so: 7 },
-    { player: "투수 18(팀R)", so: 8 },
-    { player: "투수 19(팀S)", so: 9 },
-    { player: "투수 20(팀T)", so: 10 },
-    { player: "투수 21(팀U)", so: 11 },
-    { player: "투수 22(팀V)", so: 7 },
-    { player: "투수 23(팀W)", so: 8 },
-    { player: "투수 24(팀X)", so: 9 },
-    { player: "투수 25(팀Y)", so: 10 },
-    { player: "투수 26(팀Z)", so: 11 },
-    { player: "투수 27(팀AA)", so: 7 },
-    { player: "투수 28(팀BB)", so: 8 },
-    { player: "투수 29(팀CC)", so: 9 },
-    { player: "투수 30(팀DD)", so: 10 },
-  ];
-
-  // 기본 정렬 기준: 타자 기록은 안타 개수("hits"), 투수 기록은 삼진("so")
+  // 페이지 접속 시 초기 상태에서 안타 개수("hits") 기준 내림차순 정렬 적용
   const [hitterData, setHitterData] = useState(
     [...initialHitterStats].sort((a, b) => b.hits - a.hits)
   );
-  const [pitcherData, setPitcherData] = useState(
-    [...initialPitcherStats].sort((a, b) => b.so - a.so)
-  );
   const [hitterSortKey, setHitterSortKey] = useState("hits");
-  const [pitcherSortKey, setPitcherSortKey] = useState("so");
 
   const handleSortHitter = (key) => {
     setHitterSortKey(key);
     const sortedData = [...hitterData].sort((a, b) => b[key] - a[key]);
     setHitterData(sortedData);
-  };
-
-  const handleSortPitcher = (key) => {
-    setPitcherSortKey(key);
-    const sortedData = [...pitcherData].sort((a, b) => b[key] - a[key]);
-    setPitcherData(sortedData);
   };
 
   return (
@@ -410,7 +363,7 @@ export default function StatsPage() {
               let tieCount = 0;
               let prevValue = null;
               // 상위 20개만 노출
-              return hitterData.slice(0, 5).map((item, index) => {
+              return hitterData.slice(0, 20).map((item, index) => {
                 const currentValue = item[hitterSortKey];
                 if (index === 0) {
                   currentRank = 1;
@@ -443,65 +396,6 @@ export default function StatsPage() {
           </tbody>
         </RankingTable>
       </TableWrapper>
-      <div style={{ textAlign: "center", marginBottom: "30px" }}>
-        {/* 첫번째 더보기 버튼: Next.js Link 태그 사용 */}
-        <Link href="/playerStats/playerStatsBatterDetail">
-          <MoreButton>더보기</MoreButton>
-        </Link>
-      </div>
-
-      {/* 투수기록 섹션 */}
-      <TableWrapper>
-        <TableTitle>투수기록</TableTitle>
-        <RankingTableP>
-          <thead>
-            <tr>
-              <th>순위</th>
-              <th>선수</th>
-              <th onClick={() => handleSortPitcher("so")}>
-                삼진 <ArrowIcon>▼</ArrowIcon>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {(() => {
-              let currentRank = 1;
-              let tieCount = 0;
-              let prevValue = null;
-              // 상위 20개만 노출
-              return pitcherData.slice(0, 5).map((item, index) => {
-                const currentValue = item[pitcherSortKey];
-                if (index === 0) {
-                  currentRank = 1;
-                  tieCount = 1;
-                  prevValue = currentValue;
-                } else {
-                  if (currentValue === prevValue) {
-                    tieCount++;
-                  } else {
-                    currentRank = currentRank + tieCount;
-                    tieCount = 1;
-                    prevValue = currentValue;
-                  }
-                }
-                return (
-                  <tr key={index}>
-                    <td>{currentRank}</td>
-                    <td>{item.player}</td>
-                    <td>{item.so}</td>
-                  </tr>
-                );
-              });
-            })()}
-          </tbody>
-        </RankingTableP>
-      </TableWrapper>
-      <div style={{ textAlign: "center", marginBottom: "30px" }}>
-        {/* 두번째 더보기 버튼: Next.js Link 태그 사용 */}
-        <Link href="/playerStats/playerStatsPitcherDetail">
-          <MoreButton>더보기</MoreButton>
-        </Link>
-      </div>
     </RankingContainer>
   );
 }

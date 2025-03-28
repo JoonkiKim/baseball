@@ -335,6 +335,7 @@ export const VsText = styled.div`
 `;
 
 export const RecordButton = styled.button`
+  font-family: "KBO-Dia-Gothic_light";
   background: #ffffff;
   border: 1px solid #e8e8e8;
   border-radius: 4px;

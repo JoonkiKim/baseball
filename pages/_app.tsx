@@ -1,25 +1,31 @@
+// _app.tsx
 import { Global, css } from "@emotion/react";
 import { RecoilRoot } from "recoil";
 import Layout from "../src/components/commons/layout";
 import "../styles/globals.css";
 import Head from "next/head";
-
-const globalStyles = css`
-  @font-face {
-    font-family: "KBO Dia Gothic";
-    src: url("/fonts/KBO-Dia-Gothic_medium.woff") format("woff");
-    font-weight: normal;
-    font-style: normal;
-  }
-
-  html,
-  body,
-  #__next {
-    font-family: "KBO Dia Gothic", sans-serif;
-  }
-`;
+import { useRouter } from "next/router";
 
 function MyApp({ Component, pageProps }) {
+  const router = useRouter();
+  const isResultPage = router.pathname === "/result";
+  console.log(isResultPage);
+  const globalStyles = css`
+    @font-face {
+      font-family: "KBO Dia Gothic";
+      src: url("/fonts/KBO-Dia-Gothic_medium.woff") format("woff");
+      font-weight: normal;
+      font-style: normal;
+    }
+
+    html,
+    body,
+    #__next {
+      font-family: "KBO-Dia-Gothic_medium";
+      background-color: ${isResultPage ? "#f2f2f2" : "#ffffff"};
+    }
+  `;
+
   return (
     <>
       <Head>

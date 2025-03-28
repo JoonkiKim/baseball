@@ -10,26 +10,25 @@ const xlarge = "@media only screen and (min-width: 1025px)";
 
 // ─── 전체 컨테이너 ─────────────────────────────
 export const Container = styled.div`
-  width: 90%;
-  max-width: 768px;
+  width: 100%;
+  background-color: #f2f2f2;
   margin: 0 auto;
   margin-top: 120px;
+  margin-bottom: 50px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  /* 배경색이나 추가 스타일 필요시 자유롭게 추가 */
 `;
 
 // ─── 상단 점수판 영역 ─────────────────────────────
 export const ScoreBoardWrapper = styled.div`
-  width: 100%;
-  margin-bottom: 16px; /* 점수판과 아래 섹션 사이 간격 */
+  width: 90%;
+  margin-bottom: 16px;
 `;
 
 // 이닝 헤더 (1~9, R, H)
 export const InningHeader = styled.div`
   display: grid;
-  /* 기존 repeat(11, 1fr) -> 12열로 변경 */
   grid-template-columns: repeat(12, 1fr);
   border-bottom: 1px solid #ccc;
 `;
@@ -52,7 +51,6 @@ export const InningCell = styled.div`
 // 각 팀 점수 행
 export const TeamScoreRow = styled.div`
   display: grid;
-  /* 마찬가지로 12열로 변경 */
   grid-template-columns: repeat(12, 1fr);
   border-bottom: 1px solid #ccc;
 `;
@@ -92,8 +90,20 @@ export const TeamTitle = styled.h2`
 
 // ─── 테이블 영역 공통 스타일 ─────────────────────────────
 export const TableWrapper = styled.div`
-  width: 100%;
+  width: 90%;
   margin-bottom: 32px;
+  overflow-x: auto;
+  padding: 0 20px;
+
+  ${small} {
+    padding: 0 10px;
+  }
+  ${medium} {
+    padding: 0 15px;
+  }
+  ${large}, ${xlarge} {
+    padding: 0 20px;
+  }
 `;
 
 export const TableTitle = styled.div`
@@ -111,10 +121,11 @@ export const TableTitle = styled.div`
   }
 `;
 
-// 테이블 (타자기록, 투수기록)
+// 테이블 (타자기록)
 export const RecordTable = styled.table`
   width: 100%;
   border-collapse: collapse;
+  min-width: 480px; /* 열이 늘어날 경우 최소 너비 확보 */
   text-align: center;
   border-top: 1px solid #ccc;
   border-bottom: 1px solid #ccc;
@@ -138,5 +149,101 @@ export const RecordTable = styled.table`
   }
   ${large}, ${xlarge} {
     font-size: 15px;
+  }
+  /* 첫 번째 열의 너비 지정 */
+  th:nth-of-type(1),
+  td:nth-of-type(1) {
+    width: 5vh; /* 원하는 값으로 조정 */
+  }
+
+  /* 첫 번째 열의 너비 지정 */
+  th:nth-of-type(2),
+  td:nth-of-type(2) {
+    width: 10vh; /* 원하는 값으로 조정 */
+  }
+`;
+
+export const RecordTableP = styled.table`
+  width: 100%;
+  border-collapse: collapse;
+  text-align: center;
+  border-top: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
+
+  th,
+  td {
+    padding: 8px;
+    border-bottom: 1px solid #eee;
+  }
+
+  th {
+    font-weight: 500;
+    background-color: #f9f9f9;
+  }
+
+  /* 첫 번째 열의 너비 지정 */
+  th:nth-of-type(1),
+  td:nth-of-type(1) {
+    width: 5vh; /* 원하는 값으로 조정 */
+  }
+
+  /* 두 번째 열의 너비 지정 */
+  th:nth-of-type(2),
+  td:nth-of-type(2) {
+    width: 10vh; /* 원하는 값으로 조정 */
+  }
+
+  ${small} {
+    font-size: 12px;
+  }
+  ${medium} {
+    font-size: 14px;
+  }
+  ${large}, ${xlarge} {
+    font-size: 15px;
+  }
+`;
+
+export const ButtonContainer = styled.div`
+  display: flex;
+  justify-content: space-between;
+  width: 90%;
+  /* margin-top: 20px; */
+`;
+
+export const ControlButton = styled.button`
+  margin-top: 2cqh;
+  background-color: #000000;
+  display: block;
+  margin-left: auto;
+  height: calc((100vh - 120px) * 0.044);
+  width: calc((100vh - 120px) * 0.11);
+  font-family: "KBO-Dia-Gothic_bold";
+  font-weight: bold;
+  font-size: 12px;
+  color: #ffffff;
+  cursor: pointer;
+  border-radius: 4px;
+
+  ${small} {
+    font-size: 12px;
+  }
+`;
+
+export const HomeButton = styled.button`
+  margin-top: 20px;
+  background-color: #000000;
+  display: block;
+  height: calc((100vh - 120px) * 0.044);
+  width: calc((100vh - 120px) * 0.11);
+  font-family: "KBO-Dia-Gothic_bold";
+  font-weight: bold;
+  font-size: 12px;
+  color: #ffffff;
+  cursor: pointer;
+  border-radius: 4px;
+
+  ${small} {
+    font-size: 12px;
   }
 `;

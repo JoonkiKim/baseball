@@ -29,9 +29,9 @@ export const Container = styled.div`
   }
 `;
 
-export const Title = styled.h1`
+export const LargeTitle = styled.h1`
   text-align: center;
-  font-family: "Inter-SemiBold", sans-serif;
+  font-family: "KBO-Dia-Gothic_bold";
   font-size: 20px;
   margin-bottom: 30px;
 
@@ -46,6 +46,23 @@ export const Title = styled.h1`
   }
 `;
 
+export const Title = styled.h1`
+  text-align: center;
+  font-family: "KBO-Dia-Gothic_medium";
+  font-size: 16px;
+  margin-bottom: 30px;
+
+  ${small} {
+    font-size: 14px;
+  }
+  ${medium} {
+    font-size: 17px;
+  }
+  ${large}, ${xlarge} {
+    font-size: 26px;
+  }
+`;
+
 export const PlayerList = styled.div`
   display: flex;
   flex-direction: column;
@@ -53,23 +70,20 @@ export const PlayerList = styled.div`
 `;
 
 export const PlayerRow = styled.div`
-  display: grid;
-  grid-template-columns: 40px 0.6fr 1fr;
-  align-items: center;
-  border-bottom: 1px solid #ddd;
+  display: flex;
+  /* background-color: red; */
+  /* align-items: center; */
+  justify-content: space-around;
   padding: 8px 0;
-
-  ${small} {
-    grid-template-columns: 30px 0.6fr 1fr;
-    padding: 6px 0;
-  }
 `;
 
+// 첫 번째 열 (주문 번호) - 고정 너비 40px
 export const OrderNumber = styled.div`
+  width: 1vh;
+  /* background-color: red; */
   text-align: center;
-  font-family: "Inter-Regular", sans-serif;
+  font-family: "KBO-Dia-Gothic_medium";
   font-size: 16px;
-  margin-left: 2vh;
 
   ${small} {
     font-size: 14px;
@@ -82,75 +96,107 @@ export const OrderNumber = styled.div`
   }
 `;
 
-export const NameWrapper = styled.div`
+// 두 번째 열 (NameWrapper) - 남은 공간의 절반 사용
+export const NameWrapper = styled.div<{ hasValue: boolean }>`
   display: flex;
+  width: 12vh;
   align-items: center;
-  justify-content: center;
-  gap: 0; /* gap 제거 */
-  margin-left: 10px;
+  justify-content: ${(props) => (props.hasValue ? "center" : "flex-start")};
+  border-bottom: 1px solid #e8e8e8;
+  gap: 0;
+  position: relative;
+  @media (max-width: 380px) {
+    width: 14vh;
+  }
 `;
 // 기존 PlayerName는 그대로 두되, 이제 입력필드용 컴포넌트를 따로 생성합니다.
 
 // ─── 새로운 선수명 입력 필드 ───────────────────────────────────────
+
 export const PlayerNameInput = styled.input`
-  font-family: "Inter-Regular", sans-serif;
-  font-size: 16px;
-  /* margin-right 제거 */
-  text-align: center;
-  width: 20vh;
+  font-family: "KBO-Dia-Gothic_medium";
+  font-size: 14px;
+  /* background-color: red; */
+  color: #000;
+
+  /* border-bottom은 NameWrapper로 이동했으니 제거 */
   border: none;
   outline: none;
-  background: transparent;
-  color: #000;
-  /* background-color: red; */
+  width: 100%;
+  padding: 0; /* 기본 padding 제거 */
+
+  text-align: center; /* 왼쪽 정렬 (원하는 경우) */
+
   &::placeholder {
     color: #999;
+    /* text-indent: 3px; */
   }
+  @media (max-width: 380px) {
+    font-size: 11px;
+  }
+`;
 
-  ${small} {
-    font-size: 14px;
-  }
-  ${medium} {
-    font-size: 15px;
-  }
-  ${large}, ${xlarge} {
-    font-size: 16px;
-  }
+export const WildCardBox = styled.div`
+  width: 23px;
+  height: 8px;
+  font-size: 7px;
+  /* margin-left: 1vh; */
+  background-color: #f3a231;
+  font-family: "KBO-Dia-Gothic_light";
+  color: #ffffff;
+  border-radius: 35px;
+  text-align: center;
+`;
+
+export const NoWildCardBox = styled.div`
+  width: 23px;
+  height: 8px;
+  /* background-color: blue; */
+  border: none; /* 혹시 모를 테두리 제거 */
+  outline: none; /* 포커스 시 테두리 제거 */
+  display: inline-block; /* 공간 차지를 위한 display 설정 */
+`;
+
+export const NoWildCardBoxL = styled.div`
+  width: 23px;
+  height: 8px;
+  /* background-color: blue; */
+  border: none; /* 혹시 모를 테두리 제거 */
+  outline: none; /* 포커스 시 테두리 제거 */
+  display: inline-block; /* 공간 차지를 위한 display 설정 */
 `;
 
 export const SearchIcon = styled.img`
-  width: 18px;
-  height: 18px;
+  width: 13px;
+  height: 13px;
   cursor: pointer;
-  /* background-color: red; */
 
-  ${small} {
-    width: 16px;
-    height: 16px;
-  }
+  /* 인풋과 정말 딱 붙이려면 0, 살짝 여유를 두려면 2~4px 정도 */
+  /* margin-left: 5px; */
 `;
-
 export const PositionWrapper = styled.div`
+  /* flex: 1; */
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
   cursor: pointer;
+  /* 필요한 스타일 유지 */
+  /* margin-left: 1.5vh; */
 `;
 
 export const PositionText = styled.span<{ isPlaceholder?: boolean }>`
-  font-family: "Inter-Regular", sans-serif;
-  font-size: 16px;
+  font-family: "KBO-Dia-Gothic_medium";
+  font-size: 14px;
   color: ${(props) => (props.isPlaceholder ? "#999" : "#000")};
+  width: 12vh;
+  border: none;
+  border-bottom: 1px solid #e8e8e8;
+  text-align: center;
 
-  ${small} {
-    font-size: 14px;
-  }
-  ${medium} {
-    font-size: 15px;
-  }
-  ${large}, ${xlarge} {
-    font-size: 16px;
+  @media (max-width: 380px) {
+    font-size: 11px;
+    width: 14vh;
   }
 `;
 
@@ -185,7 +231,7 @@ export const NextButton = styled.button`
   margin-top: 30px;
   display: block;
   margin-left: auto;
-  font-family: "Inter-Regular", sans-serif;
+  font-family: "KBO-Dia-Gothic_medium";
   font-size: 16px;
   padding: 10px 20px;
   cursor: pointer;
@@ -206,5 +252,28 @@ export const NextButton = styled.button`
   }
   ${large}, ${xlarge} {
     font-size: 16px;
+  }
+`;
+
+// 제출하기 버튼
+export const ControlButton = styled.button`
+  margin-top: 30px;
+  background-color: #000000;
+  display: block;
+  margin-left: auto;
+  height: calc((100vh - 120px) * 0.044);
+  width: calc((100vh - 120px) * 0.11);
+  /* border: 1px solid #999; */
+  font-family: "KBO-Dia-Gothic_bold";
+  font-weight: bold;
+
+  font-size: 12px;
+  color: #ffffff;
+  cursor: pointer;
+  border-radius: 4px;
+
+  ${small} {
+    /* padding: 8px 16px; */
+    font-size: 12px;
   }
 `;

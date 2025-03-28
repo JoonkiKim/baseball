@@ -5,7 +5,13 @@ import LayoutHeader from "./header";
 import LayoutNavigation from "./navigation";
 
 // 여기서만 보여주게 하자
-const SHOW_NAV = ["/playerStats", "/ranking", "/"];
+const SHOW_NAV = [
+  "/playerStats",
+  "/ranking",
+  "/",
+  "/playerStats/playerStatsBatterDetail",
+  "/playerStats/playerStatsPitcherDetail",
+];
 
 interface ILayoutProps {
   children: JSX.Element;

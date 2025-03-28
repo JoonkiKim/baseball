@@ -78,17 +78,23 @@ interface IPlayer {
   name: string; // 이름
   wc?: string; // '선출', 'WC', '선출/WC' 등
 }
-
 interface IPlayerSelectionModalProps {
   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
   onSelectPlayer: (playerName: string) => void;
+  selectedPlayerNames: string[]; // 새로 추가된 prop
 }
 
 export default function PlayerSelectionModal({
   setIsModalOpen,
   onSelectPlayer,
+  selectedPlayerNames,
 }: IPlayerSelectionModalProps) {
   const [playerList] = useRecoilState(playerListState);
+
+  // 선택된 선수 이름이 있는 경우 제외
+  const filteredPlayerList = playerList.filter(
+    (player) => !selectedPlayerNames.includes(player.name)
+  );
 
   const handleOverlayClick = () => {
     setIsModalOpen(false);
@@ -116,7 +122,7 @@ export default function PlayerSelectionModal({
             </tr>
           </thead>
           <tbody>
-            {playerList.map((player, idx) => (
+            {filteredPlayerList.map((player, idx) => (
               <tr key={idx} onClick={() => handleRowClick(player.name)}>
                 <td>{player.department}</td>
                 <td>{player.name}</td>

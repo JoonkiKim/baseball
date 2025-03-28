@@ -16,7 +16,7 @@ export const Container = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  font-family: "Inter-Regular", sans-serif;
+  /* font-family: "Inter-Regular", sans-serif; */
 `;
 
 export const Title = styled.h1`
@@ -77,7 +77,7 @@ export const Input = styled.input`
   padding: 8px 4px;
   font-size: 14px;
   margin-bottom: 20px;
-  font-family: "Inter-Regular", sans-serif;
+  /* font-family: "Inter-Regular", sans-serif; */
 
   &:focus {
     outline: none;
@@ -97,26 +97,18 @@ export const Input = styled.input`
 
 export const SubmitButton = styled.button`
   margin-top: 100px;
-  background-color: #fff;
-  border: 1px solid #ccc;
+  width: 90%;
+  height: 5vh;
+  background-color: #0f0f70;
+  color: white;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
   border-radius: 4px;
-  padding: 12px 24px;
-  font-size: 14px;
+  /* padding: 12px 24px; */
+  font-size: 16px;
   cursor: pointer;
-  font-family: "Inter-Regular", sans-serif;
+  /* font-family: "Inter-Regular", sans-serif; */
 
-  &:hover {
-    background-color: #f7f7f7;
-  }
-
-  ${small} {
-    font-size: 13px;
-    padding: 10px 20px;
-  }
-  ${medium} {
-    font-size: 14px;
-  }
-  ${large}, ${xlarge} {
-    font-size: 15px;
-  }
+  font-family: "KBO-Dia-Gothic_medium";
 `;
