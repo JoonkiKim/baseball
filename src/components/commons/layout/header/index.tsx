@@ -3,8 +3,8 @@ import Link from "next/link";
 
 // ─── 헤더 영역 (배경 + 날짜 영역 포함) ─────────────────────────────
 export const Background = styled.div`
-  background-color: #0f0f70;
   width: 100%;
+  background-color: #0f0f70;
   position: fixed;
   /* text-align: center; */
   top: 0;

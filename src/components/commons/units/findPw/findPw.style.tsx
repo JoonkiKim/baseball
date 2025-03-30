@@ -22,8 +22,8 @@ export const Title = styled.h1`
   font-size: 24px;
   margin-bottom: 40px;
   text-align: center;
-  font-weight: bold;
-  font-family: "KBO-Dia-Gothic_bold";
+
+  font-family: "KBO-Dia-Gothic_medium";
 `;
 
 /* 폼 전체를 감싸는 컨테이너 */
@@ -37,8 +37,26 @@ export const Form = styled.form`
 
 /* 라벨 */
 export const Label = styled.label`
-  font-size: 14px;
+  font-size: 16px;
   margin-bottom: 8px;
+  /* background-color: red; */
+
+  ${small} {
+    font-size: 16px;
+  }
+  ${medium} {
+    font-size: 17px;
+  }
+  ${large}, ${xlarge} {
+    font-size: 18px;
+  }
+`;
+
+export const SubLabel = styled.label`
+  font-size: 13px;
+  margin-bottom: 30px;
+
+  font-family: "KBO-Dia-Gothic_light";
   /* background-color: red; */
 
   ${small} {

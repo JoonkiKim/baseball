@@ -20,53 +20,53 @@ export const Container = styled.div`
 `;
 
 export const Title = styled.h1`
-  font-size: 20px;
+  font-size: 24px;
   margin-bottom: 16px;
   text-align: center;
 
   ${small} {
-    font-size: 18px;
+    font-size: 24px;
   }
   ${medium} {
-    font-size: 19px;
+    font-size: 25px;
   }
   ${large}, ${xlarge} {
-    font-size: 20px;
+    font-size: 26px;
   }
 `;
 
 export const Description = styled.p`
-  font-size: 14px;
+  font-size: 16px;
   text-align: center;
   margin-bottom: 24px;
-  margin-top: 24px;
+  margin-top: 90px;
 
   ${small} {
-    font-size: 13px;
+    font-size: 16px;
   }
   ${medium} {
-    font-size: 14px;
+    font-size: 17px;
   }
   ${large}, ${xlarge} {
-    font-size: 15px;
+    font-size: 18px;
   }
 `;
 
 export const Label = styled.label`
   align-self: flex-start;
   margin-left: 10px;
-  font-size: 14px;
+  font-size: 16px;
   margin-bottom: 8px;
   margin-top: 30px;
 
   ${small} {
-    font-size: 13px;
+    font-size: 16px;
   }
   ${medium} {
-    font-size: 14px;
+    font-size: 17px;
   }
   ${large}, ${xlarge} {
-    font-size: 15px;
+    font-size: 18px;
   }
 `;
 
@@ -96,7 +96,7 @@ export const Input = styled.input`
 `;
 
 export const SubmitButton = styled.button`
-  margin-top: 100px;
+  margin-top: 50px;
   width: 90%;
   height: 5vh;
   background-color: #0f0f70;

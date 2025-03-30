@@ -13,6 +13,13 @@ const SHOW_NAV = [
   "/playerStats/playerStatsPitcherDetail",
 ];
 
+const HIDE_HEADER = [
+  "/login",
+  "/signUp",
+  "/login/findPassword",
+  "/refreeRegistration",
+];
+
 interface ILayoutProps {
   children: JSX.Element;
 }
@@ -23,11 +30,12 @@ export default function Layout(props: ILayoutProps): JSX.Element {
   console.log(router.asPath);
 
   const isShowNav = SHOW_NAV.includes(router.asPath);
+  const isHideNav = HIDE_HEADER.includes(router.asPath);
   //
 
   return (
     <div>
-      <LayoutHeader />
+      {!isHideNav && <LayoutHeader />}
       <div style={{ backgroundColor: "white" }}>{props.children}</div>
       {isShowNav && <LayoutNavigation />}
     </div>
