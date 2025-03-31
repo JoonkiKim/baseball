@@ -78,7 +78,7 @@ export const Input = styled.input`
   font-size: 14px;
   margin-bottom: 20px;
   /* font-family: "Inter-Regular", sans-serif; */
-
+  font-family: "KBO-Dia-Gothic_medium";
   &:focus {
     outline: none;
     border-bottom: 1px solid #000;

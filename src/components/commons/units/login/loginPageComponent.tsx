@@ -18,6 +18,7 @@ import {
   ToggleImage,
   VerticalSeparator,
 } from "./loginPage.style";
+import Link from "next/link";
 
 // 폼에서 다룰 데이터 타입 정의
 interface LoginFormData {
@@ -111,9 +112,13 @@ export default function LoginPageComponent() {
 
       {/* 하단 링크: 회원가입 / 비밀번호 찾기 */}
       <LinkGroup>
-        <MoveToSignUp>회원가입</MoveToSignUp>
+        <Link href="/signUp" passHref>
+          <MoveToSignUp>회원가입</MoveToSignUp>
+        </Link>
         <VerticalSeparator />
-        <MoveToFindPw>비밀번호 찾기</MoveToFindPw>
+        <Link href="/login/findPassword" passHref>
+          <MoveToFindPw>비밀번호 찾기</MoveToFindPw>
+        </Link>
       </LinkGroup>
     </Container>
   );

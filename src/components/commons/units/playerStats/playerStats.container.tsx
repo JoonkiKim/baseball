@@ -54,7 +54,7 @@ export default function StatsPage() {
           <thead>
             <tr>
               <th>순위</th>
-              <th>선수</th>
+              <th style={{ width: "90px" }}>선수</th>
               <th onClick={() => handleSortHitter("ab")}>
                 타수 <ArrowIcon>▼</ArrowIcon>
               </th>
@@ -131,7 +131,7 @@ export default function StatsPage() {
           <thead>
             <tr>
               <th>순위</th>
-              <th>선수</th>
+              <th style={{ width: "90px" }}>선수</th>
               <th onClick={() => handleSortPitcher("so")}>
                 삼진 <ArrowIcon>▼</ArrowIcon>
               </th>

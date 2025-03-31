@@ -130,7 +130,6 @@ export const ControlButtonsRow = styled.div`
 export const ControlButtonsWrapper = styled.div`
   display: flex;
   flex-direction: row;
-
   justify-content: space-between;
   align-items: flex-end; /* 요소들을 아래쪽 정렬 */
   width: 90%;
@@ -145,7 +144,6 @@ export const ControlButton = styled.button`
   border: 1px solid #999;
   font-family: "KBO-Dia-Gothic_bold";
   font-weight: bold;
-
   font-size: 12px;
   color: #ffffff;
   cursor: pointer;
@@ -176,7 +174,6 @@ export const InningScoreContainer = styled.div`
 export const InningScoreTitle = styled.div`
   /* margin-bottom: 8px; */
   font-family: "KBO-Dia-Gothic_bold";
-  font-weight: bold;
   font-weight: 500;
   ${small} {
     font-size: 20px;
@@ -203,7 +200,6 @@ export const ScoreButton = styled.button`
   border-radius: 4px;
   font-size: 16px;
   font-family: "KBO-Dia-Gothic_bold";
-  font-weight: bold;
   font-weight: 500;
   width: 40px;
   height: 40px;
@@ -237,6 +233,7 @@ export const PlayersRow = styled.div`
   height: calc((100vh - 120px) * 0.37);
   border-bottom: 1px solid #ccc;
 `;
+
 export const PlayerBox = styled.div`
   flex: 1;
   border-right: 1px solid #ccc;
@@ -246,7 +243,7 @@ export const PlayerBox = styled.div`
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  position: relative; /* 자식의 절대 위치 지정 가능하도록 */
+  position: relative; /* OrderBadge를 절대 위치로 배치하기 위해 필요 */
   &:last-child {
     border-right: none;
   }
@@ -259,35 +256,28 @@ export const PlayerChangeButton = styled.button`
   background-color: #000;
   color: #fff;
   border: none;
-  /* border-radius: 4px; */
   font-family: "KBO-Dia-Gothic_bold";
   font-size: 14px;
   padding: 0.5rem 1rem;
   cursor: pointer;
-  &:hover {
-    opacity: 0.8;
-  }
+
   ${small} {
     font-size: 12px;
   }
 `;
 
 export const PlayerWrapper = styled.div`
-  /* 선수 정보들을 flex 컨테이너로 중앙 정렬 */
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: space-around;
-  /* background-color: red; */
   width: 100%;
   height: 60%;
 `;
 
 export const PlayerPosition = styled.div`
-  /* 버튼 아래쪽에 배치되도록 상단 마진을 넉넉히 줌 */
   font-family: "KBO-Dia-Gothic_light";
   color: rgba(0, 0, 0, 0.5);
-  /* 반응형 폰트 크기 */
   ${small} {
     font-size: 20px;
   }
@@ -300,12 +290,8 @@ export const PlayerPosition = styled.div`
 `;
 
 export const PlayerInfo = styled.div`
-  /* 버튼 아래쪽에 배치되도록 상단 마진을 넉넉히 줌 */
-  /* margin-top: 3rem; */
   font-weight: 500;
   line-height: 1.4;
-
-  /* 반응형 폰트 크기 */
   ${small} {
     font-size: 32px;
   }
@@ -325,13 +311,12 @@ export const PlayerExWrapper = styled.div<PlayerExWrapperProps>`
   display: flex;
   flex-direction: row;
   justify-content: ${({ count }) => (count === 1 ? "center" : "space-between")};
-  /* background-color: aqua; */
   width: 15vh;
 `;
 
 export const EliteBox = styled.div`
   width: 50px;
-  height: 17px;
+  height: 20px;
   background-color: #ff0004;
   font-family: "KBO-Dia-Gothic_light";
   color: #ffffff;
@@ -341,7 +326,7 @@ export const EliteBox = styled.div`
 
 export const WildCardBox = styled.div`
   width: 50px;
-  height: 17px;
+  height: 20px;
   background-color: #f3a231;
   font-family: "KBO-Dia-Gothic_light";
   color: #ffffff;
@@ -357,8 +342,6 @@ export const RecordActionsRow = styled.div`
   width: 100%;
   height: calc((100vh - 120px) * 0.12);
   grid-template-columns: repeat(4, 1fr);
-  /* border-bottom: 1px solid #ccc; */
-  /* padding: 12px 0; */
 `;
 
 export const RecordActionButton = styled.button`
@@ -367,12 +350,9 @@ export const RecordActionButton = styled.button`
   font-family: "KBO-Dia-Gothic_bold";
   font-weight: bold;
   font-size: 20px;
-  /* padding: 16px 0; */
   color: #ffffff;
-
   ${small} {
     font-size: 20px;
-    /* padding: 12px 0; */
   }
   ${medium} {
     font-size: 24px;
@@ -380,4 +360,30 @@ export const RecordActionButton = styled.button`
   ${large}, ${xlarge} {
     font-size: 25px;
   }
+`;
+
+/** ─────────────────────────────────────────────────────────
+ *  추가: 선수교체 버튼과 order값을 정렬하기 위한 flex 컨테이너
+ * ───────────────────────────────────────────────────────── */
+
+/** ─────────────────────────────────────────────────────────
+ *  추가: 선수 순번(Order)을 표시하기 위한 스타일 태그
+ * ───────────────────────────────────────────────────────── */
+// OrderBadge를 PlayerBox의 우상단에 딱 붙게 설정
+export const OrderBadge = styled.div`
+  position: absolute;
+  top: 0;
+  right: 0;
+  /* background: #fff; */
+  /* border: 1px solid #ccc; */
+  /* border-radius: 50%; */
+  width: 7vh;
+  height: 24px;
+  margin-top: 10px;
+  /* margin-right: 5px; */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-family: "KBO-Dia-Gothic_medium";
 `;

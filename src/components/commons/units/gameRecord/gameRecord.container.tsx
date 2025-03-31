@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useRouter } from "next/router";
 import {
   GameRecordContainer,
   InningHeader,
@@ -26,15 +27,17 @@ import {
   EliteBox,
   WildCardBox,
   PlayerExWrapper,
+  OrderBadge,
 } from "./gameRecord.style";
 import HitModal from "../../modals/hitModal";
 import OutModal from "../../modals/outModal";
 import EtcModal from "../../modals/etcModal";
 import DefenseChangeModal from "../../modals/defenseChange";
 import GameOverModal from "../../modals/gameOverModal";
-import { count } from "console";
 
 export default function GameRecordPage() {
+  const router = useRouter();
+
   const inningHeaders = [
     "",
     "1",
@@ -50,7 +53,7 @@ export default function GameRecordPage() {
     "H",
   ];
 
-  // 팀 이름을 별도 state로 관리
+  // 팀 이름 상태
   const [teamAName, setTeamAName] = useState("관악사");
   const [teamBName, setTeamBName] = useState("건환공");
 
@@ -113,10 +116,6 @@ export default function GameRecordPage() {
   const [isChangeModalOpen, setIsChangeModalOpen] = useState(false);
   const [isGameEndModalOpen, setIsGameEndModalOpen] = useState(false);
 
-  // 공수교대 / 경기종료 버튼 핸들러
-  const handleDefenseChange = () => setIsChangeModalOpen(true);
-  const handleGameEnd = () => setIsGameEndModalOpen(true);
-
   // 하단 기록 버튼 핸들러
   const handleRecordAction = (action: string) => {
     switch (action) {
@@ -135,6 +134,11 @@ export default function GameRecordPage() {
       default:
         break;
     }
+  };
+
+  // 선수교체 버튼 클릭 시 /records/substitution으로 이동
+  const handleSubstitution = () => {
+    router.push("/records/substitution");
   };
 
   return (
@@ -167,8 +171,12 @@ export default function GameRecordPage() {
       {/* 3) 공수교대 / 경기종료 버튼 */}
       <ControlButtonsRow>
         <ControlButtonsWrapper>
-          <ControlButton onClick={handleDefenseChange}>공수교대</ControlButton>
-          <ControlButton onClick={handleGameEnd}>경기종료</ControlButton>
+          <ControlButton onClick={() => setIsChangeModalOpen(true)}>
+            공수교대
+          </ControlButton>
+          <ControlButton onClick={() => setIsGameEndModalOpen(true)}>
+            경기종료
+          </ControlButton>
         </ControlButtonsWrapper>
       </ControlButtonsRow>
 
@@ -185,9 +193,11 @@ export default function GameRecordPage() {
       {/* 5) 현재 타자 / 투수 정보 */}
       <PlayersRow>
         <PlayerBox>
-          <PlayerChangeButton onClick={() => alert("타자 교체")}>
+          {/* 선수교체 버튼: 클릭 시 /records/substitution으로 이동 */}
+          <PlayerChangeButton onClick={handleSubstitution}>
             선수교체
           </PlayerChangeButton>
+          <OrderBadge>{batter.order}번</OrderBadge>
           <PlayerWrapper>
             <PlayerPosition>{batter.position}</PlayerPosition>
             <PlayerInfo>{batter.name}</PlayerInfo>
@@ -200,7 +210,7 @@ export default function GameRecordPage() {
           </PlayerWrapper>
         </PlayerBox>
         <PlayerBox>
-          <PlayerChangeButton onClick={() => alert("투수 교체")}>
+          <PlayerChangeButton onClick={handleSubstitution}>
             선수교체
           </PlayerChangeButton>
           <PlayerWrapper>
@@ -215,6 +225,7 @@ export default function GameRecordPage() {
           </PlayerWrapper>
         </PlayerBox>
       </PlayersRow>
+
       {/* 6) 하단 기록 입력 버튼들 */}
       <RecordActionsRow>
         <RecordActionButton onClick={() => handleRecordAction("안타")}>

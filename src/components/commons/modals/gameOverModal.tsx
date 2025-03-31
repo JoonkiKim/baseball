@@ -1,3 +1,4 @@
+import { useRouter } from "next/router";
 import {
   ModalButton,
   ModalCancleButton,
@@ -13,11 +14,13 @@ interface IModalProps {
 
 export default function GameOverModal(props: IModalProps) {
   // 공수교대 종류 선택 시 실행될 함수
+  const router = useRouter();
+
   const handleTypeSelect = (type: string) => {
     if (type === "예") {
-      // 공수교대 로직
       alert("경기종료!");
       props.setIsGameEndModalOpen(false);
+      router.push("/result");
     } else {
       props.setIsGameEndModalOpen(false);
     }

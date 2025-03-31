@@ -15,7 +15,7 @@ export const ModalOverlay = styled.div`
   justify-content: center;
 `;
 
-// ModalContainer의 높이를 50vh로 설정하고 내부 스크롤 추가
+// ModalContainer의 높이를 70vh로 설정하고 내부 스크롤 추가
 export const ModalContainer = styled.div`
   background-color: #fff;
   width: 400px; /* 테이블을 위해 살짝 넓힘 */
@@ -73,17 +73,17 @@ export const CloseButton = styled.button`
   }
 `;
 
-interface IPlayerSelectionModalProps {
+interface IPlayerSubstituteModalProps {
   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
   onSelectPlayer: (playerName: string) => void;
-  selectedPlayerNames: string[]; // 새로 추가된 prop
+  selectedPlayerNames: string[]; // 이미 선택된 선수 이름 배열
 }
 
-export default function PlayerSelectionModal({
+export default function PlayerSubstituteModal({
   setIsModalOpen,
   onSelectPlayer,
   selectedPlayerNames,
-}: IPlayerSelectionModalProps) {
+}: IPlayerSubstituteModalProps) {
   const [playerList] = useRecoilState(playerListState);
 
   // 선택된 선수 이름이 있는 경우 제외

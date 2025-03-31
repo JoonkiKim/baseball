@@ -1,3 +1,4 @@
+// gameResult.style.tsx
 import styled from "@emotion/styled";
 
 // 반응형 미디어 쿼리
@@ -36,7 +37,6 @@ export const InningCell = styled.div`
   text-align: center;
   padding: 1vh 0;
   font-weight: 600;
-
   ${small} {
     font-size: 12px;
   }
@@ -54,12 +54,10 @@ export const TeamScoreRow = styled.div`
   grid-template-columns: repeat(12, 1fr);
   border-bottom: 1px solid #ccc;
 `;
-
 export const TeamScoreCell = styled.div`
   text-align: center;
   padding: 1vh 0;
   font-weight: 400;
-
   ${small} {
     font-size: 12px;
   }
@@ -71,12 +69,11 @@ export const TeamScoreCell = styled.div`
   }
 `;
 
-// ─── 팀명 (예: "관악사 야구부") 헤더 ─────────────────────────────
+// ─── 팀명 헤더 ─────────────────────────────
 export const TeamTitle = styled.h2`
   margin: 24px 0 16px 0;
   font-weight: 600;
   text-align: center;
-
   ${small} {
     font-size: 18px;
   }
@@ -94,7 +91,6 @@ export const TableWrapper = styled.div`
   margin-bottom: 32px;
   overflow-x: auto;
   padding: 0 20px;
-
   ${small} {
     padding: 0 10px;
   }
@@ -109,7 +105,6 @@ export const TableWrapper = styled.div`
 export const TableTitle = styled.div`
   font-weight: 600;
   margin-bottom: 8px;
-
   ${small} {
     font-size: 14px;
   }
@@ -121,26 +116,23 @@ export const TableTitle = styled.div`
   }
 `;
 
-// 테이블 (타자기록)
+// 타자 기록 테이블
 export const RecordTable = styled.table`
   width: 100%;
   border-collapse: collapse;
-  min-width: 480px; /* 열이 늘어날 경우 최소 너비 확보 */
+  min-width: 480px;
   text-align: center;
   border-top: 1px solid #ccc;
   border-bottom: 1px solid #ccc;
-
   th,
   td {
     padding: 8px;
     border-bottom: 1px solid #eee;
   }
-
   th {
     font-weight: 500;
     background-color: #f9f9f9;
   }
-
   ${small} {
     font-size: 12px;
   }
@@ -150,49 +142,41 @@ export const RecordTable = styled.table`
   ${large}, ${xlarge} {
     font-size: 15px;
   }
-  /* 첫 번째 열의 너비 지정 */
+  /* 순번, 이름 열 너비 지정 */
   th:nth-of-type(1),
   td:nth-of-type(1) {
-    width: 5vh; /* 원하는 값으로 조정 */
+    width: 5vh;
   }
-
-  /* 첫 번째 열의 너비 지정 */
   th:nth-of-type(2),
   td:nth-of-type(2) {
-    width: 10vh; /* 원하는 값으로 조정 */
+    width: 10vh;
   }
 `;
 
+// 투수 기록 테이블
 export const RecordTableP = styled.table`
   width: 100%;
   border-collapse: collapse;
   text-align: center;
   border-top: 1px solid #ccc;
   border-bottom: 1px solid #ccc;
-
   th,
   td {
     padding: 8px;
     border-bottom: 1px solid #eee;
   }
-
   th {
     font-weight: 500;
     background-color: #f9f9f9;
   }
-
-  /* 첫 번째 열의 너비 지정 */
   th:nth-of-type(1),
   td:nth-of-type(1) {
-    width: 5vh; /* 원하는 값으로 조정 */
+    width: 5vh;
   }
-
-  /* 두 번째 열의 너비 지정 */
   th:nth-of-type(2),
   td:nth-of-type(2) {
-    width: 10vh; /* 원하는 값으로 조정 */
+    width: 10vh;
   }
-
   ${small} {
     font-size: 12px;
   }
@@ -204,46 +188,50 @@ export const RecordTableP = styled.table`
   }
 `;
 
+// 버튼 영역
 export const ButtonContainer = styled.div`
   display: flex;
   justify-content: space-between;
   width: 90%;
-  /* margin-top: 20px; */
 `;
 
 export const ControlButton = styled.button`
-  margin-top: 2cqh;
-  background-color: #000000;
-  display: block;
-  margin-left: auto;
+  background-color: #000;
   height: calc((100vh - 120px) * 0.044);
   width: calc((100vh - 120px) * 0.11);
   font-family: "KBO-Dia-Gothic_bold";
   font-weight: bold;
   font-size: 12px;
-  color: #ffffff;
+  color: #fff;
   cursor: pointer;
   border-radius: 4px;
-
   ${small} {
     font-size: 12px;
   }
 `;
 
 export const HomeButton = styled.button`
-  margin-top: 20px;
-  background-color: #000000;
-  display: block;
+  background-color: #000;
   height: calc((100vh - 120px) * 0.044);
   width: calc((100vh - 120px) * 0.11);
   font-family: "KBO-Dia-Gothic_bold";
   font-weight: bold;
   font-size: 12px;
-  color: #ffffff;
+  color: #fff;
   cursor: pointer;
   border-radius: 4px;
-
   ${small} {
     font-size: 12px;
+  }
+`;
+
+// ─── 수정 가능한 input 컴포넌트 ─────────────────────────────
+export const EditableInput = styled.input`
+  width: 100%;
+  border: none;
+  text-align: center;
+  background-color: #f2f2f2;
+  &:focus {
+    outline: none;
   }
 `;

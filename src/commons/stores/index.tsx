@@ -33,6 +33,16 @@ export const playerListState = atom<IPlayer[]>({
     { department: "컴퓨터공학과", name: "박야구19", wc: "선출/WC" },
     { department: "컴퓨터공학과", name: "박야구20", wc: "선출/WC" },
     { department: "컴퓨터공학과", name: "박야구21", wc: "선출/WC" },
+    { department: "컴퓨터공학과", name: "김지찬", wc: "선출" },
+    { department: "삼성라이온즈", name: "이재현", wc: "선출" },
+    { department: "삼성라이온즈", name: "디아즈", wc: "선출" },
+    { department: "삼성라이온즈", name: "구자욱", wc: "선출" },
+    { department: "삼성라이온즈", name: "김헌곤", wc: "선출/WC" },
+    { department: "삼성라이온즈", name: "양도근", wc: "선출" },
+    { department: "삼성라이온즈", name: "김영웅", wc: "선출" },
+    { department: "삼성라이온즈", name: "강민호", wc: "선출/WC" },
+    { department: "삼성라이온즈", name: "박병호", wc: "선출/WC" },
+    { department: "삼성라이온즈", name: "원태인", wc: "선출" },
     // ... (추가 데이터)
   ],
 });
@@ -394,5 +404,29 @@ export const initialPitcherStatsState = atom<IPitcher[]>({
     { player: "투수 28(팀BB)", so: 8 },
     { player: "투수 29(팀CC)", so: 9 },
     { player: "투수 30(팀DD)", so: 10 },
+  ],
+});
+
+interface PlayerInfo {
+  order: number | string;
+  name?: string;
+  position?: string;
+  // 추가: 돋보기 버튼(모달)로 선택되었는지 여부
+  selectedViaModal?: boolean;
+}
+
+export const defaultplayerList = atom<PlayerInfo[]>({
+  key: "defaultplayerList", // 전역 상태의 고유 key
+  default: [
+    { order: 1, name: "김지찬", position: "CF" },
+    { order: 2, name: "이재현", position: "SS" },
+    { order: 3, name: "디아즈", position: "1B" },
+    { order: 4, name: "구자욱", position: "LF" },
+    { order: 5, name: "김헌곤", position: "RF" },
+    { order: 6, name: "양도근", position: "2B" },
+    { order: 7, name: "김영웅", position: "3B" },
+    { order: 8, name: "강민호", position: "C" },
+    { order: 9, name: "박병호", position: "DH" },
+    { order: 10, name: "원태인", position: "P" },
   ],
 });

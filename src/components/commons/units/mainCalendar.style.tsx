@@ -168,7 +168,7 @@ export const DateDisplay = styled.div`
 
 export const CalendarIcon = styled.img`
   width: 25px; /* 기본값 */
-  height: 21px;
+  height: 24px;
   object-fit: cover;
 `;
 
