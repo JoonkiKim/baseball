@@ -6,7 +6,7 @@ export const Background = styled.div`
   width: 100%;
   background-color: #0f0f70;
   position: fixed;
-  /* text-align: center; */
+
   top: 0;
   left: 0;
   z-index: 1000;

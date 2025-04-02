@@ -20,35 +20,13 @@ import {
   WildCardBox,
   NoWildCardBox,
   NoWildCardBoxL,
+  SuggestionList,
+  SuggestionItem,
 } from "./teamRegistration.style";
 import RecordStartModal from "../../modals/recordStart";
 import PlayerSelectionModal from "../../modals/playerSelectionModal";
 import { playerListState } from "../../../../commons/stores/index";
 import styled from "@emotion/styled";
-
-// 추천 목록 스타일 컴포넌트
-const SuggestionList = styled.ul`
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  background: #fff;
-  border: 1px solid #ddd;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  max-height: 150px;
-  overflow-y: auto;
-  z-index: 10;
-`;
-
-const SuggestionItem = styled.li`
-  padding: 8px;
-  cursor: pointer;
-  &:hover {
-    background: #f2f2f2;
-  }
-`;
 
 interface PlayerInfo {
   order: number | string;
@@ -74,7 +52,7 @@ const positionOptions = [
 export default function TeamRegistrationPageComponent() {
   const router = useRouter();
 
-  // 1. 로컬 선수 데이터 (초기에는 모두 모달 선택 여부 false)
+  // 1. 로컬 선수 데이터 - 초기에는 1~9번만 있고, "P"행은 없음
   const [players, setPlayers] = useState<PlayerInfo[]>([
     { order: 1, selectedViaModal: false },
     { order: 2, selectedViaModal: false },
@@ -85,7 +63,6 @@ export default function TeamRegistrationPageComponent() {
     { order: 7, selectedViaModal: false },
     { order: 8, selectedViaModal: false },
     { order: 9, selectedViaModal: false },
-    { order: "P", selectedViaModal: false },
   ]);
 
   // 2. react-hook-form 세팅
@@ -100,9 +77,31 @@ export default function TeamRegistrationPageComponent() {
   const handlePositionClick = (index: number) => {
     setOpenPositionRow(openPositionRow === index ? null : index);
   };
+
   const handlePositionSelect = (index: number, pos: string) => {
-    const updatedPlayers = [...players];
+    // 현재 선수 목록 복사 및 해당 행 업데이트
+    let updatedPlayers = [...players];
     updatedPlayers[index].position = pos;
+
+    // DH가 선택된 행이 하나라도 있는지 확인 (order가 숫자인 행만 확인)
+    const hasDH = updatedPlayers.some(
+      (player) => player.position === "DH" && typeof player.order === "number"
+    );
+
+    // 이미 "P"행이 있는지 여부 확인
+    const hasP = updatedPlayers.some((player) => player.order === "P");
+
+    if (hasDH && !hasP) {
+      // DH가 선택되었고, 아직 "P"행이 없다면 "P"행 추가
+      updatedPlayers = [
+        ...updatedPlayers,
+        { order: "P", selectedViaModal: false },
+      ];
+    } else if (!hasDH && hasP) {
+      // DH가 없는 경우, 만약 기존에 "P"행이 있다면 제거
+      updatedPlayers = updatedPlayers.filter((player) => player.order !== "P");
+    }
+
     setPlayers(updatedPlayers);
     setOpenPositionRow(null);
   };
@@ -196,6 +195,11 @@ export default function TeamRegistrationPageComponent() {
           {players.map((player, index) => {
             // 현재 입력값
             const currentName = watch(`players.${index}.name`) || "";
+            // 이전 행의 선수명이 입력되었는지 확인 (첫 행은 항상 활성)
+            const prevName =
+              index === 0 ? "dummy" : watch(`players.${index - 1}.name`) || "";
+            const isRowEnabled = index === 0 || prevName.trim() !== "";
+
             // 전역 playerList에서 입력값을 포함하는 선수 필터링 (대소문자 무시)
             const filteredSuggestions = globalPlayerList.filter((p) => {
               const pName = p.name;
@@ -228,14 +232,20 @@ export default function TeamRegistrationPageComponent() {
                   {currentName && <NoWildCardBoxL />}
                   <PlayerNameInput
                     {...register(`players.${index}.name`, {
-                      onChange: (e) => handleInputChange(index, e),
+                      onChange: (e) => {
+                        if (isRowEnabled) {
+                          handleInputChange(index, e);
+                        }
+                      },
                     })}
                     placeholder="선수명 입력"
-                    onFocus={() => setActiveSuggestionIndex(index)}
+                    onFocus={() => {
+                      if (isRowEnabled) {
+                        setActiveSuggestionIndex(index);
+                      }
+                    }}
                     autoComplete="off"
                   />
-
-                  {/* 노란색 네모 박스 (WC인 경우) */}
                   {currentName ? (
                     globalPlayer &&
                     globalPlayer.wc &&
@@ -248,10 +258,13 @@ export default function TeamRegistrationPageComponent() {
                     <SearchIcon
                       src="/images/magnifier.png"
                       alt="Search Icon"
-                      onClick={() => handleOpenPlayerModal(index)}
+                      onClick={() => {
+                        if (isRowEnabled) {
+                          handleOpenPlayerModal(index);
+                        }
+                      }}
                     />
                   )}
-                  {/* 추천 목록 */}
                   {activeSuggestionIndex === index &&
                     !player.selectedViaModal &&
                     currentName &&
@@ -273,42 +286,44 @@ export default function TeamRegistrationPageComponent() {
                         ))}
                       </SuggestionList>
                     )}
-
-                  {/* 선수명이 입력되어 있다면 SearchIcon을 노출하지 않음 */}
-                  {/* {!currentName && (
-                    <SearchIcon
-                      src="/images/magnifier.png"
-                      alt="Search Icon"
-                      onClick={() => handleOpenPlayerModal(index)}
-                    />
-                  )} */}
                 </NameWrapper>
 
-                <PositionWrapper
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handlePositionClick(index);
-                  }}
-                >
-                  <PositionText isPlaceholder={isPositionEmpty}>
-                    {isPositionEmpty ? "포지션 입력 ▽" : player.position}
-                  </PositionText>
-                  {openPositionRow === index && (
-                    <PositionDropdown onClick={(e) => e.stopPropagation()}>
-                      {positionOptions.map((pos) => (
-                        <li
-                          key={pos}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handlePositionSelect(index, pos);
-                          }}
-                        >
-                          {pos}
-                        </li>
-                      ))}
-                    </PositionDropdown>
-                  )}
-                </PositionWrapper>
+                {/* order가 "P"인 경우에는 포지션 선택 칸을 렌더링하지 않음 */}
+                {player.order !== "P" ? (
+                  <PositionWrapper
+                    onClick={(e) => {
+                      if (isRowEnabled) {
+                        e.stopPropagation();
+                        handlePositionClick(index);
+                      }
+                    }}
+                  >
+                    <PositionText isPlaceholder={isPositionEmpty}>
+                      {isPositionEmpty ? "포지션 입력 ▽" : player.position}
+                    </PositionText>
+                    {openPositionRow === index && (
+                      <PositionDropdown onClick={(e) => e.stopPropagation()}>
+                        {positionOptions.map((pos) => (
+                          <li
+                            key={pos}
+                            onClick={(e) => {
+                              if (isRowEnabled) {
+                                e.stopPropagation();
+                                handlePositionSelect(index, pos);
+                              }
+                            }}
+                          >
+                            {pos}
+                          </li>
+                        ))}
+                      </PositionDropdown>
+                    )}
+                  </PositionWrapper>
+                ) : (
+                  <PositionWrapper>
+                    <PositionText>{player.order}</PositionText>
+                  </PositionWrapper>
+                )}
               </PlayerRow>
             );
           })}

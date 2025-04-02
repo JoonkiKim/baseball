@@ -37,7 +37,7 @@ export const ScoreBoardWrapper = styled.div`
  * ───────────────────────────────────────────────────────── */
 export const InningHeader = styled.div`
   display: grid;
-  grid-template-columns: repeat(12, 1fr);
+  grid-template-columns: repeat(10, 1fr);
   width: 100%;
   height: 33%;
   align-items: center;
@@ -69,7 +69,7 @@ export const InningCell = styled.div`
  * ───────────────────────────────────────────────────────── */
 export const TeamRow = styled.div`
   display: grid;
-  grid-template-columns: repeat(12, 1fr); /* 12개의 동일한 너비 */
+  grid-template-columns: repeat(10, 1fr); /* 12개의 동일한 너비 */
   width: 100%;
   align-items: center;
   /* border-bottom: 1px solid #ccc; */

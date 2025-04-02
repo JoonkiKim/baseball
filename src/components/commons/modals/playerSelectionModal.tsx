@@ -1,8 +1,8 @@
+// PlayerSelectionModal.tsx (전체 코드)
 import styled from "@emotion/styled";
 import { useRecoilState } from "recoil";
 import { playerListState } from "../../../commons/stores";
 
-// ModalOverlay를 full-screen으로 설정
 export const ModalOverlay = styled.div`
   position: fixed;
   top: 0;
@@ -15,10 +15,9 @@ export const ModalOverlay = styled.div`
   justify-content: center;
 `;
 
-// ModalContainer의 높이를 50vh로 설정하고 내부 스크롤 추가
 export const ModalContainer = styled.div`
   background-color: #fff;
-  width: 400px; /* 테이블을 위해 살짝 넓힘 */
+  width: 400px;
   height: 70vh;
   padding: 20px;
   border-radius: 8px;
@@ -31,7 +30,6 @@ export const ModalTitle = styled.h2`
   font-size: 18px;
 `;
 
-// 테이블 스타일 예시
 export const PlayerTable = styled.table`
   width: 100%;
   border-collapse: collapse;
@@ -53,6 +51,7 @@ export const PlayerTable = styled.table`
     border-bottom: none;
   }
 
+  /* 기본 hover 효과 */
   tbody tr:hover {
     background-color: #f2f2f2;
     cursor: pointer;
@@ -76,7 +75,7 @@ export const CloseButton = styled.button`
 interface IPlayerSelectionModalProps {
   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
   onSelectPlayer: (playerName: string) => void;
-  selectedPlayerNames: string[]; // 새로 추가된 prop
+  selectedPlayerNames: string[];
 }
 
 export default function PlayerSelectionModal({
@@ -86,10 +85,9 @@ export default function PlayerSelectionModal({
 }: IPlayerSelectionModalProps) {
   const [playerList] = useRecoilState(playerListState);
 
-  // 선택된 선수 이름이 있는 경우 제외
-  const filteredPlayerList = playerList.filter(
-    (player) => !selectedPlayerNames.includes(player.name)
-  );
+  // (1) 기존에는 filter로 "이미 선택된 선수"를 제외했지만
+  //     이제는 전체 목록을 노출해야 하므로 그대로 사용
+  const allPlayersList = playerList;
 
   const handleOverlayClick = () => {
     setIsModalOpen(false);
@@ -99,7 +97,9 @@ export default function PlayerSelectionModal({
     e.stopPropagation();
   };
 
-  const handleRowClick = (playerName: string) => {
+  // (2) 이미 선택된 선수라면 클릭이 안 되도록 처리
+  const handleRowClick = (playerName: string, isAlreadySelected: boolean) => {
+    if (isAlreadySelected) return; // 이미 선택된 선수는 클릭 무효
     onSelectPlayer(playerName);
     setIsModalOpen(false);
   };
@@ -117,13 +117,26 @@ export default function PlayerSelectionModal({
             </tr>
           </thead>
           <tbody>
-            {filteredPlayerList.map((player, idx) => (
-              <tr key={idx} onClick={() => handleRowClick(player.name)}>
-                <td>{player.department}</td>
-                <td>{player.name}</td>
-                <td>{player.wc || ""}</td>
-              </tr>
-            ))}
+            {allPlayersList.map((player, idx) => {
+              const isAlreadySelected = selectedPlayerNames.includes(
+                player.name
+              );
+              return (
+                <tr
+                  key={idx}
+                  // 이미 선택된 선수면 onClick 무효 & 텍스트 회색 + 취소선
+                  onClick={() => handleRowClick(player.name, isAlreadySelected)}
+                  style={{
+                    color: isAlreadySelected ? "gray" : "inherit",
+                    cursor: isAlreadySelected ? "default" : "pointer",
+                  }}
+                >
+                  <td>{player.department}</td>
+                  <td>{player.name}</td>
+                  <td>{player.wc || ""}</td>
+                </tr>
+              );
+            })}
           </tbody>
         </PlayerTable>
         <CloseButton onClick={() => setIsModalOpen(false)}>닫기</CloseButton>

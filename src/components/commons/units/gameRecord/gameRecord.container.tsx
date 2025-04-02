@@ -38,32 +38,18 @@ import GameOverModal from "../../modals/gameOverModal";
 export default function GameRecordPage() {
   const router = useRouter();
 
-  const inningHeaders = [
-    "",
-    "1",
-    "2",
-    "3",
-    "4",
-    "5",
-    "6",
-    "7",
-    "8",
-    "9",
-    "R",
-    "H",
-  ];
+  // 이닝 헤더: 7회까지, 그리고 R(총점)과 H(안타) 컬럼
+  const inningHeaders = ["", "1", "2", "3", "4", "5", "6", "7", "R", "H"];
 
   // 팀 이름 상태
   const [teamAName, setTeamAName] = useState("관악사");
   const [teamBName, setTeamBName] = useState("건환공");
 
-  // 팀 A, B 이닝별 점수 (총 11개: 9이닝 + R + H)
+  // 팀 A, B 이닝별 점수 (총 9개: 7이닝 + R + H)
   const [teamAScores, setTeamAScores] = useState([
     "0",
     "2",
     "4",
-    "",
-    "",
     "",
     "",
     "",
@@ -74,8 +60,6 @@ export default function GameRecordPage() {
   const [teamBScores, setTeamBScores] = useState([
     "0",
     "3",
-    "",
-    "",
     "",
     "",
     "",

@@ -48,7 +48,7 @@ export const BottomNav = styled.div`
   align-items: center;
   box-sizing: border-box;
   height: 10vh;
-  width: 33.33%;
+  width: 33%;
 `;
 
 export const NavIcon = styled.img`

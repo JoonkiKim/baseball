@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   GroupSelectorContainer,
   GroupSelector,
@@ -7,37 +7,43 @@ import {
   RankingContainer,
 } from "./rankingTable.style";
 
+import API from "../../../../commons/apis/api"; // api.ts에서 axios 인스턴스 가져옴
+
 export default function RankingTableComponent() {
-  // 그룹별 데이터 배열
-  const groups = [
-    {
-      groupName: "A조",
-      rankingData: [
-        { rank: 1, teamName: "관악사", games: 3, wins: 3, draws: 0, losses: 0 },
-        { rank: 2, teamName: "자연대", games: 3, wins: 2, draws: 0, losses: 1 },
-        { rank: 3, teamName: "공대", games: 3, wins: 1, draws: 0, losses: 2 },
-        { rank: 4, teamName: "건환공", games: 3, wins: 0, draws: 0, losses: 3 },
-      ],
-    },
-    {
-      groupName: "B조",
-      rankingData: [
-        { rank: 1, teamName: "팀B1", games: 4, wins: 3, draws: 0, losses: 1 },
-        { rank: 2, teamName: "팀B2", games: 4, wins: 2, draws: 1, losses: 1 },
-        { rank: 3, teamName: "팀B3", games: 4, wins: 1, draws: 1, losses: 2 },
-        { rank: 4, teamName: "팀B4", games: 4, wins: 0, draws: 0, losses: 4 },
-      ],
-    },
-    {
-      groupName: "C조",
-      rankingData: [
-        { rank: 1, teamName: "팀C1", games: 5, wins: 4, draws: 0, losses: 1 },
-        { rank: 2, teamName: "팀C2", games: 5, wins: 3, draws: 0, losses: 2 },
-        { rank: 3, teamName: "팀C3", games: 5, wins: 2, draws: 1, losses: 2 },
-        { rank: 4, teamName: "팀C4", games: 5, wins: 1, draws: 0, losses: 4 },
-      ],
-    },
-  ];
+  const [groupData, setGroupData] = useState<Record<string, any[]>>({});
+
+  // 그룹별 팀 정보 가져오는 함수
+  const fetchGroupedTeams = async (group: string) => {
+    const response = await API.get("/teams/grouped", {
+      params: { group },
+    });
+    return response.data;
+  };
+
+  useEffect(() => {
+    const fetchGroups = async () => {
+      try {
+        const groups = ["A", "B", "C"];
+
+        const results = await Promise.all(
+          groups.map((group) => fetchGroupedTeams(group))
+        );
+
+        const newGroupData: Record<string, any[]> = {};
+        groups.forEach((g, i) => {
+          newGroupData[g] = results[i][g] || [];
+        });
+
+        setGroupData(newGroupData);
+      } catch (err) {
+        console.error("❌ 그룹 요청 에러:", err);
+      }
+    };
+
+    fetchGroups();
+  }, []);
+
+  const getGroupName = (key: string) => `${key}조`;
 
   return (
     <RankingContainer>
@@ -48,10 +54,10 @@ export default function RankingTableComponent() {
           marginBottom: "100px",
         }}
       >
-        {groups.map((group, groupIndex) => (
-          <div key={groupIndex}>
+        {Object.entries(groupData).map(([groupKey, teams]) => (
+          <div key={groupKey}>
             <GroupSelectorContainer>
-              <GroupSelector>{group.groupName}</GroupSelector>
+              <GroupSelector>{getGroupName(groupKey)}</GroupSelector>
             </GroupSelectorContainer>
             <TableWrapper>
               <RankingTable>
@@ -66,16 +72,18 @@ export default function RankingTableComponent() {
                   </tr>
                 </thead>
                 <tbody>
-                  {group.rankingData.map((team, index) => (
-                    <tr key={index}>
-                      <td>{team.rank}</td>
-                      <td>{team.teamName}</td>
-                      <td>{team.games}</td>
-                      <td>{team.wins}</td>
-                      <td>{team.draws}</td>
-                      <td>{team.losses}</td>
-                    </tr>
-                  ))}
+                  {[...teams]
+                    .sort((a, b) => (a.rank ?? Infinity) - (b.rank ?? Infinity))
+                    .map((team: any, index: number) => (
+                      <tr key={index}>
+                        <td>{team.rank ?? ""}</td>
+                        <td>{team.name ?? team.teamName ?? ""}</td>
+                        <td>{team.games ?? ""}</td>
+                        <td>{team.wins ?? ""}</td>
+                        <td>{team.draws ?? ""}</td>
+                        <td>{team.losses ?? ""}</td>
+                      </tr>
+                    ))}
                 </tbody>
               </RankingTable>
             </TableWrapper>

@@ -176,7 +176,7 @@ export const RankingTableP = styled.table`
 
   th:nth-of-type(3),
   td:nth-of-type(3) {
-    width: 20vh; /* 원하는 값으로 조정 */
+    width: 12vh; /* 원하는 값으로 조정 */
   }
 `;
 

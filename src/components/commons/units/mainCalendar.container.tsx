@@ -23,6 +23,7 @@ import {
   VsText,
 } from "./mainCalendar.style";
 import { formatDate2 } from "../../../commons/libraries/utils";
+// import CustomInput from "../../../commons/libraries/datepicker-custominput";
 
 // Match 객체에 대한 타입 정의
 interface Match {
@@ -84,10 +85,10 @@ export default function MainCalendarPage() {
   ]);
 
   useEffect(() => {
-    // 초기값: 오늘 날짜 (이미 new Date()로 설정되어 있음)
+    // 컴포넌트 마운트 시 초기 실행 로직 (필요시 작성)
   }, []);
 
-  // 왼쪽 Arrow 클릭 시: 날짜 하루 감소
+  // 왼쪽 화살표 클릭 시: 날짜 하루 감소
   const handleDecreaseDate = () => {
     if (selectedDate) {
       const newDate = new Date(selectedDate);
@@ -96,7 +97,7 @@ export default function MainCalendarPage() {
     }
   };
 
-  // 오른쪽 Arrow 클릭 시: 날짜 하루 증가
+  // 오른쪽 화살표 클릭 시: 날짜 하루 증가
   const handleIncreaseDate = () => {
     if (selectedDate) {
       const newDate = new Date(selectedDate);
@@ -143,9 +144,8 @@ export default function MainCalendarPage() {
 
             {/* 달력 아이콘 클릭 시 달력 토글 */}
             <CalendarIcon
-              src="/images/calendar-linear.png"
+              src="/images/calendar-new.png"
               alt="Calendar Icon"
-              style={{ cursor: "pointer" }}
               onClick={handleCalendarIconClick}
             />
 
@@ -180,6 +180,7 @@ export default function MainCalendarPage() {
             match.team1Score !== undefined &&
             match.team2Score !== undefined &&
             match.team1Score > match.team2Score;
+
           const team2IsWinner =
             match.team1Score !== undefined &&
             match.team2Score !== undefined &&
@@ -191,10 +192,14 @@ export default function MainCalendarPage() {
               <TeamsContainer>
                 <Team>
                   <TeamName>{match.team1}</TeamName>
-                  <TeamScore isWinner={team1IsWinner}>
+                  <TeamScore
+                    isWinner={team1IsWinner}
+                    gameStatus={match.gameStatus}
+                  >
                     {match.team1Score}
                   </TeamScore>
                 </Team>
+
                 <div
                   style={{
                     display: "flex",
@@ -208,13 +213,18 @@ export default function MainCalendarPage() {
                   </StatusBox>
                   <VsText>vs</VsText>
                 </div>
+
                 <Team>
                   <TeamName>{match.team2}</TeamName>
-                  <TeamScore isWinner={team2IsWinner}>
+                  <TeamScore
+                    isWinner={team2IsWinner}
+                    gameStatus={match.gameStatus}
+                  >
                     {match.team2Score}
                   </TeamScore>
                 </Team>
               </TeamsContainer>
+
               {/* RecordButton 클릭 시 gameStatus에 따라 라우팅 */}
               <RecordButton onClick={() => handleRecordClick(match.gameStatus)}>
                 경기기록

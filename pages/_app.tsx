@@ -9,7 +9,7 @@ import { useRouter } from "next/router";
 function MyApp({ Component, pageProps }) {
   const router = useRouter();
   const isResultPage = router.pathname === "/result";
-  console.log(isResultPage);
+
   const globalStyles = css`
     @font-face {
       font-family: "KBO Dia Gothic";
@@ -23,6 +23,8 @@ function MyApp({ Component, pageProps }) {
     #__next {
       font-family: "KBO-Dia-Gothic_medium";
       background-color: ${isResultPage ? "#f2f2f2" : "#ffffff"};
+      margin: 0;
+      padding: 0;
     }
   `;
 

@@ -277,3 +277,27 @@ export const ControlButton = styled.button`
     font-size: 12px;
   }
 `;
+
+// 추천 목록 스타일 컴포넌트
+export const SuggestionList = styled.ul`
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #fff;
+  border: 1px solid #ddd;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 150px;
+  overflow-y: auto;
+  z-index: 10;
+`;
+
+export const SuggestionItem = styled.li`
+  padding: 8px;
+  cursor: pointer;
+  &:hover {
+    background: #f2f2f2;
+  }
+`;

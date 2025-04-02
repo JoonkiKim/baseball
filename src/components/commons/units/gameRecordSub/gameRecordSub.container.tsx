@@ -197,7 +197,6 @@ export default function SubstitutionPageComponent() {
 
   return (
     <Container onClick={() => setOpenPositionRow(null)}>
-      <LargeTitle>라인업을 등록해주세요</LargeTitle>
       <Title>관악사 야구부</Title>
       <form onSubmit={handleSubmit(onSubmit)}>
         <PlayerList>

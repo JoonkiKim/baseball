@@ -23,49 +23,95 @@ export const Container = styled.div`
 
 // ─── 상단 점수판 영역 ─────────────────────────────
 export const ScoreBoardWrapper = styled.div`
-  width: 90%;
-  margin-bottom: 16px;
+  width: calc((100% - 2px));
+  /* margin-top: 2vh; */
+  margin-top: calc((100vh - 120px) * 0.01);
+  height: calc((100vh - 120px) * 0.2);
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid black;
+  border-radius: 10px;
 `;
 
-// 이닝 헤더 (1~9, R, H)
+/** ─────────────────────────────────────────────────────────
+ *  1) 상단 이닝 헤더 (총 12열: 이닝(1~9) + R + H)
+ * ───────────────────────────────────────────────────────── */
 export const InningHeader = styled.div`
   display: grid;
-  grid-template-columns: repeat(12, 1fr);
+  grid-template-columns: repeat(10, 1fr);
+  width: 100%;
+  height: 33%;
+  align-items: center;
   border-bottom: 1px solid #ccc;
+  /* background-color: red; */
 `;
+
 export const InningCell = styled.div`
   text-align: center;
-  padding: 1vh 0;
+  /* padding-top: 1vh; */
+  /* background-color: red; */
+  /* padding-bottom: 1vh; */
   font-weight: 600;
   ${small} {
-    font-size: 12px;
+    font-size: 15px;
   }
   ${medium} {
-    font-size: 14px;
+    font-size: 20px;
   }
   ${large}, ${xlarge} {
-    font-size: 15px;
+    font-size: 20px;
   }
 `;
 
-// 각 팀 점수 행
-export const TeamScoreRow = styled.div`
+/** ─────────────────────────────────────────────────────────
+ *  2) 팀 이름과 점수를 한 행으로 구성 (총 12열)
+ *     첫 번째 열: 팀 이름 (별도 스타일)
+ *     나머지 11열: 이닝별 점수 (팀 점수 셀)
+ * ───────────────────────────────────────────────────────── */
+export const TeamRow = styled.div`
   display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  border-bottom: 1px solid #ccc;
+  grid-template-columns: repeat(10, 1fr); /* 12개의 동일한 너비 */
+  width: 100%;
+  align-items: center;
+  /* border-bottom: 1px solid #ccc; */
+  /* background-color: aqua; */
+  height: 33%;
 `;
+
+export const TeamNameCell = styled.div`
+  text-align: center;
+  padding: 1vh 0;
+  font-weight: 500;
+  font-family: "KBO-Dia-Gothic_medium";
+  font-style: normal;
+
+  ${small} {
+    font-size: 10px;
+  }
+  ${medium} {
+    font-size: 12px;
+  }
+  ${large}, ${xlarge} {
+    font-size: 14px;
+  }
+`;
+
 export const TeamScoreCell = styled.div`
   text-align: center;
+  font-family: "KBO-Dia-Gothic_light";
   padding: 1vh 0;
   font-weight: 400;
   ${small} {
-    font-size: 12px;
+    font-size: 15px;
   }
   ${medium} {
-    font-size: 14px;
+    font-size: 20px;
   }
   ${large}, ${xlarge} {
-    font-size: 15px;
+    font-size: 20px;
   }
 `;
 
@@ -89,6 +135,8 @@ export const TeamTitle = styled.h2`
 export const TableWrapper = styled.div`
   width: 90%;
   margin-bottom: 32px;
+  /* background-color: red; */
+  border-bottom: 1px solid #000;
   overflow-x: auto;
   padding: 0 20px;
   ${small} {
@@ -122,8 +170,8 @@ export const RecordTable = styled.table`
   border-collapse: collapse;
   min-width: 480px;
   text-align: center;
-  border-top: 1px solid #ccc;
-  border-bottom: 1px solid #ccc;
+  border-top: 1px solid #000;
+  border-bottom: 1px solid #000;
   th,
   td {
     padding: 8px;
@@ -131,7 +179,8 @@ export const RecordTable = styled.table`
   }
   th {
     font-weight: 500;
-    background-color: #f9f9f9;
+    border-bottom: 1px solid #000;
+    /* background-color: #f9f9f9; */
   }
   ${small} {
     font-size: 12px;
@@ -158,16 +207,18 @@ export const RecordTableP = styled.table`
   width: 100%;
   border-collapse: collapse;
   text-align: center;
-  border-top: 1px solid #ccc;
-  border-bottom: 1px solid #ccc;
+  border-top: 1px solid #000;
+  border-bottom: 1px solid #000;
   th,
   td {
     padding: 8px;
+    /* border-top: 1px solid #000; */
     border-bottom: 1px solid #eee;
   }
   th {
     font-weight: 500;
-    background-color: #f9f9f9;
+    border-bottom: 1px solid #000;
+    /* background-color: #f9f9f9; */
   }
   th:nth-of-type(1),
   td:nth-of-type(1) {

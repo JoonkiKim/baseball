@@ -1,10 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Container,
   ScoreBoardWrapper,
   InningHeader,
   InningCell,
-  TeamScoreRow,
+  // TeamScoreRow,
   TeamScoreCell,
   TeamTitle,
   TableWrapper,
@@ -14,17 +14,20 @@ import {
   HomeButton,
   ButtonContainer,
   RecordTableP,
+  TeamRow,
+  TeamNameCell,
 } from "./gameResult.style";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import ResultSubmitModal from "../../modals/submitModal/resultSubmitModal";
 
 // 홈팀 데이터
-const teamAName = "관악사 야구부";
-const teamBName = "건환공 야구부";
+const teamAName = "관악사";
+const teamBName = "건환공";
 
 // 예시: 1~9회 + R + H
-const teamAScores = ["0", "2", "2", "0", "", "", "", "", "", "4", "4"];
-const teamBScores = ["0", "1", "3", "", "", "", "", "", "", "5", "6"];
+const teamAScores = ["0", "2", "4", "0", "", "", "", "6", "4"];
+const teamBScores = ["0", "1", "3", "", "", "", "", "4", "6"];
 
 /* 
   홈팀 타자 기록 (예시 데이터)
@@ -272,42 +275,42 @@ const pitcherRecordsAway = [
 ];
 
 export default function FinalGameRecordPage() {
-  const inningHeaders = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "R", "H"];
+  const inningHeaders = ["", "1", "2", "3", "4", "5", "6", "7", "R", "H"];
   const router = useRouter();
+  const [isResultSubmitModalOpen, setIsResultSubmitModalOpen] = useState(false);
 
   // 제출하기 버튼 클릭 시 호출되는 함수
+  // 제출하기 버튼 클릭 시 모달을 열기 위한 함수
   const handleSubmitClick = () => {
-    alert("제출완료!");
-    router.push("/");
+    setIsResultSubmitModalOpen(true);
   };
 
   return (
     <Container>
       <ScoreBoardWrapper>
+        {/* 1) 이닝 헤더 */}
         <InningHeader>
-          <InningCell></InningCell>
           {inningHeaders.map((inn, idx) => (
             <InningCell key={idx}>{inn}</InningCell>
           ))}
         </InningHeader>
 
-        {/* 홈팀 점수 행 */}
-        <TeamScoreRow>
-          <TeamScoreCell>{teamAName.substring(0, 2)}</TeamScoreCell>
+        {/* 2) 팀 A 점수 행 */}
+        <TeamRow>
+          <TeamNameCell>{teamAName}</TeamNameCell>
           {teamAScores.map((score, idx) => (
             <TeamScoreCell key={idx}>{score}</TeamScoreCell>
           ))}
-        </TeamScoreRow>
+        </TeamRow>
 
-        {/* 원정팀 점수 행 */}
-        <TeamScoreRow>
-          <TeamScoreCell>{teamBName.substring(0, 2)}</TeamScoreCell>
+        {/* 2) 팀 B 점수 행 */}
+        <TeamRow>
+          <TeamNameCell>{teamBName}</TeamNameCell>
           {teamBScores.map((score, idx) => (
             <TeamScoreCell key={idx}>{score}</TeamScoreCell>
           ))}
-        </TeamScoreRow>
+        </TeamRow>
       </ScoreBoardWrapper>
-
       {/* 팀명 */}
       <TeamTitle>관악사 야구부</TeamTitle>
 
@@ -434,6 +437,12 @@ export default function FinalGameRecordPage() {
         </Link>
         <ControlButton onClick={handleSubmitClick}>제출하기</ControlButton>
       </ButtonContainer>
+      {/* 모달 조건부 렌더링 */}
+      {isResultSubmitModalOpen && (
+        <ResultSubmitModal
+          setIsResultSubmitModalOpen={setIsResultSubmitModalOpen}
+        />
+      )}
     </Container>
   );
 }

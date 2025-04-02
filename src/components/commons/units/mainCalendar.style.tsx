@@ -87,7 +87,6 @@ export const DaysOfWeekContainer = styled.div`
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  /* background-color: red; */
   padding: 16px; /* 기본값 */
   margin-top: 2vh;
 
@@ -113,7 +112,6 @@ export const DaysOfWeekWrapper = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;
-  /* background-color: red; */
   justify-content: space-between;
   width: 95%; /* 기본값 */
 `;
@@ -123,13 +121,13 @@ export const DateWrapper = styled.div`
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  /* background-color: red; */
 `;
 
 export const Arrow = styled.div`
   font-weight: 1000;
   color: #000;
   font-size: 16px; /* 기본값 */
+  cursor: pointer;
 
   /* Small */
   @media only screen and (max-width: 480px) {
@@ -170,11 +168,11 @@ export const CalendarIcon = styled.img`
   width: 25px; /* 기본값 */
   height: 24px;
   object-fit: cover;
+  cursor: pointer;
 `;
 
 export const MatchCardsContainer = styled.div`
   display: flex;
-  /* background-color: red; */
   margin-top: 2%;
   flex-direction: column;
   gap: 16px; /* 기본값 */
@@ -203,9 +201,7 @@ export const MatchCard = styled.div`
   justify-content: space-between;
   border-bottom: 1px solid #e8e8e8;
   padding: 8px 0;
-  /* background-color: red; */
   height: 10vh;
-  /* margin-top: 10px; */
 
   /* Small */
   @media only screen and (max-width: 480px) {
@@ -244,7 +240,6 @@ export const MatchTimeLabel = styled.div`
 export const TeamsContainer = styled.div`
   display: flex;
   align-items: center;
-  /* background-color: red; */
   flex: 1;
   justify-content: center;
   gap: 16px; /* 기본값 */
@@ -267,7 +262,6 @@ export const Team = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  /* background-color: aqua; */
   min-width: 50px;
   min-height: 45px;
 `;
@@ -279,9 +273,14 @@ export const TeamName = styled.div`
   margin-bottom: 7px;
 `;
 
-export const TeamScore = styled.div<{ isWinner?: boolean }>`
+/** gameStatus가 "경기종료"일 때만 승리 팀은 빨간색, 나머지는 검정색 */
+export const TeamScore = styled.div<{
+  isWinner?: boolean;
+  gameStatus?: string;
+}>`
   font-weight: 500;
-  color: ${({ isWinner }) => (isWinner ? "red" : "#000")};
+  color: ${({ isWinner, gameStatus }) =>
+    gameStatus === "경기종료" ? (isWinner ? "red" : "#000") : "#000"};
   font-size: 12px; /* 기본값 */
 `;
 
@@ -340,12 +339,10 @@ export const RecordButton = styled.button`
   border: 1px solid #e8e8e8;
   border-radius: 4px;
   cursor: pointer;
-  /* padding: 8px 16px; */
   font-size: 12px; /* 기본값 */
   min-width: 60px;
   min-height: 30px;
   text-align: center;
-
   display: flex;
   flex-direction: column;
   justify-content: center;
