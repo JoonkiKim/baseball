@@ -19,3 +19,8 @@ export const formatDate2 = (dateString: any) => {
   const dayOfWeek = daysOfWeek[date.getDay()];
   return `${year}. ${month}. ${day} (${dayOfWeek})`;
 };
+
+// commons/libraries/utils.ts
+export const formatDateToYMD = (date: Date): string => {
+  return date.toISOString().split("T")[0];
+};

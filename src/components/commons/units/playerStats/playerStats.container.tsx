@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect } from "react";
 import Link from "next/link";
+
 import {
   RankingContainer,
   TableWrapper,
@@ -8,37 +9,63 @@ import {
   TableTitle,
   ArrowIcon,
   MoreButton,
-} from "./playerStats.style"; // 스타일 임포트
+} from "./playerStats.style";
 import { useRecoilState } from "recoil";
 import {
-  initialHitterStatsState,
-  initialPitcherStatsState,
+  hitterStatsState,
+  pitcherStatsState,
 } from "../../../../commons/stores";
+import API from "../../../../commons/apis/api";
 
 export default function StatsPage() {
-  // 타자 기록 더미 데이터 (30개)
+  // 타자 기록 데이터를 전역 Recoil 스테이트에 저장 (초기값은 빈 배열)
+  const [hitterData, setHitterData] = useRecoilState(hitterStatsState);
+  // 초기 정렬 기준: 안타("H") 기준 내림차순 정렬
+  const [hitterSortKey, setHitterSortKey] = React.useState("H");
 
-  const [initialHitterStats] = useRecoilState(initialHitterStatsState);
+  // 투수 기록 데이터를 전역 Recoil 스테이트에 저장 (초기값은 빈 배열)
+  const [pitcherData, setPitcherData] = useRecoilState(pitcherStatsState);
+  // 초기 정렬 기준: 삼진("K") 기준 내림차순 정렬
+  const [pitcherSortKey, setPitcherSortKey] = React.useState("K");
 
-  // 투수 기록 더미 데이터 (30개)
-  const [initialPitcherStats] = useRecoilState(initialPitcherStatsState);
+  // 타자 기록 API 호출 및 Recoil 스테이트 업데이트
+  useEffect(() => {
+    const fetchBatters = async () => {
+      try {
+        const response = await API.get("/records/batters");
+        // 응답: { count: 30, batters: [ ... ] }
+        const sortedData = response.data.batters.sort((a, b) => b.H - a.H);
+        setHitterData(sortedData);
+      } catch (error) {
+        console.error("Error fetching hitter stats:", error);
+      }
+    };
+    fetchBatters();
+  }, [setHitterData]);
 
-  // 기본 정렬 기준: 타자 기록은 안타 개수("hits"), 투수 기록은 삼진("so")
-  const [hitterData, setHitterData] = useState(
-    [...initialHitterStats].sort((a, b) => b.hits - a.hits)
-  );
-  const [pitcherData, setPitcherData] = useState(
-    [...initialPitcherStats].sort((a, b) => b.so - a.so)
-  );
-  const [hitterSortKey, setHitterSortKey] = useState("hits");
-  const [pitcherSortKey, setPitcherSortKey] = useState("so");
+  // 투수 기록 API 호출 및 Recoil 스테이트 업데이트
+  useEffect(() => {
+    const fetchPitchers = async () => {
+      try {
+        const response = await API.get("/records/pitchers");
+        // 응답: { count: 30, pitchers: [ ... ] }
+        const sortedData = response.data.pitchers.sort((a, b) => b.K - a.K);
+        setPitcherData(sortedData);
+      } catch (error) {
+        console.error("Error fetching pitcher stats:", error);
+      }
+    };
+    fetchPitchers();
+  }, [setPitcherData]);
 
+  // 타자 기록 정렬 핸들러 (Recoil 스테이트 업데이트)
   const handleSortHitter = (key) => {
     setHitterSortKey(key);
     const sortedData = [...hitterData].sort((a, b) => b[key] - a[key]);
     setHitterData(sortedData);
   };
 
+  // 투수 기록 정렬 핸들러 (Recoil 스테이트 업데이트)
   const handleSortPitcher = (key) => {
     setPitcherSortKey(key);
     const sortedData = [...pitcherData].sort((a, b) => b[key] - a[key]);
@@ -55,25 +82,25 @@ export default function StatsPage() {
             <tr>
               <th>순위</th>
               <th style={{ width: "90px" }}>선수</th>
-              <th onClick={() => handleSortHitter("ab")}>
+              <th onClick={() => handleSortHitter("AB")}>
                 타수 <ArrowIcon>▼</ArrowIcon>
               </th>
-              <th onClick={() => handleSortHitter("hits")}>
+              <th onClick={() => handleSortHitter("H")}>
                 안타 <ArrowIcon>▼</ArrowIcon>
               </th>
-              <th onClick={() => handleSortHitter("avg")}>
+              <th onClick={() => handleSortHitter("AVG")}>
                 타율 <ArrowIcon>▼</ArrowIcon>
               </th>
-              <th onClick={() => handleSortHitter("bb")}>
+              <th onClick={() => handleSortHitter("BB")}>
                 볼넷 <ArrowIcon>▼</ArrowIcon>
               </th>
-              <th onClick={() => handleSortHitter("obp")}>
+              <th onClick={() => handleSortHitter("OBP")}>
                 출루율 <ArrowIcon>▼</ArrowIcon>
               </th>
-              <th onClick={() => handleSortHitter("slg")}>
+              <th onClick={() => handleSortHitter("SLG")}>
                 장타율 <ArrowIcon>▼</ArrowIcon>
               </th>
-              <th onClick={() => handleSortHitter("ops")}>
+              <th onClick={() => handleSortHitter("OPS")}>
                 OPS <ArrowIcon>▼</ArrowIcon>
               </th>
             </tr>
@@ -83,7 +110,7 @@ export default function StatsPage() {
               let currentRank = 1;
               let tieCount = 0;
               let prevValue = null;
-              // 상위 20개만 노출
+              // 예시로 상위 5개만 노출 (필요에 따라 조정)
               return hitterData.slice(0, 5).map((item, index) => {
                 const currentValue = item[hitterSortKey];
                 if (index === 0) {
@@ -94,7 +121,7 @@ export default function StatsPage() {
                   if (currentValue === prevValue) {
                     tieCount++;
                   } else {
-                    currentRank = currentRank + tieCount;
+                    currentRank += tieCount;
                     tieCount = 1;
                     prevValue = currentValue;
                   }
@@ -102,14 +129,16 @@ export default function StatsPage() {
                 return (
                   <tr key={index}>
                     <td>{currentRank}</td>
-                    <td>{item.player}</td>
-                    <td>{item.ab}</td>
-                    <td>{item.hits}</td>
-                    <td>{item.avg.toFixed(3)}</td>
-                    <td>{item.bb}</td>
-                    <td>{item.obp.toFixed(3)}</td>
-                    <td>{item.slg.toFixed(3)}</td>
-                    <td>{item.ops.toFixed(3)}</td>
+                    <td>
+                      {item.playerName} ({item.teamName})
+                    </td>
+                    <td>{item.AB}</td>
+                    <td>{item.H}</td>
+                    <td>{item.AVG.toFixed(3)}</td>
+                    <td>{item.BB}</td>
+                    <td>{item.OBP.toFixed(3)}</td>
+                    <td>{item.SLG.toFixed(3)}</td>
+                    <td>{item.OPS.toFixed(3)}</td>
                   </tr>
                 );
               });
@@ -118,7 +147,6 @@ export default function StatsPage() {
         </RankingTable>
       </TableWrapper>
       <div style={{ textAlign: "center", marginBottom: "30px" }}>
-        {/* 첫번째 더보기 버튼: Next.js Link 태그 사용 */}
         <Link href="/playerStats/playerStatsBatterDetail">
           <MoreButton>더보기</MoreButton>
         </Link>
@@ -132,7 +160,7 @@ export default function StatsPage() {
             <tr>
               <th>순위</th>
               <th style={{ width: "90px" }}>선수</th>
-              <th onClick={() => handleSortPitcher("so")}>
+              <th onClick={() => handleSortPitcher("K")}>
                 삼진 <ArrowIcon>▼</ArrowIcon>
               </th>
             </tr>
@@ -142,7 +170,6 @@ export default function StatsPage() {
               let currentRank = 1;
               let tieCount = 0;
               let prevValue = null;
-              // 상위 20개만 노출
               return pitcherData.slice(0, 5).map((item, index) => {
                 const currentValue = item[pitcherSortKey];
                 if (index === 0) {
@@ -153,7 +180,7 @@ export default function StatsPage() {
                   if (currentValue === prevValue) {
                     tieCount++;
                   } else {
-                    currentRank = currentRank + tieCount;
+                    currentRank += tieCount;
                     tieCount = 1;
                     prevValue = currentValue;
                   }
@@ -161,8 +188,10 @@ export default function StatsPage() {
                 return (
                   <tr key={index}>
                     <td>{currentRank}</td>
-                    <td>{item.player}</td>
-                    <td>{item.so}</td>
+                    <td>
+                      {item.playerName} ({item.teamName})
+                    </td>
+                    <td>{item.K}</td>
                   </tr>
                 );
               });
@@ -171,7 +200,6 @@ export default function StatsPage() {
         </RankingTableP>
       </TableWrapper>
       <div style={{ textAlign: "center", marginBottom: "30px" }}>
-        {/* 두번째 더보기 버튼: Next.js Link 태그 사용 */}
         <Link href="/playerStats/playerStatsPitcherDetail">
           <MoreButton>더보기</MoreButton>
         </Link>

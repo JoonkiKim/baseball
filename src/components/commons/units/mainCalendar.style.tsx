@@ -273,35 +273,39 @@ export const TeamName = styled.div`
   margin-bottom: 7px;
 `;
 
-/** gameStatus가 "경기종료"일 때만 승리 팀은 빨간색, 나머지는 검정색 */
 export const TeamScore = styled.div<{
   isWinner?: boolean;
   gameStatus?: string;
 }>`
-  font-weight: 500;
+  font-weight: 600;
+  font-size: 12px;
+  /* 경기종료 시 승리팀은 빨간색, 그렇지 않으면 기본 검정색 */
   color: ${({ isWinner, gameStatus }) =>
-    gameStatus === "경기종료" ? (isWinner ? "red" : "#000") : "#000"};
-  font-size: 12px; /* 기본값 */
+    gameStatus === "FINALIZED" && isWinner ? "#FF0000" : "#000"};
 `;
 
 export const StatusBox = styled.div<{ status: string }>`
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
+  padding: 0 8px;
   min-width: 60px;
   height: 22px;
   background-color: ${({ status }) =>
-    status === "경기종료"
-      ? "#000000"
-      : status === "경기예정"
+    status === "SCHEDULED"
       ? "#F3A231"
+      : status === "FINALIZED"
+      ? "#000000"
+      : status === "IN_PROGRESS" // 진행중
+      ? "#37DC21"
       : "#37DC21"};
-  color: white;
-  font-size: 10px;
-  font-weight: 500;
-  border-radius: 50px;
+  color: #ffffff;
+  font-size: 12px;
+  font-family: "KBO-Dia-Gothic_medium";
+
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
   margin-bottom: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 `;
 
 export const TeamsWrapper = styled.div`
@@ -350,85 +354,86 @@ export const RecordButton = styled.button`
 `;
 
 export const StyledDatePicker = styled(DatePicker)`
-  /* 전체 캘린더 컨테이너 스타일 */
+  /* 전체 캘린더 컨테이너 */
   .react-datepicker {
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid black;
+    border-radius: 12px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    font-family: sans-serif;
   }
 
   /* 헤더 영역 */
   .react-datepicker__header {
-    background-color: #5db075;
+    background-color: #4a90e2; /* 세련된 블루 계열 */
     border: none;
-    border-top-left-radius: 8px;
-    border-top-right-radius: 8px;
-    padding: 12px 0;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    padding: 16px 0;
+    position: relative;
   }
 
   .react-datepicker__current-month {
-    font-size: 18px;
+    font-size: 20px;
     color: #ffffff;
-    font-weight: 600;
+    font-weight: bold;
   }
 
   /* 네비게이션 버튼 (이전, 다음) */
   .react-datepicker__navigation {
-    top: 14px;
-    line-height: 1.7rem;
+    top: 20px;
     border: none;
     cursor: pointer;
   }
 
   .react-datepicker__navigation--previous {
-    margin-left: 10px;
+    left: 16px;
   }
 
   .react-datepicker__navigation--next {
-    margin-right: 10px;
+    right: 16px;
   }
 
   /* 요일 이름 */
   .react-datepicker__day-name {
     font-size: 14px;
-    color: #333;
-    font-weight: 500;
+    color: #666666;
+    font-weight: 600;
     margin: 0.2rem;
   }
 
   /* 날짜 셀 스타일 */
   .react-datepicker__day {
-    width: 2.5rem;
-    height: 2.5rem;
-    line-height: 2.5rem;
+    width: 2.8rem;
+    height: 2.8rem;
+    line-height: 2.8rem;
     margin: 0.2rem;
-    font-size: 14px;
-    color: #333;
-    transition: background-color 0.2s ease-in-out;
+    font-size: 16px;
+    color: #444444;
+    transition: background-color 0.3s ease;
     cursor: pointer;
   }
 
   .react-datepicker__day:hover {
-    background-color: #f0f0f0;
-    border-radius: 4px;
+    background-color: #f5faff;
+    border-radius: 8px;
   }
 
   /* 선택된 날짜 스타일 */
   .react-datepicker__day--selected,
   .react-datepicker__day--keyboard-selected {
-    background-color: #bdbdbd;
+    background-color: #4a90e2;
     color: #ffffff;
-    border-radius: 4px;
+    border-radius: 8px;
   }
 
   /* 오늘 날짜 스타일 */
   .react-datepicker__day--today {
-    border: 1px solid #5db075;
-    border-radius: 4px;
+    border: 1px solid #4a90e2;
+    border-radius: 8px;
   }
 
   /* 월 컨테이너 패딩 */
   .react-datepicker__month-container {
-    padding: 8px;
+    padding: 12px;
   }
 `;

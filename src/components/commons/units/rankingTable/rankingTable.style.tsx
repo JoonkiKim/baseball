@@ -9,7 +9,7 @@ const large =
 const xlarge = "@media only screen and (min-width: 1025px)"; // Extra Large
 
 export const RankingContainer = styled.div`
-  margin-top: 190px;
+  margin-top: 140px;
 `;
 
 // 그룹 선택 영역 (예: "A조 ▼")

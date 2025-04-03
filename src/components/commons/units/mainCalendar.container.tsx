@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import DatePicker from "react-datepicker";
+// import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-
+import { useRecoilState } from "recoil";
 import {
   Arrow,
   CalendarIcon,
@@ -16,79 +16,84 @@ import {
   MatchTimeLabel,
   RecordButton,
   StatusBox,
+  StyledDatePicker,
   Team,
   TeamName,
   TeamsContainer,
   TeamScore,
   VsText,
 } from "./mainCalendar.style";
-import { formatDate2 } from "../../../commons/libraries/utils";
-// import CustomInput from "../../../commons/libraries/datepicker-custominput";
+import { formatDate2, formatDateToYMD } from "../../../commons/libraries/utils";
+// import axios from "axios";
+import API from "../../../commons/apis/api";
+import { previousDateState } from "../../../commons/stores";
 
-// Match 객체에 대한 타입 정의
+interface RawMatch {
+  date: string;
+  dayOfWeek: string;
+  matches: Match[];
+}
+
 interface Match {
   time: string;
-  team1: string;
-  team1Score?: number;
-  team2: string;
-  team2Score?: number;
-  gameStatus: string;
+  status: string;
+  homeTeamName: string;
+  awayTeamName: string;
+  homeTeamScore: number | null;
+  awayTeamScore: number | null;
+  currentInning?: number;
+  inning_half?: string;
 }
 
 export default function MainCalendarPage() {
   const router = useRouter();
 
-  // react-datepicker에서 사용할 날짜 (Date 타입)
-  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
-
-  // 달력이 열려 있는지 여부 (수동 제어용)
+  // Recoil의 전역 상태를 사용하여 선택된 날짜를 관리합니다.
+  const [selectedDate, setSelectedDate] = useRecoilState(previousDateState);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
-  // 경기 데이터 배열 (Match 객체들의 배열)
-  const [matches, setMatches] = useState<Match[]>([
-    {
-      time: "09:00",
-      team1: "자연대",
-      team1Score: 9,
-      team2: "공대",
-      team2Score: 16,
-      gameStatus: "경기종료",
-    },
-    {
-      time: "11:00",
-      team1: "자연대",
-      team1Score: 9,
-      team2: "건환공",
-      team2Score: 6,
-      gameStatus: "경기종료",
-    },
-    {
-      time: "14:00",
-      team1: "관악사",
-      team1Score: 10,
-      team2: "공대",
-      team2Score: 6,
-      gameStatus: "5회초",
-    },
-    {
-      time: "16:30",
-      team1: "건환공",
-      team2: "자연대",
-      gameStatus: "경기예정",
-    },
-    {
-      time: "19:00",
-      team1: "자연대",
-      team2: "공대",
-      gameStatus: "경기예정",
-    },
-  ]);
+  const [allMatchData, setAllMatchData] = useState<RawMatch[]>([]);
+  const [matchesForSelectedDate, setMatchesForSelectedDate] = useState<Match[]>(
+    []
+  );
+
+  // 로딩 상태와 타임아웃 상태를 관리합니다.
+  const [isLoading, setIsLoading] = useState(true);
+  const [timedOut, setTimedOut] = useState(false);
 
   useEffect(() => {
-    // 컴포넌트 마운트 시 초기 실행 로직 (필요시 작성)
+    const fetchMatches = async () => {
+      setIsLoading(true);
+      try {
+        const res = await API.get("/matches"); // 이건 mock baseURL에 맞게 바꿔주세요!
+        setAllMatchData(res.data);
+      } catch (err) {
+        console.error("❌ 경기 데이터 요청 에러:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchMatches();
   }, []);
 
-  // 왼쪽 화살표 클릭 시: 날짜 하루 감소
+  // 3초가 지나도 데이터가 도착하지 않으면 timedOut 상태를 true로 설정
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (isLoading) {
+        setTimedOut(true);
+      }
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, [isLoading]);
+
+  useEffect(() => {
+    if (!selectedDate) return;
+    const dateStr = formatDateToYMD(selectedDate); // 예: "2025-04-13"
+    const matchDay = allMatchData.find((day) => day.date === dateStr);
+    setMatchesForSelectedDate(matchDay?.matches || []);
+  }, [selectedDate, allMatchData]);
+
   const handleDecreaseDate = () => {
     if (selectedDate) {
       const newDate = new Date(selectedDate);
@@ -97,7 +102,6 @@ export default function MainCalendarPage() {
     }
   };
 
-  // 오른쪽 화살표 클릭 시: 날짜 하루 증가
   const handleIncreaseDate = () => {
     if (selectedDate) {
       const newDate = new Date(selectedDate);
@@ -106,12 +110,10 @@ export default function MainCalendarPage() {
     }
   };
 
-  // 달력 아이콘 클릭 시 열림/닫힘 토글
   const handleCalendarIconClick = () => {
     setIsCalendarOpen((prev) => !prev);
   };
 
-  // 날짜 선택 시 state 업데이트
   const handleDateChange = (date: Date | null) => {
     if (date) {
       setSelectedDate(date);
@@ -119,11 +121,10 @@ export default function MainCalendarPage() {
     setIsCalendarOpen(false);
   };
 
-  // 경기기록 버튼 클릭 시 gameStatus에 따라 라우팅 처리
-  const handleRecordClick = (gameStatus: string) => {
-    if (gameStatus === "경기종료") {
+  const handleRecordClick = (status: string) => {
+    if (status === "FINALIZED") {
       router.push("/result");
-    } else if (gameStatus === "경기예정") {
+    } else if (status === "SCHEDULED") {
       router.push("/teamRegistration");
     } else {
       router.push("/records");
@@ -137,19 +138,16 @@ export default function MainCalendarPage() {
           <Arrow onClick={handleDecreaseDate}>&lt;</Arrow>
 
           <DateWrapper>
-            {/* 현재 선택된 날짜 표시 */}
             <DateDisplay>
               {selectedDate ? formatDate2(selectedDate) : "날짜 선택"}
             </DateDisplay>
 
-            {/* 달력 아이콘 클릭 시 달력 토글 */}
             <CalendarIcon
               src="/images/calendar-new.png"
               alt="Calendar Icon"
               onClick={handleCalendarIconClick}
             />
 
-            {/* 달력이 열려 있으면 DatePicker 표시 */}
             {isCalendarOpen && (
               <div
                 style={{
@@ -160,7 +158,7 @@ export default function MainCalendarPage() {
                   transformOrigin: "top center",
                 }}
               >
-                <DatePicker
+                <StyledDatePicker
                   selected={selectedDate}
                   onChange={handleDateChange}
                   inline
@@ -174,64 +172,84 @@ export default function MainCalendarPage() {
       </DaysOfWeekContainer>
 
       <MatchCardsContainer>
-        {matches.map((match, index) => {
-          // 두 점수가 모두 있을 경우에만 비교하여 승자를 결정
-          const team1IsWinner =
-            match.team1Score !== undefined &&
-            match.team2Score !== undefined &&
-            match.team1Score > match.team2Score;
+        {isLoading ? (
+          <p style={{ textAlign: "center", marginTop: "20px" }}>
+            {timedOut
+              ? "해당 날짜의 경기가 없습니다."
+              : "경기 일정을 불러오는 중입니다"}
+          </p>
+        ) : matchesForSelectedDate.length > 0 ? (
+          matchesForSelectedDate.map((match, index) => {
+            const team1Score = match.homeTeamScore;
+            const team2Score = match.awayTeamScore;
+            const team1IsWinner =
+              team1Score !== null &&
+              team2Score !== null &&
+              team1Score > team2Score;
+            const team2IsWinner =
+              team1Score !== null &&
+              team2Score !== null &&
+              team2Score > team1Score;
 
-          const team2IsWinner =
-            match.team1Score !== undefined &&
-            match.team2Score !== undefined &&
-            match.team2Score > match.team1Score;
+            return (
+              <MatchCard key={index}>
+                <MatchTimeLabel>{match.time}</MatchTimeLabel>
+                <TeamsContainer>
+                  <Team>
+                    <TeamName>{match.homeTeamName}</TeamName>
+                    <TeamScore
+                      isWinner={team1IsWinner}
+                      gameStatus={match.status}
+                    >
+                      {team1Score ?? "-"}
+                    </TeamScore>
+                  </Team>
 
-          return (
-            <MatchCard key={index}>
-              <MatchTimeLabel>{match.time}</MatchTimeLabel>
-              <TeamsContainer>
-                <Team>
-                  <TeamName>{match.team1}</TeamName>
-                  <TeamScore
-                    isWinner={team1IsWinner}
-                    gameStatus={match.gameStatus}
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      marginBottom: "20px",
+                    }}
                   >
-                    {match.team1Score}
-                  </TeamScore>
-                </Team>
+                    <StatusBox status={match.status}>
+                      {match.status === "SCHEDULED"
+                        ? "경기예정"
+                        : match.status === "FINALIZED"
+                        ? "경기종료"
+                        : match.status === "IN_PROGRESS" && match.currentInning
+                        ? `${match.currentInning}회${
+                            match.inning_half === "TOP" ? "초" : "말"
+                          }`
+                        : match.status}
+                    </StatusBox>
 
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    marginBottom: "20px",
-                  }}
-                >
-                  <StatusBox status={match.gameStatus}>
-                    {match.gameStatus}
-                  </StatusBox>
-                  <VsText>vs</VsText>
-                </div>
+                    <VsText>vs</VsText>
+                  </div>
 
-                <Team>
-                  <TeamName>{match.team2}</TeamName>
-                  <TeamScore
-                    isWinner={team2IsWinner}
-                    gameStatus={match.gameStatus}
-                  >
-                    {match.team2Score}
-                  </TeamScore>
-                </Team>
-              </TeamsContainer>
+                  <Team>
+                    <TeamName>{match.awayTeamName}</TeamName>
+                    <TeamScore
+                      isWinner={team2IsWinner}
+                      gameStatus={match.status}
+                    >
+                      {team2Score ?? "-"}
+                    </TeamScore>
+                  </Team>
+                </TeamsContainer>
 
-              {/* RecordButton 클릭 시 gameStatus에 따라 라우팅 */}
-              <RecordButton onClick={() => handleRecordClick(match.gameStatus)}>
-                경기기록
-              </RecordButton>
-            </MatchCard>
-          );
-        })}
+                <RecordButton onClick={() => handleRecordClick(match.status)}>
+                  경기기록
+                </RecordButton>
+              </MatchCard>
+            );
+          })
+        ) : (
+          <p style={{ textAlign: "center", marginTop: "20px" }}>
+            해당 날짜의 경기가 없습니다.
+          </p>
+        )}
       </MatchCardsContainer>
     </Container>
   );
