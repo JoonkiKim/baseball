@@ -12,13 +12,14 @@ const xlarge = "@media only screen and (min-width: 1025px)";
 export const Container = styled.div`
   width: 100%;
   height: 100%;
+  /* background-color: red; */
   display: flex;
   flex-direction: column;
 
   margin-top: 10vh;
   /* justify-content: center; 수직 중앙 정렬 */
   align-items: center; /* 수평 중앙 정렬 */
-  padding: 20px;
+  /* padding: 20px; */
 `;
 
 /** 페이지 제목 */
@@ -42,6 +43,8 @@ export const Title = styled.h1`
 
 /** 폼 전체를 감싸는 컨테이너 */
 export const Form = styled.form`
+  /* background-color: aqua; */
+  width: 65%; /* 추가 */
   max-width: 480px;
   display: flex;
   flex-direction: column;
@@ -67,7 +70,7 @@ export const Label = styled.label`
 
 /** 각 입력 필드를 감싸는 Wrapper */
 export const FieldWrapper = styled.div`
-  width: 30vh;
+  width: 100%;
   margin-top: 20px;
   display: flex;
   flex-direction: column;
@@ -109,6 +112,7 @@ export const ErrorMessage = styled.div`
   color: red;
   font-size: 12px;
   width: 90%;
+  //
   height: 12px;
   font-family: "KBO-Dia-Gothic_light";
 `;
