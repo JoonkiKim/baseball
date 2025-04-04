@@ -121,6 +121,7 @@ export const DateWrapper = styled.div`
   flex-direction: row;
   justify-content: center;
   align-items: center;
+  /* background-color: red; */
 `;
 
 export const Arrow = styled.div`
@@ -145,7 +146,10 @@ export const Arrow = styled.div`
 
 export const DateDisplay = styled.div`
   align-self: center;
+  margin-top: 2px;
   font-weight: 1000;
+  /* background-color: red; */
+
   color: #000;
   font-size: 20px; /* 기본값 */
   margin-right: 13px;
@@ -353,18 +357,31 @@ export const RecordButton = styled.button`
   align-items: center;
 `;
 
-export const StyledDatePicker = styled(DatePicker)`
-  /* 전체 캘린더 컨테이너 */
+export const DatePickTotalWrapper = styled.div`
+  position: absolute;
+  z-index: 999;
+  left: 50%;
+  transform: translateX(-50%) translateY(60%) scale(0.8);
+  transform-origin: top center;
+  /* background-color: red; */
+`;
+
+export const DatePickWrapper = styled.div`
+  width: 100%; /* 부모 요소의 90% 너비로 지정 */
+
   .react-datepicker {
+    width: 100%; /* DatePicker는 DatePickWrapper의 너비에 맞춤 */
+    height: auto; /* 콘텐츠에 따라 높이가 자동으로 조정 */
     border: 1px solid black;
     border-radius: 12px;
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-    font-family: sans-serif;
+    font-family: "KBO-Dia-Gothic_light";
   }
 
   /* 헤더 영역 */
   .react-datepicker__header {
-    background-color: #4a90e2; /* 세련된 블루 계열 */
+    width: 100%;
+    background-color: #4a90e2;
     border: none;
     border-top-left-radius: 12px;
     border-top-right-radius: 12px;
@@ -378,7 +395,7 @@ export const StyledDatePicker = styled(DatePicker)`
     font-weight: bold;
   }
 
-  /* 네비게이션 버튼 (이전, 다음) */
+  /* 네비게이션 버튼 */
   .react-datepicker__navigation {
     top: 20px;
     border: none;
@@ -393,12 +410,24 @@ export const StyledDatePicker = styled(DatePicker)`
     right: 16px;
   }
 
+  /* 요일 이름 컨테이너 (중앙 정렬) */
+  .react-datepicker__day-names {
+    display: flex;
+    justify-content: center;
+  }
+
   /* 요일 이름 */
   .react-datepicker__day-name {
+    width: 2.8rem;
+    height: 2.8rem;
+    line-height: 2.8rem;
     font-size: 14px;
     color: #666666;
     font-weight: 600;
     margin: 0.2rem;
+    /* background-color: red; */
+    margin-top: 10px;
+    text-align: center;
   }
 
   /* 날짜 셀 스타일 */
@@ -406,11 +435,12 @@ export const StyledDatePicker = styled(DatePicker)`
     width: 2.8rem;
     height: 2.8rem;
     line-height: 2.8rem;
-    margin: 0.2rem;
+    /* margin: 0.2rem; */
     font-size: 16px;
     color: #444444;
     transition: background-color 0.3s ease;
     cursor: pointer;
+    text-align: center;
   }
 
   .react-datepicker__day:hover {
@@ -437,3 +467,5 @@ export const StyledDatePicker = styled(DatePicker)`
     padding: 12px;
   }
 `;
+
+export const StyledDatePicker = styled(DatePicker)``;

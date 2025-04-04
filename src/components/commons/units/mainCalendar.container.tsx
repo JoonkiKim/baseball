@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import moment from "moment";
 import { useRouter } from "next/router";
-// import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { useRecoilState } from "recoil";
 import {
@@ -8,6 +8,8 @@ import {
   CalendarIcon,
   Container,
   DateDisplay,
+  DatePickTotalWrapper,
+  DatePickWrapper,
   DateWrapper,
   DaysOfWeekContainer,
   DaysOfWeekWrapper,
@@ -24,7 +26,6 @@ import {
   VsText,
 } from "./mainCalendar.style";
 import { formatDate2, formatDateToYMD } from "../../../commons/libraries/utils";
-// import axios from "axios";
 import API from "../../../commons/apis/api";
 import { previousDateState } from "../../../commons/stores";
 
@@ -51,21 +52,21 @@ export default function MainCalendarPage() {
   // Recoil의 전역 상태를 사용하여 선택된 날짜를 관리합니다.
   const [selectedDate, setSelectedDate] = useRecoilState(previousDateState);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-
   const [allMatchData, setAllMatchData] = useState<RawMatch[]>([]);
   const [matchesForSelectedDate, setMatchesForSelectedDate] = useState<Match[]>(
     []
   );
-
-  // 로딩 상태와 타임아웃 상태를 관리합니다.
   const [isLoading, setIsLoading] = useState(true);
   const [timedOut, setTimedOut] = useState(false);
+
+  // 캘린더 영역을 감싸는 ref 추가
+  const calendarRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchMatches = async () => {
       setIsLoading(true);
       try {
-        const res = await API.get("/matches"); // 이건 mock baseURL에 맞게 바꿔주세요!
+        const res = await API.get("/matches");
         setAllMatchData(res.data);
       } catch (err) {
         console.error("❌ 경기 데이터 요청 에러:", err);
@@ -77,7 +78,6 @@ export default function MainCalendarPage() {
     fetchMatches();
   }, []);
 
-  // 3초가 지나도 데이터가 도착하지 않으면 timedOut 상태를 true로 설정
   useEffect(() => {
     const timer = setTimeout(() => {
       if (isLoading) {
@@ -89,10 +89,32 @@ export default function MainCalendarPage() {
 
   useEffect(() => {
     if (!selectedDate) return;
-    const dateStr = formatDateToYMD(selectedDate); // 예: "2025-04-13"
+    const dateStr = formatDateToYMD(selectedDate);
     const matchDay = allMatchData.find((day) => day.date === dateStr);
     setMatchesForSelectedDate(matchDay?.matches || []);
   }, [selectedDate, allMatchData]);
+
+  // 캘린더 외부 클릭 시 캘린더를 닫는 로직
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        calendarRef.current &&
+        !calendarRef.current.contains(event.target as Node)
+      ) {
+        setIsCalendarOpen(false);
+      }
+    };
+
+    if (isCalendarOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isCalendarOpen]);
 
   const handleDecreaseDate = () => {
     if (selectedDate) {
@@ -149,21 +171,52 @@ export default function MainCalendarPage() {
             />
 
             {isCalendarOpen && (
-              <div
-                style={{
-                  position: "absolute",
-                  zIndex: 999,
-                  left: "50%",
-                  transform: "translateX(-50%) translateY(60%) scale(1.2)",
-                  transformOrigin: "top center",
-                }}
-              >
-                <StyledDatePicker
-                  selected={selectedDate}
-                  onChange={handleDateChange}
-                  inline
-                />
-              </div>
+              <DatePickTotalWrapper ref={calendarRef}>
+                <DatePickWrapper>
+                  <StyledDatePicker
+                    selected={selectedDate}
+                    onChange={handleDateChange}
+                    inline
+                    renderDayContents={(day, date) => {
+                      const dateStr = moment(date).format("YYYY-MM-DD");
+                      const hasMatch = allMatchData.some(
+                        (matchData) => matchData.date === dateStr
+                      );
+                      return (
+                        <div
+                          style={{
+                            position: "relative",
+                            width: "2.8rem",
+                            height: "2.8rem",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                        >
+                          {hasMatch && (
+                            <span
+                              style={{
+                                position: "absolute",
+                                top: "50%",
+                                left: "50%",
+                                transform: "translate(-50%, -50%)",
+                                width: "2rem",
+                                height: "2rem",
+                                borderRadius: "50%",
+                                backgroundColor: "rgba(74, 144, 226, 0.3)",
+                                zIndex: 0,
+                              }}
+                            />
+                          )}
+                          <span style={{ position: "relative", zIndex: 1 }}>
+                            {day}
+                          </span>
+                        </div>
+                      );
+                    }}
+                  />
+                </DatePickWrapper>
+              </DatePickTotalWrapper>
             )}
           </DateWrapper>
 
