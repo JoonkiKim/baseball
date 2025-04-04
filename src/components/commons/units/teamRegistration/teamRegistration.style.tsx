@@ -79,7 +79,8 @@ export const PlayerRow = styled.div`
 
 // 첫 번째 열 (주문 번호) - 고정 너비 40px
 export const OrderNumber = styled.div`
-  width: 1vh;
+  /* width: 1vh; */
+  width: 9px;
   /* background-color: red; */
   text-align: center;
   font-family: "KBO-Dia-Gothic_medium";
@@ -100,6 +101,7 @@ export const OrderNumber = styled.div`
 export const NameWrapper = styled.div<{ hasValue: boolean }>`
   display: flex;
   width: 12vh;
+  min-width: 110px;
   align-items: center;
   justify-content: ${(props) => (props.hasValue ? "center" : "flex-start")};
   border-bottom: 1px solid #e8e8e8;
@@ -107,6 +109,7 @@ export const NameWrapper = styled.div<{ hasValue: boolean }>`
   position: relative;
   @media (max-width: 380px) {
     width: 14vh;
+    min-width: 114px;
   }
 `;
 // 기존 PlayerName는 그대로 두되, 이제 입력필드용 컴포넌트를 따로 생성합니다.
@@ -190,6 +193,7 @@ export const PositionText = styled.span<{ isPlaceholder?: boolean }>`
   font-size: 14px;
   color: ${(props) => (props.isPlaceholder ? "#999" : "#000")};
   width: 12vh;
+  min-width: 110px;
   border: none;
   border-bottom: 1px solid #e8e8e8;
   text-align: center;
@@ -197,6 +201,7 @@ export const PositionText = styled.span<{ isPlaceholder?: boolean }>`
   @media (max-width: 380px) {
     font-size: 11px;
     width: 14vh;
+    min-width: 114px;
   }
 `;
 
@@ -261,8 +266,11 @@ export const ControlButton = styled.button`
   background-color: #000000;
   display: block;
   margin-left: auto;
-  height: calc((100vh - 120px) * 0.044);
-  width: calc((100vh - 120px) * 0.11);
+  /* height: calc((100vh - 120px) * 0.044);
+  width: calc((100vh - 120px) * 0.11); */
+
+  height: 30px;
+  width: 75px;
   /* border: 1px solid #999; */
   font-family: "KBO-Dia-Gothic_bold";
   font-weight: bold;

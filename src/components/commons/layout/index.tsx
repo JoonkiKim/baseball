@@ -3,6 +3,7 @@ import React from "react";
 import { useRouter } from "next/router";
 import LayoutHeader from "./header";
 import LayoutNavigation from "./navigation";
+import LayoutHeaderNone from "./headerNone";
 
 // 여기서만 보여주게 하자
 const SHOW_NAV = [
@@ -13,12 +14,7 @@ const SHOW_NAV = [
   "/playerStats/playerStatsPitcherDetail",
 ];
 
-const HIDE_HEADER = [
-  "/login",
-  "/signUp",
-  "/login/findPassword",
-  "/refreeRegistration",
-];
+const HIDE_HEADER = ["/refreeRegistration"];
 
 interface ILayoutProps {
   children: JSX.Element;
@@ -35,7 +31,7 @@ export default function Layout(props: ILayoutProps): JSX.Element {
 
   return (
     <>
-      {!isHideNav && <LayoutHeader />}
+      {!isHideNav ? <LayoutHeader /> : <LayoutHeaderNone />}
       <div style={{ backgroundColor: "white" }}>{props.children}</div>
       {isShowNav && <LayoutNavigation />}
     </>
