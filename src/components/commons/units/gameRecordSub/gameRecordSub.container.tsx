@@ -57,7 +57,7 @@ interface PlayerInfo {
   order: number | string;
   name?: string;
   position?: string;
-  // 추가: 돋보기 버튼(모달)로 선택되었는지 여부
+  // 돋보기 버튼(모달)로 선택되었는지 여부
   selectedViaModal?: boolean;
 }
 
@@ -95,9 +95,8 @@ export default function SubstitutionPageComponent() {
   // 2. react-hook-form 세팅
   const { register, handleSubmit, watch, setValue } = useForm({
     defaultValues: {
-      players: players.map((player, index) => ({
-        // 기본 선수명은 defaultPlayers의 값으로 설정 (없으면 빈 문자열)
-        name: defaultPlayers[index]?.name || "",
+      players: players.map((player) => ({
+        name: defaultPlayers[(player.order as number) - 1]?.name || "",
       })),
     },
   });
@@ -130,7 +129,7 @@ export default function SubstitutionPageComponent() {
   // 6. Recoil 전역 상태에서 playerList 불러오기
   const [globalPlayerList] = useRecoilState(playerListState);
 
-  // 입력 텍스트와 일치하는 부분을 빨간색으로 표시하는 헬퍼 함수
+  // 헬퍼: 입력 텍스트와 일치하는 부분 빨간색 표시
   const highlightText = (text: string, query: string) => {
     if (!query) return text;
     const regex = new RegExp(`(${query})`, "gi");
@@ -150,7 +149,7 @@ export default function SubstitutionPageComponent() {
     );
   };
 
-  // 돋보기 버튼(모달)로 선수 선택 후, 해당 행은 모달 선택 상태로 업데이트
+  // 돋보기 버튼(모달)로 선수 선택 후, 해당 행 업데이트
   const handleSelectPlayer = (playerName: string) => {
     if (selectedPlayerIndex === null) return;
     const updatedPlayers = [...players];
@@ -162,7 +161,7 @@ export default function SubstitutionPageComponent() {
     setSelectedPlayerIndex(null);
   };
 
-  // 입력창에 변경이 생기면, 해당 행은 수동 입력 상태로 전환(모달 선택 해제)
+  // 입력창 변경 시, 해당 행은 수동 입력 상태로 전환(모달 선택 해제)
   const handleInputChange = (
     index: number,
     e: React.ChangeEvent<HTMLInputElement>
@@ -179,11 +178,10 @@ export default function SubstitutionPageComponent() {
       name: data.players[index].name,
     }));
     setPlayers(updatedPlayers);
-    // 교체완료 후 "/records" 페이지로 이동
     router.push("/records");
   };
 
-  // (A) 검색 아이콘 클릭 시 선수 선택 모달 열기
+  // (A) NameWrapper 클릭 시 선수 선택 모달 열기
   const handleOpenPlayerModal = (index: number) => {
     setSelectedPlayerIndex(index);
     setIsPlayerSelectionModalOpen(true);
@@ -203,7 +201,7 @@ export default function SubstitutionPageComponent() {
           {players.map((player, index) => {
             // 현재 입력값
             const currentName = watch(`players.${index}.name`) || "";
-            // 전역 playerList에서 입력값을 포함하는 선수 필터링 (대소문자 무시)
+            // 전역 playerList에서 입력값 포함 선수 필터링 (대소문자 무시)
             const filteredSuggestions = globalPlayerList.filter((p) => {
               const pName = p.name;
               const matchesQuery = pName
@@ -217,10 +215,7 @@ export default function SubstitutionPageComponent() {
               );
               return matchesQuery && !isAlreadySelected;
             });
-
             const isPositionEmpty = !player.position;
-
-            // globalPlayerList에서 현재 입력된 이름과 일치하는 선수 찾기
             const globalPlayer = globalPlayerList.find(
               (p) => p.name === currentName
             );
@@ -231,6 +226,7 @@ export default function SubstitutionPageComponent() {
                 <NameWrapper
                   style={{ position: "relative" }}
                   hasValue={!!currentName}
+                  onClick={() => handleOpenPlayerModal(index)}
                 >
                   {currentName && <NoWildCardBoxL />}
                   <PlayerNameInput
@@ -239,10 +235,8 @@ export default function SubstitutionPageComponent() {
                       onChange: (e) => handleInputChange(index, e),
                     })}
                     placeholder="선수명 입력"
-                    onFocus={() => setActiveSuggestionIndex(index)}
                     autoComplete="off"
                   />
-
                   {currentName ? (
                     globalPlayer &&
                     globalPlayer.wc &&
@@ -252,11 +246,7 @@ export default function SubstitutionPageComponent() {
                       <NoWildCardBox />
                     )
                   ) : (
-                    <SearchIcon
-                      src="/images/magnifier.png"
-                      alt="Search Icon"
-                      onClick={() => handleOpenPlayerModal(index)}
-                    />
+                    <></>
                   )}
                   {activeSuggestionIndex === index &&
                     !player.selectedViaModal &&
@@ -293,7 +283,14 @@ export default function SubstitutionPageComponent() {
                       "포지션 입력 ▽"}
                   </PositionText>
                   {openPositionRow === index && (
-                    <PositionDropdown onClick={(e) => e.stopPropagation()}>
+                    <PositionDropdown
+                      dropUp={
+                        (typeof player.order === "number" &&
+                          player.order >= 7) ||
+                        player.order === "P"
+                      }
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       {positionOptions.map((pos) => (
                         <li
                           key={pos}

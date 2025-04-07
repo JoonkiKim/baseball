@@ -21,7 +21,7 @@ export default function ResultSubmitModal(props: IModalProps) {
         <ModalContainer>
           <ModalTitleSmall>제출이 완료되었습니다!</ModalTitleSmall>
           <Link href="/" passHref>
-            <ModalCancleButton as="a">홈으로</ModalCancleButton>
+            <ModalButton as="a">홈으로</ModalButton>
           </Link>
         </ModalContainer>
       </ModalOverlay>

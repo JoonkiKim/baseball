@@ -86,7 +86,7 @@ export default function LayoutNavigation() {
         <BottomNavWrapper>
           <Link href="/" passHref>
             <BottomNav as="a">
-              <NavIcon src="/images/calendar-linear.png" />
+              <NavIcon src="/images/calendar-new.png" />
               <NavItem>경기일정</NavItem>
             </BottomNav>
           </Link>

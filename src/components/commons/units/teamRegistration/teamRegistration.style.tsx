@@ -13,9 +13,11 @@ export const Container = styled.div`
   margin-top: 140px;
   width: 100%;
   max-width: 768px;
-  min-height: 1000px;
+  /* min-height: 1000px; */
   margin-left: auto;
   margin-right: auto;
+  display: flex;
+  flex-direction: column;
   padding: 0 20px;
 
   ${small} {
@@ -33,17 +35,12 @@ export const LargeTitle = styled.h1`
   text-align: center;
   font-family: "KBO-Dia-Gothic_bold";
   font-size: 20px;
+  align-self: center;
   margin-bottom: 30px;
-
-  ${small} {
-    font-size: 18px;
-  }
-  ${medium} {
-    font-size: 19px;
-  }
-  ${large}, ${xlarge} {
-    font-size: 20px;
-  }
+  width: 300px;
+  margin-top: 20px;
+  /* background-color: red; */
+  /* height: 30px; */
 `;
 
 export const Title = styled.h1`
@@ -51,16 +48,6 @@ export const Title = styled.h1`
   font-family: "KBO-Dia-Gothic_medium";
   font-size: 16px;
   margin-bottom: 30px;
-
-  ${small} {
-    font-size: 14px;
-  }
-  ${medium} {
-    font-size: 17px;
-  }
-  ${large}, ${xlarge} {
-    font-size: 26px;
-  }
 `;
 
 export const PlayerList = styled.div`
@@ -71,17 +58,20 @@ export const PlayerList = styled.div`
 
 export const PlayerRow = styled.div`
   display: flex;
-  /* background-color: red; */
-  /* align-items: center; */
   justify-content: space-around;
   padding: 8px 0;
+  height: 4vh;
 `;
 
-// 첫 번째 열 (주문 번호) - 고정 너비 40px
+export const BlankPlayerRow = styled.div`
+  display: flex;
+  justify-content: space-around;
+  padding: 8px 0;
+  height: 4vh;
+`;
+
 export const OrderNumber = styled.div`
-  /* width: 1vh; */
   width: 9px;
-  /* background-color: red; */
   text-align: center;
   font-family: "KBO-Dia-Gothic_medium";
   font-size: 16px;
@@ -97,42 +87,48 @@ export const OrderNumber = styled.div`
   }
 `;
 
-// 두 번째 열 (NameWrapper) - 남은 공간의 절반 사용
+// export const NameWrapper = styled.div<{ hasValue: boolean }>`
+//   display: flex;
+//   width: 10vh;
+//   min-width: 110px;
+//   align-items: center;
+//   justify-content: ${(props) => (props.hasValue ? "center" : "flex-start")};
+//   border-bottom: 1px solid #e8e8e8;
+//   gap: 0;
+//   position: relative;
+//   @media (max-width: 380px) {
+//     width: 14vh;
+//     min-width: 114px;
+//   }
+// `;
+
 export const NameWrapper = styled.div<{ hasValue: boolean }>`
   display: flex;
+  align-items: center;
+  justify-content: space-between; /* 좌우 끝에 자식들이 배치됨 */
+  border-bottom: 1px solid #e8e8e8;
   width: 12vh;
   min-width: 110px;
-  align-items: center;
-  justify-content: ${(props) => (props.hasValue ? "center" : "flex-start")};
-  border-bottom: 1px solid #e8e8e8;
-  gap: 0;
-  position: relative;
   @media (max-width: 380px) {
     width: 14vh;
     min-width: 114px;
   }
 `;
-// 기존 PlayerName는 그대로 두되, 이제 입력필드용 컴포넌트를 따로 생성합니다.
-
-// ─── 새로운 선수명 입력 필드 ───────────────────────────────────────
 
 export const PlayerNameInput = styled.input`
   font-family: "KBO-Dia-Gothic_medium";
   font-size: 14px;
-  /* background-color: red; */
+  margin-left: 30px;
   color: #000;
-
-  /* border-bottom은 NameWrapper로 이동했으니 제거 */
   border: none;
   outline: none;
-  width: 100%;
-  padding: 0; /* 기본 padding 제거 */
-
-  text-align: center; /* 왼쪽 정렬 (원하는 경우) */
+  width: 70%;
+  /* padding: 0; */
+  /* background-color: aqua; */
+  text-align: left;
 
   &::placeholder {
     color: #999;
-    /* text-indent: 3px; */
   }
   @media (max-width: 380px) {
     font-size: 11px;
@@ -140,52 +136,46 @@ export const PlayerNameInput = styled.input`
 `;
 
 export const WildCardBox = styled.div`
-  width: 23px;
+  width: 25px;
   height: 8px;
-  font-size: 7px;
-  /* margin-left: 1vh; */
+  font-size: 6px;
   background-color: #f3a231;
   font-family: "KBO-Dia-Gothic_light";
   color: #ffffff;
   border-radius: 35px;
   text-align: center;
+  margin-right: 5px;
 `;
 
 export const NoWildCardBox = styled.div`
   width: 23px;
   height: 8px;
-  /* background-color: blue; */
-  border: none; /* 혹시 모를 테두리 제거 */
-  outline: none; /* 포커스 시 테두리 제거 */
-  display: inline-block; /* 공간 차지를 위한 display 설정 */
+  border: none;
+  outline: none;
+  /* background-color: red; */
+  display: inline-block;
 `;
 
 export const NoWildCardBoxL = styled.div`
   width: 23px;
   height: 8px;
-  /* background-color: blue; */
-  border: none; /* 혹시 모를 테두리 제거 */
-  outline: none; /* 포커스 시 테두리 제거 */
-  display: inline-block; /* 공간 차지를 위한 display 설정 */
+  border: none;
+  outline: none;
+  display: inline-block;
 `;
 
 export const SearchIcon = styled.img`
   width: 13px;
   height: 13px;
   cursor: pointer;
-
-  /* 인풋과 정말 딱 붙이려면 0, 살짝 여유를 두려면 2~4px 정도 */
-  /* margin-left: 5px; */
 `;
+
 export const PositionWrapper = styled.div`
-  /* flex: 1; */
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
   cursor: pointer;
-  /* 필요한 스타일 유지 */
-  /* margin-left: 1.5vh; */
 `;
 
 export const PositionText = styled.span<{ isPlaceholder?: boolean }>`
@@ -197,6 +187,9 @@ export const PositionText = styled.span<{ isPlaceholder?: boolean }>`
   border: none;
   border-bottom: 1px solid #e8e8e8;
   text-align: center;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
 
   @media (max-width: 380px) {
     font-size: 11px;
@@ -205,26 +198,50 @@ export const PositionText = styled.span<{ isPlaceholder?: boolean }>`
   }
 `;
 
-export const PositionDropdown = styled.ul`
+// teamRegistration.style.tsx
+
+export const ArrowIcon = styled.span`
+  margin-left: 4px; /* 원하는 여백 값으로 조정 */
+`;
+
+export const ArrowIconNone = styled.span`
+  margin-left: 4px; /* 원하는 여백 값으로 조정 */
+  color: white;
+`;
+
+export const PositionDropdown = styled.ul<{ dropUp?: boolean }>`
   position: absolute;
-  top: 100%;
-  left: 50;
+  left: 50%;
+  transform: translateX(-50%);
   margin: 0;
   padding: 0;
   width: 80px;
   list-style: none;
   background: #fff;
-  border: 1px solid #ccc;
-  border-top: none;
   z-index: 999;
-  box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.15);
-  border-radius: 0 0 4px 4px;
+  ${(props) =>
+    props.dropUp
+      ? `
+    bottom: 100%;
+    top: auto;
+    border-top: 1px solid #ccc;
+    border-bottom: none;
+    border-radius: 4px 4px 0 0;
+    box-shadow: 0 -4px 4px -2px rgba(0, 0, 0, 0.15);
+  `
+      : `
+    top: 100%;
+    bottom: auto;
+    border-top: none;
+    border-radius: 0 0 4px 4px;
+    box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.15);
+  `}
 
   li {
     text-align: center;
     padding: 8px;
-    font-family: "Inter-Regular", sans-serif;
-    font-size: 14px;
+    font-family: "KBO-Dia-Gothic_medium";
+    font-size: 12px;
     cursor: pointer;
     &:hover {
       background-color: #f7f7f7;
@@ -260,33 +277,42 @@ export const NextButton = styled.button`
   }
 `;
 
-// 제출하기 버튼
+export const ButtonWrapper = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  margin-top: auto;
+  padding-right: 20px;
+
+  ${small} {
+    padding-right: 10px;
+  }
+  ${medium} {
+    padding-right: 15px;
+  }
+  ${large}, ${xlarge} {
+    padding-right: 20px;
+  }
+`;
+
 export const ControlButton = styled.button`
   margin-top: 30px;
+  margin-right: 10px;
   background-color: #000000;
   display: block;
-  margin-left: auto;
-  /* height: calc((100vh - 120px) * 0.044);
-  width: calc((100vh - 120px) * 0.11); */
-
   height: 30px;
   width: 75px;
-  /* border: 1px solid #999; */
   font-family: "KBO-Dia-Gothic_bold";
   font-weight: bold;
-
   font-size: 12px;
   color: #ffffff;
   cursor: pointer;
   border-radius: 4px;
 
   ${small} {
-    /* padding: 8px 16px; */
     font-size: 12px;
   }
 `;
 
-// 추천 목록 스타일 컴포넌트
 export const SuggestionList = styled.ul`
   position: absolute;
   top: 100%;

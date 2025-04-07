@@ -13,7 +13,7 @@ export const Container = styled.div`
   margin-top: 140px;
   width: 100%;
   max-width: 768px;
-  min-height: 1000px;
+  /* min-height: 1000px; */
   margin-left: auto;
   margin-right: auto;
   padding: 0 20px;
@@ -77,7 +77,7 @@ export const PlayerRow = styled.div`
   padding: 8px 0;
 `;
 
-// 첫 번째 열 (주문 번호) - 고정 너비 40px
+// 첫 번째 열 (주문 번호)
 export const OrderNumber = styled.div`
   width: 1vh;
   /* background-color: red; */
@@ -96,7 +96,7 @@ export const OrderNumber = styled.div`
   }
 `;
 
-// 두 번째 열 (NameWrapper) - 남은 공간의 절반 사용
+// 두 번째 열 (NameWrapper)
 export const NameWrapper = styled.div<{ hasValue: boolean }>`
   display: flex;
   width: 12vh;
@@ -109,27 +109,21 @@ export const NameWrapper = styled.div<{ hasValue: boolean }>`
     width: 14vh;
   }
 `;
-// 기존 PlayerName는 그대로 두되, 이제 입력필드용 컴포넌트를 따로 생성합니다.
 
 // ─── 새로운 선수명 입력 필드 ───────────────────────────────────────
-
 export const PlayerNameInput = styled.input`
   font-family: "KBO-Dia-Gothic_medium";
   font-size: 14px;
   /* background-color: red; */
   color: #000;
-
-  /* border-bottom은 NameWrapper로 이동했으니 제거 */
   border: none;
   outline: none;
-  width: 100%;
-  padding: 0; /* 기본 padding 제거 */
-
-  text-align: center; /* 왼쪽 정렬 (원하는 경우) */
+  width: 50%;
+  padding: 0;
+  text-align: center;
 
   &::placeholder {
     color: #999;
-    /* text-indent: 3px; */
   }
   @media (max-width: 380px) {
     font-size: 11px;
@@ -137,10 +131,9 @@ export const PlayerNameInput = styled.input`
 `;
 
 export const WildCardBox = styled.div`
-  width: 23px;
+  width: 16px;
   height: 8px;
   font-size: 7px;
-  /* margin-left: 1vh; */
   background-color: #f3a231;
   font-family: "KBO-Dia-Gothic_light";
   color: #ffffff;
@@ -151,38 +144,31 @@ export const WildCardBox = styled.div`
 export const NoWildCardBox = styled.div`
   width: 23px;
   height: 8px;
-  /* background-color: blue; */
-  border: none; /* 혹시 모를 테두리 제거 */
-  outline: none; /* 포커스 시 테두리 제거 */
-  display: inline-block; /* 공간 차지를 위한 display 설정 */
+  border: none;
+  outline: none;
+  display: inline-block;
 `;
 
 export const NoWildCardBoxL = styled.div`
   width: 23px;
   height: 8px;
-  /* background-color: blue; */
-  border: none; /* 혹시 모를 테두리 제거 */
-  outline: none; /* 포커스 시 테두리 제거 */
-  display: inline-block; /* 공간 차지를 위한 display 설정 */
+  border: none;
+  outline: none;
+  display: inline-block;
 `;
 
 export const SearchIcon = styled.img`
   width: 13px;
   height: 13px;
   cursor: pointer;
-
-  /* 인풋과 정말 딱 붙이려면 0, 살짝 여유를 두려면 2~4px 정도 */
-  /* margin-left: 5px; */
 `;
+
 export const PositionWrapper = styled.div`
-  /* flex: 1; */
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
   cursor: pointer;
-  /* 필요한 스타일 유지 */
-  /* margin-left: 1.5vh; */
 `;
 
 export const PositionText = styled.span<{ isPlaceholder?: boolean }>`
@@ -200,25 +186,39 @@ export const PositionText = styled.span<{ isPlaceholder?: boolean }>`
   }
 `;
 
-export const PositionDropdown = styled.ul`
+// ─── 수정된 PositionDropdown: dropUp prop에 따라 위/아래 위치 결정 ─────────
+export const PositionDropdown = styled.ul<{ dropUp?: boolean }>`
   position: absolute;
-  top: 100%;
-  left: 50;
+  left: 50%;
+  transform: translateX(-50%);
   margin: 0;
   padding: 0;
   width: 80px;
   list-style: none;
   background: #fff;
-  border: 1px solid #ccc;
-  border-top: none;
   z-index: 999;
-  box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.15);
-  border-radius: 0 0 4px 4px;
+  ${(props) =>
+    props.dropUp
+      ? `
+      bottom: 100%;
+      top: auto;
+      border-top: 1px solid #ccc;
+      border-bottom: none;
+      border-radius: 4px 4px 0 0;
+      box-shadow: 0 -4px 4px -2px rgba(0, 0, 0, 0.15);
+    `
+      : `
+      top: 100%;
+      bottom: auto;
+      border-top: none;
+      border-radius: 0 0 4px 4px;
+      box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.15);
+    `}
 
   li {
     text-align: center;
     padding: 8px;
-    font-family: "Inter-Regular", sans-serif;
+    font-family: "KBO-Dia-Gothic_light";
     font-size: 14px;
     cursor: pointer;
     &:hover {
@@ -255,14 +255,12 @@ export const NextButton = styled.button`
   }
 `;
 
-// 제출하기 버튼
 export const ControlButton = styled.button`
   margin-top: 30px;
   background-color: #000000;
   display: block;
   margin-left: auto;
   margin-right: auto;
-
   width: 80%;
   height: 4vh;
   font-family: "KBO-Dia-Gothic_bold";

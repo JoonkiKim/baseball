@@ -381,7 +381,8 @@ export const DatePickWrapper = styled.div`
   /* 헤더 영역 */
   .react-datepicker__header {
     width: 100%;
-    background-color: #4a90e2;
+    background-color: black;
+    /* background-color: gray; */
     border: none;
     border-top-left-radius: 12px;
     border-top-right-radius: 12px;
@@ -422,7 +423,7 @@ export const DatePickWrapper = styled.div`
     height: 2.8rem;
     line-height: 2.8rem;
     font-size: 14px;
-    color: #666666;
+    color: white;
     font-weight: 600;
     margin: 0.2rem;
     /* background-color: red; */

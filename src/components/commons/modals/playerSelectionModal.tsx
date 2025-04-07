@@ -13,11 +13,12 @@ export const ModalOverlay = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-top: 80px;
 `;
 
 export const ModalContainer = styled.div`
   background-color: #fff;
-  width: 400px;
+  width: 300px; // 이걸로 모달 가로 길이 조정
   height: 70vh;
   padding: 20px;
   border-radius: 8px;

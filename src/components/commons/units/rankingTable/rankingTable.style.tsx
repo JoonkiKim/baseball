@@ -24,9 +24,9 @@ export const GroupSelectorContainer = styled.div`
 `;
 
 export const GroupSelector = styled.div`
-  width: 70%;
+  width: 100%;
   text-align: center;
-  background-color: black;
+  background-color: rgba(0, 0, 0, 0.75);
   font-family: "KBO-Dia-Gothic_bold";
   color: white;
   border-radius: 25px;

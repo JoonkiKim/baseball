@@ -49,8 +49,7 @@ export default function RankingTableComponent() {
     <RankingContainer>
       <div
         style={{
-          height: "calc(100vh - 120px)",
-          overflowY: "auto",
+          // overflowY: "auto",
           marginBottom: "100px",
         }}
       >

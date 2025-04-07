@@ -18,7 +18,9 @@ export const Background = styled.div`
 `;
 
 export const PageHeader = styled.div`
+  margin-top: 30px;
   text-align: center;
+  /* background-color: red; */
   /* 
   padding-top: 30px; */
 
@@ -43,7 +45,6 @@ export const PageHeader = styled.div`
 export const PageTitle = styled.h1`
   font-weight: 600;
   color: #ffffff;
-  margin: 0;
   font-size: 30px;
 
   /* 480px 이하 */

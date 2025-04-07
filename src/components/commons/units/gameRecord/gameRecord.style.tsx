@@ -139,8 +139,8 @@ export const ControlButtonsWrapper = styled.div`
 
 export const ControlButton = styled.button`
   background-color: #000000;
-  height: calc((100vh - 120px) * 0.044);
-  width: calc((100vh - 120px) * 0.11);
+  height: 30px;
+  width: 76px;
   border: 1px solid #999;
   font-family: "KBO-Dia-Gothic_bold";
   font-weight: bold;
@@ -148,11 +148,6 @@ export const ControlButton = styled.button`
   color: #ffffff;
   cursor: pointer;
   border-radius: 4px;
-
-  ${small} {
-    /* padding: 8px 16px; */
-    font-size: 12px;
-  }
 `;
 
 /** ─────────────────────────────────────────────────────────
@@ -257,13 +252,9 @@ export const PlayerChangeButton = styled.button`
   color: #fff;
   border: none;
   font-family: "KBO-Dia-Gothic_bold";
-  font-size: 14px;
-  padding: 0.5rem 1rem;
+  font-size: 12px;
+  padding: 6px 12px;
   cursor: pointer;
-
-  ${small} {
-    font-size: 12px;
-  }
 `;
 
 export const PlayerWrapper = styled.div`
