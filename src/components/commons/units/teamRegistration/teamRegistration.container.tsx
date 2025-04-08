@@ -1,5 +1,3 @@
-// TeamRegistrationPageComponent.tsx
-
 import React, { useState } from "react";
 import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
@@ -12,6 +10,7 @@ import {
   BlankPlayerRow,
   OrderNumber,
   NameWrapper,
+  InputWrapper,
   PlayerNameInput,
   SearchIcon,
   PositionWrapper,
@@ -20,13 +19,12 @@ import {
   ControlButton,
   LargeTitle,
   WildCardBox,
-  NoWildCardBox,
-  NoWildCardBoxL,
   ArrowIcon,
   SuggestionList,
   SuggestionItem,
   ButtonWrapper,
   ArrowIconNone,
+  PitcherPositionText,
 } from "./teamRegistration.style";
 import RecordStartModal from "../../modals/recordStart";
 import PlayerSelectionModal from "../../modals/playerSelectionModal";
@@ -220,14 +218,7 @@ export default function TeamRegistrationPageComponent() {
               <PlayerRow key={`${player.order}-${index}`}>
                 <OrderNumber>{player.order}</OrderNumber>
                 <NameWrapper hasValue={!!currentName}>
-                  {/* 좌측: 입력 필드와 WC/NoWC 박스를 감싸는 flex 컨테이너 */}
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      flexGrow: 1,
-                    }}
-                  >
+                  <InputWrapper hasValue={!!currentName}>
                     <PlayerNameInput
                       {...register(`players.${index}.name`, {
                         onChange: (e) => {
@@ -245,17 +236,15 @@ export default function TeamRegistrationPageComponent() {
                       autoComplete="off"
                       disabled={!isRowEnabled} // 이전 row가 완성되지 않은 경우 입력 불가
                     />
-                    {/* 선수명이 입력된 경우에만, WC 여부에 따라 박스 렌더링 */}
                     {currentName &&
                       (globalPlayer &&
                       globalPlayer.wc &&
                       globalPlayer.wc.includes("WC") ? (
                         <WildCardBox>WC</WildCardBox>
                       ) : (
-                        <NoWildCardBox />
+                        <div></div>
                       ))}
-                  </div>
-                  {/* 우측: 돋보기 아이콘은 항상 오른쪽 끝에 배치 */}
+                  </InputWrapper>
                   <SearchIcon
                     src="/images/magnifier.png"
                     alt="Search Icon"
@@ -300,7 +289,8 @@ export default function TeamRegistrationPageComponent() {
                     <PositionText isPlaceholder={isPositionEmpty}>
                       {isPositionEmpty ? (
                         <>
-                          <ArrowIconNone>▽</ArrowIconNone>포지션 입력
+                          <ArrowIconNone>▽</ArrowIconNone>
+                          포지션 입력
                           <ArrowIcon>▽</ArrowIcon>
                         </>
                       ) : (
@@ -336,7 +326,7 @@ export default function TeamRegistrationPageComponent() {
                   </PositionWrapper>
                 ) : (
                   <PositionWrapper>
-                    <PositionText>{"P"}</PositionText>
+                    <PitcherPositionText>{"P"}</PitcherPositionText>
                   </PositionWrapper>
                 )}
               </PlayerRow>

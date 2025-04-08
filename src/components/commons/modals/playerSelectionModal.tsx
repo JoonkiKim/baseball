@@ -12,22 +12,22 @@ export const ModalOverlay = styled.div`
   background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
+  margin-top: 120px;
   justify-content: center;
-  margin-top: 80px;
 `;
 
 export const ModalContainer = styled.div`
   background-color: #fff;
-  width: 300px; // 이걸로 모달 가로 길이 조정
-  height: 70vh;
+  width: 100vw; /* 테이블을 위해 살짝 넓힘 */
+  height: calc((100vh - 120px));
   padding: 20px;
-  border-radius: 8px;
+  /* border-radius: 8px; */
   text-align: center;
   overflow-y: auto;
 `;
-
 export const ModalTitle = styled.h2`
-  margin-bottom: 20px;
+  margin-bottom: 35px;
+  margin-top: 35px;
   font-size: 18px;
 `;
 
@@ -38,39 +38,47 @@ export const PlayerTable = styled.table`
 
   th,
   td {
-    border-bottom: 1px solid #ddd;
+    /* border-bottom: 1px solid #ddd; */
     padding: 10px;
     font-size: 14px;
     text-align: center;
   }
 
   th {
-    background-color: #f7f7f7;
+    background-color: white;
+    border-bottom: 1px solid black;
+    border-top: 1px solid black;
   }
 
   tr:last-of-type td {
     border-bottom: none;
   }
 
-  /* 기본 hover 효과 */
   tbody tr:hover {
     background-color: #f2f2f2;
     cursor: pointer;
   }
 `;
+export const ButtonContainer = styled.div`
+  width: 100%;
+  /* background-color: red; */
+  display: flex;
+  justify-content: flex-end; /* 컨텐츠(버튼)를 오른쪽에 정렬 */
+  align-items: center;
+  padding: 10px; /* 필요에 따라 추가 */
+`;
 
-export const CloseButton = styled.button`
-  background-color: #0f0f70;
-  border: none;
-  color: #fff;
-  padding: 12px 16px;
-  border-radius: 4px;
-  font-size: 14px;
+export const ControlButton = styled.button`
+  background-color: #000000;
+  width: 26vw;
+  height: 4.5vh;
+  border: 1px solid #999;
+  font-family: "KBO-Dia-Gothic_bold";
+  font-weight: bold;
+  font-size: 12px;
+  color: #ffffff;
   cursor: pointer;
-
-  &:hover {
-    background-color: #2f2f9f;
-  }
+  border-radius: 4px;
 `;
 
 interface IPlayerSelectionModalProps {
@@ -140,7 +148,11 @@ export default function PlayerSelectionModal({
             })}
           </tbody>
         </PlayerTable>
-        <CloseButton onClick={() => setIsModalOpen(false)}>닫기</CloseButton>
+        <ButtonContainer>
+          <ControlButton onClick={() => setIsModalOpen(false)}>
+            닫기
+          </ControlButton>
+        </ButtonContainer>
       </ModalContainer>
     </ModalOverlay>
   );

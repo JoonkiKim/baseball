@@ -343,8 +343,9 @@ export const VsText = styled.div`
 
 export const RecordButton = styled.button`
   font-family: "KBO-Dia-Gothic_light";
-  background: #ffffff;
+  background: rgba(0, 0, 0, 0.02);
   border: 1px solid #e8e8e8;
+  color: black;
   border-radius: 4px;
   cursor: pointer;
   font-size: 12px; /* 기본값 */
@@ -414,13 +415,14 @@ export const DatePickWrapper = styled.div`
   /* 요일 이름 컨테이너 (중앙 정렬) */
   .react-datepicker__day-names {
     display: flex;
+    /* margin-top: 10px; */
     justify-content: center;
   }
 
   /* 요일 이름 */
   .react-datepicker__day-name {
     width: 2.8rem;
-    height: 2.8rem;
+    height: 2rem;
     line-height: 2.8rem;
     font-size: 14px;
     color: white;

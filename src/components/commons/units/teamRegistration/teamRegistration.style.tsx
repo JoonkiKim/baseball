@@ -58,23 +58,26 @@ export const PlayerList = styled.div`
 
 export const PlayerRow = styled.div`
   display: flex;
-  justify-content: space-around;
-  padding: 8px 0;
+  justify-content: space-evenly;
+  align-items: center;
+  /* padding: 8px 0; */
   height: 4vh;
 `;
 
 export const BlankPlayerRow = styled.div`
   display: flex;
-  justify-content: space-around;
+  justify-content: space-evenly;
   padding: 8px 0;
   height: 4vh;
 `;
 
 export const OrderNumber = styled.div`
-  width: 9px;
+  /* width: 9px; */
   text-align: center;
   font-family: "KBO-Dia-Gothic_medium";
   font-size: 16px;
+  /* background-color: red; */
+  /* margin-bottom: 11px; */
 
   ${small} {
     font-size: 14px;
@@ -87,84 +90,112 @@ export const OrderNumber = styled.div`
   }
 `;
 
-// export const NameWrapper = styled.div<{ hasValue: boolean }>`
-//   display: flex;
-//   width: 10vh;
-//   min-width: 110px;
-//   align-items: center;
-//   justify-content: ${(props) => (props.hasValue ? "center" : "flex-start")};
-//   border-bottom: 1px solid #e8e8e8;
-//   gap: 0;
-//   position: relative;
-//   @media (max-width: 380px) {
-//     width: 14vh;
-//     min-width: 114px;
-//   }
-// `;
-
 export const NameWrapper = styled.div<{ hasValue: boolean }>`
+  position: relative;
   display: flex;
   align-items: center;
-  justify-content: space-between; /* 좌우 끝에 자식들이 배치됨 */
+  justify-content: center;
   border-bottom: 1px solid #e8e8e8;
-  width: 12vh;
+  width: 12vw;
   min-width: 110px;
+
   @media (max-width: 380px) {
     width: 14vh;
     min-width: 114px;
   }
 `;
 
+// InputWrapper: PlayerNameInput을 감싸는 컨테이너
+export const InputWrapper = styled.div<{ hasValue: boolean }>`
+  position: relative;
+  display: flex;
+
+  flex-direction: row;
+  justify-content: center;
+  /* hasValue가 true이면 50%, 아니면 70% */
+  width: ${({ hasValue }) => (hasValue ? "70%" : "80%")};
+`;
+
 export const PlayerNameInput = styled.input`
+  background-color: white;
+  /* background-color: red; */
+
   font-family: "KBO-Dia-Gothic_medium";
   font-size: 14px;
-  margin-left: 30px;
   color: #000;
   border: none;
   outline: none;
-  width: 70%;
-  /* padding: 0; */
-  /* background-color: aqua; */
-  text-align: left;
+  width: 100%;
+  text-align: center;
 
   &::placeholder {
     color: #999;
   }
+
+  &:focus::placeholder {
+    color: #000;
+  }
+
   @media (max-width: 380px) {
     font-size: 11px;
   }
 `;
 
+// WildCardBox는 InputWrapper의 오른쪽 끝에 항상 붙도록 right: 0 사용
 export const WildCardBox = styled.div`
-  width: 25px;
-  height: 8px;
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 10px;
   font-size: 6px;
   background-color: #f3a231;
   font-family: "KBO-Dia-Gothic_light";
   color: #ffffff;
   border-radius: 35px;
   text-align: center;
-  margin-right: 5px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
 `;
 
 export const NoWildCardBox = styled.div`
-  width: 23px;
-  height: 8px;
-  border: none;
-  outline: none;
-  /* background-color: red; */
-  display: inline-block;
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 10px;
+  font-size: 6px;
+  background-color: white;
+  font-family: "KBO-Dia-Gothic_light";
+  color: #ffffff;
+  border-radius: 35px;
+  text-align: center;
 `;
 
 export const NoWildCardBoxL = styled.div`
-  width: 23px;
-  height: 8px;
-  border: none;
-  outline: none;
-  display: inline-block;
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 10px;
+  font-size: 6px;
+  background-color: white;
+  font-family: "KBO-Dia-Gothic_light";
+  color: #ffffff;
+  border-radius: 35px;
+  text-align: center;
 `;
 
 export const SearchIcon = styled.img`
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
   width: 13px;
   height: 13px;
   cursor: pointer;
@@ -176,16 +207,20 @@ export const PositionWrapper = styled.div`
   justify-content: center;
   position: relative;
   cursor: pointer;
+  border-bottom: 1px solid #e8e8e8;
 `;
 
-export const PositionText = styled.span<{ isPlaceholder?: boolean }>`
+export const PositionText = styled.span<{
+  isPlaceholder?: boolean;
+  isFocused?: boolean;
+}>`
   font-family: "KBO-Dia-Gothic_medium";
   font-size: 14px;
-  color: ${(props) => (props.isPlaceholder ? "#999" : "#000")};
-  width: 12vh;
+  color: ${(props) =>
+    props.isFocused ? "#000" : props.isPlaceholder ? "#999" : "#000"};
+  width: 12vw;
   min-width: 110px;
   border: none;
-  border-bottom: 1px solid #e8e8e8;
   text-align: center;
   display: flex;
   flex-direction: row;
@@ -193,19 +228,38 @@ export const PositionText = styled.span<{ isPlaceholder?: boolean }>`
 
   @media (max-width: 380px) {
     font-size: 11px;
-    width: 14vh;
+    width: 12vw;
     min-width: 114px;
   }
 `;
 
-// teamRegistration.style.tsx
+export const PitcherPositionText = styled.span`
+  font-family: "KBO-Dia-Gothic_medium";
+  font-size: 14px;
+  color: #000000;
+  width: 12vw;
+  min-width: 110px;
+  border: none;
+  text-align: center;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+
+  @media (max-width: 380px) {
+    font-size: 11px;
+    width: 14vw;
+    min-width: 114px;
+  }
+`;
 
 export const ArrowIcon = styled.span`
-  margin-left: 4px; /* 원하는 여백 값으로 조정 */
+  margin-left: 4px;
+  font-weight: 500;
+  color: #000000;
 `;
 
 export const ArrowIconNone = styled.span`
-  margin-left: 4px; /* 원하는 여백 값으로 조정 */
+  margin-left: 4px;
   color: white;
 `;
 
@@ -282,6 +336,7 @@ export const ButtonWrapper = styled.div`
   justify-content: flex-end;
   margin-top: auto;
   padding-right: 20px;
+  margin-bottom: 50px;
 
   ${small} {
     padding-right: 10px;
@@ -295,22 +350,17 @@ export const ButtonWrapper = styled.div`
 `;
 
 export const ControlButton = styled.button`
-  margin-top: 30px;
-  margin-right: 10px;
   background-color: #000000;
-  display: block;
-  height: 30px;
-  width: 75px;
+  width: 26vw;
+  height: 4.5vh;
+  border: 1px solid #999;
   font-family: "KBO-Dia-Gothic_bold";
   font-weight: bold;
   font-size: 12px;
   color: #ffffff;
   cursor: pointer;
   border-radius: 4px;
-
-  ${small} {
-    font-size: 12px;
-  }
+  margin-top: 20px;
 `;
 
 export const SuggestionList = styled.ul`

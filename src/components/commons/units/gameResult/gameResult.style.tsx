@@ -27,13 +27,13 @@ export const ScoreBoardWrapper = styled.div`
   /* margin-top: 2vh; */
   margin-top: calc((100vh - 120px) * 0.01);
   height: calc((100vh - 120px) * 0.2);
-  background-color: #ffffff;
+  background-color: #f2f2f2;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   border: 1px solid black;
-  border-radius: 10px;
+  border-radius: 4px;
 `;
 
 /** ─────────────────────────────────────────────────────────
@@ -247,33 +247,29 @@ export const ButtonContainer = styled.div`
 `;
 
 export const ControlButton = styled.button`
-  background-color: #000;
-  height: calc((100vh - 120px) * 0.044);
-  width: calc((100vh - 120px) * 0.11);
+  background-color: #000000;
+  width: 26vw;
+  height: 4.5vh;
+  border: 1px solid #999;
   font-family: "KBO-Dia-Gothic_bold";
   font-weight: bold;
   font-size: 12px;
-  color: #fff;
+  color: #ffffff;
   cursor: pointer;
   border-radius: 4px;
-  ${small} {
-    font-size: 12px;
-  }
 `;
 
 export const HomeButton = styled.button`
-  background-color: #000;
-  height: calc((100vh - 120px) * 0.044);
-  width: calc((100vh - 120px) * 0.11);
+  background-color: #000000;
+  width: 26vw;
+  height: 4.5vh;
+  border: 1px solid #999;
   font-family: "KBO-Dia-Gothic_bold";
   font-weight: bold;
   font-size: 12px;
-  color: #fff;
+  color: #ffffff;
   cursor: pointer;
   border-radius: 4px;
-  ${small} {
-    font-size: 12px;
-  }
 `;
 
 // ─── 수정 가능한 input 컴포넌트 ─────────────────────────────

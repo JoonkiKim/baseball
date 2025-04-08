@@ -8,14 +8,15 @@ const large =
   "@media only screen and (min-width: 769px) and (max-width: 1024px)";
 const xlarge = "@media only screen and (min-width: 1025px)";
 
-// ─── 기존 스타일 컴포넌트 ─────────────────────────────────────────
+// ─── 공통 컨테이너 ──────────────────────────────────────────────
 export const Container = styled.div`
   margin-top: 140px;
   width: 100%;
   max-width: 768px;
-  /* min-height: 1000px; */
   margin-left: auto;
   margin-right: auto;
+  display: flex;
+  flex-direction: column;
   padding: 0 20px;
 
   ${small} {
@@ -29,11 +30,15 @@ export const Container = styled.div`
   }
 `;
 
+// ─── 타이틀 ──────────────────────────────────────────────
 export const LargeTitle = styled.h1`
   text-align: center;
   font-family: "KBO-Dia-Gothic_bold";
   font-size: 20px;
+  align-self: center;
+  margin-top: 20px;
   margin-bottom: 30px;
+  width: 300px;
 
   ${small} {
     font-size: 18px;
@@ -63,6 +68,7 @@ export const Title = styled.h1`
   }
 `;
 
+// ─── 리스트 및 행 ──────────────────────────────────────────────
 export const PlayerList = styled.div`
   display: flex;
   flex-direction: column;
@@ -71,16 +77,13 @@ export const PlayerList = styled.div`
 
 export const PlayerRow = styled.div`
   display: flex;
-  /* background-color: red; */
-  /* align-items: center; */
-  justify-content: space-around;
-  padding: 8px 0;
+  justify-content: space-evenly;
+  align-items: center;
+  height: 4vh;
 `;
 
-// 첫 번째 열 (주문 번호)
+// ─── 주문번호 (첫 번째 열) ──────────────────────────────────────────────
 export const OrderNumber = styled.div`
-  width: 1vh;
-  /* background-color: red; */
   text-align: center;
   font-family: "KBO-Dia-Gothic_medium";
   font-size: 16px;
@@ -96,97 +99,145 @@ export const OrderNumber = styled.div`
   }
 `;
 
-// 두 번째 열 (NameWrapper)
+// ─── 선수명 입력 래퍼 ──────────────────────────────────────────────
 export const NameWrapper = styled.div<{ hasValue: boolean }>`
-  display: flex;
-  width: 12vh;
-  align-items: center;
-  justify-content: ${(props) => (props.hasValue ? "center" : "flex-start")};
-  border-bottom: 1px solid #e8e8e8;
-  gap: 0;
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid #e8e8e8;
+  width: 12vw;
+  /* background-color: red; */
+  min-width: 110px;
+
   @media (max-width: 380px) {
-    width: 14vh;
+    width: 14vw;
+    min-width: 114px;
   }
 `;
 
-// ─── 새로운 선수명 입력 필드 ───────────────────────────────────────
+// ─── 입력 필드 (선수명) ──────────────────────────────────────────────
 export const PlayerNameInput = styled.input`
+  background-color: white;
   font-family: "KBO-Dia-Gothic_medium";
   font-size: 14px;
-  /* background-color: red; */
   color: #000;
   border: none;
   outline: none;
   width: 50%;
-  padding: 0;
+  /* background-color: red; */
   text-align: center;
+  padding: 0;
 
   &::placeholder {
     color: #999;
   }
+
+  &:focus::placeholder {
+    color: #000;
+  }
+
   @media (max-width: 380px) {
     font-size: 11px;
   }
 `;
 
+// ─── 와일드카드 박스 ──────────────────────────────────────────────
 export const WildCardBox = styled.div`
-  width: 16px;
-  height: 8px;
-  font-size: 7px;
+  position: absolute;
+  right: 3vw;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 10px;
+  font-size: 6px;
   background-color: #f3a231;
+  font-family: "KBO-Dia-Gothic_light";
+  color: #ffffff;
+  border-radius: 35px;
+  text-align: center;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+`;
+
+export const NoWildCardBox = styled.div`
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 10px;
+  font-size: 6px;
+  background-color: white;
   font-family: "KBO-Dia-Gothic_light";
   color: #ffffff;
   border-radius: 35px;
   text-align: center;
 `;
 
-export const NoWildCardBox = styled.div`
-  width: 23px;
-  height: 8px;
-  border: none;
-  outline: none;
-  display: inline-block;
-`;
-
 export const NoWildCardBoxL = styled.div`
-  width: 23px;
-  height: 8px;
-  border: none;
-  outline: none;
-  display: inline-block;
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 10px;
+  font-size: 6px;
+  background-color: white;
+  font-family: "KBO-Dia-Gothic_light";
+  color: #ffffff;
+  border-radius: 35px;
+  text-align: center;
 `;
 
+// ─── 검색 아이콘 ──────────────────────────────────────────────
 export const SearchIcon = styled.img`
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
   width: 13px;
   height: 13px;
   cursor: pointer;
 `;
 
+// ─── 포지션 선택 래퍼 ──────────────────────────────────────────────
 export const PositionWrapper = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
   cursor: pointer;
+  border-bottom: 1px solid #e8e8e8;
 `;
 
-export const PositionText = styled.span<{ isPlaceholder?: boolean }>`
+// ─── 포지션 텍스트 ──────────────────────────────────────────────
+export const PositionText = styled.span<{
+  isPlaceholder?: boolean;
+  isFocused?: boolean;
+}>`
   font-family: "KBO-Dia-Gothic_medium";
   font-size: 14px;
-  color: ${(props) => (props.isPlaceholder ? "#999" : "#000")};
+
+  color: #000;
   width: 12vh;
+  min-width: 110px;
   border: none;
-  border-bottom: 1px solid #e8e8e8;
   text-align: center;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
 
   @media (max-width: 380px) {
     font-size: 11px;
     width: 14vh;
+    min-width: 114px;
   }
 `;
 
-// ─── 수정된 PositionDropdown: dropUp prop에 따라 위/아래 위치 결정 ─────────
+// ─── 드롭다운 (포지션 선택) ──────────────────────────────────────────────
 export const PositionDropdown = styled.ul<{ dropUp?: boolean }>`
   position: absolute;
   left: 50%;
@@ -200,26 +251,26 @@ export const PositionDropdown = styled.ul<{ dropUp?: boolean }>`
   ${(props) =>
     props.dropUp
       ? `
-      bottom: 100%;
-      top: auto;
-      border-top: 1px solid #ccc;
-      border-bottom: none;
-      border-radius: 4px 4px 0 0;
-      box-shadow: 0 -4px 4px -2px rgba(0, 0, 0, 0.15);
-    `
+    bottom: 100%;
+    top: auto;
+    border-top: 1px solid #ccc;
+    border-bottom: none;
+    border-radius: 4px 4px 0 0;
+    box-shadow: 0 -4px 4px -2px rgba(0, 0, 0, 0.15);
+  `
       : `
-      top: 100%;
-      bottom: auto;
-      border-top: none;
-      border-radius: 0 0 4px 4px;
-      box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.15);
-    `}
+    top: 100%;
+    bottom: auto;
+    border-top: none;
+    border-radius: 0 0 4px 4px;
+    box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.15);
+  `}
 
   li {
     text-align: center;
     padding: 8px;
-    font-family: "KBO-Dia-Gothic_light";
-    font-size: 14px;
+    font-family: "KBO-Dia-Gothic_medium";
+    font-size: 12px;
     cursor: pointer;
     &:hover {
       background-color: #f7f7f7;
@@ -227,42 +278,20 @@ export const PositionDropdown = styled.ul<{ dropUp?: boolean }>`
   }
 `;
 
-export const NextButton = styled.button`
-  margin-top: 30px;
-  display: block;
-  margin-left: auto;
-  font-family: "KBO-Dia-Gothic_medium";
-  font-size: 16px;
-  padding: 10px 20px;
-  cursor: pointer;
-  border: 1px solid #ccc;
-  background-color: #fff;
-  border-radius: 4px;
-
-  &:hover {
-    background-color: #f7f7f7;
-  }
-
-  ${small} {
-    font-size: 14px;
-    padding: 8px 16px;
-  }
-  ${medium} {
-    font-size: 15px;
-  }
-  ${large}, ${xlarge} {
-    font-size: 16px;
-  }
+// ─── 교체완료 버튼 (컨트롤 버튼) ──────────────────────────────────────────────
+export const ButtonWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
 `;
 
 export const ControlButton = styled.button`
   margin-top: 30px;
   background-color: #000000;
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
-  width: 80%;
-  height: 4vh;
+  align-self: center;
+  justify-self: center;
+  height: 30px;
+  width: 90%;
   font-family: "KBO-Dia-Gothic_bold";
   font-weight: bold;
   font-size: 12px;
@@ -272,5 +301,29 @@ export const ControlButton = styled.button`
 
   ${small} {
     font-size: 12px;
+  }
+`;
+
+// ─── 추천 목록 ──────────────────────────────────────────────
+export const SuggestionList = styled.ul`
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #fff;
+  border: 1px solid #ddd;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 150px;
+  overflow-y: auto;
+  z-index: 10;
+`;
+
+export const SuggestionItem = styled.li`
+  padding: 8px;
+  cursor: pointer;
+  &:hover {
+    background: #f2f2f2;
   }
 `;

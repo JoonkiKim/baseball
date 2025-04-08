@@ -14,50 +14,26 @@ import {
   PositionWrapper,
   PositionText,
   PositionDropdown,
-  NextButton,
-  LargeTitle,
   ControlButton,
   WildCardBox,
   NoWildCardBox,
   NoWildCardBoxL,
+  SuggestionList,
+  SuggestionItem,
+  ButtonWrapper,
 } from "./gameRecordSub.style";
 import RecordStartModal from "../../modals/recordStart";
 import PlayerSelectionModal from "../../modals/playerSelectionModal";
+import PlayerSubstituteModal from "../../modals/playerSubstituteModal";
 import {
   defaultplayerList,
   playerListState,
 } from "../../../../commons/stores/index";
-import styled from "@emotion/styled";
-
-// 추천 목록 스타일 컴포넌트
-const SuggestionList = styled.ul`
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  background: #fff;
-  border: 1px solid #ddd;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  max-height: 150px;
-  overflow-y: auto;
-  z-index: 10;
-`;
-
-const SuggestionItem = styled.li`
-  padding: 8px;
-  cursor: pointer;
-  &:hover {
-    background: #f2f2f2;
-  }
-`;
 
 interface PlayerInfo {
   order: number | string;
   name?: string;
   position?: string;
-  // 돋보기 버튼(모달)로 선택되었는지 여부
   selectedViaModal?: boolean;
 }
 
@@ -78,7 +54,7 @@ export default function SubstitutionPageComponent() {
   const router = useRouter();
   const [defaultPlayers] = useRecoilState(defaultplayerList);
 
-  // 1. 로컬 선수 데이터 (초기에는 모두 모달 선택 여부 false)
+  // 1. 로컬 선수 데이터 (초기값)
   const [players, setPlayers] = useState<PlayerInfo[]>([
     { order: 1, selectedViaModal: false },
     { order: 2, selectedViaModal: false },
@@ -95,9 +71,15 @@ export default function SubstitutionPageComponent() {
   // 2. react-hook-form 세팅
   const { register, handleSubmit, watch, setValue } = useForm({
     defaultValues: {
-      players: players.map((player) => ({
-        name: defaultPlayers[(player.order as number) - 1]?.name || "",
-      })),
+      players: players.map((player) => {
+        // order가 숫자면 기존 로직, 그렇지 않으면 (P행이면) defaultPlayers[9] (즉, 10번째 요소)를 사용
+        return {
+          name:
+            typeof player.order === "number"
+              ? defaultPlayers[(player.order as number) - 1]?.name || ""
+              : defaultPlayers[9]?.name || "",
+        };
+      }),
     },
   });
 
@@ -113,32 +95,30 @@ export default function SubstitutionPageComponent() {
     setOpenPositionRow(null);
   };
 
-  // 4. 모달 관련 상태
+  // 4. 모달 및 선택 관련 상태
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPlayerSelectionModalOpen, setIsPlayerSelectionModalOpen] =
     useState(false);
   const [selectedPlayerIndex, setSelectedPlayerIndex] = useState<number | null>(
     null
   );
-
-  // 5. 현재 활성화된 추천 목록의 인덱스 상태
   const [activeSuggestionIndex, setActiveSuggestionIndex] = useState<
     number | null
   >(null);
 
-  // 6. Recoil 전역 상태에서 playerList 불러오기
+  // 전역 플레이어 목록
   const [globalPlayerList] = useRecoilState(playerListState);
 
-  // 헬퍼: 입력 텍스트와 일치하는 부분 빨간색 표시
+  // 헬퍼: 입력 텍스트 내 하이라이트 처리
   const highlightText = (text: string, query: string) => {
     if (!query) return text;
     const regex = new RegExp(`(${query})`, "gi");
     const parts = text.split(regex);
     return (
       <>
-        {parts.map((part, index) =>
+        {parts.map((part, idx) =>
           part.toLowerCase() === query.toLowerCase() ? (
-            <span key={index} style={{ color: "red" }}>
+            <span key={idx} style={{ color: "red" }}>
               {part}
             </span>
           ) : (
@@ -149,7 +129,7 @@ export default function SubstitutionPageComponent() {
     );
   };
 
-  // 돋보기 버튼(모달)로 선수 선택 후, 해당 행 업데이트
+  // 돋보기(모달)로 선수 선택 시 처리
   const handleSelectPlayer = (playerName: string) => {
     if (selectedPlayerIndex === null) return;
     const updatedPlayers = [...players];
@@ -161,7 +141,7 @@ export default function SubstitutionPageComponent() {
     setSelectedPlayerIndex(null);
   };
 
-  // 입력창 변경 시, 해당 행은 수동 입력 상태로 전환(모달 선택 해제)
+  // 입력창 변경 시 수동 입력 상태로 전환
   const handleInputChange = (
     index: number,
     e: React.ChangeEvent<HTMLInputElement>
@@ -171,7 +151,7 @@ export default function SubstitutionPageComponent() {
     setPlayers(updatedPlayers);
   };
 
-  // 폼 제출 시 (교체완료 버튼 클릭 시)
+  // 폼 제출 (교체완료 버튼)
   const onSubmit = (data: any) => {
     const updatedPlayers = players.map((player, index) => ({
       ...player,
@@ -181,7 +161,7 @@ export default function SubstitutionPageComponent() {
     router.push("/records");
   };
 
-  // (A) NameWrapper 클릭 시 선수 선택 모달 열기
+  // NameWrapper 클릭 시 선수 선택 모달 열기
   const handleOpenPlayerModal = (index: number) => {
     setSelectedPlayerIndex(index);
     setIsPlayerSelectionModalOpen(true);
@@ -199,19 +179,16 @@ export default function SubstitutionPageComponent() {
       <form onSubmit={handleSubmit(onSubmit)}>
         <PlayerList>
           {players.map((player, index) => {
-            // 현재 입력값
             const currentName = watch(`players.${index}.name`) || "";
-            // 전역 playerList에서 입력값 포함 선수 필터링 (대소문자 무시)
             const filteredSuggestions = globalPlayerList.filter((p) => {
-              const pName = p.name;
-              const matchesQuery = pName
+              const matchesQuery = p.name
                 .toLowerCase()
                 .includes(currentName.toLowerCase());
               const isAlreadySelected = formPlayers.some(
                 (item, idx) =>
                   idx !== index &&
                   item.name &&
-                  item.name.toLowerCase() === pName.toLowerCase()
+                  item.name.toLowerCase() === p.name.toLowerCase()
               );
               return matchesQuery && !isAlreadySelected;
             });
@@ -224,13 +201,16 @@ export default function SubstitutionPageComponent() {
               <PlayerRow key={`${player.order}-${index}`}>
                 <OrderNumber>{player.order}</OrderNumber>
                 <NameWrapper
-                  style={{ position: "relative" }}
                   hasValue={!!currentName}
                   onClick={() => handleOpenPlayerModal(index)}
                 >
                   {currentName && <NoWildCardBoxL />}
                   <PlayerNameInput
-                    defaultValue={defaultPlayers[index]?.name}
+                    defaultValue={
+                      player.order === "P"
+                        ? defaultPlayers[9]?.name // "P"행이면 10번째 데이터의 name
+                        : defaultPlayers[(player.order as number) - 1]?.name
+                    }
                     {...register(`players.${index}.name`, {
                       onChange: (e) => handleInputChange(index, e),
                     })}
@@ -245,9 +225,7 @@ export default function SubstitutionPageComponent() {
                     ) : (
                       <NoWildCardBox />
                     )
-                  ) : (
-                    <></>
-                  )}
+                  ) : null}
                   {activeSuggestionIndex === index &&
                     !player.selectedViaModal &&
                     currentName &&
@@ -270,7 +248,6 @@ export default function SubstitutionPageComponent() {
                       </SuggestionList>
                     )}
                 </NameWrapper>
-
                 <PositionWrapper
                   onClick={(e) => {
                     e.stopPropagation();
@@ -309,12 +286,14 @@ export default function SubstitutionPageComponent() {
             );
           })}
         </PlayerList>
-        <ControlButton type="submit">교체완료</ControlButton>
+        <ButtonWrapper>
+          <ControlButton type="submit">교체완료</ControlButton>
+        </ButtonWrapper>
       </form>
 
       {isModalOpen && <RecordStartModal setIsModalOpen={setIsModalOpen} />}
       {isPlayerSelectionModalOpen && (
-        <PlayerSelectionModal
+        <PlayerSubstituteModal
           setIsModalOpen={setIsPlayerSelectionModalOpen}
           onSelectPlayer={handleSelectPlayer}
           selectedPlayerNames={selectedPlayerNames}

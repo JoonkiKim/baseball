@@ -139,8 +139,8 @@ export const ControlButtonsWrapper = styled.div`
 
 export const ControlButton = styled.button`
   background-color: #000000;
-  height: 30px;
-  width: 76px;
+  width: 26vw;
+  height: 4.5vh;
   border: 1px solid #999;
   font-family: "KBO-Dia-Gothic_bold";
   font-weight: bold;
@@ -159,7 +159,7 @@ export const InningScoreContainer = styled.div`
   justify-content: center;
   align-items: center;
   width: 100%;
-  height: calc((100vh - 120px) * 0.15);
+  height: calc((100vh - 120px) * 0.2);
   border-bottom: 1px solid #ccc;
   text-align: center;
   padding-top: 4vh;
@@ -225,7 +225,7 @@ export const ScoreDisplay = styled.div`
 export const PlayersRow = styled.div`
   display: flex;
   width: 100%;
-  height: calc((100vh - 120px) * 0.37);
+  height: calc((100vh - 120px) * 0.32);
   border-bottom: 1px solid #ccc;
 `;
 
@@ -249,11 +249,14 @@ export const PlayerChangeButton = styled.button`
   top: 0;
   left: 0;
   background-color: #000;
+  width: 16vw;
+  height: 4vh;
+
   color: #fff;
   border: none;
   font-family: "KBO-Dia-Gothic_bold";
   font-size: 12px;
-  padding: 6px 12px;
+  /* padding: 6px 12px; */
   cursor: pointer;
 `;
 

@@ -15,6 +15,7 @@ export const Background = styled.div`
   flex-direction: row;
   justify-content: center;
   align-items: center;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3); /* drop shadow 효과 */
 `;
 
 export const PageHeader = styled.div`
@@ -46,6 +47,7 @@ export const PageTitle = styled.h1`
   font-weight: 600;
   color: #ffffff;
   font-size: 30px;
+  font-family: "KBO-Dia-Gothic_bold";
 
   /* 480px 이하 */
   @media only screen and (max-width: 480px) {
@@ -64,46 +66,6 @@ export const PageTitle = styled.h1`
     font-size: 36px;
   }
 `;
-
-// // ─── 최종 버튼 (예: 심판등록) ─────────────────────────────
-// // Background 내부에서 절대 위치를 사용하여 우하단에 고정
-// export const ButtonWrapper = styled.div`
-//   position: absolute;
-//   bottom: 10px;
-//   right: 30px; /* 기존 10px에서 30px로 수정하여 왼쪽으로 이동 */
-// `;
-
-// export const FinalButton = styled.button`
-//   background: #bdbdbd;
-//   border: none;
-//   text-align: center;
-//   border-radius: 4px;
-//   padding: 8px 16px;
-//   font-family: "Inter-Regular", sans-serif;
-//   font-size: 12px;
-//   cursor: pointer;
-
-//   /* 480px 이하 */
-//   @media only screen and (max-width: 480px) {
-//     padding: 6px 12px;
-//     font-size: 10px;
-//   }
-//   /* 481px ~ 768px */
-//   @media only screen and (min-width: 481px) and (max-width: 768px) {
-//     padding: 7px 14px;
-//     font-size: 11px;
-//   }
-//   /* 769px ~ 1024px */
-//   @media only screen and (min-width: 769px) and (max-width: 1024px) {
-//     padding: 8px 16px;
-//     font-size: 12px;
-//   }
-//   /* 1025px 이상 */
-//   @media only screen and (min-width: 1025px) {
-//     padding: 9px 18px;
-//     font-size: 13px;
-//   }
-// `;
 
 export default function LayoutHeader() {
   return (
