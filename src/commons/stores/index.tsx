@@ -1,6 +1,17 @@
 import { atom } from "recoil";
 
+export interface ITeamList {
+  team1Name: string;
+  team2Name: string;
+}
+
+export const TeamListState = atom<ITeamList[]>({
+  key: "teamListState",
+  default: [{ team1Name: "관악사", team2Name: "건환공" }],
+});
+
 export interface IPlayer {
+  playerId: number;
   department: string;
   name: string;
   wc?: string;
@@ -9,43 +20,176 @@ export interface IPlayer {
 export const playerListState = atom<IPlayer[]>({
   key: "playerListState", // 전역 상태의 고유 key
   default: [
-    { department: "수학교육과", name: "윤동현" },
-    { department: "언론정보학과", name: "김준기" },
-    { department: "사회학과", name: "김야구", wc: "WC" },
+    { playerId: 101, department: "수학교육과", name: "윤동현" },
+    { playerId: 102, department: "언론정보학과", name: "김준기" },
+    { playerId: 103, department: "사회학과", name: "김야구", wc: "WC" },
     // 컴퓨터공학과의 "박야구"를 아래와 같이 각각 다른 이름으로 변경
-    { department: "컴퓨터공학과", name: "박진우" },
-    { department: "컴퓨터공학과", name: "박성민", wc: "선출/WC" },
-    { department: "컴퓨터공학과", name: "박민수", wc: "선출/WC" },
-    { department: "컴퓨터공학과", name: "박영수", wc: "선출/WC" },
-    { department: "컴퓨터공학과", name: "박지훈", wc: "선출/WC" },
-    { department: "컴퓨터공학과", name: "박재훈", wc: "선출/WC" },
-    { department: "컴퓨터공학과", name: "박준호", wc: "선출/WC" },
-    { department: "컴퓨터공학과", name: "박하준", wc: "선출/WC" },
-    { department: "컴퓨터공학과", name: "박승민", wc: "선출/WC" },
-    { department: "컴퓨터공학과", name: "박동현", wc: "선출/WC" },
-    { department: "컴퓨터공학과", name: "박상우", wc: "선출/WC" },
-    { department: "컴퓨터공학과", name: "박세진", wc: "선출/WC" },
-    { department: "컴퓨터공학과", name: "박형준", wc: "선출/WC" },
-    { department: "컴퓨터공학과", name: "박문수", wc: "선출/WC" },
-    { department: "컴퓨터공학과", name: "박태현", wc: "선출/WC" },
-    { department: "컴퓨터공학과", name: "박현우", wc: "선출/WC" },
-    { department: "컴퓨터공학과", name: "박재영", wc: "선출/WC" },
-    { department: "컴퓨터공학과", name: "박민재", wc: "선출/WC" },
-    { department: "컴퓨터공학과", name: "박용준", wc: "선출/WC" },
-    { department: "컴퓨터공학과", name: "박지호", wc: "선출/WC" },
-    { department: "컴퓨터공학과", name: "박준혁", wc: "선출/WC" },
-    { department: "컴퓨터공학과", name: "김지찬", wc: "선출" },
-    { department: "삼성라이온즈", name: "이재현", wc: "선출" },
-    { department: "삼성라이온즈", name: "디아즈", wc: "선출" },
-    { department: "삼성라이온즈", name: "구자욱", wc: "선출" },
-    { department: "삼성라이온즈", name: "김헌곤", wc: "선출/WC" },
-    { department: "삼성라이온즈", name: "양도근", wc: "선출" },
-    { department: "삼성라이온즈", name: "김영웅", wc: "선출" },
-    { department: "삼성라이온즈", name: "강민호", wc: "선출/WC" },
-    { department: "삼성라이온즈", name: "박병호", wc: "선출/WC" },
-    { department: "삼성라이온즈", name: "원태인", wc: "선출" },
+    { playerId: 104, department: "컴퓨터공학과", name: "박진우" },
+    {
+      playerId: 105,
+      department: "컴퓨터공학과",
+      name: "박성민",
+      wc: "선출/WC",
+    },
+    {
+      playerId: 106,
+      department: "컴퓨터공학과",
+      name: "박민수",
+      wc: "선출/WC",
+    },
+    {
+      playerId: 107,
+      department: "컴퓨터공학과",
+      name: "박영수",
+      wc: "선출/WC",
+    },
+    {
+      playerId: 108,
+      department: "컴퓨터공학과",
+      name: "박지훈",
+      wc: "선출/WC",
+    },
+    {
+      playerId: 109,
+      department: "컴퓨터공학과",
+      name: "박재훈",
+      wc: "선출/WC",
+    },
+    {
+      playerId: 110,
+      department: "컴퓨터공학과",
+      name: "박준호",
+      wc: "선출/WC",
+    },
+    {
+      playerId: 111,
+      department: "컴퓨터공학과",
+      name: "박하준",
+      wc: "선출/WC",
+    },
+    {
+      playerId: 112,
+      department: "컴퓨터공학과",
+      name: "박승민",
+      wc: "선출/WC",
+    },
+    {
+      playerId: 113,
+      department: "컴퓨터공학과",
+      name: "박동현",
+      wc: "선출/WC",
+    },
+    {
+      playerId: 114,
+      department: "컴퓨터공학과",
+      name: "박상우",
+      wc: "선출/WC",
+    },
+    {
+      playerId: 115,
+      department: "컴퓨터공학과",
+      name: "박세진",
+      wc: "선출/WC",
+    },
+    {
+      playerId: 116,
+      department: "컴퓨터공학과",
+      name: "박형준",
+      wc: "선출/WC",
+    },
+    {
+      playerId: 117,
+      department: "컴퓨터공학과",
+      name: "박문수",
+      wc: "선출/WC",
+    },
+    {
+      playerId: 118,
+      department: "컴퓨터공학과",
+      name: "박태현",
+      wc: "선출/WC",
+    },
+    {
+      playerId: 119,
+      department: "컴퓨터공학과",
+      name: "박현우",
+      wc: "선출/WC",
+    },
+    {
+      playerId: 120,
+      department: "컴퓨터공학과",
+      name: "박재영",
+      wc: "선출/WC",
+    },
+    {
+      playerId: 121,
+      department: "컴퓨터공학과",
+      name: "박민재",
+      wc: "선출/WC",
+    },
+    {
+      playerId: 122,
+      department: "컴퓨터공학과",
+      name: "박용준",
+      wc: "선출/WC",
+    },
+    {
+      playerId: 123,
+      department: "컴퓨터공학과",
+      name: "박지호",
+      wc: "선출/WC",
+    },
+    {
+      playerId: 124,
+      department: "컴퓨터공학과",
+      name: "박준혁",
+      wc: "선출/WC",
+    },
+    { playerId: 125, department: "컴퓨터공학과", name: "김지찬", wc: "선출" },
+    { playerId: 126, department: "삼성라이온즈", name: "이재현", wc: "선출" },
+    { playerId: 127, department: "삼성라이온즈", name: "디아즈", wc: "선출" },
+    { playerId: 128, department: "삼성라이온즈", name: "구자욱", wc: "선출" },
+    {
+      playerId: 129,
+      department: "삼성라이온즈",
+      name: "김헌곤",
+      wc: "선출/WC",
+    },
+    { playerId: 130, department: "삼성라이온즈", name: "양도근", wc: "선출" },
+    { playerId: 131, department: "삼성라이온즈", name: "김영웅", wc: "선출" },
+    {
+      playerId: 132,
+      department: "삼성라이온즈",
+      name: "강민호",
+      wc: "선출/WC",
+    },
+    {
+      playerId: 133,
+      department: "삼성라이온즈",
+      name: "박병호",
+      wc: "선출/WC",
+    },
+    { playerId: 134, department: "삼성라이온즈", name: "원태인", wc: "선출" },
     // ... (추가 데이터)
   ],
+});
+
+export interface IHAPlayer {
+  id: number;
+  departmentName: string;
+  name: string;
+  isElite: boolean;
+  isWc: boolean;
+}
+
+export const HomeTeamPlayerListState = atom<IHAPlayer[]>({
+  key: "HomeTeamPlayerListState", // 전역 상태의 고유 key
+  default: [],
+});
+
+export const AwayTeamPlayerListState = atom<IHAPlayer[]>({
+  key: "AwayTeamPlayerListState", // 전역 상태의 고유 key
+  default: [],
 });
 
 // 타자 기록 데이터 인터페이스

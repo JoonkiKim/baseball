@@ -11,8 +11,10 @@ const xlarge = "@media only screen and (min-width: 1025px)";
 // ─── 기존 스타일 컴포넌트 ─────────────────────────────────────────
 export const Container = styled.div`
   margin-top: 140px;
-  width: 100%;
+  width: 85%;
   max-width: 768px;
+  height: 100%;
+  /* background-color: red; */
   /* min-height: 1000px; */
   margin-left: auto;
   margin-right: auto;
@@ -58,7 +60,7 @@ export const PlayerList = styled.div`
 
 export const PlayerRow = styled.div`
   display: flex;
-  justify-content: space-evenly;
+  justify-content: space-between;
   align-items: center;
   /* padding: 8px 0; */
   height: 4vh;
@@ -333,25 +335,17 @@ export const NextButton = styled.button`
 
 export const ButtonWrapper = styled.div`
   display: flex;
-  justify-content: flex-end;
-  margin-top: auto;
-  padding-right: 20px;
-  margin-bottom: 50px;
 
-  ${small} {
-    padding-right: 10px;
-  }
-  ${medium} {
-    padding-right: 15px;
-  }
-  ${large}, ${xlarge} {
-    padding-right: 20px;
-  }
+  justify-content: flex-end;
+  /* background-color: aqua; */
+  /* margin-top: auto; */
+
+  margin-bottom: 50px;
 `;
 
 export const ControlButton = styled.button`
   background-color: #000000;
-  width: 26vw;
+  width: 25vw;
   height: 4.5vh;
   border: 1px solid #999;
   font-family: "KBO-Dia-Gothic_bold";

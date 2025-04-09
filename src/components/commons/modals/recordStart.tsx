@@ -17,7 +17,7 @@ export default function RecordStartModal(props: IModalProps) {
   const handleTypeSelect = (type: string) => {
     if (type === "예") {
       props.setIsModalOpen(false);
-      router.push("/records");
+      router.push(`/matches/${router.query.recordId}/records`);
     } else {
       props.setIsModalOpen(false);
     }

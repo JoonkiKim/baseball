@@ -1,7 +1,11 @@
-// PlayerSelectionModal.tsx (전체 코드)
 import styled from "@emotion/styled";
 import { useRecoilState } from "recoil";
-import { playerListState } from "../../../commons/stores";
+import { useRouter } from "next/router";
+import {
+  AwayTeamPlayerListState,
+  HomeTeamPlayerListState,
+  playerListState,
+} from "../../../commons/stores";
 
 export const ModalOverlay = styled.div`
   position: fixed;
@@ -38,7 +42,6 @@ export const PlayerTable = styled.table`
 
   th,
   td {
-    /* border-bottom: 1px solid #ddd; */
     padding: 10px;
     font-size: 14px;
     text-align: center;
@@ -61,13 +64,11 @@ export const PlayerTable = styled.table`
 `;
 export const ButtonContainer = styled.div`
   width: 100%;
-  /* background-color: red; */
   display: flex;
-  justify-content: flex-end; /* 컨텐츠(버튼)를 오른쪽에 정렬 */
+  justify-content: flex-end;
   align-items: center;
-  padding: 10px; /* 필요에 따라 추가 */
+  padding: 10px;
 `;
-
 export const ControlButton = styled.button`
   background-color: #000000;
   width: 26vw;
@@ -81,9 +82,14 @@ export const ControlButton = styled.button`
   border-radius: 4px;
 `;
 
+// onSelectPlayer에서 전달받는 객체는 { name: string, playerId: number, wc?: string } 형태입니다.
 interface IPlayerSelectionModalProps {
   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  onSelectPlayer: (playerName: string) => void;
+  onSelectPlayer: (selectedPlayer: {
+    name: string;
+    playerId: number;
+    wc?: string;
+  }) => void;
   selectedPlayerNames: string[];
 }
 
@@ -92,11 +98,16 @@ export default function PlayerSelectionModal({
   onSelectPlayer,
   selectedPlayerNames,
 }: IPlayerSelectionModalProps) {
-  const [playerList] = useRecoilState(playerListState);
+  const router = useRouter();
 
-  // (1) 기존에는 filter로 "이미 선택된 선수"를 제외했지만
-  //     이제는 전체 목록을 노출해야 하므로 그대로 사용
-  const allPlayersList = playerList;
+  // 홈팀 선수 목록, 원정팀 선수 목록 리코일 상태 불러오기
+  const [homeTeamPlayers] = useRecoilState(HomeTeamPlayerListState);
+  const [awayTeamPlayers] = useRecoilState(AwayTeamPlayerListState);
+
+  // 현재 URL에 따라 사용할 선수 목록을 결정합니다.
+  const allPlayersList = router.asPath.includes("homeTeamRegistration")
+    ? homeTeamPlayers
+    : awayTeamPlayers;
 
   const handleOverlayClick = () => {
     setIsModalOpen(false);
@@ -106,10 +117,24 @@ export default function PlayerSelectionModal({
     e.stopPropagation();
   };
 
-  // (2) 이미 선택된 선수라면 클릭이 안 되도록 처리
-  const handleRowClick = (playerName: string, isAlreadySelected: boolean) => {
-    if (isAlreadySelected) return; // 이미 선택된 선수는 클릭 무효
-    onSelectPlayer(playerName);
+  // 이미 선택된 선수면 클릭이 무효하도록 처리하고,
+  // onSelectPlayer에 전달 시 IHAPlayer의 필드들을 변환하여 전달합니다.
+  const handleRowClick = (
+    player: {
+      id: number;
+      departmentName: string;
+      name: string;
+      isElite: boolean;
+      isWc: boolean;
+    },
+    isAlreadySelected: boolean
+  ) => {
+    if (isAlreadySelected) return;
+    onSelectPlayer({
+      name: player.name,
+      playerId: player.id,
+      wc: player.isWc ? "WC" : undefined,
+    });
     setIsModalOpen(false);
   };
 
@@ -126,23 +151,22 @@ export default function PlayerSelectionModal({
             </tr>
           </thead>
           <tbody>
-            {allPlayersList.map((player, idx) => {
+            {allPlayersList.map((player) => {
               const isAlreadySelected = selectedPlayerNames.includes(
                 player.name
               );
               return (
                 <tr
-                  key={idx}
-                  // 이미 선택된 선수면 onClick 무효 & 텍스트 회색 + 취소선
-                  onClick={() => handleRowClick(player.name, isAlreadySelected)}
+                  key={player.id}
+                  onClick={() => handleRowClick(player, isAlreadySelected)}
                   style={{
                     color: isAlreadySelected ? "gray" : "inherit",
                     cursor: isAlreadySelected ? "default" : "pointer",
                   }}
                 >
-                  <td>{player.department}</td>
+                  <td>{player.departmentName}</td>
                   <td>{player.name}</td>
-                  <td>{player.wc || ""}</td>
+                  <td>{player.isWc ? "WC" : ""}</td>
                 </tr>
               );
             })}

@@ -27,7 +27,7 @@ import {
 } from "./mainCalendar.style";
 import { formatDate2, formatDateToYMD } from "../../../commons/libraries/utils";
 import API from "../../../commons/apis/api";
-import { previousDateState } from "../../../commons/stores";
+import { previousDateState, TeamListState } from "../../../commons/stores";
 
 interface RawMatch {
   date: string;
@@ -44,12 +44,14 @@ interface Match {
   awayTeamScore: number | null;
   currentInning?: number;
   inning_half?: string;
+  matchId?: number; // matchId 추가 (예: 1001, 1002, 1003 등)
 }
 
 export default function MainCalendarPage() {
   const router = useRouter();
 
-  // Recoil의 전역 상태를 사용하여 선택된 날짜를 관리합니다.
+  // TeamListState 및 날짜 상태 등 Recoil 상태 불러오기
+  const [teamList, setTeamList] = useRecoilState(TeamListState);
   const [selectedDate, setSelectedDate] = useRecoilState(previousDateState);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [allMatchData, setAllMatchData] = useState<RawMatch[]>([]);
@@ -59,7 +61,7 @@ export default function MainCalendarPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [timedOut, setTimedOut] = useState(false);
 
-  // 캘린더 영역을 감싸는 ref 추가
+  // 캘린더 영역 외부 클릭 감지를 위한 ref
   const calendarRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -94,7 +96,6 @@ export default function MainCalendarPage() {
     setMatchesForSelectedDate(matchDay?.matches || []);
   }, [selectedDate, allMatchData]);
 
-  // 캘린더 외부 클릭 시 캘린더를 닫는 로직
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -141,16 +142,6 @@ export default function MainCalendarPage() {
       setSelectedDate(date);
     }
     setIsCalendarOpen(false);
-  };
-
-  const handleRecordClick = (status: string) => {
-    if (status === "FINALIZED") {
-      router.push("/result");
-    } else if (status === "SCHEDULED") {
-      router.push("/teamRegistration");
-    } else {
-      router.push("/records");
-    }
   };
 
   return (
@@ -233,6 +224,7 @@ export default function MainCalendarPage() {
           </p>
         ) : matchesForSelectedDate.length > 0 ? (
           matchesForSelectedDate.map((match, index) => {
+            // 점수 관련 변수 처리
             const team1Score = match.homeTeamScore;
             const team2Score = match.awayTeamScore;
             const team1IsWinner =
@@ -277,7 +269,6 @@ export default function MainCalendarPage() {
                           }`
                         : match.status}
                     </StatusBox>
-
                     <VsText>vs</VsText>
                   </div>
 
@@ -292,7 +283,32 @@ export default function MainCalendarPage() {
                   </Team>
                 </TeamsContainer>
 
-                <RecordButton onClick={() => handleRecordClick(match.status)}>
+                {/* 경기기록 버튼 클릭 시, 상태가 "SCHEDULED"이면 TeamListState 업데이트 후 라우팅 */}
+                <RecordButton
+                  onClick={() => {
+                    if (match.status === "SCHEDULED") {
+                      setTeamList([
+                        {
+                          team1Name: match.homeTeamName,
+                          team2Name: match.awayTeamName,
+                        },
+                      ]);
+
+                      console.log(teamList);
+                    }
+                    const route =
+                      match.status === "FINALIZED"
+                        ? `/matches/${match.matchId}/result`
+                        : match.status === "SCHEDULED"
+                        ? `/matches/${match.matchId}/homeTeamRegistration`
+                        : match.status === "IN_PROGRESS"
+                        ? `/matches/${match.matchId}/records`
+                        : "";
+                    if (route) {
+                      router.push(route);
+                    }
+                  }}
+                >
                   경기기록
                 </RecordButton>
               </MatchCard>
