@@ -180,6 +180,7 @@ export interface IHAPlayer {
   name: string;
   isElite: boolean;
   isWc: boolean;
+  position?: string;
 }
 
 export const HomeTeamPlayerListState = atom<IHAPlayer[]>({
@@ -252,4 +253,19 @@ export const defaultplayerList = atom<PlayerInfo[]>({
 export const previousDateState = atom<Date>({
   key: "previousDateState",
   default: new Date(), // 초기값 설정 (원하는 경우 null로 설정 후 useEffect로 초기화 가능)
+});
+
+export const homeBatterNumberState = atom<number>({
+  key: "homeBatterNumberState",
+  default: 1,
+});
+
+export const awayBatterNumberState = atom<number>({
+  key: "awayBatterNumberState",
+  default: 101,
+});
+
+export const substitutionSwappedState = atom<boolean>({
+  key: "substitutionSwappedState",
+  default: true,
 });

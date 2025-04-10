@@ -328,6 +328,15 @@ export const WildCardBox = styled.div`
   text-align: center;
 `;
 
+export const WildCardBoxNone = styled.div`
+  width: 50px;
+  height: 20px;
+  background-color: transparent;
+  font-family: "KBO-Dia-Gothic_light";
+
+  text-align: center;
+`;
+
 /** ─────────────────────────────────────────────────────────
  *  6) 하단 기록 입력 버튼 섹션
  * ───────────────────────────────────────────────────────── */
