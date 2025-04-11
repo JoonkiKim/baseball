@@ -80,13 +80,13 @@ export default function TeamRegistrationPageComponent(props: IProps) {
           const res = await API.get("/teams/1/players");
           const dataObj =
             typeof res.data === "string" ? JSON.parse(res.data) : res.data;
-          console.log("응답", dataObj);
+          // console.log("응답", dataObj);
           setHomeTeamPlayers(dataObj.players);
         } else {
           const res = await API.get("/teams/2/players");
           const dataObj =
             typeof res.data === "string" ? JSON.parse(res.data) : res.data;
-          console.log("응답", dataObj.players);
+          // console.log("응답", dataObj.players);
           setAwayTeamPlayers(dataObj.players);
         }
       } catch (err) {
@@ -225,7 +225,7 @@ export default function TeamRegistrationPageComponent(props: IProps) {
 
   // 폼 제출 시
   const onSubmit = async (data: any) => {
-    let updatedPlayers = players.map((player, index) => {
+    const updatedPlayers = players.map((player, index) => {
       if (player.order === "P") {
         return {
           ...player,
@@ -332,7 +332,7 @@ export default function TeamRegistrationPageComponent(props: IProps) {
         requestBody
       );
       console.log("POST 요청 성공:", response.data);
-      console.log(requestBody);
+      console.log("명단제출", requestBody);
       setPlayers(updatedPlayers);
       setIsSubmitting(false);
       if (props.isHomeTeam) {

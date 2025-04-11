@@ -15,7 +15,7 @@ export const Container = styled.div`
   background-color: #f2f2f2;
   margin: 0 auto;
   margin-top: 120px;
-  margin-bottom: 50px;
+  /* margin-bottom: 50px; */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -42,6 +42,7 @@ export const ScoreBoardWrapper = styled.div`
 export const InningHeader = styled.div`
   display: grid;
   grid-template-columns: repeat(10, 1fr);
+  font-family: "KBO-Dia-Gothic_medium";
   width: 100%;
   height: 33%;
   align-items: center;
@@ -51,12 +52,14 @@ export const InningHeader = styled.div`
 
 export const InningCell = styled.div`
   text-align: center;
+  font-family: "KBO-Dia-Gothic_medium";
   /* padding-top: 1vh; */
   /* background-color: red; */
   /* padding-bottom: 1vh; */
-  font-weight: 600;
+  /* font-weight: 600; */
+
   ${small} {
-    font-size: 15px;
+    font-size: 17px;
   }
   ${medium} {
     font-size: 20px;
@@ -64,6 +67,34 @@ export const InningCell = styled.div`
   ${large}, ${xlarge} {
     font-size: 20px;
   }
+`;
+
+export const EditableInputScore = styled.input`
+  width: 100%;
+  border: none;
+  text-align: center;
+  font-family: "KBO-Dia-Gothic_light";
+  background-color: #f2f2f2;
+  ${small} {
+    font-size: 17px;
+  }
+  ${medium} {
+    font-size: 20px;
+  }
+  ${large}, ${xlarge} {
+    font-size: 20px;
+  }
+  &:focus {
+    outline: none;
+  }
+  &::-webkit-inner-spin-button,
+  &::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  -moz-appearance: none;
+  appearance: none;
 `;
 
 /** ─────────────────────────────────────────────────────────
@@ -87,11 +118,9 @@ export const TeamNameCell = styled.div`
   font-weight: 500;
   font-family: "KBO-Dia-Gothic_medium";
   font-style: normal;
+  margin-left: 4px;
 
-  ${small} {
-    font-size: 10px;
-  }
-  ${medium} {
+  ${small || medium} {
     font-size: 12px;
   }
   ${large}, ${xlarge} {
@@ -242,6 +271,7 @@ export const RecordTableP = styled.table`
 // 버튼 영역
 export const ButtonContainer = styled.div`
   display: flex;
+  margin-bottom: 50px;
   justify-content: space-between;
   width: 90%;
 `;
@@ -276,9 +306,19 @@ export const HomeButton = styled.button`
 export const EditableInput = styled.input`
   width: 100%;
   border: none;
+  font-family: "KBO-Dia-Gothic_medium";
   text-align: center;
   background-color: #f2f2f2;
+
   &:focus {
     outline: none;
   }
+  &::-webkit-inner-spin-button,
+  &::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  -moz-appearance: none;
+  appearance: none;
 `;
