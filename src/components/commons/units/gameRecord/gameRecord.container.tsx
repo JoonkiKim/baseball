@@ -16,7 +16,6 @@ import {
   ScoreDisplay,
   PlayersRow,
   PlayerBox,
-  PlayerInfo,
   PlayerChangeButton,
   RecordActionsRow,
   RecordActionButton,
@@ -29,6 +28,7 @@ import {
   PlayerExWrapper,
   OrderBadge,
   WildCardBoxNone,
+  PlayerInfo,
 } from "./gameRecord.style";
 import HitModal from "../../modals/hitModal";
 import OutModal from "../../modals/outModal";
@@ -86,7 +86,6 @@ export default function GameRecordPage() {
   const [awayBatterNumber, setAwayBatterNumber] = useRecoilState(
     awayBatterNumberState
   );
-
   const [isSubstitutionSwapped, setIsSubstitutionSwapped] = useRecoilState(
     substitutionSwappedState
   );
@@ -97,12 +96,17 @@ export default function GameRecordPage() {
   useEffect(() => {
     async function fetchInningScores() {
       try {
-        const res = await API.get("/matches/1001/inning-scores");
+        const res = await API.get(
+          `/matches/${router.query.recordId}/inning-scores`
+        );
         console.log(res.data);
         const response =
           typeof res.data === "string" ? JSON.parse(res.data) : res.data;
-        const newTeamAScores = new Array(7).fill("");
-        const newTeamBScores = new Array(7).fill("");
+
+        // 7이닝 점수 + R, H 컬럼으로 총 9자리 배열 생성
+        const newTeamAScores = new Array(9).fill("");
+        const newTeamBScores = new Array(9).fill("");
+
         if (response.scores && Array.isArray(response.scores)) {
           response.scores.forEach((scoreEntry) => {
             const inningIndex = scoreEntry.inning - 1;
@@ -115,6 +119,16 @@ export default function GameRecordPage() {
             }
           });
         }
+
+        // 계산 없이 JSON 객체의 teamStats 값을 그대로 대입
+        // 어웨이 팀(위쪽 줄) R, H: teamStats.away의 값
+        newTeamAScores[7] = response.teamStats.away.runs;
+        newTeamAScores[8] = response.teamStats.away.hits;
+
+        // 홈 팀(아래쪽 줄) R, H: teamStats.home의 값
+        newTeamBScores[7] = response.teamStats.home.runs;
+        newTeamBScores[8] = response.teamStats.home.hits;
+
         setTeamAScores(newTeamAScores);
         setTeamBScores(newTeamBScores);
       } catch (error) {
@@ -122,39 +136,38 @@ export default function GameRecordPage() {
       }
     }
     fetchInningScores();
-  }, []);
+  }, [router]);
 
-  // batter API 요청: isSubstitutionSwapped에 따라 homeBatterNumber 또는 awayBatterNumber 사용
+  // batter API 요청: 항상 "/games/1025/current-batter" 엔드포인트 호출
   useEffect(() => {
     async function fetchBatter() {
       try {
-        const endpoint = isSubstitutionSwapped
-          ? `/matches/1001/lineup/${homeBatterNumber}`
-          : `/matches/1001/lineup/${awayBatterNumber}`;
-        const res = await API.get(endpoint);
+        const res = await API.get(
+          `/games/${router.query.recordId}/current-batter`
+        );
+        console.log("게임ID", router.query.recordId);
         setBatter(res.data);
       } catch (error) {
         console.error("batter 데이터를 가져오는데 오류 발생:", error);
       }
     }
     fetchBatter();
-  }, [isSubstitutionSwapped, homeBatterNumber, awayBatterNumber]);
+  }, [router]);
 
-  // pitcher API 요청: isSubstitutionSwapped에 따라 URL 결정
+  // pitcher API 요청: 항상 "/games/1025/current-pitcher" 엔드포인트 호출하도록 수정
   useEffect(() => {
     async function fetchPitcher() {
       try {
-        const endpoint = isSubstitutionSwapped
-          ? "/matches/1001/lineup/pitcher"
-          : "/matches/1001/lineup/pitcher-away";
-        const res = await API.get(endpoint);
+        const res = await API.get(
+          `/games/${router.query.recordId}/current-pitcher`
+        );
         setPitcher(res.data);
       } catch (error) {
         console.error("pitcher 데이터를 가져오는데 오류 발생:", error);
       }
     }
     fetchPitcher();
-  }, [isSubstitutionSwapped]);
+  }, [router]);
 
   // 득점 증가/감소 함수
   const handleScoreIncrement = () => setThisInningScore((prev) => prev + 1);
@@ -184,7 +197,6 @@ export default function GameRecordPage() {
           const requestBody = { result: "BB" };
           const { data } = await API.post(endpoint, requestBody);
           alert(`볼넷/사구 기록 전송 완료\n응답값: ${JSON.stringify(data)}`);
-          // 현재 노출 중인 batter 번호를 증가시키는데, wrap-around 처리
           if (isSubstitutionSwapped) {
             setHomeBatterNumber((prev) => (prev < 9 ? prev + 1 : 1));
           } else {
@@ -206,12 +218,12 @@ export default function GameRecordPage() {
   // 선수교체 버튼 클릭 시 substitution 페이지로 이동 (쿼리로 isHomeTeam 전달)
   const handleSubstitution = (isHomeTeamParam: boolean) => {
     router.push({
-      pathname: "/matches/1001/substitution",
+      pathname: `/matches/${router.query.recordId}/substitution`,
       query: { isHomeTeam: isHomeTeamParam },
     });
   };
 
-  // DefenseChangeModal의 "예" 버튼을 누르면 isSubstitutionSwapped 상태 토글
+  // DefenseChangeModal "예" 버튼 클릭 시
   const handleDefenseChangeConfirm = () => {
     setIsSubstitutionSwapped((prev) => !prev);
   };

@@ -271,7 +271,7 @@ export const RecordTableP = styled.table`
 // 버튼 영역
 export const ButtonContainer = styled.div`
   display: flex;
-  margin-bottom: 50px;
+  margin-bottom: 20px;
   justify-content: space-between;
   width: 90%;
 `;

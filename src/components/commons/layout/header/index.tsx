@@ -19,7 +19,7 @@ export const Background = styled.div`
 `;
 
 export const PageHeader = styled.div`
-  margin-top: 30px;
+  /* margin-top: 20px; */
   text-align: center;
   /* background-color: red; */
   /* 
@@ -46,7 +46,7 @@ export const PageHeader = styled.div`
 export const PageTitle = styled.h1`
   font-weight: 600;
   color: #ffffff;
-  font-size: 30px;
+  font-size: 35px;
   font-family: "KBO-Dia-Gothic_bold";
 
   /* 480px 이하 */

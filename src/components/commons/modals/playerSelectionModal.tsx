@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import styled from "@emotion/styled";
 import { useRecoilState } from "recoil";
 import { useRouter } from "next/router";
@@ -9,26 +10,28 @@ import {
 
 export const ModalOverlay = styled.div`
   position: fixed;
-  top: 0;
+  top: 120px; /* 헤더 높이 만큼 띄워줌 */
   left: 0;
   right: 0;
   bottom: 0;
   background-color: rgba(0, 0, 0, 0.5);
   display: flex;
-  align-items: center;
-  margin-top: 120px;
+  align-items: flex-start; /* 모달 컨텐츠가 헤더 밑에 표시되도록 */
   justify-content: center;
+  /* padding-top: 20px; */
 `;
 
 export const ModalContainer = styled.div`
   background-color: #fff;
   width: 100vw; /* 테이블을 위해 살짝 넓힘 */
-  height: calc((100vh - 120px));
+  height: 100vh; /* 모달의 높이를 고정 */
+  max-height: calc(100vh - 120px); /* 헤더를 제외한 최대 높이 */
+  margin-bottom: 200px;
   padding: 20px;
-  /* border-radius: 8px; */
   text-align: center;
-  overflow-y: auto;
+  overflow-y: auto; /* 콘텐츠가 높이를 넘으면 스크롤되도록 */
 `;
+
 export const ModalTitle = styled.h2`
   margin-bottom: 35px;
   margin-top: 35px;
@@ -62,6 +65,7 @@ export const PlayerTable = styled.table`
     cursor: pointer;
   }
 `;
+
 export const ButtonContainer = styled.div`
   width: 100%;
   display: flex;
@@ -69,6 +73,7 @@ export const ButtonContainer = styled.div`
   align-items: center;
   padding: 10px;
 `;
+
 export const ControlButton = styled.button`
   background-color: #000000;
   width: 26vw;
@@ -109,6 +114,22 @@ export default function PlayerSelectionModal({
     ? homeTeamPlayers
     : awayTeamPlayers;
 
+  // 모달이 열리면 히스토리 스택에 새 상태를 추가하고, popstate 이벤트가 발생하면 모달만 닫히도록 처리
+  useEffect(() => {
+    // 모달이 열릴 때 현재 URL에 새 상태 추가
+    window.history.pushState(null, "", window.location.href);
+
+    const handlePopState = () => {
+      setIsModalOpen(false);
+    };
+
+    window.addEventListener("popstate", handlePopState);
+
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, [setIsModalOpen]);
+
   const handleOverlayClick = () => {
     setIsModalOpen(false);
   };
@@ -118,7 +139,7 @@ export default function PlayerSelectionModal({
   };
 
   // 이미 선택된 선수면 클릭이 무효하도록 처리하고,
-  // onSelectPlayer에 전달 시 IHAPlayer의 필드들을 변환하여 전달합니다.
+  // onSelectPlayer에 전달 시 필요한 정보를 변환하여 전달합니다.
   const handleRowClick = (
     player: {
       id: number;

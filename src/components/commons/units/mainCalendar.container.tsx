@@ -29,22 +29,29 @@ import { formatDate2, formatDateToYMD } from "../../../commons/libraries/utils";
 import API from "../../../commons/apis/api";
 import { previousDateState, TeamListState } from "../../../commons/stores";
 
+// 새 객체 구조에 맞춘 인터페이스 정의 (matchId → gameId)
 interface RawMatch {
   date: string;
   dayOfWeek: string;
-  matches: Match[];
+  games: Game[];
 }
 
-interface Match {
+interface Game {
   time: string;
   status: string;
-  homeTeamName: string;
-  awayTeamName: string;
-  homeTeamScore: number | null;
-  awayTeamScore: number | null;
+  homeTeam: {
+    id: number;
+    name: string;
+    score: number | null;
+  };
+  awayTeam: {
+    id: number;
+    name: string;
+    score: number | null;
+  };
   currentInning?: number;
   inning_half?: string;
-  matchId?: number; // matchId 추가 (예: 1001, 1002, 1003 등)
+  gameId?: number; // gameId로 변경 (예: 1001, 1002, 1003 등)
 }
 
 export default function MainCalendarPage() {
@@ -55,7 +62,7 @@ export default function MainCalendarPage() {
   const [selectedDate, setSelectedDate] = useRecoilState(previousDateState);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [allMatchData, setAllMatchData] = useState<RawMatch[]>([]);
-  const [matchesForSelectedDate, setMatchesForSelectedDate] = useState<Match[]>(
+  const [matchesForSelectedDate, setMatchesForSelectedDate] = useState<Game[]>(
     []
   );
   const [isLoading, setIsLoading] = useState(true);
@@ -68,7 +75,8 @@ export default function MainCalendarPage() {
     const fetchMatches = async () => {
       setIsLoading(true);
       try {
-        const res = await API.get("/matches");
+        const res = await API.get("/games");
+        // 새 객체 구조가 반영된 데이터를 불러온다고 가정합니다.
         setAllMatchData(res.data);
       } catch (err) {
         console.error("❌ 경기 데이터 요청 에러:", err);
@@ -92,8 +100,9 @@ export default function MainCalendarPage() {
   useEffect(() => {
     if (!selectedDate) return;
     const dateStr = formatDateToYMD(selectedDate);
+    // 기존의 matches 대신 games 속성 사용
     const matchDay = allMatchData.find((day) => day.date === dateStr);
-    setMatchesForSelectedDate(matchDay?.matches || []);
+    setMatchesForSelectedDate(matchDay?.games || []);
   }, [selectedDate, allMatchData]);
 
   useEffect(() => {
@@ -224,9 +233,9 @@ export default function MainCalendarPage() {
           </p>
         ) : matchesForSelectedDate.length > 0 ? (
           matchesForSelectedDate.map((match, index) => {
-            // 점수 관련 변수 처리
-            const team1Score = match.homeTeamScore;
-            const team2Score = match.awayTeamScore;
+            // 새 객체 구조에 맞게 점수 변수 처리
+            const team1Score = match.homeTeam.score;
+            const team2Score = match.awayTeam.score;
             const team1IsWinner =
               team1Score !== null &&
               team2Score !== null &&
@@ -241,7 +250,7 @@ export default function MainCalendarPage() {
                 <MatchTimeLabel>{match.time}</MatchTimeLabel>
                 <TeamsContainer>
                   <Team>
-                    <TeamName>{match.homeTeamName}</TeamName>
+                    <TeamName>{match.homeTeam.name}</TeamName>
                     <TeamScore
                       isWinner={team1IsWinner}
                       gameStatus={match.status}
@@ -273,7 +282,7 @@ export default function MainCalendarPage() {
                   </div>
 
                   <Team>
-                    <TeamName>{match.awayTeamName}</TeamName>
+                    <TeamName>{match.awayTeam.name}</TeamName>
                     <TeamScore
                       isWinner={team2IsWinner}
                       gameStatus={match.status}
@@ -283,26 +292,51 @@ export default function MainCalendarPage() {
                   </Team>
                 </TeamsContainer>
 
-                {/* 경기기록 버튼 클릭 시, 상태가 "SCHEDULED"이면 TeamListState 업데이트 후 라우팅 */}
+                {/* 경기기록 버튼 클릭 시,
+                    1. 선택된 경기에서 gameId, awayTeam, homeTeam 정보 중
+                       각 팀의 score 필드는 제외하고 id와 name 만 저장
+                    2. SCHEDULED 상태인 경우 TeamListState 업데이트 후, 조건에 따라 페이지 이동 */}
                 <RecordButton
                   onClick={() => {
+                    const selectedMatchInfo = {
+                      gameId: match.gameId,
+                      awayTeam: {
+                        id: match.awayTeam.id,
+                        name: match.awayTeam.name,
+                      },
+                      homeTeam: {
+                        id: match.homeTeam.id,
+                        name: match.homeTeam.name,
+                      },
+                    };
+                    localStorage.setItem(
+                      "selectedMatch",
+                      JSON.stringify(selectedMatchInfo)
+                    );
+
                     if (match.status === "SCHEDULED") {
                       setTeamList([
                         {
-                          team1Name: match.homeTeamName,
-                          team2Name: match.awayTeamName,
+                          team1Name: match.homeTeam.name,
+                          team1Id: match.homeTeam.id,
+                          team2Name: match.awayTeam.name,
+                          team2Id: match.awayTeam.id,
                         },
                       ]);
-
-                      console.log(teamList);
+                      console.log("저장된 팀 정보:", {
+                        team1Name: match.homeTeam.name,
+                        team1Id: match.homeTeam.id,
+                        team2Name: match.awayTeam.name,
+                        team2Id: match.awayTeam.id,
+                      });
                     }
                     const route =
                       match.status === "FINALIZED"
-                        ? `/matches/${match.matchId}/result`
+                        ? `/matches/${match.gameId}/result`
                         : match.status === "SCHEDULED"
-                        ? `/matches/${match.matchId}/homeTeamRegistration`
+                        ? `/matches/${match.gameId}/homeTeamRegistration`
                         : match.status === "IN_PROGRESS"
-                        ? `/matches/${match.matchId}/records`
+                        ? `/matches/${match.gameId}/records`
                         : "";
                     if (route) {
                       router.push(route);

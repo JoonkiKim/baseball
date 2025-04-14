@@ -63,6 +63,7 @@ const positionOptions = [
 
 export default function TeamRegistrationPageComponent(props: IProps) {
   const router = useRouter();
+  const [teamInfo] = useRecoilState(TeamListState);
 
   // 페이지 주소에 따라 팀 선수 목록을 불러올 리코일 상태
   const [homeTeamPlayers, setHomeTeamPlayers] = useRecoilState(
@@ -77,16 +78,14 @@ export default function TeamRegistrationPageComponent(props: IProps) {
     const fetchTeamPlayers = async () => {
       try {
         if (router.asPath.includes("homeTeamRegistration")) {
-          const res = await API.get("/teams/1/players");
+          const res = await API.get(`/teams/${teamInfo[0].team1Id}/players`);
           const dataObj =
             typeof res.data === "string" ? JSON.parse(res.data) : res.data;
-          // console.log("응답", dataObj);
           setHomeTeamPlayers(dataObj.players);
         } else {
-          const res = await API.get("/teams/2/players");
+          const res = await API.get(`/teams/${teamInfo[0].team2Id}/players`);
           const dataObj =
             typeof res.data === "string" ? JSON.parse(res.data) : res.data;
-          // console.log("응답", dataObj.players);
           setAwayTeamPlayers(dataObj.players);
         }
       } catch (err) {
@@ -115,7 +114,7 @@ export default function TeamRegistrationPageComponent(props: IProps) {
 
   const { register, handleSubmit, watch, setValue } = useForm({
     defaultValues: {
-      players: players.map((player) => ({ name: player.name || "" })),
+      players: players.map((player) => ({ name: player.name ?? "" })),
     },
   });
 
@@ -163,11 +162,14 @@ export default function TeamRegistrationPageComponent(props: IProps) {
   >(null);
 
   // Recoil 전역 상태에서 teamName 불러오기
-  const [teamName] = useRecoilState(TeamListState);
+  console.log("원정팀 이름 : ", teamInfo[0].team2Name);
 
-  // 페이지 주소에 따라 사용될 선수 목록(제안 목록)을 위한 localPlayerList 상태 선언 및 업데이트
+  // 페이지 주소에 관계없이 사용할 선수 목록(제안 목록) localPlayerList 상태 선언 및 업데이트
   const [localPlayerList, setLocalPlayerList] = useState<IHAPlayer[]>([]);
   useEffect(() => {
+    // 주소에 따른 분기를 없애고 두 목록을 합치는 방법도 가능하지만,
+    // 여기서는 주소와 관계없이 로컬에서 사용하는 목록에 중복 제거 방식만 적용하면 됩니다.
+    // 필요에 따라 두 리코일 상태의 값을 통합해서 사용할 수 있습니다.
     if (router.asPath.includes("homeTeamRegistration")) {
       setLocalPlayerList(homeTeamPlayers);
     } else {
@@ -225,6 +227,7 @@ export default function TeamRegistrationPageComponent(props: IProps) {
 
   // 폼 제출 시
   const onSubmit = async (data: any) => {
+    // 폼 데이터 반영하여 updatedPlayers 생성
     const updatedPlayers = players.map((player, index) => {
       if (player.order === "P") {
         return {
@@ -240,11 +243,15 @@ export default function TeamRegistrationPageComponent(props: IProps) {
     });
 
     const nonPRows = updatedPlayers.filter((player) => player.order !== "P");
+
+    // 비‑P 행의 선수명 입력 칸 검증
     const blankNameNonP = nonPRows.find((player) => !player.name?.trim());
     if (blankNameNonP) {
       alert(`${blankNameNonP.order}번 타자의 선수명 입력칸이 비어 있습니다.`);
       return;
     }
+
+    // 비‑P 행의 포지션 입력 칸 검증
     const blankPositionNonP = nonPRows.find(
       (player) => !player.position?.trim()
     );
@@ -254,14 +261,34 @@ export default function TeamRegistrationPageComponent(props: IProps) {
       );
       return;
     }
+
+    // 비‑P 행 중 DH 포지션 여부 확인
+    const hasDHOverall = nonPRows.some((p) => p.position === "DH");
     const pRow = updatedPlayers.find((player) => player.order === "P");
+
+    // DH가 없으면, non‑P 행 중 포지션이 "P"인 선수의 이름을 P행으로 복사
+    if (!hasDHOverall && pRow && !pRow.name?.trim()) {
+      const sourceRow = nonPRows.find(
+        (player) => player.position?.trim() === "P" && player.name?.trim()
+      );
+      if (sourceRow) {
+        pRow.name = sourceRow.name;
+        pRow.playerId = sourceRow.playerId;
+        pRow.selectedViaModal = sourceRow.selectedViaModal;
+        const pIndex = updatedPlayers.findIndex(
+          (player) => player.order === "P"
+        );
+        setValue(`players.${pIndex}.name`, sourceRow.name);
+      }
+    }
+
+    // P행 검증 (복사 후에도 비어있으면 에러 처리)
     if (pRow && !pRow.name?.trim()) {
       alert(`P행의 선수명 입력 칸이 비어 있습니다.`);
       return;
     }
 
-    const hasDHOverall = nonPRows.some((p) => p.position === "DH");
-
+    // 필수 포지션 검증 (DH가 있을 때와 없을 때 구분)
     if (hasDHOverall) {
       const requiredPositions = [
         "CF",
@@ -302,6 +329,27 @@ export default function TeamRegistrationPageComponent(props: IProps) {
       }
     }
 
+    // 추가 로직: 와일드카드(isWc가 true인 선수) 체크 (4명 이상이면 제출 중단)
+    // 중복되는 선수명은 Set을 이용해서 한 번만 카운트
+    const uniqueWildcardNames = new Set(
+      updatedPlayers.reduce((acc: string[], player) => {
+        if (player.name && player.name.trim()) {
+          const globalPlayer = localPlayerList.find(
+            (p) => p.name === player.name
+          );
+          if (globalPlayer && globalPlayer.isWc === true) {
+            acc.push(player.name.trim());
+          }
+        }
+        return acc;
+      }, [])
+    );
+    const wildcardCount = uniqueWildcardNames.size;
+    if (wildcardCount > 3) {
+      alert(`와일드카드 제한을 초과했습니다 (현재 ${wildcardCount}명)`);
+      return;
+    }
+
     let batters, pitcherData;
     if (hasDHOverall) {
       batters = nonPRows.map((player) => ({
@@ -316,6 +364,7 @@ export default function TeamRegistrationPageComponent(props: IProps) {
         playerId: player.playerId,
         position: player.position,
       }));
+      // 비‑P 행에서 포지션 P인 선수를 찾아 피칭 데이터로 사용
       pitcherData = nonPRows.find((player) => player.position!.trim() === "P");
     }
 
@@ -356,7 +405,7 @@ export default function TeamRegistrationPageComponent(props: IProps) {
   const formPlayers = watch("players") || [];
   const selectedPlayerNames = formPlayers
     .map((player) => player.name)
-    .filter((name) => name.trim() !== "");
+    .filter((name) => name && name.trim() !== "");
 
   const hasDHOverall = players
     .filter((p) => p.order !== "P")
@@ -367,8 +416,8 @@ export default function TeamRegistrationPageComponent(props: IProps) {
       <LargeTitle>라인업을 등록해주세요</LargeTitle>
       <Title>
         {router.asPath.includes("homeTeamRegistration")
-          ? teamName[0].team1Name
-          : teamName[0].team2Name}{" "}
+          ? teamInfo[0].team1Name
+          : teamInfo[0].team2Name}{" "}
         야구부
       </Title>
       <form
@@ -428,9 +477,7 @@ export default function TeamRegistrationPageComponent(props: IProps) {
                       disabled={!isRowEnabled}
                     />
                     {currentName &&
-                      (globalPlayer &&
-                      globalPlayer.isWc &&
-                      globalPlayer.isWc === true ? (
+                      (globalPlayer && globalPlayer.isWc === true ? (
                         <WildCardBox>WC</WildCardBox>
                       ) : (
                         <div></div>
