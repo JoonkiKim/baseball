@@ -36,6 +36,7 @@ export const ModalTitle = styled.h2`
   margin-bottom: 35px;
   margin-top: 35px;
   font-size: 18px;
+  font-family: "KBO-Dia-Gothic_bold";
 `;
 
 export const PlayerTable = styled.table`

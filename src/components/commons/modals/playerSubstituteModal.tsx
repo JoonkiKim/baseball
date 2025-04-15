@@ -4,8 +4,8 @@ import { useRecoilState } from "recoil";
 import { useRouter } from "next/router";
 import API from "../../../commons/apis/api";
 import {
-  AwayTeamPlayerListState,
   HomeTeamPlayerListState,
+  AwayTeamPlayerListState,
 } from "../../../commons/stores";
 
 export const ModalOverlay = styled.div`
@@ -35,6 +35,7 @@ export const ModalTitle = styled.h2`
   margin-bottom: 35px;
   margin-top: 35px;
   font-size: 18px;
+  font-family: "KBO-Dia-Gothic_bold";
 `;
 
 export const PlayerTable = styled.table`
@@ -103,18 +104,19 @@ export default function SubPlayerSelectionModal({
 }: IPlayerSelectionModalProps) {
   const router = useRouter();
 
-  // 홈팀, 원정팀 선수 목록 및 setter 불러오기
-  const [homeTeamPlayers, setHomeTeamPlayers] = useRecoilState(
-    HomeTeamPlayerListState
-  );
+  // 원정팀, 홈팀 선수 목록 및 setter 불러오기
   const [awayTeamPlayers, setAwayTeamPlayers] = useRecoilState(
     AwayTeamPlayerListState
   );
+  const [homeTeamPlayers, setHomeTeamPlayers] = useRecoilState(
+    HomeTeamPlayerListState
+  );
 
-  // 쿼리 파라미터 isHomeTeam가 "true"인지 판별 (방법1)
-  const isHomeTeam = router.query.isHomeTeam === "true";
+  // 쿼리 파라미터 isAwayTeam가 "true"인지 판별 (방법1)
+  // const isAwayTeam = router.query.isHomeTeam === "false";
+  const isAwayTeam = router.query.isHomeTeam === "false";
 
-  // isHomeTeam에 따라 로컬스토리지에서 homeTeam 또는 awayTeam의 id로 GET 요청 보내기
+  // isAwayTeam에 따라 로컬스토리지에서 awayTeam 또는 homeTeam의 id로 GET 요청 보내기
   useEffect(() => {
     const selectedMatchStr = localStorage.getItem("selectedMatch");
     if (!selectedMatchStr) {
@@ -123,31 +125,15 @@ export default function SubPlayerSelectionModal({
     }
     try {
       const selectedMatch = JSON.parse(selectedMatchStr);
-      if (isHomeTeam) {
-        const homeTeamId = selectedMatch?.homeTeam?.id;
-        if (homeTeamId) {
-          API.get(`/teams/${homeTeamId}/players`)
+      if (isAwayTeam) {
+        const awayTeamId = selectedMatch?.awayTeam?.id;
+        if (awayTeamId) {
+          API.get(`/teams/${awayTeamId}/players`)
             .then((res) => {
               // 응답이 JSON 문자열이면 파싱
               const parsedData =
                 typeof res.data === "string" ? JSON.parse(res.data) : res.data;
               // parsedData.players에 실제 선수 배열이 있다고 가정
-              setHomeTeamPlayers(parsedData.players);
-              console.log("HomeTeam Players:", parsedData.players);
-            })
-            .catch((error) => {
-              console.error("Error fetching homeTeam players:", error);
-            });
-        } else {
-          console.error("homeTeam id가 존재하지 않습니다.");
-        }
-      } else {
-        const awayTeamId = selectedMatch?.awayTeam?.id;
-        if (awayTeamId) {
-          API.get(`/teams/${awayTeamId}/players`)
-            .then((res) => {
-              const parsedData =
-                typeof res.data === "string" ? JSON.parse(res.data) : res.data;
               setAwayTeamPlayers(parsedData.players);
               console.log("AwayTeam Players:", parsedData.players);
             })
@@ -157,14 +143,30 @@ export default function SubPlayerSelectionModal({
         } else {
           console.error("awayTeam id가 존재하지 않습니다.");
         }
+      } else {
+        const homeTeamId = selectedMatch?.homeTeam?.id;
+        if (homeTeamId) {
+          API.get(`/teams/${homeTeamId}/players`)
+            .then((res) => {
+              const parsedData =
+                typeof res.data === "string" ? JSON.parse(res.data) : res.data;
+              setHomeTeamPlayers(parsedData.players);
+              console.log("HomeTeam Players:", parsedData.players);
+            })
+            .catch((error) => {
+              console.error("Error fetching homeTeam players:", error);
+            });
+        } else {
+          console.error("homeTeam id가 존재하지 않습니다.");
+        }
       }
     } catch (error) {
       console.error("로컬스토리지 파싱 에러:", error);
     }
-  }, [isHomeTeam, setHomeTeamPlayers, setAwayTeamPlayers]);
+  }, [isAwayTeam, setAwayTeamPlayers, setHomeTeamPlayers]);
 
-  // 현재 URL에 따라 사용할 선수 목록 결정 (홈팀이면 homeTeamPlayers, 아니면 awayTeamPlayers)
-  const allPlayersList = isHomeTeam ? homeTeamPlayers : awayTeamPlayers;
+  // 현재 URL에 따라 사용할 선수 목록 결정 (원정팀이면 awayTeamPlayers, 아니면 homeTeamPlayers)
+  const allPlayersList = isAwayTeam ? awayTeamPlayers : homeTeamPlayers;
 
   // 모달이 열리면 히스토리 스택에 새 상태 추가 및 popstate 이벤트 처리
   useEffect(() => {

@@ -116,14 +116,15 @@ export const TeamScoreCell = styled.div`
  * ───────────────────────────────────────────────────────── */
 export const ControlButtonsRow = styled.div`
   width: 100%;
-  height: calc((100vh - 120px) * 0.15);
+  height: calc((100vh - 120px) * 0.15 - 3vh);
   border-bottom: 1px solid #ccc;
+  /* margin-top: 100px; */
   /* padding: 1vh 0; */
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  padding-top: 1vh;
+  /* padding-top: 1vh; */
   /* background-color: aqua; */
 `;
 
@@ -134,7 +135,7 @@ export const ControlButtonsWrapper = styled.div`
   align-items: flex-end; /* 요소들을 아래쪽 정렬 */
   width: 90%;
   /* background-color: red; */
-  padding-top: 2vh;
+  /* padding-top: 2vh; */
 `;
 
 export const ControlButton = styled.button`
@@ -343,17 +344,24 @@ export const WildCardBoxNone = styled.div`
 export const RecordActionsRow = styled.div`
   display: grid;
   width: 100%;
-  height: calc((100vh - 120px) * 0.12);
+  height: calc((100vh - 120px) * 0.12 + 3vh);
   grid-template-columns: repeat(4, 1fr);
 `;
 
 export const RecordActionButton = styled.button`
-  border: 1px solid #0f0f70;
+  /* 기본적으로 모든 테두리 제거 */
+  border: none;
   background-color: #0f0f70;
   font-family: "KBO-Dia-Gothic_bold";
   font-weight: bold;
   font-size: 20px;
   color: #ffffff;
+
+  /* 마지막 버튼이 아닌 경우(1, 2, 3번째)에만 오른쪽 테두리 추가 */
+  &:not(:last-child) {
+    border-right: 1px solid white;
+  }
+
   ${small} {
     font-size: 20px;
   }

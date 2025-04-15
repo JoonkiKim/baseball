@@ -77,3 +77,48 @@ export const ModalCancleButton = styled.button`
     background-color: #bdbdbd;
   }
 `;
+
+export const InningScoreContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: calc((100vh - 120px) * 0.15);
+  /* border-bottom: 1px solid #ccc; */
+  text-align: center;
+  margin-bottom: 30px;
+`;
+
+export const InningScoreTitle = styled.div`
+  /* margin-bottom: 8px; */
+  font-family: "KBO-Dia-Gothic_bold";
+  font-weight: 500;
+`;
+
+export const InningScoreControls = styled.div`
+  display: inline-flex;
+  /* background-color: red; */
+  align-items: center;
+  gap: 16px;
+`;
+
+export const ScoreButton = styled.button`
+  background-color: #000000;
+  border: none;
+  color: #ffffff;
+  border-radius: 4px;
+  font-size: 16px;
+  font-family: "KBO-Dia-Gothic_bold";
+  font-weight: 500;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+`;
+
+export const ScoreDisplay = styled.div`
+  font-size: 48px;
+  min-width: 24px;
+  text-align: center;
+  font-family: "KBO-Dia-Gothic_light";
+`;

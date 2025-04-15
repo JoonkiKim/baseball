@@ -238,26 +238,9 @@ paths:
     get:
       summary: "전체 타자 기록 조회"
       description: |
-        전체 타자 기록을 반환합니다. 안타 수를 기준으로 내림차순 정렬합니다.
+        전체 타자 기록을 반환합니다. 안타 수가 1이상인 선수들을 안타 수를 기준으로 내림차순 정렬합니다.
       tags:
         - "records"
-      parameters:
-        - in: query
-          name: limit
-          schema:
-            type: integer
-            minimum: 1
-            default: 5
-          required: false
-          description: "가져올 상위 선수 수 (예: 5, 20)"
-          example: 5
-        - in: query
-          name: sortBy
-          schema:
-            type: string
-            enum: [AB, H, 2B, 3B, HR, BB, AVG, OBP, SLG, OPS]
-          required: false
-          description: "정렬 기준(default: H)"
       responses:
         "200":
           description: "성공적으로 타자 기록을 가져옴"
@@ -270,9 +253,7 @@ paths:
 
   /records/pitchers:
     get:
-      summary: "전체 투수 기록 조회"
-      description: |
-        전체 투수 기록을 반환합니다. 정렬은 프론트에서 처리합니다.
+      summary: "탈삼진 수를 기준으로 상위 20명 반환"
       tags:
         - "records"
       responses:
@@ -368,7 +349,6 @@ paths:
       summary: "특정 팀의 선수 목록 조회"
       description: |
         팀 ID를 경로로 받아 해당 팀에 소속된 선수들을 리스트업합니다.
-        - 선출 여부(`isElite`), WC 여부(`isWc`)는 boolean
       tags:
         - "teams"
       parameters:
@@ -379,15 +359,78 @@ paths:
             type: integer
           description: "팀의 ID"
           example: 1
+
       responses:
         "200":
-          description: "특정 팀의 선수 목록을 성공적으로 가져옴"
+          description: "성공적으로 선수 목록을 가져옴"
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/PlayerListResponse"
         "404":
           description: "해당 팀이 존재하지 않는 경우"
+
+  /games/{gameId}/substitutable-batters:
+    get:
+      summary: "특정 경기의 교체 가능한 타자 목록 조회"
+      tags:
+        - "games"
+      parameters:
+        - name: gameId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: "경기 ID"
+          example: 1001
+        - name: teamType
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [home, away]
+          description: "팀 타입"
+          example: "home"
+      responses:
+        "200":
+          description: "성공적으로 교체 가능한 타자 목록을 가져옴"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlayerListResponseWithSubstitutionFlag"
+        "404":
+          description: "해당 경기 또는 팀을 찾을 수 없음"
+
+  /games/{gameId}/substitutable-pitchers:
+    get:
+      summary: "특정 경기의 교체 가능한 투수 목록 조회"
+      tags:
+        - "games"
+      parameters:
+        - name: gameId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: "경기 ID"
+          example: 1001
+        - name: teamType
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [home, away]
+          description: "팀 타입"
+          example: "home"
+      responses:
+        "200":
+          description: "성공적으로 교체 가능한 투수 목록을 가져옴"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlayerListResponseWithSubstitutionFlag"
+        "404":
+          description: "해당 경기 또는 팀을 찾을 수 없음"
   /games/{gameId}/lineup:
     get:
       summary: "특정 경기의 라인업 조회"
@@ -409,6 +452,15 @@ paths:
             enum: [home, away]
           description: "팀 타입"
           example: "home"
+        # - name: purpose
+        #   in: query
+        #   required: false
+        #   schema:
+        #     type: string
+        #     enum: [lineup, substitution]
+        #     default: "lineup"
+        #   description: "라인업 조회 목적"
+        #   example: "lineup"
       responses:
         "200":
           description: "특정 경기의 라인업 조회 성공"
@@ -457,7 +509,7 @@ paths:
         "404":
           description: "해당 경기 또는 팀을 찾을 수 없음"
     patch:
-      summary: "특정 경기 라인업 부분 수정"
+      summary: "특정 경기 라인업 부분 수정(사용 x)"
       description: |
         - 서버는 전달받은 `batters` 또는 'pitcher' 목록에 있는 선수들만 **DB 업데이트**합니다.
       tags:
@@ -496,6 +548,81 @@ paths:
         "404":
           description: "해당 경기 또는 팀(혹은 선수)을 찾을 수 없음"
 
+  # paths 섹션에 추가
+  /games/{gameId}/start:
+    post:
+      summary: "게임 시작"
+      description: |
+        게임을 시작하고 초기 상태를 설정합니다.
+        - 게임 상태를 IN_PROGRESS로 변경
+        - GameStat 생성 및 초기화 (점수 0, 1회초, 원정팀 1번타자 vs 홈팀 선발투수)
+        - 양 팀의 라인업이 모두 제출되어 있어야 함
+      tags:
+        - "games"
+      parameters:
+        - name: gameId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: "게임 ID"
+          example: 1001
+      responses:
+        "200":
+          description: "게임 시작 성공"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "게임이 시작되었습니다."
+                  gameStat:
+                    type: object
+                    properties:
+                      gameId:
+                        type: integer
+                        example: 1001
+                      homeScore:
+                        type: integer
+                        example: 0
+                      awayScore:
+                        type: integer
+                        example: 0
+                      homeHits:
+                        type: integer
+                        example: 0
+                      awayHits:
+                        type: integer
+                        example: 0
+                      inning:
+                        type: integer
+                        example: 1
+                      inningHalf:
+                        type: string
+                        enum: ["TOP", "BOT"]
+                        example: "TOP"
+                      homePitcherParticipationId:
+                        type: integer
+                        example: 101
+                      homeBatterParticipationId:
+                        type: integer
+                        example: 201
+                      awayPitcherParticipationId:
+                        type: integer
+                        example: 102
+                      awayBatterParticipationId:
+                        type: integer
+                        example: 202
+        "400":
+          description: |
+            잘못된 요청
+            - 이미 시작된 게임
+            - 라인업이 제출되지 않은 경우
+            - 필수 선수(투수, 타자)가 없는 경우
+        "404":
+          description: "게임을 찾을 수 없음"
   /games/{gameId}/current-batter:
     get:
       summary: "현재 타자 조회"
@@ -661,7 +788,7 @@ paths:
     post:
       summary: "특정 경기에서 타자의 타석 결과 기록"
       description: |
-        - 안타/2루타/3루타/홈런/볼넷/희생타/아웃 등 타석 결과를 기록
+        - 
         - 서버는 DB(batter_game_stats)를 업데이트
       tags:
         - "games"
@@ -714,6 +841,29 @@ paths:
                 $ref: "#/components/schemas/GameResultsResponse"
         "404":
           description: "경기(gameId) 없음"
+
+    post:
+      summary: "경기 결과 생성 (스코어보드 + 팀/선수 기록)"
+      description: |
+        - 경기 종료 후 결과 생성
+      tags:
+        - "games"
+      parameters:
+        - name: gameId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: "경기 ID"
+          example: 101
+      responses:
+        "200":
+          description: "경기 결과 생성 성공"
+        "400":
+          description: "이미 종료된 경기, 또는 정합성 오류"
+        "404":
+          description: "경기(gameId) 없음"
+
   /games/{gameId}/results/batters/{batterGameStatsId}:
     patch:
       summary: "타자 기록 수정 (타수/안타/홈런/볼넷)"
@@ -896,7 +1046,8 @@ components:
         date: "2025-04-13"
         dayOfWeek: "일"
         games:
-          - time: "09:00"
+          - gameId: 101
+            time: "09:00"
             status: "FINALIZED"
             homeTeam:
               id: 1
@@ -907,7 +1058,8 @@ components:
               name: "공대"
               score: 16
 
-          - time: "11:00"
+          - gameId: 102
+            time: "11:00"
             status: "EDITING"
             homeTeam:
               id: 1
@@ -918,7 +1070,8 @@ components:
               name: "건환공"
               score: 6
 
-          - time: "14:00"
+          - gameId: 103
+            time: "14:00"
             status: "IN_PROGRESS"
             inning: 5
             inningHalf: "BOT"
@@ -931,7 +1084,8 @@ components:
               name: "공대"
               score: 6
 
-          - time: "16:30"
+          - gameId: 104
+            time: "16:30"
             status: "SCHEDULED"
             homeTeam:
               id: 1
@@ -942,7 +1096,8 @@ components:
               name: "공대"
               score: null
 
-          - time: "19:00"
+          - gameId: 105
+            time: "19:00"
             status: "SCHEDULED"
             homeTeam:
               id: 1
@@ -1017,10 +1172,6 @@ components:
           type: integer
           description: "가져온 타자 수"
           example: 150
-        sortBy:
-          type: string
-          description: "정렬 기준"
-          example: "AB"
         batters:
           type: array
           description: "타자 기록 배열"
@@ -1029,7 +1180,6 @@ components:
       required:
         - count
         - batters
-        - sortBy
 
     BatterRecord:
       type: object
@@ -1042,6 +1192,14 @@ components:
           type: string
           description: "소속 팀 이름"
           example: "관악사"
+        teamGameCount:
+          type: integer
+          description: "소속 팀 경기 수"
+          example: 4
+        PA:
+          type: integer
+          description: "타자 기록 수"
+          example: 100
         AB:
           type: integer
           description: "타수 (At Bats)"
@@ -1140,7 +1298,7 @@ components:
         count:
           type: integer
           description: "가져온 투수 수"
-          example: 80
+          example: 20
         pitchers:
           type: array
           description: "투수 기록 배열"
@@ -1228,7 +1386,7 @@ components:
           type: string
           description: "학과"
           example: "수학교육과"
-        playerName:
+        name:
           type: string
           description: "선수 이름"
           example: "윤동현"
@@ -1243,9 +1401,66 @@ components:
       required:
         - id
         - departmentName
-        - playerName
+        - name
         - isElite
         - isWc
+
+    PlayerListResponseWithSubstitutionFlag:
+      type: object
+      properties:
+        teamId:
+          type: integer
+          description: "팀 ID"
+          example: 1
+        teamName:
+          type: string
+          description: "팀 이름"
+          example: "공대"
+        # lineup:
+        #   type: array
+        #   description: "라인업"
+        #   items:
+        #     $ref: "#/components/schemas/LineupResponse"
+        players:
+          type: array
+          description: "선수 목록"
+          items:
+            $ref: "#/components/schemas/PlayerWithSubstitutionFlag"
+      required:
+        - id
+        - name
+        - players
+    PlayerWithSubstitutionFlag:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: "선수 ID"
+          example: 101
+        name:
+          type: string
+          description: "선수 이름"
+          example: "윤동현"
+        departmentName:
+          type: string
+          description: "학과"
+          example: "수학교육과"
+        isElite:
+          type: boolean
+          description: "선출 여부 (true면 프로 경험자)"
+          example: false
+        isWc:
+          type: boolean
+          description: "WC 여부 (true면 와일드카드)"
+          example: false
+        isSubstitutable:
+          type: boolean
+          description: "해당 선수가 교체 가능한지 여부"
+      required:
+        - id
+        - name
+        - departmentName
+        - isSubstitutable
 
     LineupResponse:
       type: object
@@ -1348,6 +1563,10 @@ components:
           type: string
           description: "포지션 (CF, SS, C, 1B, 2B, 3B, LF, RF, DH, P 등)"
           example: "CF"
+        isWC:
+          type: boolean
+          description: "WC 여부 (true면 와일드카드)"
+          example: false
       required:
         - playerId
         - order
@@ -1373,6 +1592,10 @@ components:
           type: string
           description: "선수 이름"
           example: "김철수"
+        isWC:
+          type: boolean
+          description: "WC 여부 (true면 와일드카드)"
+          example: false
       required:
         - playerId
         - playerName
@@ -1518,13 +1741,13 @@ components:
           description: "이닝별 전체 점수 목록"
           items:
             $ref: "#/components/schemas/InningHalfScore"
-        teamStats:
+        teamSummary:
           type: object
           properties:
             home:
-              $ref: "#/components/schemas/TeamStats"
+              $ref: "#/components/schemas/TeamSummary"
             away:
-              $ref: "#/components/schemas/TeamStats"
+              $ref: "#/components/schemas/TeamSummary"
       required:
         - scoreboard
       example:
@@ -1538,17 +1761,29 @@ components:
           - inning: 2
             inningHalf: "TOP"
             runs: 2
-        teamStats:
+        teamSummary:
           home:
+            id: 1
+            name: "공대"
             runs: 1
             hits: 1
           away:
+            id: 2
+            name: "건환공"
             runs: 2
             hits: 2
 
-    TeamStats:
+    TeamSummary:
       type: object
       properties:
+        id:
+          type: integer
+          description: "팀 ID"
+          example: 1
+        name:
+          type: string
+          description: "팀 이름"
+          example: "공대"
         runs:
           type: integer
           description: "총 득점"
@@ -1558,28 +1793,20 @@ components:
           description: "총 안타"
           example: 4
       required:
+        - id
+        - name
         - runs
         - hits
     InningHalfScore:
       type: object
       properties:
-        inning:
-          type: integer
-          description: "몇 회 이닝인지"
-          example: 1
-        inningHalf:
-          type: string
-          enum: [TOP, BOT]
-          description: "이닝의 절반 - TOP: 초 / BOT: 말"
-          example: "TOP"
         runs:
           type: integer
           nullable: true
           description: "득점 (아직 기록되지 않은 경우 null)"
           example: 1
       required:
-        - inning
-        - inningHalf
+        - runs
 
     InningScoreResponse:
       type: object
@@ -1614,13 +1841,13 @@ components:
           description: "이닝별 득점 목록"
           items:
             $ref: "#/components/schemas/InningScoreResponse"
-        teamStats:
+        teamSummary:
           type: object
           properties:
             home:
-              $ref: "#/components/schemas/TeamStats"
+              $ref: "#/components/schemas/TeamSummary"
             away:
-              $ref: "#/components/schemas/TeamStats"
+              $ref: "#/components/schemas/TeamSummary"
       required:
         - scoreboard
       example:
@@ -1637,13 +1864,17 @@ components:
           - inning: 2
             inningHalf: "BOT"
             runs: 1
-        teamStats:
+        teamSummary:
           home:
+            id: 1
+            name: "공대"
             runs: 2
             hits: 3
           away:
-          runs: 1
-          hits: 2
+            id: 2
+            name: "건환공"
+            runs: 1
+            hits: 2
     BatterPlateAppearanceRequest:
       type: object
       properties:
@@ -1657,31 +1888,6 @@ components:
         - result
       example:
         result: "2B"
-
-    # 팀 정보 + 누적 득점/안타
-    TeamSummary:
-      type: object
-      properties:
-        id:
-          type: integer
-          description: "팀 ID"
-          example: 1
-        name:
-          type: string
-          description: "팀 이름"
-          example: "관악사 야구부"
-        runs:
-          type: integer
-          description: "총 득점"
-          example: 4
-        hits:
-          type: integer
-          description: "총 안타 수"
-          example: 4
-      required:
-        - id
-        - runs
-        - hits
 
     # 타자 당일 기록
     BatterDailyStats:
@@ -1807,20 +2013,26 @@ components:
           type: integer
           description: "안타"
           example: 1
-        HR:
-          type: integer
-          description: "홈런"
-          example: 0
         BB:
           type: integer
           description: "볼넷"
           example: 1
-
-      example:
-        AB: 2
-        H: 1
-        HR: 0
-        BB: 1
+        "2B":
+          type: integer
+          description: "2루타"
+          example: 0
+        "3B":
+          type: integer
+          description: "3루타"
+          example: 0
+        HR:
+          type: integer
+          description: "홈런"
+          example: 0
+        SAC:
+          type: integer
+          description: "희생타"
+          example: 0
     UpdateBatterResponse:
       type: object
       properties:
@@ -1848,14 +2060,26 @@ components:
           type: integer
           description: "안타"
           example: 1
-        HR:
-          type: integer
-          description: "홈런"
-          example: 0
         BB:
           type: integer
           description: "볼넷"
           example: 1
+        "2B":
+          type: integer
+          description: "2루타"
+          example: 0
+        "3B":
+          type: integer
+          description: "3루타"
+          example: 0
+        HR:
+          type: integer
+          description: "홈런"
+          example: 0
+        SAC:
+          type: integer
+          description: "희생타"
+          example: 0
 
     UpdatePitcherStatsRequest:
       type: object

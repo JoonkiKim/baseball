@@ -7,7 +7,6 @@ import {
   Title,
   PlayerList,
   PlayerRow,
-  BlankPlayerRow,
   OrderNumber,
   NameWrapper,
   InputWrapper,
@@ -20,8 +19,6 @@ import {
   LargeTitle,
   WildCardBox,
   ArrowIcon,
-  SuggestionList,
-  SuggestionItem,
   ButtonWrapper,
   ArrowIconNone,
   PitcherPositionText,
@@ -65,7 +62,7 @@ export default function TeamRegistrationPageComponent(props: IProps) {
   const router = useRouter();
   const [teamInfo] = useRecoilState(TeamListState);
 
-  // 페이지 주소에 따라 팀 선수 목록을 불러올 리코일 상태
+  // 홈/원정 선수 목록 전역 상태
   const [homeTeamPlayers, setHomeTeamPlayers] = useRecoilState(
     HomeTeamPlayerListState
   );
@@ -73,19 +70,24 @@ export default function TeamRegistrationPageComponent(props: IProps) {
     AwayTeamPlayerListState
   );
 
-  // 페이지 주소 변화에 따라 GET 요청 보내기 (JSON 파싱 처리 포함)
+  const [homeTeamName, setHomeTeamName] = useState("");
+  const [awayTeamName, setAwayTeamName] = useState("");
+
+  // 팀 선수 목록 GET
   useEffect(() => {
     const fetchTeamPlayers = async () => {
       try {
         if (router.asPath.includes("homeTeamRegistration")) {
-          const res = await API.get(`/teams/${teamInfo[0].team1Id}/players`);
+          const res = await API.get(`/teams/${teamInfo[0].homeTeamId}/players`);
           const dataObj =
             typeof res.data === "string" ? JSON.parse(res.data) : res.data;
+          setHomeTeamName(dataObj.name);
           setHomeTeamPlayers(dataObj.players);
         } else {
-          const res = await API.get(`/teams/${teamInfo[0].team2Id}/players`);
+          const res = await API.get(`/teams/${teamInfo[0].awayTeamId}/players`);
           const dataObj =
             typeof res.data === "string" ? JSON.parse(res.data) : res.data;
+          setAwayTeamName(dataObj.name);
           setAwayTeamPlayers(dataObj.players);
         }
       } catch (err) {
@@ -95,10 +97,10 @@ export default function TeamRegistrationPageComponent(props: IProps) {
     fetchTeamPlayers();
   }, [router.asPath, setHomeTeamPlayers, setAwayTeamPlayers]);
 
-  // 제출 중복 방지를 위한 isSubmitting state (초기값 false)
+  // 제출 중복 방지
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // 초기 선수 배열에 "P"행을 추가하여 항상 자리 유지
+  // 1~9번 + P행
   const [players, setPlayers] = useState<PlayerInfo[]>([
     { order: 1, selectedViaModal: false },
     { order: 2, selectedViaModal: false },
@@ -112,43 +114,40 @@ export default function TeamRegistrationPageComponent(props: IProps) {
     { order: "P", selectedViaModal: false },
   ]);
 
+  // useForm
   const { register, handleSubmit, watch, setValue } = useForm({
     defaultValues: {
-      players: players.map((player) => ({ name: player.name ?? "" })),
+      players: players.map((player) => ({
+        name: player.name ?? "",
+        position: player.position ?? "",
+        playerId: player.playerId,
+      })),
     },
   });
 
-  // 포지션 드롭다운 관련 상태
+  // "비(非)‑P 행에서 P를 선택"했을 때 해당 row 인덱스를 기억
+  const [lastPUpdateIndex, setLastPUpdateIndex] = useState<number | null>(null);
+
+  // 포지션 드롭다운
   const [openPositionRow, setOpenPositionRow] = useState<number | null>(null);
   const handlePositionClick = (index: number) => {
     setOpenPositionRow(openPositionRow === index ? null : index);
   };
-
-  // 포지션 선택 시, non‑P 행에서 "P" 포지션 선택 시 P행 업데이트 처리
   const handlePositionSelect = (index: number, pos: string) => {
     const updatedPlayers = [...players];
     updatedPlayers[index].position = pos;
+
+    // batter 행에서 "P" 선택 시 lastPUpdateIndex 업데이트
     if (pos === "P" && updatedPlayers[index].order !== "P") {
-      const nonPRows = updatedPlayers.filter((player) => player.order !== "P");
-      const hasDHOverall = nonPRows.some((p) => p.position === "DH");
-      if (!hasDHOverall) {
-        const pRowIndex = updatedPlayers.findIndex(
-          (player) => player.order === "P"
-        );
-        if (pRowIndex !== -1) {
-          updatedPlayers[pRowIndex].name = updatedPlayers[index].name;
-          updatedPlayers[pRowIndex].playerId = updatedPlayers[index].playerId;
-          updatedPlayers[pRowIndex].selectedViaModal =
-            updatedPlayers[index].selectedViaModal;
-          setValue(`players.${pRowIndex}.name`, updatedPlayers[index].name);
-        }
-      }
+      setLastPUpdateIndex(index);
     }
+
     setPlayers(updatedPlayers);
+    setValue(`players.${index}.position`, pos);
     setOpenPositionRow(null);
   };
 
-  // 모달 관련 상태
+  // 모달 상태
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPlayerSelectionModalOpen, setIsPlayerSelectionModalOpen] =
     useState(false);
@@ -156,20 +155,9 @@ export default function TeamRegistrationPageComponent(props: IProps) {
     null
   );
 
-  // 추천 목록 활성 인덱스 상태
-  const [activeSuggestionIndex, setActiveSuggestionIndex] = useState<
-    number | null
-  >(null);
-
-  // Recoil 전역 상태에서 teamName 불러오기
-  console.log("원정팀 이름 : ", teamInfo[0].team2Name);
-
-  // 페이지 주소에 관계없이 사용할 선수 목록(제안 목록) localPlayerList 상태 선언 및 업데이트
+  // 페이지 주소에 따라 사용할 선수 데이터
   const [localPlayerList, setLocalPlayerList] = useState<IHAPlayer[]>([]);
   useEffect(() => {
-    // 주소에 따른 분기를 없애고 두 목록을 합치는 방법도 가능하지만,
-    // 여기서는 주소와 관계없이 로컬에서 사용하는 목록에 중복 제거 방식만 적용하면 됩니다.
-    // 필요에 따라 두 리코일 상태의 값을 통합해서 사용할 수 있습니다.
     if (router.asPath.includes("homeTeamRegistration")) {
       setLocalPlayerList(homeTeamPlayers);
     } else {
@@ -177,27 +165,7 @@ export default function TeamRegistrationPageComponent(props: IProps) {
     }
   }, [router.asPath, homeTeamPlayers, awayTeamPlayers]);
 
-  // 헬퍼: 입력 텍스트와 일치하는 부분 빨간색 표시
-  const highlightText = (text: string, query: string) => {
-    if (!query) return text;
-    const regex = new RegExp(`(${query})`, "gi");
-    const parts = text.split(regex);
-    return (
-      <>
-        {parts.map((part, index) =>
-          part.toLowerCase() === query.toLowerCase() ? (
-            <span key={index} style={{ color: "red" }}>
-              {part}
-            </span>
-          ) : (
-            part
-          )
-        )}
-      </>
-    );
-  };
-
-  // 돋보기 버튼(모달)로 선수 선택 후 해당 행 업데이트
+  // 모달에서 선수 선택 시
   const handleSelectPlayer = (selectedPlayer: {
     name: string;
     playerId: number;
@@ -210,24 +178,65 @@ export default function TeamRegistrationPageComponent(props: IProps) {
     updatedPlayers[selectedPlayerIndex].selectedViaModal = true;
     setPlayers(updatedPlayers);
     setValue(`players.${selectedPlayerIndex}.name`, selectedPlayer.name);
+
+    // batter 행이면서 포지션이 "P"라면 lastPUpdateIndex 업데이트
+    if (
+      updatedPlayers[selectedPlayerIndex].order !== "P" &&
+      updatedPlayers[selectedPlayerIndex].position === "P"
+    ) {
+      setLastPUpdateIndex(selectedPlayerIndex);
+    }
+
     setIsPlayerSelectionModalOpen(false);
     setSelectedPlayerIndex(null);
   };
 
-  // 입력창 변경 시 해당 행은 수동 입력 상태로 전환
-  const handleInputChange = (
-    index: number,
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const updatedPlayers = [...players];
-    updatedPlayers[index].selectedViaModal = false;
-    updatedPlayers[index].playerId = undefined;
-    setPlayers(updatedPlayers);
-  };
+  // ★ 투수행 자동 업데이트
+  useEffect(() => {
+    const pitcherIndex = players.findIndex((player) => player.order === "P");
+    if (pitcherIndex === -1) return;
 
-  // 폼 제출 시
+    if (lastPUpdateIndex !== null) {
+      const candidate = players[lastPUpdateIndex];
+      if (
+        candidate &&
+        candidate.name?.trim() !== "" &&
+        candidate.position === "P"
+      ) {
+        // 이름이 다를 때에만 동기화
+        if (players[pitcherIndex].name !== candidate.name) {
+          const updatedPlayers = [...players];
+          updatedPlayers[pitcherIndex] = {
+            ...updatedPlayers[pitcherIndex],
+            name: candidate.name,
+            playerId: candidate.playerId,
+            selectedViaModal: candidate.selectedViaModal,
+            position: "P", // P행은 항상 P
+          };
+          setPlayers(updatedPlayers);
+          setValue(`players.${pitcherIndex}.name`, candidate.name);
+          setValue(`players.${pitcherIndex}.playerId`, candidate.playerId);
+        }
+      }
+    } else {
+      // lastPUpdateIndex가 null이면 P행 초기화
+      if (players[pitcherIndex].name?.trim() !== "") {
+        const updatedPlayers = [...players];
+        updatedPlayers[pitcherIndex] = {
+          ...updatedPlayers[pitcherIndex],
+          name: "",
+          playerId: undefined,
+          selectedViaModal: false,
+        };
+        setPlayers(updatedPlayers);
+        setValue(`players.${pitcherIndex}.name`, "");
+        setValue(`players.${pitcherIndex}.playerId`, undefined);
+      }
+    }
+  }, [lastPUpdateIndex, players, setValue]);
+
+  // 폼 제출
   const onSubmit = async (data: any) => {
-    // 폼 데이터 반영하여 updatedPlayers 생성
     const updatedPlayers = players.map((player, index) => {
       if (player.order === "P") {
         return {
@@ -244,14 +253,12 @@ export default function TeamRegistrationPageComponent(props: IProps) {
 
     const nonPRows = updatedPlayers.filter((player) => player.order !== "P");
 
-    // 비‑P 행의 선수명 입력 칸 검증
+    // 비‑P 행 필수값 체크 (이름, 포지션)
     const blankNameNonP = nonPRows.find((player) => !player.name?.trim());
     if (blankNameNonP) {
       alert(`${blankNameNonP.order}번 타자의 선수명 입력칸이 비어 있습니다.`);
       return;
     }
-
-    // 비‑P 행의 포지션 입력 칸 검증
     const blankPositionNonP = nonPRows.find(
       (player) => !player.position?.trim()
     );
@@ -262,11 +269,11 @@ export default function TeamRegistrationPageComponent(props: IProps) {
       return;
     }
 
-    // 비‑P 행 중 DH 포지션 여부 확인
+    // DH 체크
     const hasDHOverall = nonPRows.some((p) => p.position === "DH");
     const pRow = updatedPlayers.find((player) => player.order === "P");
 
-    // DH가 없으면, non‑P 행 중 포지션이 "P"인 선수의 이름을 P행으로 복사
+    // DH가 없으면, P행 비어있을 경우 비‑P 행의 "P" 선수명을 복사
     if (!hasDHOverall && pRow && !pRow.name?.trim()) {
       const sourceRow = nonPRows.find(
         (player) => player.position?.trim() === "P" && player.name?.trim()
@@ -282,13 +289,13 @@ export default function TeamRegistrationPageComponent(props: IProps) {
       }
     }
 
-    // P행 검증 (복사 후에도 비어있으면 에러 처리)
+    // P행 검증
     if (pRow && !pRow.name?.trim()) {
       alert(`P행의 선수명 입력 칸이 비어 있습니다.`);
       return;
     }
 
-    // 필수 포지션 검증 (DH가 있을 때와 없을 때 구분)
+    // 필수 포지션 검증
     if (hasDHOverall) {
       const requiredPositions = [
         "CF",
@@ -304,7 +311,7 @@ export default function TeamRegistrationPageComponent(props: IProps) {
       const nonPPositions = nonPRows.map((player) => player.position?.trim());
       for (const pos of requiredPositions) {
         if (!nonPPositions.includes(pos)) {
-          alert(`필수 포지션 ${pos}가 입력되지 않았습니다.`);
+          alert(`포지션 입력이 올바르지 않습니다.`);
           return;
         }
       }
@@ -323,14 +330,13 @@ export default function TeamRegistrationPageComponent(props: IProps) {
       const nonPPositions = nonPRows.map((player) => player.position?.trim());
       for (const pos of requiredPositions) {
         if (!nonPPositions.includes(pos)) {
-          alert(`필수 포지션 ${pos}가 입력되지 않았습니다.`);
+          alert(`포지션 입력이 올바르지 않습니다.`);
           return;
         }
       }
     }
 
-    // 추가 로직: 와일드카드(isWc가 true인 선수) 체크 (4명 이상이면 제출 중단)
-    // 중복되는 선수명은 Set을 이용해서 한 번만 카운트
+    // 와일드카드(WC) 제한 체크
     const uniqueWildcardNames = new Set(
       updatedPlayers.reduce((acc: string[], player) => {
         if (player.name && player.name.trim()) {
@@ -364,7 +370,6 @@ export default function TeamRegistrationPageComponent(props: IProps) {
         playerId: player.playerId,
         position: player.position,
       }));
-      // 비‑P 행에서 포지션 P인 선수를 찾아 피칭 데이터로 사용
       pitcherData = nonPRows.find((player) => player.position!.trim() === "P");
     }
 
@@ -376,18 +381,26 @@ export default function TeamRegistrationPageComponent(props: IProps) {
 
     setIsSubmitting(true);
     try {
+      // 라인업 제출
       const response = await API.post(
         `/matches/${router.query.recordId}/lineup`,
         requestBody
       );
       console.log("POST 요청 성공:", response.data);
-      console.log("명단제출", requestBody);
       setPlayers(updatedPlayers);
       setIsSubmitting(false);
+
+      // 홈/원정에 따라 분기
       if (props.isHomeTeam) {
         router.push(`/matches/${router.query.recordId}/awayTeamRegistration`);
       } else {
-        setIsModalOpen(true);
+        // 기록 시작
+        const response = await API.post(
+          `/games/${router.query.recordId}/start`,
+          requestBody
+        );
+        console.log(response);
+        router.push(`/matches/${router.query.recordId}/records`);
       }
     } catch (error) {
       console.error("POST 요청 실패:", error);
@@ -395,41 +408,24 @@ export default function TeamRegistrationPageComponent(props: IProps) {
     }
   };
 
-  // 검색 아이콘 클릭 시 선수 선택 모달 열기
-  const handleOpenPlayerModal = (index: number) => {
-    setSelectedPlayerIndex(index);
-    setIsPlayerSelectionModalOpen(true);
-  };
-
-  // 전체 폼의 선수명 배열 (중복 체크용)
-  const formPlayers = watch("players") || [];
-  const selectedPlayerNames = formPlayers
-    .map((player) => player.name)
-    .filter((name) => name && name.trim() !== "");
-
-  const hasDHOverall = players
-    .filter((p) => p.order !== "P")
-    .some((p) => p.position === "DH");
-
   return (
     <Container onClick={() => setOpenPositionRow(null)}>
       <LargeTitle>라인업을 등록해주세요</LargeTitle>
       <Title>
         {router.asPath.includes("homeTeamRegistration")
-          ? teamInfo[0].team1Name
-          : teamInfo[0].team2Name}{" "}
+          ? homeTeamName
+          : awayTeamName}{" "}
         야구부
       </Title>
+
       <form
         onSubmit={handleSubmit(onSubmit)}
         style={{ display: "flex", flexDirection: "column", height: "100%" }}
       >
         <PlayerList style={{ flexGrow: 1 }}>
           {players.map((player, index) => {
-            if (player.order === "P" && !hasDHOverall) {
-              return <BlankPlayerRow key={`${player.order}-${index}`} />;
-            }
             const currentName = watch(`players.${index}.name`) || "";
+            // 바로 전 행이 비어있는 경우 현재 행 비활성화
             const prevName =
               index === 0 ? "dummy" : watch(`players.${index - 1}.name`) || "";
             const prevPosition =
@@ -437,88 +433,50 @@ export default function TeamRegistrationPageComponent(props: IProps) {
             const isRowEnabled =
               index === 0 ||
               (prevName.trim() !== "" && prevPosition.trim() !== "");
-            const filteredSuggestions = localPlayerList.filter((p) => {
-              const pName = p.name;
-              const matchesQuery = pName
-                .toLowerCase()
-                .includes(currentName.toLowerCase());
-              const isAlreadySelected = formPlayers.some(
-                (item, idx) =>
-                  idx !== index &&
-                  item.name &&
-                  item.name.toLowerCase() === pName.toLowerCase()
-              );
-              return matchesQuery && !isAlreadySelected;
-            });
-            const isPositionEmpty = !player.position;
+
+            // 전체 목록에서 현재 이름이 WC인지 체크
             const globalPlayer = localPlayerList.find(
               (p) => p.name === currentName
             );
+
             return (
               <PlayerRow key={`${player.order}-${index}`}>
                 <OrderNumber>{player.order}</OrderNumber>
                 <NameWrapper hasValue={!!currentName}>
                   <InputWrapper hasValue={!!currentName}>
+                    {/* ★ readOnly 적용, 클릭 시 모달 오픈 */}
                     <PlayerNameInput
-                      {...register(`players.${index}.name`, {
-                        onChange: (e) => {
-                          if (isRowEnabled) {
-                            handleInputChange(index, e);
-                          }
-                        },
-                      })}
-                      placeholder="선수명 입력"
-                      onFocus={() => {
+                      {...register(`players.${index}.name`)}
+                      placeholder="선수명 선택"
+                      autoComplete="off"
+                      readOnly
+                      disabled={!isRowEnabled}
+                      onClick={() => {
                         if (isRowEnabled) {
-                          setActiveSuggestionIndex(index);
+                          setSelectedPlayerIndex(index);
+                          setIsPlayerSelectionModalOpen(true);
                         }
                       }}
-                      autoComplete="off"
-                      disabled={!isRowEnabled}
                     />
                     {currentName &&
-                      (globalPlayer && globalPlayer.isWc === true ? (
+                      globalPlayer &&
+                      globalPlayer.isWc === true && (
                         <WildCardBox>WC</WildCardBox>
-                      ) : (
-                        <div></div>
-                      ))}
+                      )}
                   </InputWrapper>
+                  {/* 돋보기 아이콘 유지 */}
                   <SearchIcon
                     src="/images/magnifier.png"
                     alt="Search Icon"
                     onClick={() => {
                       if (isRowEnabled) {
-                        handleOpenPlayerModal(index);
+                        setSelectedPlayerIndex(index);
+                        setIsPlayerSelectionModalOpen(true);
                       }
                     }}
                   />
-                  {activeSuggestionIndex === index &&
-                    !player.selectedViaModal &&
-                    currentName &&
-                    filteredSuggestions.length > 0 && (
-                      <SuggestionList>
-                        {filteredSuggestions.map((suggestion, idx) => (
-                          <SuggestionItem
-                            key={idx}
-                            onClick={() => {
-                              const updatedPlayers = [...players];
-                              updatedPlayers[index].name = suggestion.name;
-                              updatedPlayers[index].playerId = suggestion.id;
-                              updatedPlayers[index].selectedViaModal = true;
-                              setPlayers(updatedPlayers);
-                              setValue(
-                                `players.${index}.name`,
-                                suggestion.name
-                              );
-                              setActiveSuggestionIndex(null);
-                            }}
-                          >
-                            {highlightText(suggestion.name, currentName)}
-                          </SuggestionItem>
-                        ))}
-                      </SuggestionList>
-                    )}
                 </NameWrapper>
+
                 {player.order !== "P" ? (
                   <PositionWrapper
                     onClick={(e) => {
@@ -528,11 +486,11 @@ export default function TeamRegistrationPageComponent(props: IProps) {
                       }
                     }}
                   >
-                    <PositionText isPlaceholder={isPositionEmpty}>
-                      {isPositionEmpty ? (
+                    <PositionText isPlaceholder={!player.position}>
+                      {!player.position ? (
                         <>
                           <ArrowIconNone>▽</ArrowIconNone>
-                          포지션 입력
+                          포지션 선택
                           <ArrowIcon>▽</ArrowIcon>
                         </>
                       ) : (
@@ -568,25 +526,29 @@ export default function TeamRegistrationPageComponent(props: IProps) {
                   </PositionWrapper>
                 ) : (
                   <PositionWrapper>
-                    <PitcherPositionText>{"P"}</PitcherPositionText>
+                    <PitcherPositionText>P</PitcherPositionText>
                   </PositionWrapper>
                 )}
               </PlayerRow>
             );
           })}
         </PlayerList>
+
         <ButtonWrapper>
           <ControlButton type="submit" disabled={isSubmitting}>
             제출하기
           </ControlButton>
         </ButtonWrapper>
       </form>
+
       {isModalOpen && <RecordStartModal setIsModalOpen={setIsModalOpen} />}
       {isPlayerSelectionModalOpen && (
         <PlayerSelectionModal
           setIsModalOpen={setIsPlayerSelectionModalOpen}
           onSelectPlayer={handleSelectPlayer}
-          selectedPlayerNames={selectedPlayerNames}
+          selectedPlayerNames={(watch("players") || [])
+            .map((p: any) => p.name)
+            .filter((name: string) => name && name.trim() !== "")}
         />
       )}
     </Container>

@@ -233,7 +233,7 @@ export default function MainCalendarPage() {
           </p>
         ) : matchesForSelectedDate.length > 0 ? (
           matchesForSelectedDate.map((match, index) => {
-            // 새 객체 구조에 맞게 점수 변수 처리
+            // 기존 구조: homeTeam을 team1, awayTeam을 team2로 사용
             const team1Score = match.homeTeam.score;
             const team2Score = match.awayTeam.score;
             const team1IsWinner =
@@ -249,13 +249,14 @@ export default function MainCalendarPage() {
               <MatchCard key={index}>
                 <MatchTimeLabel>{match.time}</MatchTimeLabel>
                 <TeamsContainer>
+                  {/* awayTeam을 왼쪽에 노출 */}
                   <Team>
-                    <TeamName>{match.homeTeam.name}</TeamName>
+                    <TeamName>{match.awayTeam.name}</TeamName>
                     <TeamScore
-                      isWinner={team1IsWinner}
+                      isWinner={team2IsWinner}
                       gameStatus={match.status}
                     >
-                      {team1Score ?? "-"}
+                      {team2Score ?? "-"}
                     </TeamScore>
                   </Team>
 
@@ -281,23 +282,22 @@ export default function MainCalendarPage() {
                     <VsText>vs</VsText>
                   </div>
 
+                  {/* homeTeam을 오른쪽에 노출 */}
                   <Team>
-                    <TeamName>{match.awayTeam.name}</TeamName>
+                    <TeamName>{match.homeTeam.name}</TeamName>
                     <TeamScore
-                      isWinner={team2IsWinner}
+                      isWinner={team1IsWinner}
                       gameStatus={match.status}
                     >
-                      {team2Score ?? "-"}
+                      {team1Score ?? "-"}
                     </TeamScore>
                   </Team>
                 </TeamsContainer>
 
-                {/* 경기기록 버튼 클릭 시,
-                    1. 선택된 경기에서 gameId, awayTeam, homeTeam 정보 중
-                       각 팀의 score 필드는 제외하고 id와 name 만 저장
-                    2. SCHEDULED 상태인 경우 TeamListState 업데이트 후, 조건에 따라 페이지 이동 */}
+                {/* 경기기록 버튼 클릭 시, 관련 팀 정보 저장 순서도 awayTeam -> homeTeam로 변경 */}
                 <RecordButton
                   onClick={() => {
+                    // 선택된 경기 정보를 객체로 구성합니다.
                     const selectedMatchInfo = {
                       gameId: match.gameId,
                       awayTeam: {
@@ -314,33 +314,48 @@ export default function MainCalendarPage() {
                       JSON.stringify(selectedMatchInfo)
                     );
 
+                    // localStorage를 사용하지 않고, Recoil 스테이트 (TeamListState)를 업데이트 합니다.
+                    // 경기 상태가 "SCHEDULED"인 경우에 팀 정보를 저장하는 예시입니다.
                     if (match.status === "SCHEDULED") {
                       setTeamList([
                         {
-                          team1Name: match.homeTeam.name,
-                          team1Id: match.homeTeam.id,
-                          team2Name: match.awayTeam.name,
-                          team2Id: match.awayTeam.id,
+                          homeTeamName: match.homeTeam.name,
+                          homeTeamId: match.homeTeam.id,
+                          awayTeamName: match.awayTeam.name,
+                          awayTeamId: match.awayTeam.id,
                         },
                       ]);
                       console.log("저장된 팀 정보:", {
-                        team1Name: match.homeTeam.name,
-                        team1Id: match.homeTeam.id,
-                        team2Name: match.awayTeam.name,
-                        team2Id: match.awayTeam.id,
+                        homeTeamName: match.homeTeam.name,
+                        homeTeamId: match.homeTeam.id,
+                        awayTeamName: match.awayTeam.name,
+                        awayTeamId: match.awayTeam.id,
                       });
                     }
-                    const route =
-                      match.status === "FINALIZED"
-                        ? `/matches/${match.gameId}/result`
-                        : match.status === "SCHEDULED"
-                        ? `/matches/${match.gameId}/homeTeamRegistration`
-                        : match.status === "IN_PROGRESS"
-                        ? `/matches/${match.gameId}/records`
-                        : "";
-                    if (route) {
-                      router.push(route);
+
+                    // 경기 상태에 따라 이동할 route를 설정합니다.
+                    let route = "";
+                    if (match.status === "FINALIZED") {
+                      route = `/matches/${match.gameId}/result`;
+                    } else if (match.status === "SCHEDULED") {
+                      route = `/matches/${match.gameId}/homeTeamRegistration`;
+                    } else if (match.status === "IN_PROGRESS") {
+                      route = `/matches/${match.gameId}/records`;
                     }
+
+                    router.push(route);
+                    // 설정된 route에 따라 쿼리 파라미터를 붙여 새 URL을 구성합니다.
+                    // route에 "homeTeamRegistration"이 포함되어 있으면 homeTeam의 id를, 그렇지 않으면 awayTeam의 id를 사용합니다.
+                    // if (route) {
+                    //   if (route.includes("homeTeamRegistration")) {
+                    //     // 예: /matches/1025/homeTeamRegistration?teamId=1
+                    //     route = `${route}?teamId=${match.homeTeam.id}`;
+                    //   } else {
+                    //     // 예: /matches/1025/result?teamId=2 또는 기타 상태의 경우 awayTeam의 id 사용
+                    //     route = `${route}?teamId=${match.awayTeam.id}`;
+                    //   }
+
+                    // }
                   }}
                 >
                   경기기록

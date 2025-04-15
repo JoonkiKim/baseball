@@ -1,3 +1,5 @@
+// TeamRegistrationPageComponent.tsx
+
 import React, { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
@@ -62,25 +64,27 @@ const positionOptions = [
 ];
 
 // 기본 라인업 (API 응답 전 fallback default 값)
+// 기존 기본값은 사용하지 않고 API에서 받아온 pitcher row가 초기값으로 반영됩니다.
 const defaultLineup = {
   batters: [
     { order: 1, playerId: 0, playerName: "", position: "", isWc: false },
-    { order: 2, playerId: 102, playerName: "", position: "", isWc: false },
-    { order: 3, playerId: 103, playerName: "", position: "", isWc: false },
-    { order: 4, playerId: 104, playerName: "", position: "", isWc: false },
-    { order: 5, playerId: 105, playerName: "", position: "", isWc: false },
-    { order: 6, playerId: 106, playerName: "", position: "", isWc: false },
-    { order: 7, playerId: 107, playerName: "", position: "", isWc: false },
-    { order: 8, playerId: 108, playerName: "", position: "", isWc: false },
-    { order: 9, playerId: 109, playerName: "", position: "", isWc: false },
+    { order: 2, playerId: 0, playerName: "", position: "", isWc: false },
+    { order: 3, playerId: 0, playerName: "", position: "", isWc: false },
+    { order: 4, playerId: 0, playerName: "", position: "", isWc: false },
+    { order: 5, playerId: 0, playerName: "", position: "", isWc: false },
+    { order: 6, playerId: 0, playerName: "", position: "", isWc: false },
+    { order: 7, playerId: 0, playerName: "", position: "", isWc: false },
+    { order: 8, playerId: 0, playerName: "", position: "", isWc: false },
+    { order: 9, playerId: 0, playerName: "", position: "", isWc: false },
   ],
   pitcher: {
-    playerId: 110,
-    playerName: "",
+    playerId: 0,
+    playerName: "", // 이 값은 API 결과에서 대체됩니다.
     isWc: false,
   },
 };
 
+// defaultPlayers 초기값 (초기 렌더링 전에 사용하므로 API 호출 전 fallback 값)
 const defaultPlayers: PlayerInfo[] = [
   ...defaultLineup.batters.map((batter) => ({
     order: batter.order,
@@ -102,25 +106,45 @@ const defaultPlayers: PlayerInfo[] = [
 
 export default function TeamRegistrationPageComponent() {
   const router = useRouter();
+  const [wildCardCount, setWildCardCount] = useState(0);
 
   // 홈/원정 여부 상태
   const [isHomeTeam, setIsHomeTeam] = useState(true);
-  // Recoil 상태 (홈/원정 선수 목록)
+
+  // Recoil: 홈/원정 선수 목록
   const [homeTeamPlayers, setHomeTeamPlayers] = useRecoilState(
     HomeTeamPlayerListState
   );
   const [awayTeamPlayers, setAwayTeamPlayers] = useRecoilState(
     AwayTeamPlayerListState
   );
-  // 팀 API 응답 및 라인업 API 응답 저장
+
+  // 팀 API 응답 (선수 목록)
   const [teamPlayersData, setTeamPlayersData] = useState<any[]>([]);
+  // 라인업 API 응답
   const [lineupPlayersData, setLineupPlayersData] = useState<any[]>([]);
-  // 추가로 등록되는 isWc 값이 true인 선수 id를 담는 state
+  // 커스텀으로 WC 체크된 선수 관리 (key=playerId, value=true/false)
   const [customWcMap, setCustomWcMap] = useState<{
     [playerId: number]: boolean;
   }>({});
 
-  // URL 쿼리를 이용한 홈/원정 여부 설정
+  // react-hook-form 및 선수 state 초기화
+  const [players, setPlayers] = useState<PlayerInfo[]>(defaultPlayers);
+  const { register, handleSubmit, watch, getValues, setValue } = useForm({
+    defaultValues: {
+      players: defaultPlayers.map((player) => ({
+        name: player.name || "",
+        position: player.position || "",
+        isWc: player.isWc,
+        playerId: player.playerId,
+      })),
+    },
+  });
+
+  // ★ 최근 수정한 batter 행(투수 행 제외)의 인덱스를 추적하는 state
+  const [lastPUpdateIndex, setLastPUpdateIndex] = useState<number | null>(null);
+
+  // URL 쿼리로 홈/원정 설정
   useEffect(() => {
     if (router.isReady) {
       const queryValue = router.query.isHomeTeam;
@@ -134,11 +158,11 @@ export default function TeamRegistrationPageComponent() {
     }
   }, [router.isReady, router.query.isHomeTeam]);
 
-  // 로컬스토리지의 selectedMatch를 읽고 팀 선수 목록(API) 호출
+  // localStorage에서 selectedMatch 읽고 팀 선수 목록(API) 호출
   useEffect(() => {
     const selectedMatchStr = localStorage.getItem("selectedMatch");
     if (!selectedMatchStr) {
-      console.error("selectedMatch 데이터가 로컬스토리지에 없습니다.");
+      console.error("selectedMatch 데이터가 없습니다.");
       return;
     }
     try {
@@ -156,8 +180,6 @@ export default function TeamRegistrationPageComponent() {
             .catch((error) => {
               console.error("Error fetching homeTeam players:", error);
             });
-        } else {
-          console.error("homeTeam id가 존재하지 않습니다.");
         }
       } else {
         const awayTeamId = selectedMatch?.awayTeam?.id;
@@ -172,8 +194,6 @@ export default function TeamRegistrationPageComponent() {
             .catch((error) => {
               console.error("Error fetching awayTeam players:", error);
             });
-        } else {
-          console.error("awayTeam id가 존재하지 않습니다.");
         }
       }
     } catch (error) {
@@ -181,31 +201,23 @@ export default function TeamRegistrationPageComponent() {
     }
   }, [isHomeTeam]);
 
-  // react-hook-form 설정: 기본값에 playerId 포함
-  const [players, setPlayers] = useState<PlayerInfo[]>(defaultPlayers);
-  const { register, handleSubmit, watch, getValues, setValue } = useForm({
-    defaultValues: {
-      players: defaultPlayers.map((player) => ({
-        name: player.name || "",
-        position: player.position || "",
-        isWc: player.isWc,
-        playerId: player.playerId,
-      })),
-    },
-  });
-
-  // 게임 라인업 API 호출 및 Recoil 상태 업데이트
+  // 라인업 API 호출 & recoil 업데이트
   useEffect(() => {
     const fetchTeamPlayers = async () => {
       const queryValue = router.query.isHomeTeam;
+      if (!router.query.recordId) return;
+
       try {
         if (queryValue === "true") {
+          // 홈팀
           const res = await API.get(
             `/games/${router.query.recordId}/lineup?teamType="home"`
           );
           const dataObj =
             typeof res.data === "string" ? JSON.parse(res.data) : res.data;
           console.log("홈팀 응답 (lineup API):", dataObj);
+
+          // API의 pitcher row 값을 그대로 사용
           let lineupPlayers = [
             ...dataObj.batters.map((batter: any) => ({
               order: batter.order,
@@ -213,7 +225,7 @@ export default function TeamRegistrationPageComponent() {
               position: batter.position,
               playerId: batter.playerId,
               selectedViaModal: false,
-              isWc: false,
+              isWc: batter.isWC ?? false,
             })),
             {
               order: "P",
@@ -221,35 +233,21 @@ export default function TeamRegistrationPageComponent() {
               position: "P",
               playerId: dataObj.pitcher.playerId,
               selectedViaModal: false,
-              isWc: false,
+              isWc: dataObj.pitcher.isWC ?? false,
             },
           ];
-          // DH가 없으면 원래 P행의 데이터를 초기화(제거)합니다.
-          if (
-            !dataObj.batters.some((batter: any) => batter.position === "DH")
-          ) {
-            lineupPlayers = lineupPlayers.map((player: any) =>
-              player.order === "P"
-                ? {
-                    order: "P",
-                    name: "",
-                    position: "P",
-                    playerId: undefined,
-                    selectedViaModal: false,
-                    isWc: false,
-                  }
-                : player
-            );
-          }
+          // 기존에는 DH가 없으면 P행을 초기화했지만, 이제 API의 pitcher 값을 그대로 유지합니다.
           setHomeTeamPlayers(lineupPlayers);
           setLineupPlayersData(lineupPlayers);
         } else {
+          // 원정팀
           const res = await API.get(
             `/games/${router.query.recordId}/lineup?teamType="away"`
           );
           const dataObj =
             typeof res.data === "string" ? JSON.parse(res.data) : res.data;
           console.log("원정팀 응답 (lineup API):", dataObj);
+
           let lineupPlayers = [
             ...dataObj.batters.map((batter: any) => ({
               order: batter.order,
@@ -257,7 +255,7 @@ export default function TeamRegistrationPageComponent() {
               position: batter.position,
               playerId: batter.playerId,
               selectedViaModal: false,
-              isWc: false,
+              isWc: batter.isWC ?? false,
             })),
             {
               order: "P",
@@ -265,27 +263,13 @@ export default function TeamRegistrationPageComponent() {
               position: "P",
               playerId: dataObj.pitcher.playerId,
               selectedViaModal: false,
-              isWc: false,
+              isWc: dataObj.pitcher.isWC ?? false,
             },
           ];
-          if (
-            !dataObj.batters.some((batter: any) => batter.position === "DH")
-          ) {
-            lineupPlayers = lineupPlayers.map((player: any) =>
-              player.order === "P"
-                ? {
-                    order: "P",
-                    name: "",
-                    position: "P",
-                    playerId: undefined,
-                    selectedViaModal: false,
-                    isWc: false,
-                  }
-                : player
-            );
-          }
+          // 원정팀도 DH 여부 상관없이 API의 pitcher 값을 그대로 사용합니다.
           setAwayTeamPlayers(lineupPlayers);
           setLineupPlayersData(lineupPlayers);
+          console.log("awayTeamPlayers", awayTeamPlayers);
         }
       } catch (err) {
         console.error("팀 선수 목록 요청 에러:", err);
@@ -294,7 +278,11 @@ export default function TeamRegistrationPageComponent() {
     fetchTeamPlayers();
   }, [router]);
 
-  // wcMap 계산 (lineupPlayersData와 teamPlayersData 기반)
+  useEffect(() => {
+    console.log("Updated homeTeamPlayers:", homeTeamPlayers);
+  }, [homeTeamPlayers]);
+
+  // wcMap 계산 (lineupPlayersData & teamPlayersData)
   const wcMap = useMemo(() => {
     if (!lineupPlayersData.length || !teamPlayersData.length) return {};
     const map: { [playerId: number]: boolean } = {};
@@ -310,7 +298,7 @@ export default function TeamRegistrationPageComponent() {
     return map;
   }, [lineupPlayersData, teamPlayersData]);
 
-  // API 응답 기반으로 form 기본 값 및 players 배열 업데이트
+  // 폼 기본값 & players 배열 업데이트
   useEffect(() => {
     if (router.query.isHomeTeam === "true" && homeTeamPlayers.length > 0) {
       const updatedPlayers = players.map((player) => {
@@ -354,16 +342,61 @@ export default function TeamRegistrationPageComponent() {
     }
   }, [router.query.isHomeTeam, homeTeamPlayers, awayTeamPlayers]);
 
-  // WildCardBox 개수를 계산해서 콘솔에 찍는 useEffect 추가
+  // WildCardBox 계산 (콘솔용)
   useEffect(() => {
-    const wildCardCountCalc = players.filter(
+    let wildCardCountCalc = players.filter(
       (player) =>
         player.name &&
         player.playerId &&
-        (wcMap[player.playerId] || customWcMap[player.playerId])
+        (player.isWc || wcMap[player.playerId] || customWcMap[player.playerId])
     ).length;
+
+    const pitcherPlayer = players.find((player) => player.order === "P");
+    if (pitcherPlayer && pitcherPlayer.name.trim() !== "") {
+      const isDuplicate = players.some(
+        (player) =>
+          player.order !== "P" &&
+          player.name.trim() !== "" &&
+          player.name === pitcherPlayer.name
+      );
+      if (isDuplicate) {
+        wildCardCountCalc = Math.max(wildCardCountCalc - 1, 0);
+      }
+    }
     console.log("WildCardBox count:", wildCardCountCalc);
+    setWildCardCount(wildCardCountCalc);
   }, [players, wcMap, customWcMap]);
+
+  // ★ 투수행 자동 업데이트
+  // 최근 수정한 batter 행(투수 행이 아닌)에서 포지션이 "P"인 row의 인덱스를 기준으로 투수행(P행)을 업데이트합니다.
+  // 만약 lastPUpdateIndex가 null이면, 현재 API에서 받아온 pitcher row(즉, homeTeamPlayers/awayTeamPlayers의 값)를 그대로 유지합니다.
+  useEffect(() => {
+    const pitcherIndex = players.findIndex((player) => player.order === "P");
+    if (pitcherIndex === -1) return;
+
+    if (lastPUpdateIndex !== null) {
+      const candidate = players[lastPUpdateIndex];
+      if (
+        candidate &&
+        candidate.name.trim() !== "" &&
+        candidate.position === "P"
+      ) {
+        if (players[pitcherIndex].name !== candidate.name) {
+          const updatedPlayers = [...players];
+          updatedPlayers[pitcherIndex] = {
+            ...updatedPlayers[pitcherIndex],
+            name: candidate.name,
+            playerId: candidate.playerId,
+            isWc: candidate.isWc,
+          };
+          setPlayers(updatedPlayers);
+          setValue(`players.${pitcherIndex}.name`, candidate.name);
+          setValue(`players.${pitcherIndex}.playerId`, candidate.playerId);
+        }
+      }
+    }
+    // lastPUpdateIndex가 null이면 아무런 변경도 하지 않습니다.
+  }, [lastPUpdateIndex, players, setValue]);
 
   // 포지션 드롭다운 관련 상태 및 핸들러
   const [openPositionRow, setOpenPositionRow] = useState<number | null>(null);
@@ -371,28 +404,30 @@ export default function TeamRegistrationPageComponent() {
     setOpenPositionRow(openPositionRow === index ? null : index);
   };
 
+  // ★ handlePositionSelect에서 batter 행(투수 행이 아닌)에서 "P" 선택 시 lastPUpdateIndex 업데이트
   const handlePositionSelect = (index: number, pos: string) => {
     const updatedPlayers = [...players];
     updatedPlayers[index].position = pos;
-    // DH 선택 시 P행 초기화 처리 (DH가 아직 등록되지 않은 경우)
+    if (updatedPlayers[index].order !== "P" && pos === "P") {
+      setLastPUpdateIndex(index);
+    }
+    // DH 선택 시 P행 기본값 유지 (API에서 받아온 pitcher 값을 그대로 사용)
     if (pos === "DH" && updatedPlayers[index].order !== "P") {
       const hasDH = updatedPlayers.some(
         (player) => player.order !== "P" && player.position === "DH"
       );
       if (!hasDH) {
-        const pRowIndex = updatedPlayers.findIndex(
-          (player) => player.order === "P"
-        );
+        const pRowIndex = updatedPlayers.findIndex((p) => p.order === "P");
         if (pRowIndex !== -1) {
           updatedPlayers[pRowIndex] = {
             order: "P",
-            name: "",
+            name: players[pRowIndex].name, // 기존 API에서 받아온 값 유지
             position: "P",
-            playerId: undefined,
+            playerId: players[pRowIndex].playerId,
             selectedViaModal: false,
-            isWc: false,
+            isWc: players[pRowIndex].isWc,
           };
-          setValue(`players.${pRowIndex}.name`, "");
+          setValue(`players.${pRowIndex}.name`, players[pRowIndex].name);
           setValue(`players.${pRowIndex}.position`, "P");
         }
       }
@@ -409,14 +444,11 @@ export default function TeamRegistrationPageComponent() {
   const [selectedPlayerIndex, setSelectedPlayerIndex] = useState<number | null>(
     null
   );
-  const [activeSuggestionIndex, setActiveSuggestionIndex] = useState<
-    number | null
-  >(null);
 
-  // Recoil 전역 상태에서 팀 이름 불러오기
+  // Recoil 전역 상태
   const [teamName] = useRecoilState(TeamListState);
 
-  // 팀별 선수 제안을 위한 localPlayerList 상태 업데이트
+  // localPlayerList (제안 목록)
   const [localPlayerList, setLocalPlayerList] = useState<IHAPlayer[]>([]);
   useEffect(() => {
     if (router.asPath.includes("homeTeamRegistration")) {
@@ -426,37 +458,7 @@ export default function TeamRegistrationPageComponent() {
     }
   }, [router.asPath, homeTeamPlayers, awayTeamPlayers]);
 
-  // 헬퍼: 검색 시 입력 문자 강조 (빨간색)
-  const highlightText = (text: string, query: string) => {
-    if (!query) return text;
-    const regex = new RegExp(`(${query})`, "gi");
-    const parts = text.split(regex);
-    return (
-      <>
-        {parts.map((part, index) =>
-          part.toLowerCase() === query.toLowerCase() ? (
-            <span key={index} style={{ color: "red" }}>
-              {part}
-            </span>
-          ) : (
-            part
-          )
-        )}
-      </>
-    );
-  };
-
-  // 포지션 입력값을 최신 상태로 getValues()에 반영하기 위해 hidden input 등록
-  const renderHiddenPositionInput = (index: number) => {
-    return <input type="hidden" {...register(`players.${index}.position`)} />;
-  };
-
-  // playerId를 반영하는 hidden input 등록
-  const renderHiddenPlayerIdInput = (index: number) => {
-    return <input type="hidden" {...register(`players.${index}.playerId`)} />;
-  };
-
-  // 모달에서 선수 선택 후 해당 행 업데이트 및 isWc 업데이트
+  // ★ 모달에서 선수를 선택했을 때, batter 행(투수 행이 아닌)에서 선택 시 lastPUpdateIndex 업데이트
   const handleSelectPlayer = (selectedPlayer: {
     name: string;
     playerId: number;
@@ -478,10 +480,13 @@ export default function TeamRegistrationPageComponent() {
       }
       updatedPlayers[selectedPlayerIndex].isWc = matchingPlayer.isWc;
     } else {
-      console.log(
-        `매칭된 선수 없음: 선택된 playerId = ${selectedPlayer.playerId}`
-      );
       updatedPlayers[selectedPlayerIndex].isWc = false;
+    }
+    if (
+      updatedPlayers[selectedPlayerIndex].order !== "P" &&
+      updatedPlayers[selectedPlayerIndex].position === "P"
+    ) {
+      setLastPUpdateIndex(selectedPlayerIndex);
     }
     setPlayers(updatedPlayers);
     setValue(`players.${selectedPlayerIndex}.name`, selectedPlayer.name);
@@ -493,7 +498,7 @@ export default function TeamRegistrationPageComponent() {
     setSelectedPlayerIndex(null);
   };
 
-  // 입력창 변경 시 수동 입력 상태로 전환
+  // ★ 입력창 수정 시, batter 행(투수 행이 아닌)에서 입력하면 lastPUpdateIndex 업데이트
   const handleInputChange = (
     index: number,
     e: React.ChangeEvent<HTMLInputElement>
@@ -502,41 +507,26 @@ export default function TeamRegistrationPageComponent() {
     updatedPlayers[index].selectedViaModal = false;
     updatedPlayers[index].playerId = undefined;
     setPlayers(updatedPlayers);
+    if (
+      updatedPlayers[index].order !== "P" &&
+      updatedPlayers[index].position === "P"
+    ) {
+      setLastPUpdateIndex(index);
+    }
   };
 
-  // players와 wcMap, customWcMap 조건에 맞는 선수 id 콘솔 출력
-  useEffect(() => {
-    players.forEach((player) => {
-      if (
-        player.name &&
-        player.playerId &&
-        (wcMap[player.playerId] || customWcMap[player.playerId])
-      ) {
-        console.log(`조건 만족 선수 id: ${player.playerId}`);
-      }
-    });
-  }, [players, wcMap, customWcMap]);
+  // Hidden inputs
+  const renderHiddenPositionInput = (index: number) => {
+    return <input type="hidden" {...register(`players.${index}.position`)} />;
+  };
+  const renderHiddenPlayerIdInput = (index: number) => {
+    return <input type="hidden" {...register(`players.${index}.playerId`)} />;
+  };
 
-  // WildCardBox count를 저장할 state
-  const [wildCardCount, setWildCardCount] = useState<number>(0);
-  // WildCardBox 조건에 맞는 플레이어 수를 계산해 wildCardCount state에 저장
-  useEffect(() => {
-    const count = players.filter(
-      (player) =>
-        player.name &&
-        player.playerId &&
-        (wcMap[player.playerId] || customWcMap[player.playerId])
-    ).length;
-    setWildCardCount(count);
-    console.log("WildCardBox count updated:", count);
-  }, [players, wcMap, customWcMap]);
-
-  // onSubmit 함수 (교체완료 버튼 클릭 시)
+  // 교체완료 버튼 시
   const onSubmit = async (data: any) => {
-    // 1. react-hook-form에서 저장된 players 데이터를 가져오기
     const currentPlayersFromForm = getValues("players");
-
-    // 2. 각 플레이어의 isWc 값을 wcMap과 customWcMap을 기준으로 재계산
+    console.log("currentPlayersFromForm", currentPlayersFromForm);
     const updatedCurrentPlayers = currentPlayersFromForm.map((player: any) => {
       const updatedIsWc = player.playerId
         ? wcMap[player.playerId] === true ||
@@ -544,67 +534,56 @@ export default function TeamRegistrationPageComponent() {
         : false;
       return { ...player, isWc: updatedIsWc };
     });
-
-    // 3. DH 존재 여부 판단
-    const hasDH = updatedCurrentPlayers.some(
-      (player) => player.position === "DH"
-    );
-
-    let formattedObject;
-    if (hasDH) {
-      // DH가 있는 경우: "P" 행 데이터는 pitcher로 사용하고, batters에는 "P"행 제외
-      const pitcherCandidate = updatedCurrentPlayers.find(
-        (player) => player.position === "P"
+    if (wildCardCount > 3) {
+      alert(
+        `WC 조건을 만족하는 선수가 3명을 초과합니다. 현재 ${wildCardCount} 명`
       );
-      formattedObject = {
-        batters: updatedCurrentPlayers
-          .filter((player) => player.position !== "P")
-          .map((player) => ({
-            order: player.order,
-            playerId: player.playerId,
-            position: player.position,
-          })),
-        pitcher: {
-          playerId: pitcherCandidate?.playerId,
-        },
-      };
-    } else {
-      // DH가 없는 경우: non-P 행 중 포지션이 "P"인 선수는 pitcher 후보로 사용
-      const pitcherCandidate = updatedCurrentPlayers.find(
-        (player) => player.position === "P"
-      );
-      // non-P 행 필터링
-      let nonPRows = updatedCurrentPlayers.filter(
-        (player) => player.position !== "P"
-      );
-      // pitcherCandidate가 존재하면 nonPRows에 추가
-      if (pitcherCandidate) {
-        nonPRows = [...nonPRows, pitcherCandidate];
-      }
-      formattedObject = {
-        batters: nonPRows.map((player) => ({
-          order: player.order,
-          playerId: player.playerId,
-          position: player.position,
-        })),
-        pitcher: {
-          playerId: pitcherCandidate?.playerId,
-        },
-      };
+      return;
     }
-
+    const nonPPlayers = updatedCurrentPlayers.filter(
+      (p: any) => p.order !== "P"
+    );
+    const hasDHInNonP = nonPPlayers.some((p: any) => p.position === "DH");
+    const requiredPositions = hasDHInNonP
+      ? ["CF", "LF", "RF", "SS", "1B", "2B", "3B", "C", "DH"]
+      : ["CF", "LF", "RF", "SS", "1B", "2B", "3B", "C", "P"];
+    const assignedPositionsNonP = nonPPlayers
+      .slice(0, -1)
+      .map((p: any) => p.position);
+    console.log("확인할 포지션", assignedPositionsNonP);
+    const missingPositions = requiredPositions.filter(
+      (pos) => !assignedPositionsNonP.includes(pos)
+    );
+    if (missingPositions.length > 0) {
+      alert(`포지션 설정이 올바르지 않습니다.`);
+      return;
+    }
+    const pitcherCandidate = updatedCurrentPlayers.find(
+      (p: any) => p.position === "P"
+    );
+    const batters = updatedCurrentPlayers
+      .filter((p: any) => p.order !== "P")
+      .slice(0, -1)
+      .map((p: any) => ({
+        order: p.order,
+        playerId: p.playerId,
+        position: p.position,
+      }));
+    const formattedObject = {
+      batters,
+      pitcher: {
+        playerId: pitcherCandidate?.playerId,
+      },
+    };
     console.log("Formatted Object:", JSON.stringify(formattedObject, null, 2));
-
-    // 4. PATCH 요청: /games/{gameId}/lineup 엔드포인트에 formattedObject를 request body로 전송
     try {
-      const gameId = router.query.recordId; // URL 쿼리에서 gameId(또는 recordId) 추출
-      const response = await API.patch(
+      const gameId = router.query.recordId;
+      const response = await API.post(
         `/games/${gameId}/lineup`,
         formattedObject
       );
-      console.log("PATCH 요청 성공:", response);
+      console.log("전송 성공:", response.data);
       router.push(`/matches/${router.query.recordId}/records`);
-      // 이후 필요한 후속 처리 (예: 알림, 페이지 이동 등)를 추가할 수 있습니다.
     } catch (error) {
       console.error("PATCH 요청 에러:", error);
     }
@@ -619,19 +598,13 @@ export default function TeamRegistrationPageComponent() {
       >
         <PlayerList style={{ flexGrow: 1 }}>
           {players.map((player, index) => {
-            if (
-              player.order === "P" &&
-              !players.some((p) => p.position === "DH")
-            ) {
-              return <BlankPlayerRow key={`${player.order}-${index}`} />;
-            }
             const currentName = watch(`players.${index}.name`) || "";
-            const displayPosition =
+            const actualPosition =
               player.position ||
               (isHomeTeam
                 ? homeTeamPlayers[index]?.position
                 : awayTeamPlayers[index]?.position) ||
-              "포지션 입력 ▽";
+              "";
             return (
               <PlayerRow key={`${player.order}-${index}`}>
                 <OrderNumber>{player.order}</OrderNumber>
@@ -651,9 +624,7 @@ export default function TeamRegistrationPageComponent() {
                       autoComplete="off"
                       readOnly
                     />
-                    {currentName &&
-                    player.playerId &&
-                    (wcMap[player.playerId] || customWcMap[player.playerId]) ? (
+                    {currentName && player.playerId && player.isWc ? (
                       <WildCardBox>WC</WildCardBox>
                     ) : (
                       <div></div>
@@ -676,10 +647,20 @@ export default function TeamRegistrationPageComponent() {
                       handlePositionClick(index);
                     }}
                   >
-                    <PositionText isPlaceholder={!player.position}>
-                      <ArrowIconNone>▽</ArrowIconNone>
-                      {displayPosition}
-                      <ArrowIconNone>▽</ArrowIconNone>
+                    <PositionText isPlaceholder={!actualPosition}>
+                      {actualPosition ? (
+                        <>
+                          <ArrowIconNone>▽</ArrowIconNone>
+                          <span>{actualPosition}</span>
+                          <ArrowIconNone>▽</ArrowIconNone>
+                        </>
+                      ) : (
+                        <>
+                          <ArrowIconNone>▽</ArrowIconNone>
+                          <span>포지션 입력</span>
+                          <ArrowIcon>▽</ArrowIcon>
+                        </>
+                      )}
                     </PositionText>
                     {renderHiddenPositionInput(index)}
                     {renderHiddenPlayerIdInput(index)}

@@ -1,3 +1,5 @@
+// FinalGameRecordPage.tsx
+
 import React, { useState, useEffect } from "react";
 import {
   Container,
@@ -22,8 +24,15 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import ResultSubmitModal from "../../modals/submitModal/resultSubmitModal";
 import API from "../../../../commons/apis/api";
+import ScorePatchModal from "../../modals/scorePatchModal";
 
-// 기본 점수 배열 (1~7회, R, H)
+interface ISelectedCell {
+  cellValue: string;
+  team: "A" | "B";
+  cellIndex: number; // 이닝 인덱스(0-based)
+}
+
+// 점수 배열 초기값 (1~7회, R, H)
 const defaultTeamAScores = ["", "", "", "", "", "", "", "", ""];
 const defaultTeamBScores = ["", "", "", "", "", "", "", "", ""];
 
@@ -31,26 +40,39 @@ export default function FinalGameRecordPage() {
   const inningHeaders = ["", "1", "2", "3", "4", "5", "6", "7", "R", "H"];
   const router = useRouter();
 
-  // 팀 이름은 GET 응답으로 받아온 데이터 (읽기 전용, 일반 텍스트로 표시)
+  // 팀 이름 상태
   const [teamAName, setTeamAName] = useState("");
   const [teamBName, setTeamBName] = useState("");
 
-  // 점수 배열 상태 (GET 응답 데이터 → 수정 가능)
+  // 점수 상태
   const [teamAScores, setTeamAScores] = useState(defaultTeamAScores);
   const [teamBScores, setTeamBScores] = useState(defaultTeamBScores);
 
-  // 타자 및 투수 기록 상태 (GET 응답 데이터 → 수정 가능)
+  // 선수 기록 상태
   const [awayBatters, setAwayBatters] = useState([]);
   const [homeBatters, setHomeBatters] = useState([]);
   const [awayPitchers, setAwayPitchers] = useState([]);
   const [homePitchers, setHomePitchers] = useState([]);
 
+  // 제출 모달
   const [isResultSubmitModalOpen, setIsResultSubmitModalOpen] = useState(false);
 
+  // ScorePatchModal 열림 여부 + 데이터
+  const [isScorePatchModalOpen, setIsScorePatchModalOpen] = useState(false);
+  const [selectedCell, setSelectedCell] = useState<ISelectedCell | null>(null);
+
+  // (A) 모달이 열리는 이유(모드)
+  const [modalMode, setModalMode] = useState<"score" | "batter" | "pitcher">(
+    "score"
+  );
+  // (B) 모달에서 띄울 알림 메시지 (타자/투수)
+  const [alertMessage, setAlertMessage] = useState<string>("");
+
   useEffect(() => {
-    API.get("/matches/1001/results")
+    API.get(`/games/${router.query.recordId}/results`)
       .then((response) => {
-        console.log("GET /matches/1001/results 응답:", response.data);
+        console.log("응답:", response.data);
+
         const {
           scoreboard,
           awayTeam,
@@ -61,14 +83,15 @@ export default function FinalGameRecordPage() {
           homePitchers,
         } = response.data;
 
-        // 팀 이름 업데이트 → 읽기 전용 (앞 3글자)
+        // 팀 이름
         setTeamAName(awayTeam.name.substring(0, 3));
         setTeamBName(homeTeam.name.substring(0, 3));
 
-        // scoreboard 데이터를 반영하여 팀 점수 업데이트
+        // 스코어보드 설정
         const newTeamAScores = [...teamAScores];
         const newTeamBScores = [...teamBScores];
-        scoreboard.forEach((item) => {
+
+        scoreboard.forEach((item: any) => {
           const inningIndex = item.inning - 1;
           if (item.inning_half === "TOP") {
             newTeamAScores[inningIndex] = String(item.runs);
@@ -76,106 +99,140 @@ export default function FinalGameRecordPage() {
             newTeamBScores[inningIndex] = String(item.runs);
           }
         });
-        // 8번째(index 7)와 9번째(index 8) 칸을 팀 정보(총 runs, hits)로 업데이트
+
+        // 마지막(R, H) 칸에 기록
         newTeamAScores[7] = String(awayTeam.runs);
-        console.log(awayTeam.runs);
         newTeamAScores[8] = String(awayTeam.hits);
         newTeamBScores[7] = String(homeTeam.runs);
         newTeamBScores[8] = String(homeTeam.hits);
+
         setTeamAScores(newTeamAScores);
         setTeamBScores(newTeamBScores);
 
-        // 타자 기록 매핑 (order와 이름은 plain text, 수정 가능한 값은 EditableInput으로)
-        const mappedAwayBatters = awayBatters.map((item) => ({
-          order: item.order,
-          name: item.playerName,
-          ab: item.AB,
-          hit: item["1B"],
-          bb: item.BB,
-          doubles: item["2B"],
-          triples: item["3B"],
-          hr: item.HR,
-        }));
-        setAwayBatters(mappedAwayBatters);
-
-        const mappedHomeBatters = homeBatters.map((item) => ({
-          order: item.order,
-          name: item.playerName,
-          ab: item.AB,
-          hit: item["1B"],
-          bb: item.BB,
-          doubles: item["2B"],
-          triples: item["3B"],
-          hr: item.HR,
-        }));
-        setHomeBatters(mappedHomeBatters);
-
-        // 투수 기록 매핑 (order와 이름은 plain text, 수정 가능한 값은 EditableInput으로)
-        const mappedAwayPitchers = awayPitchers.map((item, idx) => ({
-          order: idx + 1,
-          name: item.playerName,
-          so: item.K,
-        }));
-        setAwayPitchers(mappedAwayPitchers);
-
-        const mappedHomePitchers = homePitchers.map((item, idx) => ({
-          order: idx + 1,
-          name: item.playerName,
-          so: item.K,
-        }));
-        setHomePitchers(mappedHomePitchers);
+        // 타자/투수 기록
+        setAwayBatters(awayBatters);
+        setHomeBatters(homeBatters);
+        setAwayPitchers(awayPitchers);
+        setHomePitchers(homePitchers);
       })
       .catch((error) => {
         console.error("API GET 요청 에러:", error);
       });
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [router]);
 
+  // 제출 버튼
   const handleSubmitClick = () => {
     setIsResultSubmitModalOpen(true);
   };
 
+  // (1) 스코어보드 셀 클릭 → 모달 열기 (mode="score")
+  const handleScoreCellClick = (
+    score: string,
+    team: "A" | "B",
+    idx: number
+  ) => {
+    // 빈 점수거나 R(7)/H(8) 인덱스면 열지 않음
+    if (!score || idx === 7 || idx === 8) return;
+
+    setSelectedCell({ cellValue: score, team, cellIndex: idx });
+    setModalMode("score");
+    setAlertMessage(""); // 스코어보드 수정은 alertMessage 사용 안 함
+    setIsScorePatchModalOpen(true);
+  };
+
+  // (2) 타자 칸 클릭 → 모달 열기 (mode="batter")
+  const handleBatterClick = (player: any) => {
+    const msg =
+      `id: ${player.batterGameStatsId}\n` +
+      `플레이어: ${player.playerName}\n` +
+      `AB: ${player.AB}\n` +
+      `H: ${player["1B"]}\n` +
+      `BB: ${player.BB}\n` +
+      `2B: ${player["2B"]}\n` +
+      `3B: ${player["3B"]}\n` +
+      `HR: ${player["HR"]}\n`;
+
+    setAlertMessage(msg);
+    setModalMode("batter");
+
+    // 스코어보드 관련 정보는 사용 안 하므로 임시 값
+    setSelectedCell({ cellValue: "", team: "A", cellIndex: 0 });
+
+    // 모달 열기
+    setIsScorePatchModalOpen(true);
+  };
+
+  // (3) 투수 칸 클릭 → 모달 열기 (mode="pitcher")
+  const handlePitcherClick = (pitcher: any) => {
+    const msg =
+      `id: ${pitcher.pitcherGameStatsId}\n` +
+      `플레이어: ${pitcher.playerName}\n` +
+      `K: ${pitcher.K}`;
+    setAlertMessage(msg);
+    setModalMode("pitcher");
+
+    // 스코어보드 관련 정보는 사용 안 하므로 임시 값
+    setSelectedCell({ cellValue: "", team: "A", cellIndex: 0 });
+
+    setIsScorePatchModalOpen(true);
+  };
+
+  // 타자 표에서 "order" 표시를 결정하는 함수
+  // - 첫 번째로 나온 선수의 order는 숫자로 표시
+  // - 같은 order가 연속으로 등장하는 경우 두 번째부터는 '↑'로 표시
+  const getDisplayOrder = (
+    currentIndex: number,
+    batters: any[]
+  ): string | number => {
+    if (currentIndex === 0) return batters[currentIndex].order; // 첫 선수
+    // 이전 선수와 order가 동일하면 '↑' 표시
+    if (batters[currentIndex].order === batters[currentIndex - 1].order) {
+      return "↑";
+    }
+    // 아니면 그냥 order 숫자를 표시
+    return batters[currentIndex].order;
+  };
+
   return (
     <Container>
-      {/* 스코어보드 부분 */}
+      {/* 스코어보드 */}
       <ScoreBoardWrapper>
         <InningHeader>
           {inningHeaders.map((inn, idx) => (
-            <InningCell key={idx}>
-              {/* 이닝 헤더는 일반 텍스트 */}
-              {inn}
-            </InningCell>
+            <InningCell key={idx}>{inn}</InningCell>
           ))}
         </InningHeader>
+
+        {/* 팀 A (원정) */}
         <TeamRow>
           <TeamNameCell>{teamAName}</TeamNameCell>
           {teamAScores.map((score, idx) => (
-            <TeamScoreCell key={idx}>
-              {/* 빈 문자열이면 수정 불가하도록 readOnly 처리 */}
-              <EditableInputScore
-                type="number"
-                defaultValue={score}
-                readOnly={score === ""}
-              />
+            <TeamScoreCell
+              key={idx}
+              onClick={() => handleScoreCellClick(score, "A", idx)}
+            >
+              <EditableInputScore type="number" defaultValue={score} readOnly />
             </TeamScoreCell>
           ))}
         </TeamRow>
+
+        {/* 팀 B (홈) */}
         <TeamRow>
           <TeamNameCell>{teamBName}</TeamNameCell>
           {teamBScores.map((score, idx) => (
-            <TeamScoreCell key={idx}>
-              <EditableInputScore
-                type="number"
-                defaultValue={score}
-                readOnly={score === ""}
-              />
+            <TeamScoreCell
+              key={idx}
+              onClick={() => handleScoreCellClick(score, "B", idx)}
+            >
+              <EditableInputScore type="number" defaultValue={score} readOnly />
             </TeamScoreCell>
           ))}
         </TeamRow>
       </ScoreBoardWrapper>
 
-      {/* 원정팀(팀A) 기록 */}
-      <TeamTitle>{teamAName} 야구부</TeamTitle>
       {/* 원정팀 타자 기록 */}
+      <TeamTitle>{teamAName} 야구부</TeamTitle>
       <TableWrapper>
         <TableTitle>타자기록</TableTitle>
         <RecordTable>
@@ -192,57 +249,67 @@ export default function FinalGameRecordPage() {
             </tr>
           </thead>
           <tbody>
-            {awayBatters.map((player, idx) => (
-              <tr key={idx}>
-                <td>{player.order}</td>
-                <td>{player.name}</td>
-                <td>
-                  <EditableInput
-                    type="number"
-                    defaultValue={player.ab}
-                    readOnly={player.ab === ""}
-                  />
-                </td>
-                <td>
-                  <EditableInput
-                    type="number"
-                    defaultValue={player.hit}
-                    readOnly={player.hit === ""}
-                  />
-                </td>
-                <td>
-                  <EditableInput
-                    type="number"
-                    defaultValue={player.bb}
-                    readOnly={player.bb === ""}
-                  />
-                </td>
-                <td>
-                  <EditableInput
-                    type="number"
-                    defaultValue={player.doubles}
-                    readOnly={player.doubles === ""}
-                  />
-                </td>
-                <td>
-                  <EditableInput
-                    type="number"
-                    defaultValue={player.triples}
-                    readOnly={player.triples === ""}
-                  />
-                </td>
-                <td>
-                  <EditableInput
-                    type="number"
-                    defaultValue={player.hr}
-                    readOnly={player.hr === ""}
-                  />
-                </td>
-              </tr>
-            ))}
+            {awayBatters.map((player: any, idx: number) => {
+              const displayOrder = getDisplayOrder(idx, awayBatters);
+              return (
+                <tr key={idx}>
+                  <td>{displayOrder}</td>
+                  <td>{player.playerName}</td>
+                  <td>
+                    <EditableInput
+                      type="number"
+                      defaultValue={player.AB}
+                      readOnly
+                      onClick={() => handleBatterClick(player)}
+                    />
+                  </td>
+                  <td>
+                    <EditableInput
+                      type="number"
+                      defaultValue={player["1B"]}
+                      readOnly
+                      onClick={() => handleBatterClick(player)}
+                    />
+                  </td>
+                  <td>
+                    <EditableInput
+                      type="number"
+                      defaultValue={player.BB}
+                      readOnly
+                      onClick={() => handleBatterClick(player)}
+                    />
+                  </td>
+                  <td>
+                    <EditableInput
+                      type="number"
+                      defaultValue={player["2B"]}
+                      readOnly
+                      onClick={() => handleBatterClick(player)}
+                    />
+                  </td>
+                  <td>
+                    <EditableInput
+                      type="number"
+                      defaultValue={player["3B"]}
+                      readOnly
+                      onClick={() => handleBatterClick(player)}
+                    />
+                  </td>
+                  <td>
+                    <EditableInput
+                      type="number"
+                      defaultValue={player.HR}
+                      readOnly
+                      onClick={() => handleBatterClick(player)}
+                    />
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </RecordTable>
       </TableWrapper>
+
       {/* 원정팀 투수 기록 */}
       <TableWrapper>
         <TableTitle>투수기록</TableTitle>
@@ -255,15 +322,16 @@ export default function FinalGameRecordPage() {
             </tr>
           </thead>
           <tbody>
-            {awayPitchers.map((pitcher, idx) => (
+            {awayPitchers.map((pitcher: any, idx: number) => (
               <tr key={idx}>
-                <td>{pitcher.order}</td>
-                <td>{pitcher.name}</td>
+                <td>{idx + 1}</td>
+                <td>{pitcher.playerName}</td>
                 <td>
                   <EditableInput
                     type="number"
-                    defaultValue={pitcher.so}
-                    readOnly={pitcher.so === ""}
+                    defaultValue={pitcher.K}
+                    readOnly
+                    onClick={() => handlePitcherClick(pitcher)}
                   />
                 </td>
               </tr>
@@ -272,9 +340,8 @@ export default function FinalGameRecordPage() {
         </RecordTableP>
       </TableWrapper>
 
-      {/* 홈팀(팀B) 기록 */}
-      <TeamTitle>{teamBName} 야구부</TeamTitle>
       {/* 홈팀 타자 기록 */}
+      <TeamTitle>{teamBName} 야구부</TeamTitle>
       <TableWrapper>
         <TableTitle>타자기록</TableTitle>
         <RecordTable>
@@ -291,58 +358,68 @@ export default function FinalGameRecordPage() {
             </tr>
           </thead>
           <tbody>
-            {homeBatters.map((player, idx) => (
-              <tr key={idx}>
-                <td>{player.order}</td>
-                <td>{player.name}</td>
-                <td>
-                  <EditableInput
-                    type="number"
-                    defaultValue={player.ab}
-                    readOnly={player.ab === ""}
-                  />
-                </td>
-                <td>
-                  <EditableInput
-                    type="number"
-                    defaultValue={player.hit}
-                    readOnly={player.hit === ""}
-                  />
-                </td>
-                <td>
-                  <EditableInput
-                    type="number"
-                    defaultValue={player.bb}
-                    readOnly={player.bb === ""}
-                  />
-                </td>
-                <td>
-                  <EditableInput
-                    type="number"
-                    defaultValue={player.doubles}
-                    readOnly={player.doubles === ""}
-                  />
-                </td>
-                <td>
-                  <EditableInput
-                    type="number"
-                    defaultValue={player.triples}
-                    readOnly={player.triples === ""}
-                  />
-                </td>
-                <td>
-                  <EditableInput
-                    type="number"
-                    defaultValue={player.hr}
-                    readOnly={player.hr === ""}
-                  />
-                </td>
-              </tr>
-            ))}
+            {homeBatters.map((player: any, idx: number) => {
+              const displayOrder = getDisplayOrder(idx, homeBatters);
+              return (
+                <tr key={idx}>
+                  <td>{displayOrder}</td>
+                  <td>{player.playerName}</td>
+                  <td>
+                    <EditableInput
+                      type="number"
+                      defaultValue={player.AB}
+                      readOnly
+                      onClick={() => handleBatterClick(player)}
+                    />
+                  </td>
+                  <td>
+                    <EditableInput
+                      type="number"
+                      defaultValue={player["1B"]}
+                      readOnly
+                      onClick={() => handleBatterClick(player)}
+                    />
+                  </td>
+                  <td>
+                    <EditableInput
+                      type="number"
+                      defaultValue={player.BB}
+                      readOnly
+                      onClick={() => handleBatterClick(player)}
+                    />
+                  </td>
+                  <td>
+                    <EditableInput
+                      type="number"
+                      defaultValue={player["2B"]}
+                      readOnly
+                      onClick={() => handleBatterClick(player)}
+                    />
+                  </td>
+                  <td>
+                    <EditableInput
+                      type="number"
+                      defaultValue={player["3B"]}
+                      readOnly
+                      onClick={() => handleBatterClick(player)}
+                    />
+                  </td>
+                  <td>
+                    <EditableInput
+                      type="number"
+                      defaultValue={player.HR}
+                      readOnly
+                      onClick={() => handleBatterClick(player)}
+                    />
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </RecordTable>
       </TableWrapper>
-      {/* 홈팀 투수 기록 */}
+
+      {/* 홈팀 투수기록 */}
       <TableWrapper>
         <TableTitle>투수기록</TableTitle>
         <RecordTableP>
@@ -354,15 +431,16 @@ export default function FinalGameRecordPage() {
             </tr>
           </thead>
           <tbody>
-            {homePitchers.map((pitcher, idx) => (
+            {homePitchers.map((pitcher: any, idx: number) => (
               <tr key={idx}>
-                <td>{pitcher.order}</td>
-                <td>{pitcher.name}</td>
+                <td>{idx + 1}</td>
+                <td>{pitcher.playerName}</td>
                 <td>
                   <EditableInput
                     type="number"
-                    defaultValue={pitcher.so}
-                    readOnly={pitcher.so === ""}
+                    defaultValue={pitcher.K}
+                    readOnly
+                    onClick={() => handlePitcherClick(pitcher)}
                   />
                 </td>
               </tr>
@@ -371,7 +449,7 @@ export default function FinalGameRecordPage() {
         </RecordTableP>
       </TableWrapper>
 
-      {/* 하단 버튼 (수정 불가) */}
+      {/* 하단 버튼 */}
       <ButtonContainer>
         <Link href="/" passHref>
           <a>
@@ -384,6 +462,17 @@ export default function FinalGameRecordPage() {
       {isResultSubmitModalOpen && (
         <ResultSubmitModal
           setIsResultSubmitModalOpen={setIsResultSubmitModalOpen}
+        />
+      )}
+
+      {isScorePatchModalOpen && selectedCell && (
+        <ScorePatchModal
+          setIsModalOpen={setIsScorePatchModalOpen}
+          cellValue={selectedCell.cellValue}
+          team={selectedCell.team}
+          cellIndex={selectedCell.cellIndex}
+          mode={modalMode} // 추가: 어떤 이유로 열렸는지
+          alertMessage={alertMessage} // 추가: 타자/투수 클릭 시 알림 내용
         />
       )}
     </Container>

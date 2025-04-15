@@ -1,15 +1,17 @@
 import { atom } from "recoil";
 
 export interface ITeamList {
-  team1Name: string;
-  team1Id: number;
-  team2Name: string;
-  team2Id: number;
+  homeTeamName: string;
+  homeTeamId: number;
+  awayTeamName: string;
+  awayTeamId: number;
 }
 
 export const TeamListState = atom<ITeamList[]>({
   key: "teamListState",
-  default: [{ team1Name: "", team1Id: 1, team2Name: "", team2Id: 2 }],
+  default: [
+    { homeTeamName: "", homeTeamId: 1, awayTeamName: "", awayTeamId: 2 },
+  ],
 });
 
 export interface IPlayer {

@@ -19,7 +19,7 @@ export default function GameOverModal(props: IModalProps) {
   const handleTypeSelect = (type: string) => {
     if (type === "예") {
       props.setIsGameEndModalOpen(false);
-      router.push("/matches/1001/result");
+      router.push(`/matches/${router.query.recordId}/result`);
     } else {
       props.setIsGameEndModalOpen(false);
     }

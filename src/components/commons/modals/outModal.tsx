@@ -1,3 +1,4 @@
+import { useRouter } from "next/router";
 import API from "../../../commons/apis/api";
 import {
   ModalButton,
@@ -12,18 +13,18 @@ interface IModalProps {
 }
 
 export default function OutModal(props: IModalProps) {
+  const router = useRouter();
   // 아웃 종류 선택 시 실행될 비동기 함수
   const handleTypeSelect = async (Type: string) => {
     if (Type === "삼진") {
       try {
-        const endpoint = `/matches/1001/pitchers/${props.playerId}/strikeout`;
-        console.log(endpoint);
+        const endpoint = `/matches/${router.query.recordId}/batters/${props.playerId}/plate-appearance`;
         const requestBody = {
-          gameId: 1001,
-          playerId: 110,
+          result: "K",
         };
         const { data } = await API.post(endpoint, requestBody);
-        alert(`기록: 삼진\n응답값: ${JSON.stringify(data)}`);
+        alert(`삼진 기록 전송 완료\n응답값: ${JSON.stringify(data)}`);
+        console.log(endpoint, requestBody);
       } catch (error) {
         console.error("삼진 기록 전송 오류:", error);
         alert("삼진 기록 전송 오류");

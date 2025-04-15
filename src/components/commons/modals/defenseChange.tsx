@@ -22,6 +22,7 @@ export default function DefenseChangeModal(props: IModalProps) {
       props.setIsChangeModalOpen(false);
     }
   };
+
   return (
     <ModalOverlay>
       <ModalContainer>
