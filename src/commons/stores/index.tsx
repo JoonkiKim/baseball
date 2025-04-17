@@ -1,4 +1,5 @@
 import { atom } from "recoil";
+import { string } from "yup";
 
 export interface ITeamList {
   homeTeamName: string;
@@ -181,10 +182,12 @@ export const playerListState = atom<IPlayer[]>({
 export interface IHAPlayer {
   id: number;
   departmentName: string;
+  order: number | string;
   name: string;
   isElite: boolean;
   isWc: boolean;
   position?: string;
+  isSubstitutable: boolean;
 }
 
 export const HomeTeamPlayerListState = atom<IHAPlayer[]>({

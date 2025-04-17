@@ -10,25 +10,25 @@ import {
 
 export const ModalOverlay = styled.div`
   position: fixed;
-  top: 120px; /* 헤더 높이 만큼 띄워줌 */
+  top: 120px;
   left: 0;
   right: 0;
   bottom: 0;
   background-color: rgba(0, 0, 0, 0.5);
   display: flex;
-  align-items: flex-start; /* 모달 컨텐츠가 헤더 밑에 표시되도록 */
+  align-items: flex-start;
   justify-content: center;
 `;
 
 export const ModalContainer = styled.div`
   background-color: #fff;
-  width: 100vw; /* 테이블을 위해 살짝 넓힘 */
-  height: 100vh; /* 모달의 높이를 고정 */
-  max-height: calc(100vh - 120px); /* 헤더를 제외한 최대 높이 */
+  width: 100vw;
+  height: 100vh;
+  max-height: calc(100vh - 120px);
   margin-bottom: 200px;
   padding: 20px;
   text-align: center;
-  overflow-y: auto; /* 콘텐츠가 높이를 넘으면 스크롤되도록 */
+  overflow-y: auto;
 `;
 
 export const ModalTitle = styled.h2`
@@ -59,11 +59,6 @@ export const PlayerTable = styled.table`
   tr:last-of-type td {
     border-bottom: none;
   }
-
-  tbody tr:hover {
-    background-color: #f2f2f2;
-    cursor: pointer;
-  }
 `;
 
 export const ButtonContainer = styled.div`
@@ -75,151 +70,91 @@ export const ButtonContainer = styled.div`
 `;
 
 export const ControlButton = styled.button`
-  background-color: #000000;
+  background-color: #000;
   width: 26vw;
   height: 4.5vh;
   border: 1px solid #999;
   font-family: "KBO-Dia-Gothic_bold";
   font-weight: bold;
   font-size: 12px;
-  color: #ffffff;
+  color: #fff;
   cursor: pointer;
   border-radius: 4px;
 `;
 
 interface IPlayerSelectionModalProps {
   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  onSelectPlayer: (selectedPlayer: {
+  onSelectPlayer: (selected: {
     name: string;
     playerId: number;
     wc?: string;
   }) => void;
-  selectedPlayerNames: string[];
+  /** P행 선택 여부 (true일 때 투수 대체 리스트 호출) */
+  isPitcher: boolean;
+  selectedPlayerNames: any[];
 }
 
 export default function SubPlayerSelectionModal({
   setIsModalOpen,
   onSelectPlayer,
-  selectedPlayerNames,
+  isPitcher,
 }: IPlayerSelectionModalProps) {
   const router = useRouter();
-
-  // 원정팀, 홈팀 선수 목록 및 setter 불러오기
   const [awayTeamPlayers, setAwayTeamPlayers] = useRecoilState(
     AwayTeamPlayerListState
   );
   const [homeTeamPlayers, setHomeTeamPlayers] = useRecoilState(
     HomeTeamPlayerListState
   );
+  const isAway = router.query.isHomeTeam === "false";
 
-  // 쿼리 파라미터 isAwayTeam가 "true"인지 판별 (방법1)
-  // const isAwayTeam = router.query.isHomeTeam === "false";
-  const isAwayTeam = router.query.isHomeTeam === "false";
-
-  // isAwayTeam에 따라 로컬스토리지에서 awayTeam 또는 homeTeam의 id로 GET 요청 보내기
   useEffect(() => {
-    const selectedMatchStr = localStorage.getItem("selectedMatch");
-    if (!selectedMatchStr) {
-      console.error("selectedMatch 데이터가 로컬스토리지에 없습니다.");
-      return;
-    }
-    try {
-      const selectedMatch = JSON.parse(selectedMatchStr);
-      if (isAwayTeam) {
-        const awayTeamId = selectedMatch?.awayTeam?.id;
-        if (awayTeamId) {
-          API.get(`/teams/${awayTeamId}/players`)
-            .then((res) => {
-              // 응답이 JSON 문자열이면 파싱
-              const parsedData =
-                typeof res.data === "string" ? JSON.parse(res.data) : res.data;
-              // parsedData.players에 실제 선수 배열이 있다고 가정
-              setAwayTeamPlayers(parsedData.players);
-              console.log("AwayTeam Players:", parsedData.players);
-            })
-            .catch((error) => {
-              console.error("Error fetching awayTeam players:", error);
-            });
-        } else {
-          console.error("awayTeam id가 존재하지 않습니다.");
-        }
-      } else {
-        const homeTeamId = selectedMatch?.homeTeam?.id;
-        if (homeTeamId) {
-          API.get(`/teams/${homeTeamId}/players`)
-            .then((res) => {
-              const parsedData =
-                typeof res.data === "string" ? JSON.parse(res.data) : res.data;
-              setHomeTeamPlayers(parsedData.players);
-              console.log("HomeTeam Players:", parsedData.players);
-            })
-            .catch((error) => {
-              console.error("Error fetching homeTeam players:", error);
-            });
-        } else {
-          console.error("homeTeam id가 존재하지 않습니다.");
-        }
-      }
-    } catch (error) {
-      console.error("로컬스토리지 파싱 에러:", error);
-    }
-  }, [isAwayTeam, setAwayTeamPlayers, setHomeTeamPlayers]);
+    const recordId = router.query.recordId;
+    if (!recordId) return;
+    const teamType = isAway ? "home" : "away";
+    const endpoint = isPitcher
+      ? "substitutable-pitchers"
+      : "substitutable-batters";
 
-  // 현재 URL에 따라 사용할 선수 목록 결정 (원정팀이면 awayTeamPlayers, 아니면 homeTeamPlayers)
-  const allPlayersList = isAwayTeam ? awayTeamPlayers : homeTeamPlayers;
+    API.get(`/games/${recordId}/${endpoint}?teamType=${teamType}`)
+      .then((res) => {
+        const data =
+          typeof res.data === "string" ? JSON.parse(res.data) : res.data;
+        const list = data.players;
+        if (isAway) setAwayTeamPlayers(list);
+        else setHomeTeamPlayers(list);
+      })
+      .catch((err) => console.error("대체 선수 목록 요청 실패:", err));
+  }, [
+    isAway,
+    isPitcher,
+    router.query.recordId,
+    setAwayTeamPlayers,
+    setHomeTeamPlayers,
+  ]);
 
-  // 모달이 열리면 히스토리 스택에 새 상태 추가 및 popstate 이벤트 처리
   useEffect(() => {
     window.history.pushState(null, "", window.location.href);
-
-    const handlePopState = () => {
-      setIsModalOpen(false);
-    };
-
-    window.addEventListener("popstate", handlePopState);
-    return () => {
-      window.removeEventListener("popstate", handlePopState);
-    };
+    const onPop = () => setIsModalOpen(false);
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
   }, [setIsModalOpen]);
 
-  const handleOverlayClick = () => {
-    setIsModalOpen(false);
-  };
+  const players = isAway ? awayTeamPlayers : homeTeamPlayers;
 
-  const handleContainerClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-  };
-
-  const handleRowClick = (
-    player: {
-      id: number;
-      departmentName: string;
-      name: string;
-      isElite: boolean;
-      isWc: boolean;
-    },
-    isAlreadySelected: boolean
-  ) => {
-    if (isAlreadySelected) return;
-
-    // 선택된 선수 정보 객체 생성
-    const selectedPlayer = {
+  const handleRowClick = (player: any) => {
+    if (!player.isSubstitutable) return;
+    onSelectPlayer({
       name: player.name,
       playerId: player.id,
       wc: player.isWc ? "WC" : undefined,
-    };
-
-    // 선택된 선수 정보를 콘솔에 찍기
-    console.log("선택된 선수 정보:", selectedPlayer);
-
-    // 부모 컴포넌트에서 정의한 onSelectPlayer 함수 호출
-    onSelectPlayer(selectedPlayer);
+    });
     setIsModalOpen(false);
   };
 
   return (
-    <ModalOverlay onClick={handleOverlayClick}>
-      <ModalContainer onClick={handleContainerClick}>
+    <ModalOverlay onClick={() => setIsModalOpen(false)}>
+      <ModalContainer onClick={(e) => e.stopPropagation()}>
         <ModalTitle>선수를 선택해주세요</ModalTitle>
         <PlayerTable>
           <thead>
@@ -230,26 +165,23 @@ export default function SubPlayerSelectionModal({
             </tr>
           </thead>
           <tbody>
-            {Array.isArray(allPlayersList) &&
-              allPlayersList.map((player) => {
-                const isAlreadySelected = selectedPlayerNames.includes(
-                  player.name
-                );
-                return (
-                  <tr
-                    key={player.id}
-                    onClick={() => handleRowClick(player, isAlreadySelected)}
-                    style={{
-                      color: isAlreadySelected ? "gray" : "inherit",
-                      cursor: isAlreadySelected ? "default" : "pointer",
-                    }}
-                  >
-                    <td>{player.departmentName}</td>
-                    <td>{player.name}</td>
-                    <td>{player.isWc ? "WC" : ""}</td>
-                  </tr>
-                );
-              })}
+            {players.map((player) => {
+              const disabled = player.isSubstitutable === false;
+              return (
+                <tr
+                  key={player.id}
+                  onClick={() => handleRowClick(player)}
+                  style={{
+                    color: disabled ? "gray" : undefined,
+                    cursor: disabled ? "default" : "pointer",
+                  }}
+                >
+                  <td>{player.departmentName}</td>
+                  <td>{player.name}</td>
+                  <td>{player.isWc ? "WC" : ""}</td>
+                </tr>
+              );
+            })}
           </tbody>
         </PlayerTable>
         <ButtonContainer>

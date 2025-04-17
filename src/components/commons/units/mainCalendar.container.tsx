@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import moment from "moment";
+import moment from "moment-timezone";
 import { useRouter } from "next/router";
 import "react-datepicker/dist/react-datepicker.css";
 import { useRecoilState } from "recoil";
@@ -55,6 +55,7 @@ interface Game {
 }
 
 export default function MainCalendarPage() {
+  moment.tz.setDefault("Asia/Seoul");
   const router = useRouter();
 
   // TeamListState 및 날짜 상태 등 Recoil 상태 불러오기
@@ -78,6 +79,7 @@ export default function MainCalendarPage() {
         const res = await API.get("/games");
         // 새 객체 구조가 반영된 데이터를 불러온다고 가정합니다.
         setAllMatchData(res.data);
+        console.log(allMatchData);
       } catch (err) {
         console.error("❌ 경기 데이터 요청 에러:", err);
       } finally {
@@ -126,21 +128,28 @@ export default function MainCalendarPage() {
     };
   }, [isCalendarOpen]);
 
-  const handleDecreaseDate = () => {
-    if (selectedDate) {
-      const newDate = new Date(selectedDate);
-      newDate.setDate(newDate.getDate() - 1);
-      setSelectedDate(newDate);
-    }
-  };
+  // const handleDecreaseDate = () => {
+  //   if (selectedDate) {
+  //     const newDate = new Date(selectedDate);
+  //     newDate.setDate(newDate.getDate() - 1);
+  //     setSelectedDate(newDate);
+  //   }
+  // };
 
-  const handleIncreaseDate = () => {
-    if (selectedDate) {
-      const newDate = new Date(selectedDate);
-      newDate.setDate(newDate.getDate() + 1);
-      setSelectedDate(newDate);
-    }
-  };
+  // const handleIncreaseDate = () => {
+  //   if (selectedDate) {
+  //     const newDate = new Date(selectedDate);
+  //     newDate.setDate(newDate.getDate() + 1);
+  //     setSelectedDate(newDate);
+  //   }
+  // };
+  const handleDecreaseDate = () =>
+    selectedDate &&
+    setSelectedDate(moment(selectedDate).subtract(1, "day").toDate());
+
+  const handleIncreaseDate = () =>
+    selectedDate &&
+    setSelectedDate(moment(selectedDate).add(1, "day").toDate());
 
   const handleCalendarIconClick = () => {
     setIsCalendarOpen((prev) => !prev);

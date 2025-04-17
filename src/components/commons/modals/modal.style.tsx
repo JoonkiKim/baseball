@@ -15,6 +15,20 @@ export const ModalOverlay = styled.div`
 
 export const ModalContainer = styled.div`
   background-color: #fff;
+  /* margin-top: 20px; */
+  width: 80%;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+`;
+
+export const LongModalContainer = styled.div`
+  background-color: #fff;
+  margin-top: 100px;
   width: 80%;
   padding: 20px;
   border-radius: 8px;

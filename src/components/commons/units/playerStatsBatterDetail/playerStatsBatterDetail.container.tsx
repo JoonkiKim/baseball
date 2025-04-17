@@ -11,6 +11,9 @@ import { hitterStatsState } from "../../../../commons/stores";
 import { HitterStat } from "../../../../commons/stores"; // 인터페이스 import (필요시)
 
 export default function StatsPageBatterDetail() {
+  /* ▼ / ▲ 표기를 결정하는 유틸 */
+  const getArrow = (currentKey: string, columnKey: string) =>
+    currentKey === columnKey ? "▼" : "▲";
   // Recoil의 hitterStatsState에서 타자 기록 데이터를 가져옴 (타입은 HitterStat[]로 추론됨)
   const [hitterStats] = useRecoilState<HitterStat[]>(hitterStatsState);
 
@@ -51,27 +54,34 @@ export default function StatsPageBatterDetail() {
           <thead>
             <tr>
               <th>순위</th>
-              <th>선수</th>
+              <th style={{ width: "90px" }}>선수</th>
+
               <th onClick={() => handleSortHitter("AB")}>
-                타수 <ArrowIcon>▼</ArrowIcon>
+                타수 <ArrowIcon>{getArrow(hitterSortKey, "AB")}</ArrowIcon>
               </th>
+
               <th onClick={() => handleSortHitter("H")}>
-                안타 <ArrowIcon>▼</ArrowIcon>
+                안타 <ArrowIcon>{getArrow(hitterSortKey, "H")}</ArrowIcon>
               </th>
+
               <th onClick={() => handleSortHitter("AVG")}>
-                타율 <ArrowIcon>▼</ArrowIcon>
+                타율 <ArrowIcon>{getArrow(hitterSortKey, "AVG")}</ArrowIcon>
               </th>
+
               <th onClick={() => handleSortHitter("BB")}>
-                볼넷 <ArrowIcon>▼</ArrowIcon>
+                볼넷 <ArrowIcon>{getArrow(hitterSortKey, "BB")}</ArrowIcon>
               </th>
+
               <th onClick={() => handleSortHitter("OBP")}>
-                출루율 <ArrowIcon>▼</ArrowIcon>
+                출루율 <ArrowIcon>{getArrow(hitterSortKey, "OBP")}</ArrowIcon>
               </th>
+
               <th onClick={() => handleSortHitter("SLG")}>
-                장타율 <ArrowIcon>▼</ArrowIcon>
+                장타율 <ArrowIcon>{getArrow(hitterSortKey, "SLG")}</ArrowIcon>
               </th>
+
               <th onClick={() => handleSortHitter("OPS")}>
-                OPS <ArrowIcon>▼</ArrowIcon>
+                OPS <ArrowIcon>{getArrow(hitterSortKey, "OPS")}</ArrowIcon>
               </th>
             </tr>
           </thead>

@@ -367,37 +367,6 @@ export default function TeamRegistrationPageComponent() {
     setWildCardCount(wildCardCountCalc);
   }, [players, wcMap, customWcMap]);
 
-  // ★ 투수행 자동 업데이트
-  // 최근 수정한 batter 행(투수 행이 아닌)에서 포지션이 "P"인 row의 인덱스를 기준으로 투수행(P행)을 업데이트합니다.
-  // 만약 lastPUpdateIndex가 null이면, 현재 API에서 받아온 pitcher row(즉, homeTeamPlayers/awayTeamPlayers의 값)를 그대로 유지합니다.
-  useEffect(() => {
-    const pitcherIndex = players.findIndex((player) => player.order === "P");
-    if (pitcherIndex === -1) return;
-
-    if (lastPUpdateIndex !== null) {
-      const candidate = players[lastPUpdateIndex];
-      if (
-        candidate &&
-        candidate.name.trim() !== "" &&
-        candidate.position === "P"
-      ) {
-        if (players[pitcherIndex].name !== candidate.name) {
-          const updatedPlayers = [...players];
-          updatedPlayers[pitcherIndex] = {
-            ...updatedPlayers[pitcherIndex],
-            name: candidate.name,
-            playerId: candidate.playerId,
-            isWc: candidate.isWc,
-          };
-          setPlayers(updatedPlayers);
-          setValue(`players.${pitcherIndex}.name`, candidate.name);
-          setValue(`players.${pitcherIndex}.playerId`, candidate.playerId);
-        }
-      }
-    }
-    // lastPUpdateIndex가 null이면 아무런 변경도 하지 않습니다.
-  }, [lastPUpdateIndex, players, setValue]);
-
   // 포지션 드롭다운 관련 상태 및 핸들러
   const [openPositionRow, setOpenPositionRow] = useState<number | null>(null);
   const handlePositionClick = (index: number) => {
@@ -706,6 +675,10 @@ export default function TeamRegistrationPageComponent() {
           selectedPlayerNames={watch("players")
             .map((p: any) => p.name)
             .filter((name: string) => name.trim() !== "")}
+          isPitcher={
+            selectedPlayerIndex !== null &&
+            players[selectedPlayerIndex].order === "P"
+          }
         />
       )}
     </Container>

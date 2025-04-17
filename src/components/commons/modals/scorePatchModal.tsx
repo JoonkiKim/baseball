@@ -1,5 +1,4 @@
 // ScorePatchModal.tsx
-
 import { useRouter } from "next/router";
 import { useState } from "react";
 
@@ -11,14 +10,16 @@ import {
   ModalTitleSmall,
 } from "./modal.style";
 import ScorePatchInputModal from "./scorePatchInputModal";
+import StatPatchInputModal from "./statPatchInputModal"; // ★ 추가
 
 interface IModalProps {
   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  cellValue: string; // 스코어보드 셀로부터 받은 점수
-  team: "A" | "B"; // 스코어보드 팀 구분
-  cellIndex: number; // 이닝 인덱스 (0-based)
-  mode?: "score" | "batter" | "pitcher"; // 모달을 연 원인
-  alertMessage?: string; // 타자/투수 클릭 시 띄울 메시지
+  cellValue: string; // 스코어보드 셀에서 가져온 값
+  team: "A" | "B"; // 팀 구분
+  cellIndex: number; // 이닝 인덱스(0‑based)
+  mode?: "score" | "batter" | "pitcher";
+  alertMessage?: string; // batter/pitcher 모드에서 보여줄 alert
+  statId: number | null;
 }
 
 export default function ScorePatchModal({
@@ -26,32 +27,28 @@ export default function ScorePatchModal({
   cellValue,
   team,
   cellIndex,
-  mode,
+  mode = "score",
   alertMessage,
+  statId,
 }: IModalProps) {
   const router = useRouter();
 
-  // ScoreInputModal 표시 여부
+  /* 다음 단계 모달 플래그 */
   const [showScoreInputModal, setShowScoreInputModal] = useState(false);
+  const [showStatInputModal, setShowStatInputModal] = useState(false);
 
-  // 스코어보드 점수 수정에 필요한 상태
+  /* score 모드에서만 사용하는 상태 */
   const [suffix, setSuffix] = useState("");
   const [order, setOrder] = useState(0);
 
   const handleTypeSelect = (type: string) => {
-    if (type === "예") {
-      // 1) 만약 "타자/투수" 클릭으로 열린 모달일 경우(alertMessage 존재)
-      if (mode === "batter" || mode === "pitcher") {
-        // 기존에 handleBatterClick / handlePitcherClick 에서 띄우던 alert
-        if (alertMessage) {
-          alert(alertMessage);
-        }
-        // 모달 닫고 종료
-        setIsModalOpen(false);
-        return;
-      }
+    if (type !== "예") {
+      setIsModalOpen(false);
+      return;
+    }
 
-      // 2) 스코어보드 "점수" 클릭으로 열린 경우(mode === "score")
+    /* ────────────────────────── score 모드 ────────────────────────── */
+    if (mode === "score") {
       const selectedSuffix = team === "A" ? "TOP" : "BOT";
       const selectedOrder = cellIndex + 1;
 
@@ -61,20 +58,24 @@ export default function ScorePatchModal({
 
       setSuffix(selectedSuffix);
       setOrder(selectedOrder);
-
-      // 다음 모달(ScorePatchInputModal) 오픈
       setShowScoreInputModal(true);
-    } else {
-      // "아니오" 클릭 시
-      setIsModalOpen(false);
+      return;
     }
+
+    /* ───────────────────── batter / pitcher 모드 ──────────────────── */
+    // if (alertMessage) alert(alertMessage);
+    setShowStatInputModal(true);
   };
+
+  /* 모달 제목 */
+  const titleText =
+    mode === "score" ? "점수를 수정하시겠습니까?" : "스탯을 수정하시겠습니까?";
 
   return (
     <>
       <ModalOverlay>
         <ModalContainer>
-          <ModalTitleSmall>점수를 수정하시겠습니까?</ModalTitleSmall>
+          <ModalTitleSmall>{titleText}</ModalTitleSmall>
           <ModalButton onClick={() => handleTypeSelect("예")}>예</ModalButton>
           <ModalCancleButton onClick={() => handleTypeSelect("아니오")}>
             아니오
@@ -82,12 +83,23 @@ export default function ScorePatchModal({
         </ModalContainer>
       </ModalOverlay>
 
+      {/* ──────────────────── Score 입력 모달 ──────────────────── */}
       {showScoreInputModal && (
         <ScorePatchInputModal
           setIsModalOpen={setIsModalOpen}
           suffix={suffix}
           order={order}
           cellValue={cellValue}
+        />
+      )}
+
+      {/* ──────────────────── Stat 입력 모달 ──────────────────── */}
+      {showStatInputModal && (
+        <StatPatchInputModal
+          key={statId}
+          setIsModalOpen={setIsModalOpen}
+          mode={mode as "batter" | "pitcher"}
+          alertMessage={alertMessage}
         />
       )}
     </>

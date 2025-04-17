@@ -1,3 +1,4 @@
+// PlayerSelectionModal.tsx
 import { useEffect } from "react";
 import styled from "@emotion/styled";
 import { useRecoilState } from "recoil";
@@ -5,7 +6,6 @@ import { useRouter } from "next/router";
 import {
   AwayTeamPlayerListState,
   HomeTeamPlayerListState,
-  playerListState,
 } from "../../../commons/stores";
 
 export const ModalOverlay = styled.div`
@@ -18,7 +18,6 @@ export const ModalOverlay = styled.div`
   display: flex;
   align-items: flex-start; /* 모달 컨텐츠가 헤더 밑에 표시되도록 */
   justify-content: center;
-  /* padding-top: 20px; */
 `;
 
 export const ModalContainer = styled.div`
@@ -88,7 +87,6 @@ export const ControlButton = styled.button`
   border-radius: 4px;
 `;
 
-// onSelectPlayer에서 전달받는 객체는 { name: string, playerId: number, wc?: string } 형태입니다.
 interface IPlayerSelectionModalProps {
   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
   onSelectPlayer: (selectedPlayer: {
@@ -97,50 +95,35 @@ interface IPlayerSelectionModalProps {
     wc?: string;
   }) => void;
   selectedPlayerNames: string[];
+  allowDuplicates: boolean; // P행에서 중복 선택 허용 여부
 }
 
 export default function PlayerSelectionModal({
   setIsModalOpen,
   onSelectPlayer,
   selectedPlayerNames,
+  allowDuplicates,
 }: IPlayerSelectionModalProps) {
   const router = useRouter();
-
-  // 홈팀 선수 목록, 원정팀 선수 목록 리코일 상태 불러오기
   const [homeTeamPlayers] = useRecoilState(HomeTeamPlayerListState);
   const [awayTeamPlayers] = useRecoilState(AwayTeamPlayerListState);
 
-  // 현재 URL에 따라 사용할 선수 목록을 결정합니다.
   const allPlayersList = router.asPath.includes("homeTeamRegistration")
     ? homeTeamPlayers
     : awayTeamPlayers;
 
-  // 모달이 열리면 히스토리 스택에 새 상태를 추가하고, popstate 이벤트가 발생하면 모달만 닫히도록 처리
   useEffect(() => {
-    // 모달이 열릴 때 현재 URL에 새 상태 추가
     window.history.pushState(null, "", window.location.href);
-
-    const handlePopState = () => {
-      setIsModalOpen(false);
-    };
-
+    const handlePopState = () => setIsModalOpen(false);
     window.addEventListener("popstate", handlePopState);
-
     return () => {
       window.removeEventListener("popstate", handlePopState);
     };
   }, [setIsModalOpen]);
 
-  const handleOverlayClick = () => {
-    setIsModalOpen(false);
-  };
+  const handleOverlayClick = () => setIsModalOpen(false);
+  const handleContainerClick = (e: React.MouseEvent) => e.stopPropagation();
 
-  const handleContainerClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-  };
-
-  // 이미 선택된 선수면 클릭이 무효하도록 처리하고,
-  // onSelectPlayer에 전달 시 필요한 정보를 변환하여 전달합니다.
   const handleRowClick = (
     player: {
       id: number;
@@ -174,9 +157,8 @@ export default function PlayerSelectionModal({
           </thead>
           <tbody>
             {allPlayersList.map((player) => {
-              const isAlreadySelected = selectedPlayerNames.includes(
-                player.name
-              );
+              const isAlreadySelected =
+                !allowDuplicates && selectedPlayerNames.includes(player.name);
               return (
                 <tr
                   key={player.id}

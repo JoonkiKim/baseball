@@ -140,18 +140,21 @@ export default function FinalGameRecordPage() {
     setAlertMessage(""); // 스코어보드 수정은 alertMessage 사용 안 함
     setIsScorePatchModalOpen(true);
   };
+  const [selectedStatId, setSelectedStatId] = useState<number | null>(null);
 
   // (2) 타자 칸 클릭 → 모달 열기 (mode="batter")
   const handleBatterClick = (player: any) => {
+    setSelectedStatId(player.batterGameStatsId);
     const msg =
       `id: ${player.batterGameStatsId}\n` +
       `플레이어: ${player.playerName}\n` +
-      `AB: ${player.AB}\n` +
-      `H: ${player["1B"]}\n` +
-      `BB: ${player.BB}\n` +
-      `2B: ${player["2B"]}\n` +
-      `3B: ${player["3B"]}\n` +
-      `HR: ${player["HR"]}\n`;
+      `타수: ${player.AB}\n` +
+      `안타: ${player["1B"]}\n` +
+      `볼넷/사구: ${player.BB}\n` +
+      `2루타: ${player["2B"]}\n` +
+      `3루타: ${player["3B"]}\n` +
+      `홈런: ${player["HR"]}\n` +
+      `희생타: ${player["SAC"]}\n`;
 
     setAlertMessage(msg);
     setModalMode("batter");
@@ -165,6 +168,7 @@ export default function FinalGameRecordPage() {
 
   // (3) 투수 칸 클릭 → 모달 열기 (mode="pitcher")
   const handlePitcherClick = (pitcher: any) => {
+    setSelectedStatId(pitcher.pitcherGameStatsId);
     const msg =
       `id: ${pitcher.pitcherGameStatsId}\n` +
       `플레이어: ${pitcher.playerName}\n` +
@@ -246,6 +250,7 @@ export default function FinalGameRecordPage() {
               <th>2루타</th>
               <th>3루타</th>
               <th>홈런</th>
+              <th>희생타</th>
             </tr>
           </thead>
           <tbody>
@@ -303,6 +308,14 @@ export default function FinalGameRecordPage() {
                       onClick={() => handleBatterClick(player)}
                     />
                   </td>
+                  <td>
+                    <EditableInput
+                      type="number"
+                      defaultValue={player.SAC}
+                      readOnly
+                      onClick={() => handleBatterClick(player)}
+                    />
+                  </td>
                 </tr>
               );
             })}
@@ -355,6 +368,7 @@ export default function FinalGameRecordPage() {
               <th>2루타</th>
               <th>3루타</th>
               <th>홈런</th>
+              <th>희생타</th>
             </tr>
           </thead>
           <tbody>
@@ -408,6 +422,14 @@ export default function FinalGameRecordPage() {
                     <EditableInput
                       type="number"
                       defaultValue={player.HR}
+                      readOnly
+                      onClick={() => handleBatterClick(player)}
+                    />
+                  </td>
+                  <td>
+                    <EditableInput
+                      type="number"
+                      defaultValue={player.SAC}
                       readOnly
                       onClick={() => handleBatterClick(player)}
                     />
@@ -472,6 +494,7 @@ export default function FinalGameRecordPage() {
           team={selectedCell.team}
           cellIndex={selectedCell.cellIndex}
           mode={modalMode} // 추가: 어떤 이유로 열렸는지
+          statId={selectedStatId}
           alertMessage={alertMessage} // 추가: 타자/투수 클릭 시 알림 내용
         />
       )}
