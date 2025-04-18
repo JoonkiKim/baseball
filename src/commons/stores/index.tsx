@@ -249,11 +249,11 @@ export const defaultplayerList = atom<PlayerInfo[]>({
     { order: 3, name: "디아즈", position: "1B" },
     { order: 4, name: "구자욱", position: "LF" },
     { order: 5, name: "김헌곤", position: "RF" },
-    { order: 6, name: "양도근", position: "2B" },
+    { order: 6, name: "심재훈", position: "2B" },
     { order: 7, name: "김영웅", position: "3B" },
     { order: 8, name: "강민호", position: "C" },
     { order: 9, name: "박병호", position: "DH" },
-    { order: 10, name: "원태인", position: "P" },
+    { order: 10, name: "원태양", position: "P" },
   ],
 });
 

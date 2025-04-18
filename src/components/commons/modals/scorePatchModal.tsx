@@ -19,7 +19,7 @@ interface IModalProps {
   cellIndex: number; // 이닝 인덱스(0‑based)
   mode?: "score" | "batter" | "pitcher";
   alertMessage?: string; // batter/pitcher 모드에서 보여줄 alert
-  statId: number | null;
+  statId?: number | null;
 }
 
 export default function ScorePatchModal({
@@ -93,7 +93,6 @@ export default function ScorePatchModal({
         />
       )}
 
-      {/* ──────────────────── Stat 입력 모달 ──────────────────── */}
       {showStatInputModal && (
         <StatPatchInputModal
           key={statId}
