@@ -204,6 +204,8 @@ export const AwayTeamPlayerListState = atom<IHAPlayer[]>({
 export interface HitterStat {
   playerName: string;
   teamName: string;
+  teamGameCount: number;
+  PA: number;
   AB: number;
   H: number;
   "2B": number;

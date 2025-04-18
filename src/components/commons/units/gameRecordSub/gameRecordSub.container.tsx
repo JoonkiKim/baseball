@@ -1,5 +1,3 @@
-// TeamRegistrationPageComponent.tsx
-
 import React, { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
@@ -106,6 +104,7 @@ const defaultPlayers: PlayerInfo[] = [
 
 export default function TeamRegistrationPageComponent() {
   const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [wildCardCount, setWildCardCount] = useState(0);
 
   // 홈/원정 여부 상태
@@ -130,6 +129,7 @@ export default function TeamRegistrationPageComponent() {
 
   // react-hook-form 및 선수 state 초기화
   const [players, setPlayers] = useState<PlayerInfo[]>(defaultPlayers);
+
   const { register, handleSubmit, watch, getValues, setValue } = useForm({
     defaultValues: {
       players: defaultPlayers.map((player) => ({
@@ -140,7 +140,6 @@ export default function TeamRegistrationPageComponent() {
       })),
     },
   });
-
   // ★ 최근 수정한 batter 행(투수 행 제외)의 인덱스를 추적하는 state
   const [lastPUpdateIndex, setLastPUpdateIndex] = useState<number | null>(null);
 
@@ -211,7 +210,7 @@ export default function TeamRegistrationPageComponent() {
         if (queryValue === "true") {
           // 홈팀
           const res = await API.get(
-            `/games/${router.query.recordId}/lineup?teamType="home"`
+            `/games/${router.query.recordId}/lineup?teamType=home`
           );
           const dataObj =
             typeof res.data === "string" ? JSON.parse(res.data) : res.data;
@@ -242,7 +241,7 @@ export default function TeamRegistrationPageComponent() {
         } else {
           // 원정팀
           const res = await API.get(
-            `/games/${router.query.recordId}/lineup?teamType="away"`
+            `/games/${router.query.recordId}/lineup?teamType=away`
           );
           const dataObj =
             typeof res.data === "string" ? JSON.parse(res.data) : res.data;
@@ -296,7 +295,7 @@ export default function TeamRegistrationPageComponent() {
     });
     console.log("wcMap (useMemo):", map);
     return map;
-  }, [lineupPlayersData, teamPlayersData]);
+  }, [router.query.recordId, lineupPlayersData, teamPlayersData]);
 
   // 폼 기본값 & players 배열 업데이트
   useEffect(() => {
@@ -494,6 +493,8 @@ export default function TeamRegistrationPageComponent() {
 
   // 교체완료 버튼 시
   const onSubmit = async (data: any) => {
+    // if (isSubmitting) return; // 이미 요청 중이면 무시
+    // setIsSubmitting(true);
     const currentPlayersFromForm = getValues("players");
     console.log("currentPlayersFromForm", currentPlayersFromForm);
     const updatedCurrentPlayers = currentPlayersFromForm.map((player: any) => {
@@ -509,15 +510,23 @@ export default function TeamRegistrationPageComponent() {
       );
       return;
     }
-    const nonPPlayers = updatedCurrentPlayers.filter(
-      (p: any) => p.order !== "P"
-    );
+    const nonPPlayers = updatedCurrentPlayers.slice(0, 9);
+    console.log("nonPPlayers", nonPPlayers);
+    const ids = nonPPlayers.map((p: any) => p.playerId);
+    const uniqueIds = new Set(ids);
+    if (uniqueIds.size !== ids.length) {
+      alert(
+        "1번~9번 타순에 중복된 선수가 있습니다. 각 타자를 고유한 선수로 선택해주세요."
+      );
+      return;
+    }
+
     const hasDHInNonP = nonPPlayers.some((p: any) => p.position === "DH");
     const requiredPositions = hasDHInNonP
       ? ["CF", "LF", "RF", "SS", "1B", "2B", "3B", "C", "DH"]
       : ["CF", "LF", "RF", "SS", "1B", "2B", "3B", "C", "P"];
     const assignedPositionsNonP = nonPPlayers
-      .slice(0, -1)
+      .slice(0, 9)
       .map((p: any) => p.position);
     console.log("확인할 포지션", assignedPositionsNonP);
     const missingPositions = requiredPositions.filter(
@@ -527,9 +536,9 @@ export default function TeamRegistrationPageComponent() {
       alert(`포지션 설정이 올바르지 않습니다.`);
       return;
     }
-    const pitcherCandidate = updatedCurrentPlayers.find(
-      (p: any) => p.position === "P"
-    );
+    // const pitcherCandidate = updatedCurrentPlayers.find(
+    //   (p: any) => p.position === "P"
+    // );
     const batters = updatedCurrentPlayers
       .filter((p: any) => p.order !== "P")
       .slice(0, -1)
@@ -538,10 +547,27 @@ export default function TeamRegistrationPageComponent() {
         playerId: p.playerId,
         position: p.position,
       }));
+
+    // pitcher: 항상 맨마지막행(index가 9인 선수)
+    const pitcherRow = updatedCurrentPlayers[9]; //
+    console.log(pitcherRow);
+
+    const dupId = pitcherRow.playerId;
+    if (nonPPlayers.some((p) => p.playerId === dupId && p.position !== "P")) {
+      alert("한 선수가 야수인 동시에 투수일 수 없습니다");
+      return;
+    }
+    const nonPPitchers = nonPPlayers.filter((p) => p.position === "P");
+    // 하나라도 있으면 모두 마지막 pitcherRow.playerId 와 일치해야 함
+    if (nonPPitchers.some((p) => p.playerId !== pitcherRow.playerId)) {
+      alert("투수id가 일치하지 않습니다다");
+      return;
+    }
+
     const formattedObject = {
       batters,
       pitcher: {
-        playerId: pitcherCandidate?.playerId,
+        playerId: pitcherRow?.playerId,
       },
     };
     console.log("Formatted Object:", JSON.stringify(formattedObject, null, 2));
@@ -552,6 +578,7 @@ export default function TeamRegistrationPageComponent() {
         formattedObject
       );
       console.log("전송 성공:", response.data);
+
       router.push(`/matches/${router.query.recordId}/records`);
     } catch (error) {
       console.error("PATCH 요청 에러:", error);

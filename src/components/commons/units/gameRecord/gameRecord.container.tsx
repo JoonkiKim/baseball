@@ -54,6 +54,7 @@ interface ISelectedCell {
 
 export default function GameRecordPage() {
   const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // 이닝 헤더: 7회까지, R(총점), H(안타) 컬럼 포함
   const inningHeaders = ["", "1", "2", "3", "4", "5", "6", "7", "R", "H"];
@@ -213,6 +214,8 @@ export default function GameRecordPage() {
         setIsOutModalOpen(true);
         break;
       case "볼넷/사구":
+        if (isSubmitting) return; // 이미 요청 중이면 무시
+        setIsSubmitting(true);
         try {
           const endpoint = `/matches/${router.query.recordId}/batters/${batter.playerId}/plate-appearance`;
           const requestBody = { result: "BB" };
@@ -221,6 +224,8 @@ export default function GameRecordPage() {
         } catch (error) {
           console.error("볼넷/사구 기록 전송 오류:", error);
           alert("볼넷/사구 기록 전송 오류");
+        } finally {
+          setIsSubmitting(false);
         }
         break;
       case "etc":
@@ -243,6 +248,8 @@ export default function GameRecordPage() {
 
   // 공수교대 확인
   const handleDefenseChangeConfirm = async () => {
+    if (isSubmitting) return; // 이미 요청 중이면 무시
+    setIsSubmitting(true);
     try {
       const gameId = router.query.recordId;
       const endpoint = `/games/${gameId}/scores`;
@@ -250,11 +257,12 @@ export default function GameRecordPage() {
       await API.post(endpoint, requestBody);
       console.log("이닝 득점 전송완료", requestBody);
       setThisInningScore(0);
-      // router.reload();
     } catch (error) {
       console.error("이닝 득점 전송 오류:", error);
+    } finally {
+      setIsSubmitting(false);
+      setIsSubstitutionSwapped((prev) => !prev);
     }
-    setIsSubstitutionSwapped((prev) => !prev);
   };
 
   // ★★★ 스코어 셀 클릭 핸들러 ★★★
@@ -311,7 +319,10 @@ export default function GameRecordPage() {
 
       <ControlButtonsRow>
         <ControlButtonsWrapper>
-          <ControlButton onClick={() => setIsChangeModalOpen(true)}>
+          <ControlButton
+            onClick={() => setIsChangeModalOpen(true)}
+            disabled={isSubmitting}
+          >
             공수교대
           </ControlButton>
           <ControlButton onClick={() => setIsGameEndModalOpen(true)}>
@@ -332,7 +343,7 @@ export default function GameRecordPage() {
       <PlayersRow>
         <PlayerBox>
           <PlayerChangeButton onClick={() => handleSubstitution(true)}>
-            선수교체({router.query.attack === "home" ? "홈" : "원정"})
+            선수교체({router.query.attack === "away" ? "홈" : "원정"})
           </PlayerChangeButton>
           <OrderBadge>{batter.order}번</OrderBadge>
           <PlayerWrapper>
@@ -358,7 +369,7 @@ export default function GameRecordPage() {
         </PlayerBox>
         <PlayerBox>
           <PlayerChangeButton onClick={() => handleSubstitution(false)}>
-            선수교체({router.query.attack === "home" ? "원정" : "홈"})
+            선수교체({router.query.attack === "away" ? "원정" : "홈"})
           </PlayerChangeButton>
           <PlayerWrapper>
             <PlayerPosition>P</PlayerPosition>
@@ -387,7 +398,10 @@ export default function GameRecordPage() {
         <RecordActionButton onClick={() => handleRecordAction("안타")}>
           안타
         </RecordActionButton>
-        <RecordActionButton onClick={() => handleRecordAction("볼넷/사구")}>
+        <RecordActionButton
+          onClick={() => handleRecordAction("볼넷/사구")}
+          disabled={isSubmitting}
+        >
           볼넷/사구
         </RecordActionButton>
         <RecordActionButton onClick={() => handleRecordAction("아웃")}>

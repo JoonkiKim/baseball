@@ -16,25 +16,28 @@ interface IModalProps {
 
 export default function ResultSubmitModal(props: IModalProps) {
   const router = useRouter();
-  console.log(router.query.recordId);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const handleSubmit = async () => {
+    if (isSubmitting) return; // 이미 요청 중이면 무시
+    setIsSubmitting(true);
+
     try {
-      // POST 요청을 보내고 응답 객체를 받는다.
       const response = await API.post(
         `/games/${router.query.recordId}/results/finalize`
       );
+      console.log(
+        `/games/${router.query.recordId}/results/finalize`,
+        "응답 상태:",
+        response.status
+      );
 
-      console.log(`/games/${router.query.recordId}/results/finalize`);
-      console.log("응답 상태:", response.status);
-      // 응답 상태에 따라 다르게 처리
       if (response.status === 200) {
         alert("경기 종료 및 확정 성공");
         setIsSubmitted(true);
       }
     } catch (error: any) {
-      // error.response가 있을 경우 API 응답 코드가 있다.
       if (error.response) {
         console.error("오류 응답 상태:", error.response.status);
         if (error.response.status === 400) {
@@ -48,6 +51,8 @@ export default function ResultSubmitModal(props: IModalProps) {
         console.error("네트워크 오류 또는 알 수 없는 에러:", error);
         alert("네트워크 오류가 발생했습니다.");
       }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -68,9 +73,12 @@ export default function ResultSubmitModal(props: IModalProps) {
     <ModalOverlay>
       <ModalContainer>
         <ModalTitleSmall>경기기록을 제출하시겠습니까?</ModalTitleSmall>
-        <ModalButton onClick={handleSubmit}>예</ModalButton>
+        <ModalButton onClick={handleSubmit} disabled={isSubmitting}>
+          예
+        </ModalButton>
         <ModalCancleButton
           onClick={() => props.setIsResultSubmitModalOpen(false)}
+          disabled={isSubmitting}
         >
           아니오
         </ModalCancleButton>

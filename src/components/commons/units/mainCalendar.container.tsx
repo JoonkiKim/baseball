@@ -79,7 +79,7 @@ export default function MainCalendarPage() {
         const res = await API.get("/games");
         // 새 객체 구조가 반영된 데이터를 불러온다고 가정합니다.
         setAllMatchData(res.data);
-        console.log(allMatchData);
+        // console.log(allMatchData);
       } catch (err) {
         console.error("❌ 경기 데이터 요청 에러:", err);
       } finally {

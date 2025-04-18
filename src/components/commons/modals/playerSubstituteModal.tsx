@@ -89,15 +89,15 @@ interface IPlayerSelectionModalProps {
     playerId: number;
     wc?: string;
   }) => void;
-  /** P행 선택 여부 (true일 때 투수 대체 리스트 호출) */
   isPitcher: boolean;
-  selectedPlayerNames: any[];
+  selectedPlayerNames: string[];
 }
 
 export default function SubPlayerSelectionModal({
   setIsModalOpen,
   onSelectPlayer,
   isPitcher,
+  selectedPlayerNames,
 }: IPlayerSelectionModalProps) {
   const router = useRouter();
   const [awayTeamPlayers, setAwayTeamPlayers] = useRecoilState(
@@ -143,7 +143,6 @@ export default function SubPlayerSelectionModal({
   const players = isAway ? awayTeamPlayers : homeTeamPlayers;
 
   const handleRowClick = (player: any) => {
-    if (!player.isSubstitutable) return;
     onSelectPlayer({
       name: player.name,
       playerId: player.id,
@@ -166,11 +165,14 @@ export default function SubPlayerSelectionModal({
           </thead>
           <tbody>
             {players.map((player) => {
-              const disabled = player.isSubstitutable === false;
+              // isSubstitutable이 false라도, 원래 자리에 있던 선수면 항상 선택 가능
+              const disabled =
+                !player.isSubstitutable &&
+                selectedPlayerNames.includes(player.name);
               return (
                 <tr
                   key={player.id}
-                  onClick={() => handleRowClick(player)}
+                  onClick={() => !disabled && handleRowClick(player)}
                   style={{
                     color: disabled ? "gray" : undefined,
                     cursor: disabled ? "default" : "pointer",

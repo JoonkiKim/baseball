@@ -26,25 +26,53 @@ export default function StatsPageBatterDetail() {
     const sortedData = [...hitterStats].sort((a, b) => b.H - a.H);
     setHitterData(sortedData);
   }, [hitterStats]);
-
-  // 정렬 핸들러: 각 컬럼 클릭 시 해당 키로 데이터를 정렬합니다.
-  const handleSortHitter = (key: keyof HitterStat) => {
-    setHitterSortKey(key);
-    const sortedData = [...hitterData].sort((a, b) => {
-      const aValue = a[key];
-      const bValue = b[key];
-      if (typeof aValue === "number" && typeof bValue === "number") {
-        return bValue - aValue;
+  useEffect(() => {
+    hitterData.forEach((p) => {
+      if (p.PA >= p.teamGameCount * 2) {
+        console.log(
+          `${p.playerName} (${p.teamName}) — PA: ${p.PA}, teamGameCount: ${p.teamGameCount}`
+        );
       }
-      // 문자열 비교가 필요한 경우 (예: 사전순 정렬)
-      if (typeof aValue === "string" && typeof bValue === "string") {
-        return bValue.localeCompare(aValue);
-      }
-      // 서로 다른 타입이면 원하는 정렬 로직에 따라 처리
-      return 0;
     });
-    setHitterData(sortedData);
+  }, [hitterData]);
+
+  type HitterNumericKey =
+    | "AB"
+    | "H"
+    | "2B"
+    | "3B"
+    | "HR"
+    | "BB"
+    | "AVG"
+    | "OBP"
+    | "SLG"
+    | "OPS";
+
+  // 정렬 핸들러
+  const handleSortHitter = (key: HitterNumericKey) => {
+    setHitterSortKey(key);
+    const sorted = [...hitterData].sort(
+      (a, b) =>
+        // 이제 key가 숫자 타입만 보장하므로 빼기가 가능합니다
+        (b[key] as number) - (a[key] as number)
+    );
+    setHitterData(sorted);
   };
+
+  // AVG, OBP, SLG, OPS 정렬 시에만 PA 필터 적용
+  const isRateKey = ["AVG", "OBP", "SLG", "OPS"].includes(
+    hitterSortKey as string
+  );
+  console.log("전체 선수 수:", hitterData.length);
+  const filtered = hitterData.filter((p) => p.PA >= p.teamGameCount * 2);
+  console.log("비율키 정렬 적용 후 남은 선수 수:", filtered.length);
+  console.table(
+    filtered.map((p) => ({
+      name: p.playerName,
+      PA: p.PA,
+      teamGC: p.teamGameCount,
+    }))
+  );
 
   return (
     <RankingContainer>
@@ -55,31 +83,33 @@ export default function StatsPageBatterDetail() {
             <tr>
               <th>순위</th>
               <th style={{ width: "90px" }}>선수</th>
-
               <th onClick={() => handleSortHitter("AB")}>
                 타수 <ArrowIcon>{getArrow(hitterSortKey, "AB")}</ArrowIcon>
               </th>
-
               <th onClick={() => handleSortHitter("H")}>
                 안타 <ArrowIcon>{getArrow(hitterSortKey, "H")}</ArrowIcon>
               </th>
-
               <th onClick={() => handleSortHitter("AVG")}>
                 타율 <ArrowIcon>{getArrow(hitterSortKey, "AVG")}</ArrowIcon>
               </th>
-
+              <th onClick={() => handleSortHitter("2B")}>
+                2루타 <ArrowIcon>{getArrow(hitterSortKey, "2B")}</ArrowIcon>
+              </th>
+              <th onClick={() => handleSortHitter("3B")}>
+                3루타 <ArrowIcon>{getArrow(hitterSortKey, "3B")}</ArrowIcon>
+              </th>
+              <th onClick={() => handleSortHitter("HR")}>
+                홈런 <ArrowIcon>{getArrow(hitterSortKey, "HR")}</ArrowIcon>
+              </th>
               <th onClick={() => handleSortHitter("BB")}>
                 볼넷 <ArrowIcon>{getArrow(hitterSortKey, "BB")}</ArrowIcon>
               </th>
-
               <th onClick={() => handleSortHitter("OBP")}>
                 출루율 <ArrowIcon>{getArrow(hitterSortKey, "OBP")}</ArrowIcon>
               </th>
-
               <th onClick={() => handleSortHitter("SLG")}>
                 장타율 <ArrowIcon>{getArrow(hitterSortKey, "SLG")}</ArrowIcon>
               </th>
-
               <th onClick={() => handleSortHitter("OPS")}>
                 OPS <ArrowIcon>{getArrow(hitterSortKey, "OPS")}</ArrowIcon>
               </th>
@@ -114,6 +144,9 @@ export default function StatsPageBatterDetail() {
                     <td>{item.AB}</td>
                     <td>{item.H}</td>
                     <td>{item.AVG.toFixed(3)}</td>
+                    <td>{item["2B"]}</td>
+                    <td>{item["3B"]}</td>
+                    <td>{item.HR}</td>
                     <td>{item.BB}</td>
                     <td>{item.OBP.toFixed(3)}</td>
                     <td>{item.SLG.toFixed(3)}</td>
