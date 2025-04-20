@@ -16,7 +16,7 @@ export const Container = styled.div`
   display: flex;
   flex-direction: column;
 
-  margin-top: 10vh;
+  margin-top: 20vh;
   /* justify-content: center; 수직 중앙 정렬 */
   align-items: center; /* 수평 중앙 정렬 */
   /* padding: 20px; */
@@ -51,6 +51,28 @@ export const Form = styled.form`
   gap: 16px; /* 요소 간의 간격 */
 `;
 
+/** 각 입력 필드를 감싸는 Wrapper */
+export const WrapperForEmail = styled.div`
+  width: 100%;
+
+  /* background-color: red; */
+  border-bottom: 1px solid #ccc;
+  display: flex;
+  flex-direction: row;
+`;
+
+export const EmailButton = styled.button`
+  /* background-color: red; */
+  background-color: transparent;
+  font-size: 10px;
+  width: 25vw;
+  border: 1px solid #bdbdbd;
+  /* border-radius: 4px; */
+  max-height: 20px;
+  margin-top: 5px;
+  margin-bottom: 5px;
+`;
+
 /** 라벨 */
 export const Label = styled.label`
   font-size: 14px;
@@ -71,21 +93,24 @@ export const Label = styled.label`
 /** 각 입력 필드를 감싸는 Wrapper */
 export const FieldWrapper = styled.div`
   width: 100%;
+  /* background-color: red; */
   margin-top: 20px;
   display: flex;
   flex-direction: column;
 `;
 
 /** 기본 인풋 스타일 */
-export const Input = styled.input`
+export const Input = styled.input<{ $noBottom?: boolean }>`
   width: 100%;
+  margin-top: 5px;
+  margin-bottom: 5px;
   border: none;
   border-bottom: 1px solid #ccc;
   /* padding: 8px 4px; */
   padding-bottom: 4px;
   font-size: 14px;
   font-family: "KBO-Dia-Gothic_medium";
-
+  border-bottom: ${({ $noBottom }) => ($noBottom ? "none" : "1px solid #ccc")};
   &::placeholder {
     color: rgba(0, 0, 0, 0.3);
     font-size: 14px;
@@ -94,6 +119,8 @@ export const Input = styled.input`
   &:focus {
     outline: none;
     border-bottom: 1px solid #ccc;
+    border-bottom: ${({ $noBottom }) =>
+      $noBottom ? "none" : "1px solid #ccc"};
   }
 
   ${small} {

@@ -136,3 +136,10 @@ export const ScoreDisplay = styled.div`
   text-align: center;
   font-family: "KBO-Dia-Gothic_light";
 `;
+
+export const StatPatchInput = styled.input`
+  width: 10vw;
+  text-align: center;
+  border: none;
+  border-bottom: 1px solid #bdbdbd;
+`;

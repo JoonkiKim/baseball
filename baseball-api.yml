@@ -234,6 +234,35 @@ paths:
           description: "잘못된 파라미터 형식"
         "404":
           description: "해당 날짜의 경기가 존재하지 않음"
+  /games/{gameId}/players:
+    get:
+      summary: "특정 경기의 선수 목록 조회 for 교체명단 등록"
+      description: |
+        라인업 등록여부를 inLineup 필드에 표시합니다.
+      tags:
+        - "games"
+      parameters:
+        - name: gameId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: "경기 ID"
+        - name: teamType
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [home, away]
+          description: "팀 타입"
+      responses:
+        "200":
+          description: "성공적으로 선수 목록을 가져옴"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlayerListWithInLineupResponse"
+
   /records/batters:
     get:
       summary: "전체 타자 기록 조회"
@@ -1373,6 +1402,54 @@ components:
             playerName: "박야구"
             isElite: false
             isWc: false # 이미 선택되어 더 이상 선택 불가
+    PlayerListWithInLineupResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: "팀 ID"
+          example: 1
+        name:
+          type: string
+          description: "팀 이름"
+          example: "공대"
+        players:
+          type: array
+          description: "선수 배열"
+          items:
+            $ref: "#/components/schemas/Player"
+      required:
+        - id
+        - name
+        - players
+      example:
+        id: 1
+        name: "공대"
+        players:
+          - id: 101
+            departmentName: "수학교육과"
+            name: "윤동현"
+            isElite: false
+            isWc: false
+            inLineup: true
+          - id: 102
+            departmentName: "언론정보학과"
+            playerName: "김준기"
+            isElite: false
+            isWc: false
+            inLineup: false
+          - id: 103
+            departmentName: "사회학과"
+            playerName: "김태균"
+            isElite: true
+            isWc: false
+            inLineup: false
+          - id: 104
+            departmentName: "컴퓨터공학과"
+            playerName: "박야구"
+            isElite: false
+            isWc: false # 이미 선택되어 더 이상 선택 불가
+            inLineup: false
 
     # 선수 개별 정보
     Player:

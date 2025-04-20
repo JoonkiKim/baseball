@@ -7,6 +7,7 @@ import {
   ModalContainer,
   ModalOverlay,
   ModalTitleSmall,
+  StatPatchInput,
 } from "./modal.style";
 import API from "../../../commons/apis/api";
 
@@ -125,14 +126,14 @@ export default function StatPatchInputModal({
         <ModalTitleSmall>스탯을 수정해주세요</ModalTitleSmall>
 
         {/* id, playerName 은 읽기 전용으로 표시 */}
-        {"id" in stat && (
+        {/* {"id" in stat && (
           <div style={{ marginBottom: 8 }}>
             <b>id</b>: {stat.id}
           </div>
-        )}
+        )} */}
         {("플레이어" in stat || "playerName" in stat) && (
-          <div style={{ marginBottom: 16 }}>
-            <b>플레이어</b>: {stat["플레이어"] ?? stat.playerName}
+          <div style={{ marginBottom: 30 }}>
+            {stat["플레이어"] ?? stat.playerName}
           </div>
         )}
 
@@ -147,7 +148,7 @@ export default function StatPatchInputModal({
               style={{
                 display: "flex",
                 alignItems: "center",
-                marginBottom: 20,
+                marginBottom: 25,
               }}
             >
               <label
@@ -161,15 +162,10 @@ export default function StatPatchInputModal({
                 {key}
               </label>
 
-              <input
+              <StatPatchInput
                 type="number"
                 value={stat[key] as string | number}
                 onChange={(e) => handleChange(key, e.target.value)}
-                style={{
-                  width: "25vw",
-                  padding: 4,
-                  textAlign: "right",
-                }}
               />
             </div>
           );

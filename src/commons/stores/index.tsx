@@ -188,6 +188,7 @@ export interface IHAPlayer {
   isWc: boolean;
   position?: string;
   isSubstitutable: boolean;
+  inLineup?: boolean;
 }
 
 export const HomeTeamPlayerListState = atom<IHAPlayer[]>({

@@ -24,7 +24,7 @@ export default function OutModal(props: IModalProps) {
 
     if (Type === "삼진") {
       try {
-        const endpoint = `/matches/${router.query.recordId}/batters/${props.playerId}/plate-appearance`;
+        const endpoint = `/games/${router.query.recordId}/batters/${props.playerId}/plate-appearance`;
         const requestBody = { result: "K" };
         const { data } = await API.post(endpoint, requestBody);
         alert(`삼진 기록 전송 완료\n응답값: ${JSON.stringify(data)}`);

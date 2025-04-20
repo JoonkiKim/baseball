@@ -205,7 +205,7 @@ export default function TeamRegistrationPageComponent() {
     const fetchTeamPlayers = async () => {
       const queryValue = router.query.isHomeTeam;
       if (!router.query.recordId) return;
-
+      const teamType = router.query.isHomeTeam === "true" ? "home" : "away";
       try {
         if (queryValue === "true") {
           // 홈팀
@@ -215,7 +215,25 @@ export default function TeamRegistrationPageComponent() {
           const dataObj =
             typeof res.data === "string" ? JSON.parse(res.data) : res.data;
           console.log("홈팀 응답 (lineup API):", dataObj);
-
+          // ★ 이 부분을 추가 ★
+          const minimalLineup = {
+            batters: dataObj.batters.map(
+              ({ order, playerId, playerName }: any) => ({
+                order,
+                playerId,
+                playerName,
+              })
+            ),
+            // 만약 투수 정보도 저장하고 싶으면 아래 주석 해제
+            pitcher: {
+              playerId: dataObj.pitcher.playerId,
+              playerName: dataObj.pitcher.playerName,
+            },
+          };
+          localStorage.setItem(
+            `lineup_${teamType}`,
+            JSON.stringify(minimalLineup)
+          );
           // API의 pitcher row 값을 그대로 사용
           let lineupPlayers = [
             ...dataObj.batters.map((batter: any) => ({
@@ -243,10 +261,28 @@ export default function TeamRegistrationPageComponent() {
           const res = await API.get(
             `/games/${router.query.recordId}/lineup?teamType=away`
           );
+
           const dataObj =
             typeof res.data === "string" ? JSON.parse(res.data) : res.data;
           console.log("원정팀 응답 (lineup API):", dataObj);
-
+          const minimalLineup = {
+            batters: dataObj.batters.map(
+              ({ order, playerId, playerName }: any) => ({
+                order,
+                playerId,
+                playerName,
+              })
+            ),
+            // 만약 투수 정보도 저장하고 싶으면 아래 주석 해제
+            pitcher: {
+              playerId: dataObj.pitcher.playerId,
+              playerName: dataObj.pitcher.playerName,
+            },
+          };
+          localStorage.setItem(
+            `lineup_${teamType}`,
+            JSON.stringify(minimalLineup)
+          );
           let lineupPlayers = [
             ...dataObj.batters.map((batter: any) => ({
               order: batter.order,
@@ -341,29 +377,38 @@ export default function TeamRegistrationPageComponent() {
     }
   }, [router.query.isHomeTeam, homeTeamPlayers, awayTeamPlayers]);
 
+  // 추가: 배터 WC 개수
+  const [batterWcCount, setBatterWcCount] = useState(0);
+  // 추가: 투수 WC 개수
+  const [pitcherWcCount, setPitcherWcCount] = useState(0);
   // WildCardBox 계산 (콘솔용)
+  // WildCardBox 계산 (배터/투수 따로, 중복 없이)
   useEffect(() => {
-    let wildCardCountCalc = players.filter(
-      (player) =>
-        player.name &&
-        player.playerId &&
-        (player.isWc || wcMap[player.playerId] || customWcMap[player.playerId])
+    // 1) 배터(1~9번) WC 개수
+    const batterCount = players.filter(
+      (p) =>
+        p.order !== "P" &&
+        p.name &&
+        p.playerId &&
+        (p.isWc || wcMap[p.playerId] || customWcMap[p.playerId])
     ).length;
 
-    const pitcherPlayer = players.find((player) => player.order === "P");
-    if (pitcherPlayer && pitcherPlayer.name.trim() !== "") {
-      const isDuplicate = players.some(
-        (player) =>
-          player.order !== "P" &&
-          player.name.trim() !== "" &&
-          player.name === pitcherPlayer.name
-      );
-      if (isDuplicate) {
-        wildCardCountCalc = Math.max(wildCardCountCalc - 1, 0);
-      }
-    }
-    console.log("WildCardBox count:", wildCardCountCalc);
-    setWildCardCount(wildCardCountCalc);
+    // 2) 투수(P행) WC 개수 (중복 검사 없이)
+    const pitcherCount = players.filter(
+      (p) =>
+        p.order === "P" &&
+        p.name &&
+        p.playerId &&
+        (p.isWc || wcMap[p.playerId] || customWcMap[p.playerId])
+    ).length;
+
+    console.log("Batter WC count:", batterCount);
+    console.log("Pitcher WC count:", pitcherCount);
+
+    // 상태 업데이트
+    setBatterWcCount(batterCount);
+    setPitcherWcCount(pitcherCount);
+    setWildCardCount(batterCount + pitcherCount);
   }, [players, wcMap, customWcMap]);
 
   // 포지션 드롭다운 관련 상태 및 핸들러
@@ -493,10 +538,11 @@ export default function TeamRegistrationPageComponent() {
 
   // 교체완료 버튼 시
   const onSubmit = async (data: any) => {
-    // if (isSubmitting) return; // 이미 요청 중이면 무시
-    // setIsSubmitting(true);
+    // 이미 제출 중이면 무시
+    if (isSubmitting) return;
+    // 1) form 에서 넘어온 플레이어들
     const currentPlayersFromForm = getValues("players");
-    console.log("currentPlayersFromForm", currentPlayersFromForm);
+    // 2) WC 플래그 갱신
     const updatedCurrentPlayers = currentPlayersFromForm.map((player: any) => {
       const updatedIsWc = player.playerId
         ? wcMap[player.playerId] === true ||
@@ -504,12 +550,49 @@ export default function TeamRegistrationPageComponent() {
         : false;
       return { ...player, isWc: updatedIsWc };
     });
+
+    // ─── 여기서만 쓰는 임시 wildCardCount 계산 ───
+
+    // 3) 배터(1~9번) WC 개수
+    const batterWcCount = updatedCurrentPlayers
+      .slice(0, -1) // 마지막 요소 제외
+      .filter((p) => p.isWc).length; // WC인 선수만
+
+    console.log("batterWcCount", batterWcCount);
+
+    // 4) 투수(P행) WC 개수
+    const pitcherWcCount = updatedCurrentPlayers
+      .slice(-1) // 마지막 요소만 남음
+      .filter((p) => p.isWc).length; // WC 여부 필터
+    console.log("pitcherWcCount", pitcherWcCount);
+
+    // 5) 합산
+    const rawTotal = batterWcCount + pitcherWcCount;
+    // 6) 배터와 투수 같은 ID 로 중복된 경우 1만 빼기
+
+    // 1) pitcher: 배열의 마지막 요소를 가져오기
+    const pitcher = updatedCurrentPlayers[updatedCurrentPlayers.length - 1];
+
+    // 2) 마지막 행을 제외한 나머지에서 중복 검사
+    const isDuplicate =
+      pitcher &&
+      updatedCurrentPlayers
+        .slice(0, -1) // 마지막 요소(투수) 제외
+        .some((p) => p.playerId === pitcher.playerId && p.isWc && pitcher.isWc);
+
+    // 3) 최종 WC 카운트
+    const wildCardCount = isDuplicate ? rawTotal - 1 : rawTotal;
+    console.log("isDuplicate", isDuplicate);
+    console.log("wildCardCount", wildCardCount);
+
+    // 7) 최종 검증 (기존과 동일하게 wildCardCount 사용)
     if (wildCardCount > 3) {
       alert(
         `WC 조건을 만족하는 선수가 3명을 초과합니다. 현재 ${wildCardCount} 명`
       );
       return;
     }
+    // ────────────────────────────────────────────────
     const nonPPlayers = updatedCurrentPlayers.slice(0, 9);
     console.log("nonPPlayers", nonPPlayers);
     const ids = nonPPlayers.map((p: any) => p.playerId);
@@ -572,6 +655,8 @@ export default function TeamRegistrationPageComponent() {
     };
     console.log("Formatted Object:", JSON.stringify(formattedObject, null, 2));
     try {
+      // 중복 제출 방지 시작
+      setIsSubmitting(true);
       const gameId = router.query.recordId;
       const response = await API.post(
         `/games/${gameId}/lineup`,
@@ -582,6 +667,9 @@ export default function TeamRegistrationPageComponent() {
       router.push(`/matches/${router.query.recordId}/records`);
     } catch (error) {
       console.error("PATCH 요청 에러:", error);
+    } finally {
+      // 3) 제출 상태 해제
+      setIsSubmitting(false);
     }
   };
 
@@ -691,7 +779,9 @@ export default function TeamRegistrationPageComponent() {
           })}
         </PlayerList>
         <ButtonWrapper>
-          <ControlButton type="submit">교체완료</ControlButton>
+          <ControlButton type="submit" disabled={isSubmitting}>
+            교체완료
+          </ControlButton>
         </ButtonWrapper>
       </form>
       {isModalOpen && <RecordStartModal setIsModalOpen={setIsModalOpen} />}
@@ -699,13 +789,17 @@ export default function TeamRegistrationPageComponent() {
         <SubPlayerSelectionModal
           setIsModalOpen={setIsPlayerSelectionModalOpen}
           onSelectPlayer={handleSelectPlayer}
-          selectedPlayerNames={watch("players")
-            .map((p: any) => p.name)
-            .filter((name: string) => name.trim() !== "")}
           isPitcher={
             selectedPlayerIndex !== null &&
             players[selectedPlayerIndex].order === "P"
           }
+          selectedPlayerIds={watch("players")
+            .filter((_, idx) =>
+              players[selectedPlayerIndex!].order === "P" ? idx === 9 : idx < 9
+            )
+            .map((p: any) => p.playerId)
+            .filter((id: number) => id != null)}
+          rowOrder={players[selectedPlayerIndex!].order}
         />
       )}
     </Container>

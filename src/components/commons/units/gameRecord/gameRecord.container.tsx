@@ -60,12 +60,24 @@ export default function GameRecordPage() {
   const inningHeaders = ["", "1", "2", "3", "4", "5", "6", "7", "R", "H"];
 
   // 팀 이름 상태
-  const [teamAName, setTeamAName] = useState("키움");
-  const [teamBName, setTeamBName] = useState("삼성");
+  const [teamAName, setTeamAName] = useState("");
+  const [teamBName, setTeamBName] = useState("");
 
   // 팀 A, B 이닝별 점수 (7이닝 기준) + R, H 포함 시 9칸
   const [teamAScores, setTeamAScores] = useState(new Array(7).fill(""));
   const [teamBScores, setTeamBScores] = useState(new Array(7).fill(""));
+  // 페이지 로드 시 로컬스토리지에서 팀 이름 읽어오기
+  useEffect(() => {
+    const matchStr = localStorage.getItem("selectedMatch");
+    if (!matchStr) return;
+    try {
+      const { awayTeam, homeTeam } = JSON.parse(matchStr);
+      setTeamAName(awayTeam.name);
+      setTeamBName(homeTeam.name);
+    } catch {
+      console.error("selectedMatch 파싱 실패");
+    }
+  }, []);
 
   // 이번 이닝 득점
   const [thisInningScore, setThisInningScore] = useState(0);
@@ -106,7 +118,7 @@ export default function GameRecordPage() {
     async function fetchInningScores() {
       try {
         const res = await API.get(
-          `/matches/${router.query.recordId}/inning-scores`
+          `/games/${router.query.recordId}/inning-scores`
         );
         const response =
           typeof res.data === "string" ? JSON.parse(res.data) : res.data;
@@ -158,7 +170,7 @@ export default function GameRecordPage() {
     async function fetchBatter() {
       if (!router.query.recordId || !router.query.attack) return;
       try {
-        const teamType = router.query.attack;
+        const teamType = router.query.attack === "home" ? "home" : "away";
         const res = await API.get(
           `/games/${router.query.recordId}/current-batter?teamType=${teamType}`
         );
@@ -217,7 +229,7 @@ export default function GameRecordPage() {
         if (isSubmitting) return; // 이미 요청 중이면 무시
         setIsSubmitting(true);
         try {
-          const endpoint = `/matches/${router.query.recordId}/batters/${batter.playerId}/plate-appearance`;
+          const endpoint = `/games/${router.query.recordId}/batters/${batter.playerId}/plate-appearance`;
           const requestBody = { result: "BB" };
           const { data } = await API.post(endpoint, requestBody);
           alert(`볼넷/사구 기록 전송 완료\n응답값: ${JSON.stringify(data)}`);
@@ -343,7 +355,7 @@ export default function GameRecordPage() {
       <PlayersRow>
         <PlayerBox>
           <PlayerChangeButton onClick={() => handleSubstitution(true)}>
-            선수교체({router.query.attack === "away" ? "홈" : "원정"})
+            선수교체({router.query.attack === "home" ? "홈" : "원정"})
           </PlayerChangeButton>
           <OrderBadge>{batter.order}번</OrderBadge>
           <PlayerWrapper>
@@ -369,7 +381,7 @@ export default function GameRecordPage() {
         </PlayerBox>
         <PlayerBox>
           <PlayerChangeButton onClick={() => handleSubstitution(false)}>
-            선수교체({router.query.attack === "away" ? "원정" : "홈"})
+            선수교체({router.query.attack === "home" ? "원정" : "홈"})
           </PlayerChangeButton>
           <PlayerWrapper>
             <PlayerPosition>P</PlayerPosition>

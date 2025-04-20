@@ -31,7 +31,7 @@ export default function EtcModal(props: IModalProps) {
     setIsSubmitting(true);
 
     try {
-      const endpoint = `/matches/${router.query.recordId}/batters/${props.playerId}/plate-appearance`;
+      const endpoint = `/games/${router.query.recordId}/batters/${props.playerId}/plate-appearance`;
       const requestBody = { result: mapping[Type] };
       const { data } = await API.post(endpoint, requestBody);
       alert(`${mapping[Type]} 기록 전송 완료\n응답값: ${JSON.stringify(data)}`);

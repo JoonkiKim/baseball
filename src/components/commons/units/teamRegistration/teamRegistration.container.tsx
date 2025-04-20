@@ -324,7 +324,7 @@ export default function TeamRegistrationPageComponent(props: IProps) {
     setIsSubmitting(true);
     try {
       const res = await API.post(
-        `/matches/${router.query.recordId}/lineup`,
+        `/games/${router.query.recordId}/lineup`,
         requestBody
       );
       console.log("POST 요청 성공:", res.data);
@@ -335,8 +335,11 @@ export default function TeamRegistrationPageComponent(props: IProps) {
       if (props.isHomeTeam) {
         router.push(`/matches/${router.query.recordId}/awayTeamRegistration`);
       } else {
-        await API.post(`/games/${router.query.recordId}/start`, requestBody);
-        router.push(`/matches/${router.query.recordId}/records`);
+        // await API.post(`/games/${router.query.recordId}/start`, requestBody);
+        // router.push(`/matches/${router.query.recordId}/records`);
+        router.push(
+          `/matches/${router.query.recordId}/homeTeamRegistration/homeTeamSubRegistration`
+        );
       }
     } catch (error) {
       console.error("POST 요청 실패:", error);

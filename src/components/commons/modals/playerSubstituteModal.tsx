@@ -90,14 +90,16 @@ interface IPlayerSelectionModalProps {
     wc?: string;
   }) => void;
   isPitcher: boolean;
-  selectedPlayerNames: string[];
+  selectedPlayerIds: number[];
+  rowOrder: number | string;
 }
 
 export default function SubPlayerSelectionModal({
   setIsModalOpen,
   onSelectPlayer,
   isPitcher,
-  selectedPlayerNames,
+  selectedPlayerIds,
+  rowOrder,
 }: IPlayerSelectionModalProps) {
   const router = useRouter();
   const [awayTeamPlayers, setAwayTeamPlayers] = useRecoilState(
@@ -111,7 +113,7 @@ export default function SubPlayerSelectionModal({
   useEffect(() => {
     const recordId = router.query.recordId;
     if (!recordId) return;
-    const teamType = isAway ? "home" : "away";
+    const teamType = isAway ? "away" : "home";
     const endpoint = isPitcher
       ? "substitutable-pitchers"
       : "substitutable-batters";
@@ -140,6 +142,13 @@ export default function SubPlayerSelectionModal({
     return () => window.removeEventListener("popstate", onPop);
   }, [setIsModalOpen]);
 
+  // 1) localStorage 에서 최소 라인업 정보 꺼내기
+  const teamType = router.query.isHomeTeam === "false" ? "away" : "home";
+  const minimalRaw = localStorage.getItem(`lineup_${teamType}`);
+  const minimal = minimalRaw ? JSON.parse(minimalRaw) : { batters: [] };
+  const originalBatters: { order: number; playerId: number }[] =
+    minimal.batters || [];
+  const originalPitcherId: number | null = minimal.pitcher?.playerId ?? null;
   const players = isAway ? awayTeamPlayers : homeTeamPlayers;
 
   const handleRowClick = (player: any) => {
@@ -165,10 +174,42 @@ export default function SubPlayerSelectionModal({
           </thead>
           <tbody>
             {players.map((player) => {
-              // isSubstitutable이 false라도, 원래 자리에 있던 선수면 항상 선택 가능
-              const disabled =
-                !player.isSubstitutable &&
-                selectedPlayerNames.includes(player.name);
+              let disabled: boolean;
+
+              if (isPitcher) {
+                // P행: 원래 타자나 원래 투수는 반드시 선택 가능
+                const isOriginalBatter = originalBatters.some(
+                  (b) => b.playerId === player.id
+                );
+                if (isOriginalBatter || player.id === originalPitcherId) {
+                  disabled = false;
+                } else if (player.isSubstitutable) {
+                  // 대체 가능한 투수는 이미 선택된 경우만 차단
+                  disabled = selectedPlayerIds.includes(player.id);
+                } else {
+                  // 그 외 교체 불가능 선수는 차단
+                  disabled = true;
+                }
+              } else {
+                // 1~9번 타순: 원래 투수는 반드시 선택 가능
+                if (player.id === originalPitcherId) {
+                  disabled = false;
+                } else if (player.isSubstitutable) {
+                  // 대체 가능한 타자는 이미 선택된 경우만 차단
+                  disabled = selectedPlayerIds.includes(player.id);
+                } else {
+                  // 그 외 교체 불가능 타자는
+                  // 해당 자리에서 교체된 원래 타자만 선택 가능
+                  const substitutedOut = originalBatters.filter(
+                    (b) => !selectedPlayerIds.includes(b.playerId)
+                  );
+                  const candidate = substitutedOut.find(
+                    (b) => b.order === rowOrder
+                  );
+                  disabled = !(candidate && candidate.playerId === player.id);
+                }
+              }
+
               return (
                 <tr
                   key={player.id}

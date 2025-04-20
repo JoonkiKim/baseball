@@ -28,6 +28,8 @@ import {
 import { formatDate2, formatDateToYMD } from "../../../commons/libraries/utils";
 import API from "../../../commons/apis/api";
 import { previousDateState, TeamListState } from "../../../commons/stores";
+import { registerLocale } from "react-datepicker";
+import { ko } from "date-fns/locale";
 
 // 새 객체 구조에 맞춘 인터페이스 정의 (matchId → gameId)
 interface RawMatch {
@@ -55,6 +57,7 @@ interface Game {
 }
 
 export default function MainCalendarPage() {
+  registerLocale("ko", ko);
   moment.tz.setDefault("Asia/Seoul");
   const router = useRouter();
 
@@ -128,21 +131,6 @@ export default function MainCalendarPage() {
     };
   }, [isCalendarOpen]);
 
-  // const handleDecreaseDate = () => {
-  //   if (selectedDate) {
-  //     const newDate = new Date(selectedDate);
-  //     newDate.setDate(newDate.getDate() - 1);
-  //     setSelectedDate(newDate);
-  //   }
-  // };
-
-  // const handleIncreaseDate = () => {
-  //   if (selectedDate) {
-  //     const newDate = new Date(selectedDate);
-  //     newDate.setDate(newDate.getDate() + 1);
-  //     setSelectedDate(newDate);
-  //   }
-  // };
   const handleDecreaseDate = () =>
     selectedDate &&
     setSelectedDate(moment(selectedDate).subtract(1, "day").toDate());
@@ -183,6 +171,8 @@ export default function MainCalendarPage() {
               <DatePickTotalWrapper ref={calendarRef}>
                 <DatePickWrapper>
                   <StyledDatePicker
+                    locale="ko"
+                    dateFormatCalendar="M월"
                     selected={selectedDate}
                     onChange={handleDateChange}
                     inline
@@ -353,18 +343,6 @@ export default function MainCalendarPage() {
                     }
 
                     router.push(route);
-                    // 설정된 route에 따라 쿼리 파라미터를 붙여 새 URL을 구성합니다.
-                    // route에 "homeTeamRegistration"이 포함되어 있으면 homeTeam의 id를, 그렇지 않으면 awayTeam의 id를 사용합니다.
-                    // if (route) {
-                    //   if (route.includes("homeTeamRegistration")) {
-                    //     // 예: /matches/1025/homeTeamRegistration?teamId=1
-                    //     route = `${route}?teamId=${match.homeTeam.id}`;
-                    //   } else {
-                    //     // 예: /matches/1025/result?teamId=2 또는 기타 상태의 경우 awayTeam의 id 사용
-                    //     route = `${route}?teamId=${match.awayTeam.id}`;
-                    //   }
-
-                    // }
                   }}
                 >
                   경기기록

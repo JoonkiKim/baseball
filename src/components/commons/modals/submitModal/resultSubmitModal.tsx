@@ -35,6 +35,9 @@ export default function ResultSubmitModal(props: IModalProps) {
 
       if (response.status === 200) {
         alert("경기 종료 및 확정 성공");
+        localStorage.removeItem("selectedMatch");
+        localStorage.removeItem("lineup_away");
+        localStorage.removeItem("lineup_home");
         setIsSubmitted(true);
       }
     } catch (error: any) {

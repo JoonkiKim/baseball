@@ -11,6 +11,8 @@ import {
   Input,
   SignUpButton,
   ErrorMessage,
+  WrapperForEmail,
+  EmailButton,
 } from "./refereeRegister.style";
 
 // 폼에서 다룰 데이터 타입 정의 (숫자 타입으로 변경)
@@ -52,6 +54,11 @@ export default function RefereeRegisterPage() {
   } = useForm({
     resolver: yupResolver(schema),
   });
+  // ① 인증번호 발송 버튼 클릭 시 실행되는 함수
+  const handleSendVerification = () => {
+    alert("인증번호가 발송되었습니다. 이메일 수신함을 확인해주세요!");
+    // 실제로는 여기서 이메일 인증번호 발송 API 호출을 수행하면 됩니다.
+  };
 
   // 폼 제출 핸들러
   const onSubmit: SubmitHandler<RefereeFormData> = (data) => {
@@ -88,12 +95,18 @@ export default function RefereeRegisterPage() {
         {/* 발송된 인증번호 입력 */}
         <FieldWrapper>
           <Label htmlFor="verificationCode">발송된 인증번호를 입력하세요</Label>
-          <Input
-            id="verificationCode"
-            type="number"
-            placeholder="6자리 숫자"
-            {...register("verificationCode")}
-          />
+          <WrapperForEmail>
+            <Input
+              id="verificationCode"
+              type="number"
+              placeholder="6자리 숫자"
+              {...register("verificationCode")}
+              $noBottom
+            />
+            <EmailButton type="button" onClick={handleSendVerification}>
+              인증번호 발송
+            </EmailButton>
+          </WrapperForEmail>
           {errors.verificationCode ? (
             <ErrorMessage>{errors.verificationCode.message}</ErrorMessage>
           ) : (
@@ -101,7 +114,7 @@ export default function RefereeRegisterPage() {
           )}
         </FieldWrapper>
 
-        {/* 운영진에게 전달받은 인증코드 입력 */}
+        {/* 운영진에게 전달받은 인증코드 입력
         <FieldWrapper>
           <Label htmlFor="adminCode">
             운영진에게 전달받은 인증코드를 입력하세요
@@ -117,7 +130,7 @@ export default function RefereeRegisterPage() {
           ) : (
             <ErrorMessage />
           )}
-        </FieldWrapper>
+        </FieldWrapper> */}
 
         {/* 등록 버튼 */}
         <SignUpButton type="submit">심판 등록하기</SignUpButton>
