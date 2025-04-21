@@ -1,5 +1,5 @@
 // TeamRegistrationPageComponent.tsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
 import { useRecoilState } from "recoil";
@@ -108,6 +108,18 @@ export default function TeamRegistrationPageComponent(props: IProps) {
     { order: 9, selectedViaModal: false },
     { order: "P", selectedViaModal: false },
   ]);
+
+  const duplicatePositions = useMemo(() => {
+    const counts: Record<string, number> = {};
+    // 1~9번(인덱스 0~8) 포지션만 집계
+    players.slice(0, 9).forEach((p) => {
+      if (p.position) {
+        counts[p.position] = (counts[p.position] || 0) + 1;
+      }
+    });
+    // 2회 이상 등장한 포지션 이름만 반환
+    return Object.keys(counts).filter((pos) => counts[pos] > 1);
+  }, [players]);
 
   const { register, handleSubmit, watch, setValue } = useForm({
     defaultValues: {
@@ -417,7 +429,16 @@ export default function TeamRegistrationPageComponent(props: IProps) {
                       }
                     }}
                   >
-                    <PositionText isPlaceholder={!player.position}>
+                    <PositionText
+                      isPlaceholder={!player.position}
+                      style={{
+                        color:
+                          player.position &&
+                          duplicatePositions.includes(player.position)
+                            ? "red"
+                            : undefined,
+                      }}
+                    >
                       {!player.position ? (
                         <>
                           <ArrowIconNone>▽</ArrowIconNone>

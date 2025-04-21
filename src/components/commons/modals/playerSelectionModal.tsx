@@ -61,7 +61,7 @@ export const PlayerTable = styled.table`
   }
 
   tbody tr:hover {
-    background-color: #f2f2f2;
+    /* background-color: #f2f2f2; */
     cursor: pointer;
   }
 `;
