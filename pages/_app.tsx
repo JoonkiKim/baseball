@@ -30,6 +30,23 @@ function MyApp({ Component, pageProps }) {
       background-color: ${isResultPage ? "#f2f2f2" : "#ffffff"};
       margin: 0;
       padding: 0;
+      /* height: 100vh; */
+      /* height: calc(100% - 140px); */
+    }
+
+    /* 2) RootWebArea가 부모 높이(=100%)를 상속하도록 */
+    .RootWebArea {
+      /* height: 100%; */
+      /* 또는 flex 레이아웃이라면 flex: 1; */
+    }
+
+    html,
+    body,
+    #__next,
+    .RootWebArea {
+      /* height: 100%; */
+      margin: 0;
+      padding: 0;
     }
   `;
 

@@ -392,6 +392,7 @@ export default function TeamRegistrationPageComponent(props: IProps) {
                 <NameWrapper hasValue={!!currentName}>
                   <InputWrapper hasValue={!!currentName}>
                     <PlayerNameInput
+                      hasValue={!!currentName}
                       {...register(`players.${index}.name`)}
                       placeholder="선수명 선택"
                       autoComplete="off"

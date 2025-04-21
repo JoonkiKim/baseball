@@ -9,28 +9,27 @@ const large =
 const xlarge = "@media only screen and (min-width: 1025px)";
 
 // ─── 기존 스타일 컴포넌트 ─────────────────────────────────────────
+
+const SIDE_PADDING = "5vh";
 export const Container = styled.div`
+  /* 1) 헤더 높이 만큼 위로 밀리는 margin 유지 */
   margin-top: 140px;
-  width: 85%;
-  max-width: 768px;
-  height: 100%;
-  /* background-color: red; */
-  /* min-height: 1000px; */
+
+  /* 2) 양쪽 중앙 정렬 */
   margin-left: auto;
   margin-right: auto;
+  width: 100%;
+  max-width: 768px;
+
+  /* 3) 전체 높이에서 헤더(140px)만큼 빼서 채우기 */
+  height: calc(100% - 140px);
+
+  /* 4) flex 컬럼, 내용이 길어지면 스크롤 */
   display: flex;
   flex-direction: column;
-  padding: 0 20px;
 
-  ${small} {
-    padding: 0 10px;
-  }
-  ${medium} {
-    padding: 0 15px;
-  }
-  ${large}, ${xlarge} {
-    padding: 0 20px;
-  }
+  /* 5) 기존 패딩 유지 */
+  padding: 0 ${SIDE_PADDING} ${SIDE_PADDING};
 `;
 
 export const LargeTitle = styled.h1`
@@ -101,10 +100,33 @@ export const NameWrapper = styled.div<{ hasValue: boolean }>`
   width: 12vw;
   min-width: 110px;
 
-  @media (max-width: 380px) {
-    width: 14vh;
-    min-width: 114px;
-  }
+  /* @media (max-width: 380px) {
+    width: 12vw;
+    min-width: 110px;
+  } */
+`;
+
+export const PositionText = styled.span<{
+  isPlaceholder?: boolean;
+  isFocused?: boolean;
+}>`
+  font-family: "KBO-Dia-Gothic_medium";
+  font-size: 11px;
+  color: ${(props) =>
+    props.isFocused ? "#000" : props.isPlaceholder ? "#999" : "#000"};
+  width: 12vw;
+  min-width: 110px;
+  border: none;
+  text-align: center;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+
+  /* @media (max-width: 380px) {
+    font-size: 11px;
+    width: 12vw;
+    min-width: 110px;
+  } */
 `;
 
 // InputWrapper: PlayerNameInput을 감싸는 컨테이너
@@ -118,10 +140,37 @@ export const InputWrapper = styled.div<{ hasValue: boolean }>`
   width: ${({ hasValue }) => (hasValue ? "70%" : "80%")};
 `;
 
-export const PlayerNameInput = styled.input`
-  background-color: white;
-  /* background-color: red; */
+// export const PlayerNameInput = styled.input`
+//   background-color: white;
+//   /* background-color: red; */
 
+//   font-family: "KBO-Dia-Gothic_medium";
+//   font-size: 14px;
+//   color: #000;
+//   border: none;
+//   outline: none;
+//   width: 100%;
+//   text-align: center;
+
+//   &::placeholder {
+//     color: #999;
+//   }
+
+//   &:focus::placeholder {
+//     color: #000;
+//   }
+
+//   @media (max-width: 380px) {
+//     font-size: 11px;
+//   }
+// `;
+
+// WildCardBox는 InputWrapper의 오른쪽 끝에 항상 붙도록 right: 0 사용
+
+export const PlayerNameInput = styled.input<{ hasValue: boolean }>`
+  background-color: white;
+
+  /* background-color: red; */
   font-family: "KBO-Dia-Gothic_medium";
   font-size: 14px;
   color: #000;
@@ -129,6 +178,8 @@ export const PlayerNameInput = styled.input`
   outline: none;
   width: 100%;
   text-align: center;
+  /* 입력값이 있으면 왼쪽 정렬, 없으면 가운데 정렬 */
+  /* text-align: ${({ hasValue }) => (hasValue ? "left" : "center")}; */
 
   &::placeholder {
     color: #999;
@@ -143,7 +194,6 @@ export const PlayerNameInput = styled.input`
   }
 `;
 
-// WildCardBox는 InputWrapper의 오른쪽 끝에 항상 붙도록 right: 0 사용
 export const WildCardBox = styled.div`
   position: absolute;
   right: 0;
@@ -212,34 +262,11 @@ export const PositionWrapper = styled.div`
   border-bottom: 1px solid #e8e8e8;
 `;
 
-export const PositionText = styled.span<{
-  isPlaceholder?: boolean;
-  isFocused?: boolean;
-}>`
-  font-family: "KBO-Dia-Gothic_medium";
-  font-size: 14px;
-  color: ${(props) =>
-    props.isFocused ? "#000" : props.isPlaceholder ? "#999" : "#000"};
-  width: 12vw;
-  min-width: 110px;
-  border: none;
-  text-align: center;
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-
-  @media (max-width: 380px) {
-    font-size: 11px;
-    width: 12vw;
-    min-width: 114px;
-  }
-`;
-
 export const PitcherPositionText = styled.span`
   font-family: "KBO-Dia-Gothic_medium";
-  font-size: 14px;
+  font-size: 11px;
   color: #000000;
-  width: 12vw;
+  width: 14vw;
   min-width: 110px;
   border: none;
   text-align: center;
@@ -247,11 +274,11 @@ export const PitcherPositionText = styled.span`
   flex-direction: row;
   justify-content: center;
 
-  @media (max-width: 380px) {
+  /* @media (max-width: 380px) {
     font-size: 11px;
     width: 14vw;
-    min-width: 114px;
-  }
+    min-width: 110px;
+  } */
 `;
 
 export const ArrowIcon = styled.span`
@@ -338,9 +365,9 @@ export const ButtonWrapper = styled.div`
 
   justify-content: flex-end;
   /* background-color: aqua; */
-  /* margin-top: auto; */
+  /* margin-top: 40px; */
 
-  margin-bottom: 50px;
+  /* margin-bottom: 50px; */
 `;
 
 export const ControlButton = styled.button`
