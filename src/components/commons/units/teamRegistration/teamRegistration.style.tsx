@@ -111,7 +111,7 @@ export const PositionText = styled.span<{
   isFocused?: boolean;
 }>`
   font-family: "KBO-Dia-Gothic_medium";
-  font-size: 11px;
+  font-size: 14px;
   color: ${(props) =>
     props.isFocused ? "#000" : props.isPlaceholder ? "#999" : "#000"};
   width: 12vw;
@@ -189,9 +189,9 @@ export const PlayerNameInput = styled.input<{ hasValue: boolean }>`
     color: #000;
   }
 
-  @media (max-width: 380px) {
+  /* @media (max-width: 380px) {
     font-size: 11px;
-  }
+  } */
 `;
 
 export const WildCardBox = styled.div`
@@ -264,7 +264,7 @@ export const PositionWrapper = styled.div`
 
 export const PitcherPositionText = styled.span`
   font-family: "KBO-Dia-Gothic_medium";
-  font-size: 11px;
+  font-size: 14px;
   color: #000000;
   width: 14vw;
   min-width: 110px;

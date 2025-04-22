@@ -215,11 +215,18 @@ export const PositionWrapper = styled.div`
 export const PositionText = styled.span<{
   isPlaceholder?: boolean;
   isFocused?: boolean;
+  isDuplicate?: boolean; // ← 여기를 추가
 }>`
   font-family: "KBO-Dia-Gothic_medium";
   font-size: 14px;
   color: ${(props) =>
-    props.isFocused ? "#000" : props.isPlaceholder ? "#999" : "#000"};
+    props.isDuplicate
+      ? "#f00" // 중복 시 빨간색
+      : props.isFocused
+      ? "#000"
+      : props.isPlaceholder
+      ? "#999"
+      : "#000"};
   width: 12vw;
   min-width: 110px;
   border: none;

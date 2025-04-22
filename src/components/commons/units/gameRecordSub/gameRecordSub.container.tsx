@@ -536,6 +536,20 @@ export default function TeamRegistrationPageComponent() {
     return <input type="hidden" {...register(`players.${index}.playerId`)} />;
   };
 
+  const duplicatePositions = useMemo(() => {
+    const counts: Record<string, number> = {};
+    players
+      .filter((p) => p.order !== "P")
+      .forEach((p) => {
+        if (p.position) counts[p.position] = (counts[p.position] || 0) + 1;
+      });
+    return new Set(
+      Object.entries(counts)
+        .filter(([_, c]) => c > 1)
+        .map(([pos]) => pos)
+    );
+  }, [players]);
+
   // 교체완료 버튼 시
   const onSubmit = async (data: any) => {
     // 이미 제출 중이면 무시
@@ -682,16 +696,26 @@ export default function TeamRegistrationPageComponent() {
       >
         <PlayerList style={{ flexGrow: 1 }}>
           {players.map((player, index) => {
+            // 입력된 이름
             const currentName = watch(`players.${index}.name`) || "";
+
+            // 실제 표시할 포지션 (API나 상태값에서 가져온 값)
             const actualPosition =
               player.position ||
               (isHomeTeam
                 ? homeTeamPlayers[index]?.position
                 : awayTeamPlayers[index]?.position) ||
               "";
+
+            // 중복 포지션인지 여부
+            const isDup = duplicatePositions.has(actualPosition);
+
             return (
               <PlayerRow key={`${player.order}-${index}`}>
+                {/* 순번 */}
                 <OrderNumber>{player.order}</OrderNumber>
+
+                {/* 선수 이름 입력 */}
                 <NameWrapper
                   onClick={() => {
                     setSelectedPlayerIndex(index);
@@ -711,7 +735,7 @@ export default function TeamRegistrationPageComponent() {
                     {currentName && player.playerId && player.isWc ? (
                       <WildCardBox>WC</WildCardBox>
                     ) : (
-                      <div></div>
+                      <div />
                     )}
                   </InputWrapper>
                   <SearchIcon
@@ -724,6 +748,8 @@ export default function TeamRegistrationPageComponent() {
                     }}
                   />
                 </NameWrapper>
+
+                {/* 포지션 */}
                 {player.order !== "P" ? (
                   <PositionWrapper
                     onClick={(e) => {
@@ -731,7 +757,10 @@ export default function TeamRegistrationPageComponent() {
                       handlePositionClick(index);
                     }}
                   >
-                    <PositionText isPlaceholder={!actualPosition}>
+                    <PositionText
+                      isPlaceholder={!actualPosition}
+                      isDuplicate={isDup} // ← 중복 시 빨간색 처리
+                    >
                       {actualPosition ? (
                         <>
                           <ArrowIconNone>▽</ArrowIconNone>
@@ -778,6 +807,7 @@ export default function TeamRegistrationPageComponent() {
             );
           })}
         </PlayerList>
+
         <ButtonWrapper>
           <ControlButton type="submit" disabled={isSubmitting}>
             교체완료

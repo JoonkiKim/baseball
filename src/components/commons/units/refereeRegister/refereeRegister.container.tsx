@@ -37,12 +37,12 @@ const schema = yup.object().shape({
     .min(100000, "인증번호는 6자리 숫자여야 합니다.")
     .max(999999, "인증번호는 6자리 숫자여야 합니다.")
     .required("인증번호는 필수 입력 항목입니다."),
-  adminCode: yup
-    .number()
-    .typeError("인증코드는 6자리 숫자여야 합니다.")
-    .min(100000, "인증코드는 6자리 숫자여야 합니다.")
-    .max(999999, "인증코드는 6자리 숫자여야 합니다.")
-    .required("인증코드는 필수 입력 항목입니다."),
+  // adminCode: yup
+  //   .number()
+  //   .typeError("인증코드는 6자리 숫자여야 합니다.")
+  //   .min(100000, "인증코드는 6자리 숫자여야 합니다.")
+  //   .max(999999, "인증코드는 6자리 숫자여야 합니다.")
+  //   .required("인증코드는 필수 입력 항목입니다."),
 });
 
 export default function RefereeRegisterPage() {
@@ -79,12 +79,18 @@ export default function RefereeRegisterPage() {
         {/* 이메일 입력 */}
         <FieldWrapper>
           <Label htmlFor="email">이메일 주소</Label>
-          <Input
-            id="email"
-            type="email"
-            placeholder="@snu.ac.kr"
-            {...register("email")}
-          />
+          <WrapperForEmail>
+            <Input
+              id="email"
+              type="email"
+              placeholder="@snu.ac.kr"
+              {...register("email")}
+              $noBottom
+            />
+            <EmailButton type="button" onClick={handleSendVerification}>
+              인증번호 발송
+            </EmailButton>
+          </WrapperForEmail>
           {errors.email ? (
             <ErrorMessage>{errors.email.message}</ErrorMessage>
           ) : (
@@ -103,9 +109,6 @@ export default function RefereeRegisterPage() {
               {...register("verificationCode")}
               $noBottom
             />
-            <EmailButton type="button" onClick={handleSendVerification}>
-              인증번호 발송
-            </EmailButton>
           </WrapperForEmail>
           {errors.verificationCode ? (
             <ErrorMessage>{errors.verificationCode.message}</ErrorMessage>

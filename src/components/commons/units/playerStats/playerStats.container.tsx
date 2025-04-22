@@ -125,7 +125,7 @@ export default function StatsPage() {
           <thead>
             <tr>
               <th>순위</th>
-              <th style={{ width: "90px" }}>선수</th>
+              <th style={{ width: "25vw" }}>선수</th>
               <th onClick={() => handleSortHitter("AB")}>
                 타수 <ArrowIcon>{getArrow(hitterSortKey, "AB")}</ArrowIcon>
               </th>
@@ -215,7 +215,7 @@ export default function StatsPage() {
           <thead>
             <tr>
               <th>순위</th>
-              <th style={{ width: "90px" }}>선수</th>
+              <th style={{ width: "25vw" }}>선수</th>
               <th onClick={() => handleSortPitcher("K")}>
                 삼진 <ArrowIcon>{getArrow(pitcherSortKey, "K")}</ArrowIcon>
               </th>

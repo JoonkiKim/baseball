@@ -358,27 +358,16 @@ export default function TeamRegistrationPageComponent(props: IProps) {
       setIsSubmitting(false);
     }
   };
-  const [showTitle, setShowTitle] = useState(false);
-  // router와 팀 이름이 준비되면 true
-  useEffect(() => {
-    if (router.isReady) {
-      setShowTitle(true);
-    }
-  }, [router.isReady]);
 
   return (
     <Container onClick={() => setOpenPositionRow(null)}>
       <LargeTitle>라인업을 등록해주세요</LargeTitle>
-      {showTitle ? (
-        <Title>
-          {router.asPath.includes("homeTeamRegistration")
-            ? homeTeamName
-            : awayTeamName}{" "}
-          야구부
-        </Title>
-      ) : (
-        <div style={{ height: "1.2em" }} /> // 높이만 미리 차지
-      )}
+      <Title>
+        {router.asPath.includes("homeTeamRegistration")
+          ? homeTeamName
+          : awayTeamName}{" "}
+        야구부
+      </Title>
       <form
         onSubmit={handleSubmit(onSubmit)}
         style={{ display: "flex", flexDirection: "column", height: "100%" }}

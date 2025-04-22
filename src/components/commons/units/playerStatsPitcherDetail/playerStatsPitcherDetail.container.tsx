@@ -43,7 +43,7 @@ export default function StatsPagePitcherDetail() {
           <thead>
             <tr>
               <th>순위</th>
-              <th>선수</th>
+              <th style={{ width: "25vw" }}>선수</th>
               <th onClick={() => handleSortPitcher("K")}>
                 삼진 <ArrowIcon>▼</ArrowIcon>
               </th>

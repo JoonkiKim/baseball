@@ -105,7 +105,7 @@ export const Input = styled.input<{ $noBottom?: boolean }>`
   margin-top: 5px;
   margin-bottom: 5px;
   border: none;
-  border-bottom: 1px solid #ccc;
+  /* border-bottom: 1px solid #ccc; */
   /* padding: 8px 4px; */
   padding-bottom: 4px;
   font-size: 14px;

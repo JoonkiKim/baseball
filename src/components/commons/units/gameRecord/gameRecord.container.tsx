@@ -268,6 +268,7 @@ export default function GameRecordPage() {
       const requestBody = { runs: thisInningScore };
       await API.post(endpoint, requestBody);
       console.log("이닝 득점 전송완료", requestBody);
+      alert("공수교대 완료");
       setThisInningScore(0);
     } catch (error) {
       console.error("이닝 득점 전송 오류:", error);
