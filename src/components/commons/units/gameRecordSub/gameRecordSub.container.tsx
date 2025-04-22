@@ -643,7 +643,7 @@ export default function TeamRegistrationPageComponent() {
     const nonPPitchers = nonPPlayers.filter((p) => p.position === "P");
     // 하나라도 있으면 모두 마지막 pitcherRow.playerId 와 일치해야 함
     if (nonPPitchers.some((p) => p.playerId !== pitcherRow.playerId)) {
-      alert("투수id가 일치하지 않습니다다");
+      alert("투수 이름이 일치하지 않습니다");
       return;
     }
 

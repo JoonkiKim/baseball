@@ -67,7 +67,7 @@ export default function RefereeRegisterPage() {
       심판 등록 시도:
       이메일: ${data.email}
       발송된 인증번호: ${data.verificationCode}
-      운영진 인증코드: ${data.adminCode}
+
     `);
   };
 

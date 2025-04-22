@@ -247,7 +247,7 @@ export default function TeamRegistrationPageComponent(props: IProps) {
     if (hasDH) {
       if (pRow && nonPRows.some((player) => player.name === pRow.name)) {
         alert(
-          "1번~9번 타순에 DH가 있는 경우, P행 선수명은 1번~9번 행 내에 존재해서는 안됩니다."
+          "1번~9번 타순에 DH가 있는 경우, P행의 선수명은 1번~9번 타순 내에 존재해서는 안됩니다."
         );
         return;
       }

@@ -1,7 +1,7 @@
 {
-  "name": "My PWA App",
-  "short_name": "PWA",
-  "description": "Next.js와 PWA 설정 예제",
+  "name": "SNUBaseballTracker",
+  "short_name": "SNUTRK",
+  "description": "SNU 야구대회 기록을 위한 앱",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
