@@ -64,11 +64,12 @@ export const WrapperForEmail = styled.div`
 export const EmailButton = styled.button`
   /* background-color: red; */
   background-color: transparent;
-  font-size: 10px;
+  font-family: "KBO-Dia-Gothic_bold";
+  font-size: 9px;
   width: 25vw;
   border: 1px solid #bdbdbd;
   /* border-radius: 4px; */
-  max-height: 20px;
+  max-height: 25px;
   margin-top: 5px;
   margin-bottom: 5px;
 `;

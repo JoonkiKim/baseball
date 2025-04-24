@@ -183,8 +183,10 @@ export default function SubPlayerSelectionModal({
                 );
                 if (isOriginalBatter || player.id === originalPitcherId) {
                   disabled = false;
+                  //  현재 타자투수 라인업명단에 있으면 무조건 선택가능하고, 현재 명단에 없는데 isSub = false이면 선택 불가능
                 } else if (player.isSubstitutable) {
                   // 대체 가능한 투수는 이미 선택된 경우만 차단
+                  console.log(player.name, player.isSubstitutable);
                   disabled = selectedPlayerIds.includes(player.id);
                 } else {
                   // 그 외 교체 불가능 선수는 차단

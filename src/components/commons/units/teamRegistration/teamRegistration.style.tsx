@@ -106,64 +106,16 @@ export const NameWrapper = styled.div<{ hasValue: boolean }>`
   } */
 `;
 
-export const PositionText = styled.span<{
-  isPlaceholder?: boolean;
-  isFocused?: boolean;
-}>`
-  font-family: "KBO-Dia-Gothic_medium";
-  font-size: 14px;
-  color: ${(props) =>
-    props.isFocused ? "#000" : props.isPlaceholder ? "#999" : "#000"};
-  width: 12vw;
-  min-width: 110px;
-  border: none;
-  text-align: center;
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-
-  /* @media (max-width: 380px) {
-    font-size: 11px;
-    width: 12vw;
-    min-width: 110px;
-  } */
-`;
-
 // InputWrapper: PlayerNameInput을 감싸는 컨테이너
 export const InputWrapper = styled.div<{ hasValue: boolean }>`
   position: relative;
   display: flex;
 
   flex-direction: row;
-  justify-content: center;
+  justify-content: left;
   /* hasValue가 true이면 50%, 아니면 70% */
-  width: ${({ hasValue }) => (hasValue ? "70%" : "80%")};
+  width: ${({ hasValue }) => (hasValue ? "55%" : "80%")};
 `;
-
-// export const PlayerNameInput = styled.input`
-//   background-color: white;
-//   /* background-color: red; */
-
-//   font-family: "KBO-Dia-Gothic_medium";
-//   font-size: 14px;
-//   color: #000;
-//   border: none;
-//   outline: none;
-//   width: 100%;
-//   text-align: center;
-
-//   &::placeholder {
-//     color: #999;
-//   }
-
-//   &:focus::placeholder {
-//     color: #000;
-//   }
-
-//   @media (max-width: 380px) {
-//     font-size: 11px;
-//   }
-// `;
 
 // WildCardBox는 InputWrapper의 오른쪽 끝에 항상 붙도록 right: 0 사용
 
@@ -176,8 +128,8 @@ export const PlayerNameInput = styled.input<{ hasValue: boolean }>`
   color: #000;
   border: none;
   outline: none;
-  width: 100%;
-  text-align: center;
+  width: 90%;
+  text-align: left;
   /* 입력값이 있으면 왼쪽 정렬, 없으면 가운데 정렬 */
   /* text-align: ${({ hasValue }) => (hasValue ? "left" : "center")}; */
 
@@ -197,6 +149,7 @@ export const PlayerNameInput = styled.input<{ hasValue: boolean }>`
 export const WildCardBox = styled.div`
   position: absolute;
   right: 0;
+  /* left: -5; */
   top: 50%;
   transform: translateY(-50%);
   width: 18px;
@@ -260,6 +213,28 @@ export const PositionWrapper = styled.div`
   position: relative;
   cursor: pointer;
   border-bottom: 1px solid #e8e8e8;
+`;
+export const PositionText = styled.span<{
+  isPlaceholder?: boolean;
+  isFocused?: boolean;
+}>`
+  font-family: "KBO-Dia-Gothic_medium";
+  font-size: 14px;
+  color: ${(props) =>
+    props.isFocused ? "#000" : props.isPlaceholder ? "#999" : "#000"};
+  width: 12vw;
+  min-width: 110px;
+  border: none;
+  text-align: center;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+
+  /* @media (max-width: 380px) {
+    font-size: 11px;
+    width: 12vw;
+    min-width: 110px;
+  } */
 `;
 
 export const PitcherPositionText = styled.span`

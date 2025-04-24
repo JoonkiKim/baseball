@@ -345,13 +345,19 @@ export default function TeamRegistrationPageComponent(props: IProps) {
 
       // 14. 홈/원정 분기 후 다음 화면 이동
       if (props.isHomeTeam) {
-        router.push(`/matches/${router.query.recordId}/awayTeamRegistration`);
-      } else {
-        // await API.post(`/games/${router.query.recordId}/start`, requestBody);
-        // router.push(`/matches/${router.query.recordId}/records`);
         router.push(
           `/matches/${router.query.recordId}/homeTeamRegistration/homeTeamSubRegistration`
         );
+        // router.push(`/matches/${router.query.recordId}/awayTeamRegistration`);
+      } else {
+        // await API.post(`/games/${router.query.recordId}/start`, requestBody);
+        // router.push(`/matches/${router.query.recordId}/records`);
+        // router.push(
+        router.push(
+          `/matches/${router.query.recordId}/awayTeamRegistration/awayTeamSubRegistration`
+        );
+        // `/matches/${router.query.recordId}/homeTeamRegistration/homeTeamSubRegistration`
+        // );
       }
     } catch (error) {
       console.error("POST 요청 실패:", error);

@@ -142,9 +142,7 @@ export default function SubTeamRegistrationComponent({
 
     if (isHomeTeam) {
       // 홈팀이면 어웨이 팀 교체등록 페이지로 이동
-      router.push(
-        `/matches/${recordId}/awayTeamRegistration/awayTeamSubRegistration`
-      );
+      router.push(`/matches/${recordId}/awayTeamRegistration`);
     } else {
       // 어웨이팀이면 경기 시작 요청 후 기록 페이지로 이동
       try {
