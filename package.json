@@ -57,9 +57,9 @@
   "devDependencies": {
     "@eslint/js": "^9.9.0",
     "@playwright/test": "^1.52.0",
-    "@testing-library/dom": "^10.4.0",
+    "@testing-library/dom": "^8",
     "@testing-library/jest-dom": "^6.6.3",
-    "@testing-library/react": "^16.3.0",
+    "@testing-library/react": "^12.1.2",
     "@types/apollo-upload-client": "^17.0.2",
     "@types/dompurify": "^3.0.5",
     "@types/jest": "^29.5.14",
@@ -90,9 +90,10 @@
     "next-pwa": "^5.6.0",
     "next-router-mock": "^0.9.13",
     "prettier": "2",
-    "ts-jest": "^29.2.5",
+    "ts-jest": "^29.3.2",
     "typescript": "^5.5.4",
-    "typescript-eslint": "^8.1.0"
+    "typescript-eslint": "^8.1.0",
+    "web-streams-polyfill": "^4.1.0"
   },
   "husky": {
     "hooks": {
