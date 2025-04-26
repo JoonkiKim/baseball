@@ -33,12 +33,24 @@ export default function HitModal(props: IModalProps) {
     try {
       const endpoint = `/games/${router.query.recordId}/batters/${props.playerId}/plate-appearance`;
       const requestBody = { result: mapping[Type] };
+      // alert(
+      //   `안타 기록 전송 완료\n` + `키: ${Type}\n` // “안타”, “2루타” 등
+      // );
+      console.log(props.playerId);
       const { data } = await API.post(endpoint, requestBody);
-      alert(`안타 기록 전송 완료\n응답값: ${JSON.stringify(data)}`);
-      console.log(endpoint, requestBody);
+      // alert(`안타 기록 전송 완료\n응답값: ${JSON.stringify(data)}`);
+      // alert(
+      //   `기록 전송 완료\n` + `${Type}\n` // “안타”, “2루타” 등
+      // );
+
+      // alert(`안타 기록 전송 완료\n: ${mapping.key}`);
+      console.log(endpoint, requestBody, `${JSON.stringify(data)}`);
+      alert(
+        `기록 전송 완료\n` + `${Type}\n` // “안타”, “2루타” 등
+      );
     } catch (error) {
-      console.error("히트 기록 전송 오류:", error);
-      alert("히트 기록 전송 오류");
+      console.error("안타 기록 전송 오류:", error);
+      alert("안타 기록 전송 오류");
     } finally {
       setIsSubmitting(false);
       props.setIsHitModalOpen(false);
@@ -46,8 +58,8 @@ export default function HitModal(props: IModalProps) {
   };
 
   return (
-    <ModalOverlay>
-      <ModalContainer>
+    <ModalOverlay onClick={() => props.setIsHitModalOpen(false)}>
+      <ModalContainer onClick={(e) => e.stopPropagation()}>
         <ModalTitle>종류를 선택해주세요</ModalTitle>
         <ModalButton
           onClick={() => handleTypeSelect("안타")}

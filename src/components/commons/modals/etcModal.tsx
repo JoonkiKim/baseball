@@ -34,8 +34,9 @@ export default function EtcModal(props: IModalProps) {
       const endpoint = `/games/${router.query.recordId}/batters/${props.playerId}/plate-appearance`;
       const requestBody = { result: mapping[Type] };
       const { data } = await API.post(endpoint, requestBody);
-      alert(`${mapping[Type]} 기록 전송 완료\n응답값: ${JSON.stringify(data)}`);
+      // alert(`${mapping[Type]} 기록 전송 완료\n응답값: ${JSON.stringify(data)}`);
       console.log(endpoint, requestBody);
+      alert(`기록 전송 완료\n` + `${Type}\n`);
     } catch (error) {
       console.error("etc 기록 전송 오류:", error);
       alert("etc 기록 전송 오류");
@@ -46,8 +47,8 @@ export default function EtcModal(props: IModalProps) {
   };
 
   return (
-    <ModalOverlay>
-      <ModalContainer>
+    <ModalOverlay onClick={() => props.setIsEtcModalOpen(false)}>
+      <ModalContainer onClick={(e) => e.stopPropagation()}>
         <ModalTitle>종류를 선택해주세요</ModalTitle>
         <ModalButton
           disabled={isSubmitting}

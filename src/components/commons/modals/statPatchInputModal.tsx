@@ -103,9 +103,10 @@ export default function StatPatchInputModal({
           : null;
 
       if (!url) {
-        alert("지원하지 않는 mode 입니다.");
+        alert("수정에 실패하였습니다.");
         return;
       }
+      console.log("url", url);
 
       console.log(body);
       console.log(id);

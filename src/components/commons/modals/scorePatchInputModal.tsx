@@ -28,7 +28,7 @@ export default function ScorePatchInputModal({
   cellValue,
 }: IScoreEditModalProps) {
   const router = useRouter();
-  const [score, setScore] = useState<number>(0);
+  const [score, setScore] = useState<number>(Number(cellValue));
 
   const handleSubmit = async () => {
     // 점수가 비어있는 경우 요청을 보내지 않고 경고창을 띄우고 종료

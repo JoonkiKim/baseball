@@ -84,7 +84,7 @@ export default function GameRecordPage() {
 
   // 선수 정보
   const [batter, setBatter] = useState({
-    order: 0,
+    battingOrder: 0,
     playerId: 0,
     playerName: "-",
     isElite: false,
@@ -92,7 +92,7 @@ export default function GameRecordPage() {
     position: "-",
   });
   const [pitcher, setPitcher] = useState({
-    order: 0,
+    battingOrder: 0,
     playerId: 0,
     playerName: "-",
     isElite: false,
@@ -117,13 +117,11 @@ export default function GameRecordPage() {
   useEffect(() => {
     async function fetchInningScores() {
       try {
-        const res = await API.get(
-          `/games/${router.query.recordId}/inning-scores`
-        );
+        const res = await API.get(`/games/${router.query.recordId}/scores`);
         const response =
           typeof res.data === "string" ? JSON.parse(res.data) : res.data;
 
-        // 7이닝 점수 + R, H 컬럼 → 총 9칸
+        // 1~7회 점수 채우기
         const newTeamAScores = new Array(9).fill("");
         const newTeamBScores = new Array(9).fill("");
 
@@ -131,44 +129,49 @@ export default function GameRecordPage() {
           response.scores.forEach((scoreEntry) => {
             const inningIndex = scoreEntry.inning - 1;
             if (inningIndex >= 0 && inningIndex < 7) {
-              if (scoreEntry.inning_half === "TOP") {
+              if (scoreEntry.inningHalf === "TOP") {
                 newTeamAScores[inningIndex] = scoreEntry.runs;
-              } else if (scoreEntry.inning_half === "BOT") {
+              } else if (scoreEntry.inningHalf === "BOT") {
                 newTeamBScores[inningIndex] = scoreEntry.runs;
               }
             }
           });
-
-          if (!attackSet && response.scores.length > 0) {
-            const lastScore = response.scores[response.scores.length - 1];
-            const attackValue =
-              lastScore.inning_half === "TOP" ? "home" : "away";
-            router.replace({
-              pathname: router.pathname,
-              query: { ...router.query, attack: attackValue },
-            });
-            setAttackSet(true);
-          }
         }
 
-        newTeamAScores[7] = response.teamStats.away.runs; // R
-        newTeamAScores[8] = response.teamStats.away.hits; // H
-        newTeamBScores[7] = response.teamStats.home.runs; // R
-        newTeamBScores[8] = response.teamStats.home.hits; // H
+        // R, H 컬럼 채우기
+        newTeamAScores[7] = response.teamStats.away.runs;
+        newTeamAScores[8] = response.teamStats.away.hits;
+        newTeamBScores[7] = response.teamStats.home.runs;
+        newTeamBScores[8] = response.teamStats.home.hits;
 
         setTeamAScores(newTeamAScores);
         setTeamBScores(newTeamBScores);
+
+        // attack 쿼리 매번 재설정
+        let attackValue = "away";
+        if (
+          response.scores &&
+          Array.isArray(response.scores) &&
+          response.scores.length > 0
+        ) {
+          const lastScore = response.scores[response.scores.length - 1];
+          attackValue = lastScore.inningHalf === "TOP" ? "home" : "away";
+        }
+        router.replace({
+          pathname: router.pathname,
+          query: { ...router.query, attack: attackValue },
+        });
       } catch (error) {
         console.error("이닝 점수 데이터를 가져오는데 오류 발생:", error);
       }
     }
     fetchInningScores();
-  }, [router.query.recordId, attackSet]);
+  }, [router.query.recordId]);
 
   // batter API 요청
   useEffect(() => {
     async function fetchBatter() {
-      if (!router.query.recordId || !router.query.attack) return;
+      // if (!router.query.recordId || !router.query.attack) return;
       try {
         const teamType = router.query.attack === "home" ? "home" : "away";
         const res = await API.get(
@@ -185,7 +188,7 @@ export default function GameRecordPage() {
   // pitcher API 요청
   useEffect(() => {
     async function fetchPitcher() {
-      if (!router.query.recordId || !router.query.attack) return;
+      // if (!router.query.recordId || !router.query.attack) return;
       try {
         const teamType = router.query.attack === "home" ? "away" : "home";
         const res = await API.get(
@@ -232,7 +235,8 @@ export default function GameRecordPage() {
           const endpoint = `/games/${router.query.recordId}/batters/${batter.playerId}/plate-appearance`;
           const requestBody = { result: "BB" };
           const { data } = await API.post(endpoint, requestBody);
-          alert(`볼넷/사구 기록 전송 완료\n응답값: ${JSON.stringify(data)}`);
+          // alert(`볼넷/사구 기록 전송 완료\n응답값: ${JSON.stringify(data)}`)
+          alert(`기록 전송 완료\n` + `볼넷/사구`);
         } catch (error) {
           console.error("볼넷/사구 기록 전송 오류:", error);
           alert("볼넷/사구 기록 전송 오류");
@@ -281,18 +285,46 @@ export default function GameRecordPage() {
   // ★★★ 스코어 셀 클릭 핸들러 ★★★
   // 7, 8번 인덱스(R, H)는 클릭 불가 + score가 빈("") 경우도 클릭 불가
   const handleScoreCellClick = (
-    score: string,
+    score: string | number,
     team: "A" | "B",
     idx: number
   ) => {
-    // 빈 값이거나, 7 or 8 인덱스면 모달 열지 않음
-    if (!score || idx === 7 || idx === 8) {
+    // 빈 문자열이거나, 7 or 8 인덱스면 모달 열지 않음
+    if (score === "" || score == null || idx === 7 || idx === 8) {
       return;
     }
     // 그 외에는 모달 열기
-    setSelectedCell({ score, team, index: idx });
+    setSelectedCell({ score: String(score), team, index: idx });
     setIsScorePatchModalOpen(true);
   };
+  const ModalWrapper = ({ children, onClose }) => (
+    <div
+      onClick={onClose}
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        width: "100vw",
+        height: "100vh",
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: 1000,
+      }}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          // 필요에 따라 모달 크기나 패딩을 조절하세요
+          backgroundColor: "#fff",
+          borderRadius: "8px",
+        }}
+      >
+        {children}
+      </div>
+    </div>
+  );
 
   return (
     <GameRecordContainer>
@@ -358,7 +390,7 @@ export default function GameRecordPage() {
           <PlayerChangeButton onClick={() => handleSubstitution(true)}>
             선수교체({router.query.attack === "home" ? "홈" : "원정"})
           </PlayerChangeButton>
-          <OrderBadge>{batter.order}번</OrderBadge>
+          <OrderBadge>{batter.battingOrder}번</OrderBadge>
           <PlayerWrapper>
             <PlayerPosition>{batter.position}</PlayerPosition>
             <PlayerInfo>{batter.playerName}</PlayerInfo>
@@ -427,41 +459,51 @@ export default function GameRecordPage() {
 
       {/* 모달들 */}
       {isHitModalOpen && (
-        <HitModal
-          setIsHitModalOpen={setIsHitModalOpen}
-          playerId={batterPlayerId}
-        />
+        <ModalWrapper onClose={() => setIsHitModalOpen(false)}>
+          <HitModal
+            setIsHitModalOpen={setIsHitModalOpen}
+            playerId={batterPlayerId}
+          />
+        </ModalWrapper>
       )}
       {isOutModalOpen && (
-        <OutModal
-          setIsOutModalOpen={setIsOutModalOpen}
-          playerId={pitcher.playerId}
-        />
+        <ModalWrapper onClose={() => setIsOutModalOpen(false)}>
+          <OutModal
+            setIsOutModalOpen={setIsOutModalOpen}
+            playerId={batterPlayerId}
+          />
+        </ModalWrapper>
       )}
       {isEtcModalOpen && (
-        <EtcModal
-          setIsEtcModalOpen={setIsEtcModalOpen}
-          playerId={pitcher.playerId}
-        />
+        <ModalWrapper onClose={() => setIsEtcModalOpen(false)}>
+          <EtcModal
+            setIsEtcModalOpen={setIsEtcModalOpen}
+            playerId={batterPlayerId}
+          />
+        </ModalWrapper>
       )}
       {isChangeModalOpen && (
-        <DefenseChangeModal
-          setIsChangeModalOpen={setIsChangeModalOpen}
-          onConfirm={handleDefenseChangeConfirm}
-        />
+        <ModalWrapper onClose={() => setIsChangeModalOpen(false)}>
+          <DefenseChangeModal
+            setIsChangeModalOpen={setIsChangeModalOpen}
+            onConfirm={handleDefenseChangeConfirm}
+          />
+        </ModalWrapper>
       )}
       {isGameEndModalOpen && (
-        <GameOverModal setIsGameEndModalOpen={setIsGameEndModalOpen} />
+        <ModalWrapper onClose={() => setIsGameEndModalOpen(false)}>
+          <GameOverModal setIsGameEndModalOpen={setIsGameEndModalOpen} />
+        </ModalWrapper>
       )}
-
-      {/* 스코어 수정 모달 */}
       {isScorePatchModalOpen && selectedCell && (
-        <ScorePatchModal
-          setIsModalOpen={setIsScorePatchModalOpen}
-          cellValue={selectedCell.score}
-          team={selectedCell.team}
-          cellIndex={selectedCell.index}
-        />
+        <ModalWrapper onClose={() => setIsScorePatchModalOpen(false)}>
+          <ScorePatchModal
+            setIsModalOpen={setIsScorePatchModalOpen}
+            cellValue={selectedCell.score}
+            team={selectedCell.team}
+            cellIndex={selectedCell.index}
+          />
+        </ModalWrapper>
       )}
     </GameRecordContainer>
   );

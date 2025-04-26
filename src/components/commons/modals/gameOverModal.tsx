@@ -7,6 +7,7 @@ import {
   ModalTitle,
   ModalTitleSmall,
 } from "./modal.style";
+import API from "../../../commons/apis/api";
 
 interface IModalProps {
   setIsGameEndModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -16,8 +17,16 @@ export default function GameOverModal(props: IModalProps) {
   // 공수교대 종류 선택 시 실행될 함수
   const router = useRouter();
 
-  const handleTypeSelect = (type: string) => {
+  const handleTypeSelect = async (type: string) => {
     if (type === "예") {
+      const response = await API.post(
+        `/games/${router.query.recordId}/results`
+      );
+      console.log(
+        `/games/${router.query.recordId}/results`,
+        "응답 상태:",
+        response.status
+      );
       props.setIsGameEndModalOpen(false);
       router.push(`/matches/${router.query.recordId}/result`);
     } else {

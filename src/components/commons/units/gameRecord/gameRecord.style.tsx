@@ -398,3 +398,5 @@ export const OrderBadge = styled.div`
   font-size: 24px;
   font-family: "KBO-Dia-Gothic_medium";
 `;
+
+// 이 아래에 추가

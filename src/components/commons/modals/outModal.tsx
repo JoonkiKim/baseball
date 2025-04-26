@@ -27,7 +27,8 @@ export default function OutModal(props: IModalProps) {
         const endpoint = `/games/${router.query.recordId}/batters/${props.playerId}/plate-appearance`;
         const requestBody = { result: "K" };
         const { data } = await API.post(endpoint, requestBody);
-        alert(`삼진 기록 전송 완료\n응답값: ${JSON.stringify(data)}`);
+        // alert(`삼진 기록 전송 완료\n응답값: ${JSON.stringify(data)}`);
+        alert(`기록 전송 완료\n` + `${Type}\n`);
         console.log(endpoint, requestBody);
       } catch (error) {
         console.error("삼진 기록 전송 오류:", error);
@@ -38,15 +39,15 @@ export default function OutModal(props: IModalProps) {
       }
     } else {
       // 그 외 아웃일 경우 기존 방식대로 처리
-      alert(`기록: ${Type}`);
+      alert(`기록 전송 완료\n` + `${Type}\n`);
       props.setIsOutModalOpen(false);
       setIsSubmitting(false);
     }
   };
 
   return (
-    <ModalOverlay>
-      <ModalContainer>
+    <ModalOverlay onClick={() => props.setIsOutModalOpen(false)}>
+      <ModalContainer onClick={(e) => e.stopPropagation()}>
         <ModalTitle>종류를 선택해주세요</ModalTitle>
         <ModalButton
           onClick={() => handleTypeSelect("삼진")}

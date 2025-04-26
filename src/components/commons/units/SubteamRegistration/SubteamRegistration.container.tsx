@@ -18,14 +18,6 @@ import {
 import API from "../../../../commons/apis/api";
 
 interface ISubTeamRegistrationProps {
-  // setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  // onSelectPlayer: (selectedPlayer: {
-  //   name: string;
-  //   playerId: number;
-  //   wc?: string;
-  // }) => void;
-  // selectedPlayerNames: string[];
-  // allowDuplicates: boolean; // P행에서 중복 선택 허용 여부
   isHomeTeam: boolean;
 }
 
@@ -55,20 +47,19 @@ export default function SubTeamRegistrationComponent({
         console.error("JSON parsing error:", err);
       }
     }
-  }, [isHomeTeam]); // isHomeTeam 변경될 때만 다시 실행
+  }, [isHomeTeam]);
 
   useEffect(() => {
     const recordId = router.query.recordId;
     if (!recordId) return;
 
     const teamType = isHomeTeam ? "home" : "away";
-    const url = `/games/${recordId}/players?teamType=${teamType}`;
+    const url = `/games/${recordId}/players-with-in-lineup?teamType=${teamType}`;
 
     API.get(url)
       .then((res) => {
         let parsedData;
 
-        // JSON 파싱
         if (typeof res.data === "string") {
           try {
             parsedData = JSON.parse(res.data);
@@ -106,32 +97,32 @@ export default function SubTeamRegistrationComponent({
 
   const handleContainerClick = (e: React.MouseEvent) => e.stopPropagation();
 
-  // 1) 선택된 선수 배열 상태 (id, name)
   const [selectedPlayers, setSelectedPlayers] = useState<
     { id: number; name: string }[]
   >([]);
 
-  // 2) 클릭 토글 함수
   const togglePlayerSelection = (player: {
     id: number;
     name: string;
     departmentName: string;
     isWc: boolean;
   }) => {
-    setSelectedPlayers((prev) => {
-      const exists = prev.find((p) => p.id === player.id);
-      if (exists) {
-        // 이미 있으면 제거
-        return prev.filter((p) => p.id !== player.id);
-      } else {
-        // 없으면 추가
-        return [...prev, { id: player.id, name: player.name }];
-      }
-    });
+    setSelectedPlayers((prev) =>
+      prev.find((p) => p.id === player.id)
+        ? prev.filter((p) => p.id !== player.id)
+        : [...prev, { id: player.id, name: player.name }]
+    );
   };
-
   const handleSubmit = async () => {
-    // 선택된 선수 배열 로그
+    console.log("선택된 선수 목록:", selectedPlayers);
+    // ① 아무도 선택하지 않은 경우 먼저 확인을 받는다
+    if (selectedPlayers.length === 0) {
+      const proceed = window.confirm(
+        "교체선수를 한명도 선택하지 않았습니다. 이대로 제출하시겠습니까?"
+      );
+      if (!proceed) return; // 사용자가 취소를 누르면 여기서 중단
+    }
+
     console.log("선택된 선수 목록:", selectedPlayers);
     const recordId = router.query.recordId;
 
@@ -140,20 +131,30 @@ export default function SubTeamRegistrationComponent({
       return;
     }
 
-    if (isHomeTeam) {
-      // 홈팀이면 어웨이 팀 교체등록 페이지로 이동
-      router.push(`/matches/${recordId}/awayTeamRegistration`);
-    } else {
-      // 어웨이팀이면 경기 시작 요청 후 기록 페이지로 이동
-      try {
-        await API.post(`/games/${recordId}/start`);
+    // ② 선택한 선수 id만 추출해 요청 바디를 만든다
+    const playerIds = selectedPlayers.map((p) => p.id);
+    const payload = { playerIds };
+    console.log(payload);
+
+    try {
+      const teamType = isHomeTeam ? "home" : "away";
+      const res = await API.post(
+        `/games/${recordId}/substitution?teamType=${teamType}`,
+        payload
+      );
+      console.log(res.data);
+
+      if (isHomeTeam) {
+        router.push(`/matches/${recordId}/awayTeamRegistration`);
+      } else {
+        const res = await API.post(`/games/${recordId}/start`);
+        console.log(res.data);
         router.push(`/matches/${recordId}/records`);
-      } catch (err) {
-        console.error("경기 시작 요청 실패:", err);
       }
+    } catch (err) {
+      console.error("교체명단 등록 실패:", err);
     }
   };
-
   return (
     <ModalOverlay>
       <ModalContainer onClick={handleContainerClick}>
@@ -172,19 +173,18 @@ export default function SubTeamRegistrationComponent({
               const isSelected = selectedPlayers.some(
                 (p) => p.id === player.id
               );
-              const isDisabled = player.inLineup; // 이미 라인업에 올라간 선수는 비활성화
+              const isDisabled = player.inLineup;
 
               return (
                 <tr
                   key={player.id}
-                  // inLineup 선수는 클릭해도 아무 동작 안 하도록
                   onClick={() => {
                     if (!isDisabled) togglePlayerSelection(player);
                   }}
                   style={{
                     backgroundColor: isSelected ? "#f2f2f2" : "transparent",
                     cursor: isDisabled ? "not-allowed" : "pointer",
-                    color: isDisabled ? "#999" : "#000", // disabled 느낌을 주기 위해 색상 변경
+                    color: isDisabled ? "#999" : "#000",
                   }}
                 >
                   <td>{player.departmentName}</td>

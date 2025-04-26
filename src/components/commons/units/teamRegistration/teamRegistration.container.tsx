@@ -35,7 +35,7 @@ import {
 import API from "../../../../commons/apis/api";
 
 interface PlayerInfo {
-  order: number | string;
+  battingOrder: number | string;
   name?: string;
   position?: string;
   selectedViaModal?: boolean;
@@ -75,17 +75,27 @@ export default function TeamRegistrationPageComponent(props: IProps) {
     const fetchTeamPlayers = async () => {
       try {
         if (router.asPath.includes("homeTeamRegistration")) {
-          const res = await API.get(`/teams/${teamInfo[0].homeTeamId}/players`);
+          // const res = await API.get(`/teams/${teamInfo[0].homeTeamId}/players`);
+          const res = await API.get(
+            `/games/${router.query.recordId}/players?teamType=home`
+          );
+          console.log(res.data);
           const dataObj =
             typeof res.data === "string" ? JSON.parse(res.data) : res.data;
           setHomeTeamName(dataObj.name);
           setHomeTeamPlayers(dataObj.players);
+          console.log("homeTeamPlayers", homeTeamPlayers);
         } else {
-          const res = await API.get(`/teams/${teamInfo[0].awayTeamId}/players`);
+          // const res = await API.get(`/teams/${teamInfo[0].awayTeamId}/players`);
+
+          const res = await API.get(
+            `/games/${router.query.recordId}/players?teamType=away`
+          );
           const dataObj =
             typeof res.data === "string" ? JSON.parse(res.data) : res.data;
           setAwayTeamName(dataObj.name);
           setAwayTeamPlayers(dataObj.players);
+          console.log(awayTeamPlayers);
         }
       } catch (err) {
         console.error("팀 선수 목록 요청 에러:", err);
@@ -93,20 +103,21 @@ export default function TeamRegistrationPageComponent(props: IProps) {
     };
     fetchTeamPlayers();
   }, [router.asPath, teamInfo, setHomeTeamPlayers, setAwayTeamPlayers]);
-
+  console.log("awayTeamPlayers", awayTeamPlayers);
+  console.log("homeTeamPlayers", homeTeamPlayers);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [players, setPlayers] = useState<PlayerInfo[]>([
-    { order: 1, selectedViaModal: false },
-    { order: 2, selectedViaModal: false },
-    { order: 3, selectedViaModal: false },
-    { order: 4, selectedViaModal: false },
-    { order: 5, selectedViaModal: false },
-    { order: 6, selectedViaModal: false },
-    { order: 7, selectedViaModal: false },
-    { order: 8, selectedViaModal: false },
-    { order: 9, selectedViaModal: false },
-    { order: "P", selectedViaModal: false },
+    { battingOrder: 1, selectedViaModal: false },
+    { battingOrder: 2, selectedViaModal: false },
+    { battingOrder: 3, selectedViaModal: false },
+    { battingOrder: 4, selectedViaModal: false },
+    { battingOrder: 5, selectedViaModal: false },
+    { battingOrder: 6, selectedViaModal: false },
+    { battingOrder: 7, selectedViaModal: false },
+    { battingOrder: 8, selectedViaModal: false },
+    { battingOrder: 9, selectedViaModal: false },
+    { battingOrder: "P", selectedViaModal: false },
   ]);
 
   const duplicatePositions = useMemo(() => {
@@ -139,7 +150,7 @@ export default function TeamRegistrationPageComponent(props: IProps) {
   const handlePositionSelect = (index: number, pos: string) => {
     const updated = [...players];
     updated[index].position = pos;
-    if (pos === "P" && updated[index].order !== "P") {
+    if (pos === "P" && updated[index].battingOrder !== "P") {
       setLastPUpdateIndex(index);
     }
     setPlayers(updated);
@@ -175,8 +186,9 @@ export default function TeamRegistrationPageComponent(props: IProps) {
     updated[selectedPlayerIndex].selectedViaModal = true;
     setPlayers(updated);
     setValue(`players.${selectedPlayerIndex}.name`, sel.name);
+    setValue(`players.${selectedPlayerIndex}.playerId`, sel.playerId);
     if (
-      updated[selectedPlayerIndex].order !== "P" &&
+      updated[selectedPlayerIndex].battingOrder !== "P" &&
       updated[selectedPlayerIndex].position === "P"
     ) {
       setLastPUpdateIndex(selectedPlayerIndex);
@@ -187,7 +199,7 @@ export default function TeamRegistrationPageComponent(props: IProps) {
   const onSubmit = async (data: any) => {
     // 1. 폼의 입력값으로 players 배열 업데이트
     const updatedPlayers = players.map((player, index) => {
-      if (player.order === "P") {
+      if (player.battingOrder === "P") {
         return {
           ...player,
           name: data.players[index].name,
@@ -202,12 +214,16 @@ export default function TeamRegistrationPageComponent(props: IProps) {
     });
 
     // 2. P행 제외한 선수들
-    const nonPRows = updatedPlayers.filter((player) => player.order !== "P");
+    const nonPRows = updatedPlayers.filter(
+      (player) => player.battingOrder !== "P"
+    );
 
     // 3. 비‑P 행 필수값 체크 (이름, 포지션)
     const blankNameNonP = nonPRows.find((player) => !player.name?.trim());
     if (blankNameNonP) {
-      alert(`${blankNameNonP.order}번 타자의 선수명 입력칸이 비어 있습니다.`);
+      alert(
+        `${blankNameNonP.battingOrder}번 타자의 선수명 입력칸이 비어 있습니다.`
+      );
       return;
     }
     const blankPositionNonP = nonPRows.find(
@@ -215,7 +231,7 @@ export default function TeamRegistrationPageComponent(props: IProps) {
     );
     if (blankPositionNonP) {
       alert(
-        `${blankPositionNonP.order}번 타자의 포지션 입력칸이 비어 있습니다.`
+        `${blankPositionNonP.battingOrder}번 타자의 포지션 입력칸이 비어 있습니다.`
       );
       return;
     }
@@ -232,7 +248,7 @@ export default function TeamRegistrationPageComponent(props: IProps) {
     }
 
     // 5. 1~9번 행에 P만 있을 때, 그 P 선수명과 P행 이름이 일치하는지 검증
-    const pRow = updatedPlayers.find((player) => player.order === "P");
+    const pRow = updatedPlayers.find((player) => player.battingOrder === "P");
     if (!hasDH && hasP) {
       const nonPpitcher = nonPRows.find((player) => player.position === "P");
       if (nonPpitcher && pRow && nonPpitcher.name !== pRow.name) {
@@ -266,7 +282,7 @@ export default function TeamRegistrationPageComponent(props: IProps) {
         pRow.playerId = sourceRow.playerId;
         pRow.selectedViaModal = sourceRow.selectedViaModal;
         const pIndex = updatedPlayers.findIndex(
-          (player) => player.order === "P"
+          (player) => player.battingOrder === "P"
         );
         setValue(`players.${pIndex}.name`, sourceRow.name);
       }
@@ -310,14 +326,14 @@ export default function TeamRegistrationPageComponent(props: IProps) {
     let batters, pitcherData;
     if (hasDHOverall) {
       batters = nonPRows.map((player) => ({
-        order: player.order,
+        battingOrder: player.battingOrder,
         playerId: player.playerId,
         position: player.position,
       }));
       pitcherData = pRow;
     } else {
       batters = nonPRows.map((player) => ({
-        order: player.order,
+        battingOrder: player.battingOrder,
         playerId: player.playerId,
         position: player.position,
       }));
@@ -325,9 +341,8 @@ export default function TeamRegistrationPageComponent(props: IProps) {
     }
 
     const requestBody = {
-      teamId: 10,
       batters,
-      pitcher: pitcherData,
+      pitcher: { playerId: pitcherData.playerId },
     };
 
     console.log(requestBody);
@@ -335,29 +350,21 @@ export default function TeamRegistrationPageComponent(props: IProps) {
     // 13. 서버에 POST 요청
     setIsSubmitting(true);
     try {
-      const res = await API.post(
-        `/games/${router.query.recordId}/lineup`,
-        requestBody
-      );
+      const teamType = props.isHomeTeam ? "home" : "away";
+      const url = `/games/${router.query.recordId}/lineup?teamType=${teamType}`;
+      const res = await API.post(url, requestBody);
       console.log("POST 요청 성공:", res.data);
       setPlayers(updatedPlayers);
       setIsSubmitting(false);
 
-      // 14. 홈/원정 분기 후 다음 화면 이동
       if (props.isHomeTeam) {
         router.push(
           `/matches/${router.query.recordId}/homeTeamRegistration/homeTeamSubRegistration`
         );
-        // router.push(`/matches/${router.query.recordId}/awayTeamRegistration`);
       } else {
-        // await API.post(`/games/${router.query.recordId}/start`, requestBody);
-        // router.push(`/matches/${router.query.recordId}/records`);
-        // router.push(
         router.push(
           `/matches/${router.query.recordId}/awayTeamRegistration/awayTeamSubRegistration`
         );
-        // `/matches/${router.query.recordId}/homeTeamRegistration/homeTeamSubRegistration`
-        // );
       }
     } catch (error) {
       console.error("POST 요청 실패:", error);
@@ -371,6 +378,14 @@ export default function TeamRegistrationPageComponent(props: IProps) {
       setShowTitle(true);
     }
   }, [router.isReady]);
+
+  // ① watch로 가져오기
+  const watchedPlayers = watch("players");
+
+  // ② 상태나 렌더링마다 로그 찍기 (의존성 배열에 watchedPlayers)
+  useEffect(() => {
+    console.log("watch('players'):", watchedPlayers);
+  }, [watchedPlayers]);
 
   return (
     <Container onClick={() => setOpenPositionRow(null)}>
@@ -404,8 +419,8 @@ export default function TeamRegistrationPageComponent(props: IProps) {
             );
 
             return (
-              <PlayerRow key={`${player.order}-${index}`}>
-                <OrderNumber>{player.order}</OrderNumber>
+              <PlayerRow key={`${player.battingOrder}-${index}`}>
+                <OrderNumber>{player.battingOrder}</OrderNumber>
                 <NameWrapper hasValue={!!currentName}>
                   <InputWrapper hasValue={!!currentName}>
                     <PlayerNameInput
@@ -438,7 +453,7 @@ export default function TeamRegistrationPageComponent(props: IProps) {
                   />
                 </NameWrapper>
 
-                {player.order !== "P" ? (
+                {player.battingOrder !== "P" ? (
                   <PositionWrapper
                     onClick={(e) => {
                       if (isRowEnabled) {
@@ -474,7 +489,8 @@ export default function TeamRegistrationPageComponent(props: IProps) {
                     {openPositionRow === index && (
                       <PositionDropdown
                         dropUp={
-                          typeof player.order === "number" && player.order >= 6
+                          typeof player.battingOrder === "number" &&
+                          player.battingOrder >= 6
                         }
                         onClick={(e) => e.stopPropagation()}
                       >
@@ -516,10 +532,14 @@ export default function TeamRegistrationPageComponent(props: IProps) {
         <PlayerSelectionModal
           setIsModalOpen={setIsPlayerSelectionModalOpen}
           onSelectPlayer={handleSelectPlayer}
-          selectedPlayerNames={(watch("players") || [])
-            .map((p: any) => p.name)
-            .filter((n: string) => n.trim() !== "")}
-          allowDuplicates={players[selectedPlayerIndex].order === "P"}
+          // 마지막 요소를 제외하기 위해 slice(0, -1) 사용
+          selectedPlayerIds={
+            (watch("players") || [])
+              .slice(0, -1) // 마지막 행 제외
+              .map((p: any) => p.playerId) // playerId 매핑
+              .filter((id: number | undefined) => id != null) // undefined 제외
+          }
+          allowDuplicates={players[selectedPlayerIndex].battingOrder === "P"}
         />
       )}
     </Container>

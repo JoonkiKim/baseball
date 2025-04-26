@@ -61,7 +61,6 @@ export const PlayerTable = styled.table`
   }
 
   tbody tr:hover {
-    /* background-color: #f2f2f2; */
     cursor: pointer;
   }
 `;
@@ -75,14 +74,14 @@ export const ButtonContainer = styled.div`
 `;
 
 export const ControlButton = styled.button`
-  background-color: #000000;
+  background-color: #000;
   width: 26vw;
   height: 4.5vh;
   border: 1px solid #999;
   font-family: "KBO-Dia-Gothic_bold";
   font-weight: bold;
   font-size: 12px;
-  color: #ffffff;
+  color: #fff;
   cursor: pointer;
   border-radius: 4px;
 `;
@@ -94,20 +93,19 @@ interface IPlayerSelectionModalProps {
     playerId: number;
     wc?: string;
   }) => void;
-  selectedPlayerNames: string[];
+  selectedPlayerIds: number[]; // 이름 대신 ID 리스트
   allowDuplicates: boolean; // P행에서 중복 선택 허용 여부
 }
 
 export default function PlayerSelectionModal({
   setIsModalOpen,
   onSelectPlayer,
-  selectedPlayerNames,
+  selectedPlayerIds, // prop 이름 변경
   allowDuplicates,
 }: IPlayerSelectionModalProps) {
   const router = useRouter();
   const [homeTeamPlayers] = useRecoilState(HomeTeamPlayerListState);
   const [awayTeamPlayers] = useRecoilState(AwayTeamPlayerListState);
-
   const allPlayersList = router.asPath.includes("homeTeamRegistration")
     ? homeTeamPlayers
     : awayTeamPlayers;
@@ -143,6 +141,8 @@ export default function PlayerSelectionModal({
     setIsModalOpen(false);
   };
 
+  console.log("selected IDs:", selectedPlayerIds);
+
   return (
     <ModalOverlay onClick={handleOverlayClick}>
       <ModalContainer onClick={handleContainerClick}>
@@ -158,7 +158,7 @@ export default function PlayerSelectionModal({
           <tbody>
             {allPlayersList.map((player) => {
               const isAlreadySelected =
-                !allowDuplicates && selectedPlayerNames.includes(player.name);
+                !allowDuplicates && selectedPlayerIds.includes(player.id);
               return (
                 <tr
                   key={player.id}

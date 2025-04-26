@@ -14,6 +14,7 @@ import {
   WrapperForEmail,
   EmailButton,
 } from "./refereeRegister.style";
+import API from "../../../../commons/apis/api";
 
 // 폼에서 다룰 데이터 타입 정의 (숫자 타입으로 변경)
 interface RefereeFormData {
@@ -51,24 +52,56 @@ export default function RefereeRegisterPage() {
     register,
     handleSubmit,
     formState: { errors },
+    getValues,
   } = useForm({
     resolver: yupResolver(schema),
   });
   // ① 인증번호 발송 버튼 클릭 시 실행되는 함수
-  const handleSendVerification = () => {
-    alert("인증번호가 발송되었습니다. 이메일 수신함을 확인해주세요!");
-    // 실제로는 여기서 이메일 인증번호 발송 API 호출을 수행하면 됩니다.
+  // ① 인증번호 발송 버튼 클릭 시 실행되는 함수
+  const handleSendVerification = async () => {
+    const email = getValues("email").trim();
+
+    // 1) 빈값 체크
+    if (!email) {
+      alert("이메일을 입력해주세요");
+      return;
+    }
+    // 2) '@' 포함 여부 체크
+    if (!email.includes("@")) {
+      alert("유효한 이메일 형식이 아닙니다");
+      return;
+    }
+    // 3) 도메인 체크
+    if (!email.includes("@snu.ac.kr")) {
+      alert("이메일은 @snu.ac.kr을 포함해야 합니다");
+      return;
+    }
+
+    try {
+      // POST /auth/email/request
+      await API.post("/auth/email/request", { email });
+      console.log({ email });
+      alert("인증번호가 발송되었습니다. 이메일 수신함을 확인해주세요!");
+    } catch (error) {
+      console.error("이메일 인증번호 발송 오류:", error);
+      alert("인증번호 발송에 실패했습니다. 다시 시도해주세요.");
+    }
   };
 
   // 폼 제출 핸들러
-  const onSubmit: SubmitHandler<RefereeFormData> = (data) => {
-    // 실제 등록 로직 대신 콘솔 로그 또는 alert로 예시
-    alert(`
-      심판 등록 시도:
-      이메일: ${data.email}
-      발송된 인증번호: ${data.verificationCode}
-
-    `);
+  const onSubmit: SubmitHandler<RefereeFormData> = async (data) => {
+    try {
+      const payload = {
+        email: data.email,
+        code: String(data.verificationCode),
+      };
+      const response = await API.post("/auth/email/verify", payload);
+      console.log(payload, response);
+      alert("심판 등록에 성공했습니다!");
+    } catch (error) {
+      console.error("등록 실패:", error);
+      alert("심판 등록에 실패했습니다. 이메일과 인증코드를 다시 확인해주세요.");
+    }
   };
 
   return (

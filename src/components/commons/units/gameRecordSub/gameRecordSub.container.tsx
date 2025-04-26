@@ -39,7 +39,7 @@ import SubPlayerSelectionModal from "../../modals/playerSubstituteModal";
 
 // 선수 정보를 나타내는 인터페이스
 interface PlayerInfo {
-  order: number | string;
+  battingOrder: number | string;
   name?: string;
   position?: string;
   selectedViaModal?: boolean;
@@ -65,15 +65,15 @@ const positionOptions = [
 // 기존 기본값은 사용하지 않고 API에서 받아온 pitcher row가 초기값으로 반영됩니다.
 const defaultLineup = {
   batters: [
-    { order: 1, playerId: 0, playerName: "", position: "", isWc: false },
-    { order: 2, playerId: 0, playerName: "", position: "", isWc: false },
-    { order: 3, playerId: 0, playerName: "", position: "", isWc: false },
-    { order: 4, playerId: 0, playerName: "", position: "", isWc: false },
-    { order: 5, playerId: 0, playerName: "", position: "", isWc: false },
-    { order: 6, playerId: 0, playerName: "", position: "", isWc: false },
-    { order: 7, playerId: 0, playerName: "", position: "", isWc: false },
-    { order: 8, playerId: 0, playerName: "", position: "", isWc: false },
-    { order: 9, playerId: 0, playerName: "", position: "", isWc: false },
+    { battingOrder: 1, playerId: 0, playerName: "", position: "", isWc: false },
+    { battingOrder: 2, playerId: 0, playerName: "", position: "", isWc: false },
+    { battingOrder: 3, playerId: 0, playerName: "", position: "", isWc: false },
+    { battingOrder: 4, playerId: 0, playerName: "", position: "", isWc: false },
+    { battingOrder: 5, playerId: 0, playerName: "", position: "", isWc: false },
+    { battingOrder: 6, playerId: 0, playerName: "", position: "", isWc: false },
+    { battingOrder: 7, playerId: 0, playerName: "", position: "", isWc: false },
+    { battingOrder: 8, playerId: 0, playerName: "", position: "", isWc: false },
+    { battingOrder: 9, playerId: 0, playerName: "", position: "", isWc: false },
   ],
   pitcher: {
     playerId: 0,
@@ -85,7 +85,7 @@ const defaultLineup = {
 // defaultPlayers 초기값 (초기 렌더링 전에 사용하므로 API 호출 전 fallback 값)
 const defaultPlayers: PlayerInfo[] = [
   ...defaultLineup.batters.map((batter) => ({
-    order: batter.order,
+    battingOrder: batter.battingOrder,
     name: batter.playerName,
     position: batter.position,
     playerId: batter.playerId,
@@ -93,7 +93,7 @@ const defaultPlayers: PlayerInfo[] = [
     selectedViaModal: false,
   })),
   {
-    order: "P",
+    battingOrder: "P",
     name: defaultLineup.pitcher.playerName,
     position: "P",
     playerId: defaultLineup.pitcher.playerId,
@@ -218,8 +218,8 @@ export default function TeamRegistrationPageComponent() {
           // ★ 이 부분을 추가 ★
           const minimalLineup = {
             batters: dataObj.batters.map(
-              ({ order, playerId, playerName }: any) => ({
-                order,
+              ({ battingOrder, playerId, playerName }: any) => ({
+                battingOrder,
                 playerId,
                 playerName,
               })
@@ -237,7 +237,7 @@ export default function TeamRegistrationPageComponent() {
           // API의 pitcher row 값을 그대로 사용
           let lineupPlayers = [
             ...dataObj.batters.map((batter: any) => ({
-              order: batter.order,
+              battingOrder: batter.battingOrder,
               name: batter.playerName,
               position: batter.position,
               playerId: batter.playerId,
@@ -245,7 +245,7 @@ export default function TeamRegistrationPageComponent() {
               isWc: batter.isWC ?? false,
             })),
             {
-              order: "P",
+              battingOrder: "P",
               name: dataObj.pitcher.playerName,
               position: "P",
               playerId: dataObj.pitcher.playerId,
@@ -267,8 +267,8 @@ export default function TeamRegistrationPageComponent() {
           console.log("원정팀 응답 (lineup API):", dataObj);
           const minimalLineup = {
             batters: dataObj.batters.map(
-              ({ order, playerId, playerName }: any) => ({
-                order,
+              ({ battingOrder, playerId, playerName }: any) => ({
+                battingOrder,
                 playerId,
                 playerName,
               })
@@ -285,7 +285,7 @@ export default function TeamRegistrationPageComponent() {
           );
           let lineupPlayers = [
             ...dataObj.batters.map((batter: any) => ({
-              order: batter.order,
+              battingOrder: batter.battingOrder,
               name: batter.playerName,
               position: batter.position,
               playerId: batter.playerId,
@@ -293,7 +293,7 @@ export default function TeamRegistrationPageComponent() {
               isWc: batter.isWC ?? false,
             })),
             {
-              order: "P",
+              battingOrder: "P",
               name: dataObj.pitcher.playerName,
               position: "P",
               playerId: dataObj.pitcher.playerId,
@@ -337,12 +337,14 @@ export default function TeamRegistrationPageComponent() {
   useEffect(() => {
     if (router.query.isHomeTeam === "true" && homeTeamPlayers.length > 0) {
       const updatedPlayers = players.map((player) => {
-        if (player.order === "P") {
-          const pitcherRow = homeTeamPlayers.find((p: any) => p.order === "P");
+        if (player.battingOrder === "P") {
+          const pitcherRow = homeTeamPlayers.find(
+            (p: any) => p.battingOrder === "P"
+          );
           return pitcherRow ? { ...player, ...pitcherRow } : player;
         } else {
           const responsePlayer = homeTeamPlayers.find(
-            (p: any) => p.order === player.order
+            (p: any) => p.battingOrder === player.battingOrder
           );
           return responsePlayer ? { ...player, ...responsePlayer } : player;
         }
@@ -358,12 +360,14 @@ export default function TeamRegistrationPageComponent() {
       awayTeamPlayers.length > 0
     ) {
       const updatedPlayers = players.map((player) => {
-        if (player.order === "P") {
-          const pitcherRow = awayTeamPlayers.find((p: any) => p.order === "P");
+        if (player.battingOrder === "P") {
+          const pitcherRow = awayTeamPlayers.find(
+            (p: any) => p.battingOrder === "P"
+          );
           return pitcherRow ? { ...player, ...pitcherRow } : player;
         } else {
           const responsePlayer = awayTeamPlayers.find(
-            (p: any) => p.order === player.order
+            (p: any) => p.battingOrder === player.battingOrder
           );
           return responsePlayer ? { ...player, ...responsePlayer } : player;
         }
@@ -387,7 +391,7 @@ export default function TeamRegistrationPageComponent() {
     // 1) 배터(1~9번) WC 개수
     const batterCount = players.filter(
       (p) =>
-        p.order !== "P" &&
+        p.battingOrder !== "P" &&
         p.name &&
         p.playerId &&
         (p.isWc || wcMap[p.playerId] || customWcMap[p.playerId])
@@ -396,7 +400,7 @@ export default function TeamRegistrationPageComponent() {
     // 2) 투수(P행) WC 개수 (중복 검사 없이)
     const pitcherCount = players.filter(
       (p) =>
-        p.order === "P" &&
+        p.battingOrder === "P" &&
         p.name &&
         p.playerId &&
         (p.isWc || wcMap[p.playerId] || customWcMap[p.playerId])
@@ -421,19 +425,21 @@ export default function TeamRegistrationPageComponent() {
   const handlePositionSelect = (index: number, pos: string) => {
     const updatedPlayers = [...players];
     updatedPlayers[index].position = pos;
-    if (updatedPlayers[index].order !== "P" && pos === "P") {
+    if (updatedPlayers[index].battingOrder !== "P" && pos === "P") {
       setLastPUpdateIndex(index);
     }
     // DH 선택 시 P행 기본값 유지 (API에서 받아온 pitcher 값을 그대로 사용)
-    if (pos === "DH" && updatedPlayers[index].order !== "P") {
+    if (pos === "DH" && updatedPlayers[index].battingOrder !== "P") {
       const hasDH = updatedPlayers.some(
-        (player) => player.order !== "P" && player.position === "DH"
+        (player) => player.battingOrder !== "P" && player.position === "DH"
       );
       if (!hasDH) {
-        const pRowIndex = updatedPlayers.findIndex((p) => p.order === "P");
+        const pRowIndex = updatedPlayers.findIndex(
+          (p) => p.battingOrder === "P"
+        );
         if (pRowIndex !== -1) {
           updatedPlayers[pRowIndex] = {
-            order: "P",
+            battingOrder: "P",
             name: players[pRowIndex].name, // 기존 API에서 받아온 값 유지
             position: "P",
             playerId: players[pRowIndex].playerId,
@@ -496,7 +502,7 @@ export default function TeamRegistrationPageComponent() {
       updatedPlayers[selectedPlayerIndex].isWc = false;
     }
     if (
-      updatedPlayers[selectedPlayerIndex].order !== "P" &&
+      updatedPlayers[selectedPlayerIndex].battingOrder !== "P" &&
       updatedPlayers[selectedPlayerIndex].position === "P"
     ) {
       setLastPUpdateIndex(selectedPlayerIndex);
@@ -521,7 +527,7 @@ export default function TeamRegistrationPageComponent() {
     updatedPlayers[index].playerId = undefined;
     setPlayers(updatedPlayers);
     if (
-      updatedPlayers[index].order !== "P" &&
+      updatedPlayers[index].battingOrder !== "P" &&
       updatedPlayers[index].position === "P"
     ) {
       setLastPUpdateIndex(index);
@@ -539,7 +545,7 @@ export default function TeamRegistrationPageComponent() {
   const duplicatePositions = useMemo(() => {
     const counts: Record<string, number> = {};
     players
-      .filter((p) => p.order !== "P")
+      .filter((p) => p.battingOrder !== "P")
       .forEach((p) => {
         if (p.position) counts[p.position] = (counts[p.position] || 0) + 1;
       });
@@ -637,10 +643,10 @@ export default function TeamRegistrationPageComponent() {
     //   (p: any) => p.position === "P"
     // );
     const batters = updatedCurrentPlayers
-      .filter((p: any) => p.order !== "P")
+      .filter((p: any) => p.battingOrder !== "P")
       .slice(0, -1)
       .map((p: any) => ({
-        order: p.order,
+        battingOrder: p.battingOrder,
         playerId: p.playerId,
         position: p.position,
       }));
@@ -672,13 +678,12 @@ export default function TeamRegistrationPageComponent() {
       // 중복 제출 방지 시작
       setIsSubmitting(true);
       const gameId = router.query.recordId;
-      const response = await API.post(
-        `/games/${gameId}/lineup`,
-        formattedObject
-      );
+      const teamType = isHomeTeam ? "home" : "away";
+      const url = `/games/${gameId}/lineup?teamType=${teamType}`;
+      const response = await API.post(url, formattedObject);
       console.log("전송 성공:", response.data);
 
-      router.push(`/matches/${router.query.recordId}/records`);
+      router.push(`/matches/${gameId}/records`);
     } catch (error) {
       console.error("PATCH 요청 에러:", error);
     } finally {
@@ -711,9 +716,9 @@ export default function TeamRegistrationPageComponent() {
             const isDup = duplicatePositions.has(actualPosition);
 
             return (
-              <PlayerRow key={`${player.order}-${index}`}>
+              <PlayerRow key={`${player.battingOrder}-${index}`}>
                 {/* 순번 */}
-                <OrderNumber>{player.order}</OrderNumber>
+                <OrderNumber>{player.battingOrder}</OrderNumber>
 
                 {/* 선수 이름 입력 */}
                 <NameWrapper
@@ -750,7 +755,7 @@ export default function TeamRegistrationPageComponent() {
                 </NameWrapper>
 
                 {/* 포지션 */}
-                {player.order !== "P" ? (
+                {player.battingOrder !== "P" ? (
                   <PositionWrapper
                     onClick={(e) => {
                       e.stopPropagation();
@@ -780,7 +785,8 @@ export default function TeamRegistrationPageComponent() {
                     {openPositionRow === index && (
                       <PositionDropdown
                         dropUp={
-                          typeof player.order === "number" && player.order >= 6
+                          typeof player.battingOrder === "number" &&
+                          player.battingOrder >= 6
                         }
                         onClick={(e) => e.stopPropagation()}
                       >
@@ -821,15 +827,17 @@ export default function TeamRegistrationPageComponent() {
           onSelectPlayer={handleSelectPlayer}
           isPitcher={
             selectedPlayerIndex !== null &&
-            players[selectedPlayerIndex].order === "P"
+            players[selectedPlayerIndex].battingOrder === "P"
           }
           selectedPlayerIds={watch("players")
             .filter((_, idx) =>
-              players[selectedPlayerIndex!].order === "P" ? idx === 9 : idx < 9
+              players[selectedPlayerIndex!].battingOrder === "P"
+                ? idx === 9
+                : idx < 9
             )
             .map((p: any) => p.playerId)
             .filter((id: number) => id != null)}
-          rowOrder={players[selectedPlayerIndex!].order}
+          rowOrder={players[selectedPlayerIndex!].battingOrder}
         />
       )}
     </Container>

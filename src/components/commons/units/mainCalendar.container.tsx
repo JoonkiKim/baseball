@@ -276,7 +276,9 @@ export default function MainCalendarPage() {
                         ? `${match.currentInning}회${
                             match.inning_half === "TOP" ? "초" : "말"
                           }`
-                        : match.status}
+                        : match.status === "EDITING"
+                        ? "경기종료"
+                        : ""}
                     </StatusBox>
                     <VsText>vs</VsText>
                   </div>
@@ -307,6 +309,7 @@ export default function MainCalendarPage() {
                         id: match.homeTeam.id,
                         name: match.homeTeam.name,
                       },
+                      status: match.status,
                     };
                     localStorage.setItem(
                       "selectedMatch",
@@ -334,7 +337,10 @@ export default function MainCalendarPage() {
 
                     // 경기 상태에 따라 이동할 route를 설정합니다.
                     let route = "";
-                    if (match.status === "FINALIZED") {
+                    if (
+                      match.status === "FINALIZED" ||
+                      match.status === "EDITING"
+                    ) {
                       route = `/matches/${match.gameId}/result`;
                     } else if (match.status === "SCHEDULED") {
                       route = `/matches/${match.gameId}/homeTeamRegistration`;

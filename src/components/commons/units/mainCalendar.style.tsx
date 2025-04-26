@@ -298,7 +298,7 @@ export const StatusBox = styled.div<{ status: string }>`
   background-color: ${({ status }) =>
     status === "SCHEDULED"
       ? "#F3A231"
-      : status === "FINALIZED"
+      : status === "FINALIZED" || status === "EDITING"
       ? "#000000"
       : status === "IN_PROGRESS" // 진행중
       ? "#37DC21"

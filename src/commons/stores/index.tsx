@@ -182,7 +182,7 @@ export const playerListState = atom<IPlayer[]>({
 export interface IHAPlayer {
   id: number;
   departmentName: string;
-  order: number | string;
+  battingOrder: number | string;
   name: string;
   isElite: boolean;
   isWc: boolean;
@@ -237,7 +237,7 @@ export const pitcherStatsState = atom<PitcherStat[]>({
 });
 
 interface PlayerInfo {
-  order: number | string;
+  battingOrder: number | string;
   name?: string;
   position?: string;
   // 추가: 돋보기 버튼(모달)로 선택되었는지 여부
@@ -247,16 +247,16 @@ interface PlayerInfo {
 export const defaultplayerList = atom<PlayerInfo[]>({
   key: "defaultplayerList", // 전역 상태의 고유 key
   default: [
-    { order: 1, name: "김지찬", position: "CF" },
-    { order: 2, name: "이재현", position: "SS" },
-    { order: 3, name: "디아즈", position: "1B" },
-    { order: 4, name: "구자욱", position: "LF" },
-    { order: 5, name: "김헌곤", position: "RF" },
-    { order: 6, name: "심재훈", position: "2B" },
-    { order: 7, name: "김영웅", position: "3B" },
-    { order: 8, name: "강민호", position: "C" },
-    { order: 9, name: "박병호", position: "DH" },
-    { order: 10, name: "원태양", position: "P" },
+    { battingOrder: 1, name: "김지찬", position: "CF" },
+    { battingOrder: 2, name: "이재현", position: "SS" },
+    { battingOrder: 3, name: "디아즈", position: "1B" },
+    { battingOrder: 4, name: "구자욱", position: "LF" },
+    { battingOrder: 5, name: "김헌곤", position: "RF" },
+    { battingOrder: 6, name: "심재훈", position: "2B" },
+    { battingOrder: 7, name: "김영웅", position: "3B" },
+    { battingOrder: 8, name: "강민호", position: "C" },
+    { battingOrder: 9, name: "박병호", position: "DH" },
+    { battingOrder: 10, name: "원태양", position: "P" },
   ],
 });
 

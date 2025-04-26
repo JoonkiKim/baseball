@@ -146,7 +146,7 @@ export default function SubPlayerSelectionModal({
   const teamType = router.query.isHomeTeam === "false" ? "away" : "home";
   const minimalRaw = localStorage.getItem(`lineup_${teamType}`);
   const minimal = minimalRaw ? JSON.parse(minimalRaw) : { batters: [] };
-  const originalBatters: { order: number; playerId: number }[] =
+  const originalBatters: { battingOrder: number; playerId: number }[] =
     minimal.batters || [];
   const originalPitcherId: number | null = minimal.pitcher?.playerId ?? null;
   const players = isAway ? awayTeamPlayers : homeTeamPlayers;
@@ -160,6 +160,8 @@ export default function SubPlayerSelectionModal({
     setIsModalOpen(false);
   };
 
+  console.log("isPitcher", isPitcher);
+  console.log(rowOrder);
   return (
     <ModalOverlay onClick={() => setIsModalOpen(false)}>
       <ModalContainer onClick={(e) => e.stopPropagation()}>
@@ -206,7 +208,7 @@ export default function SubPlayerSelectionModal({
                     (b) => !selectedPlayerIds.includes(b.playerId)
                   );
                   const candidate = substitutedOut.find(
-                    (b) => b.order === rowOrder
+                    (b) => b.battingOrder === rowOrder
                   );
                   disabled = !(candidate && candidate.playerId === player.id);
                 }
