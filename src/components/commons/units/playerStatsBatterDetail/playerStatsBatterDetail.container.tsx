@@ -123,14 +123,14 @@ export default function StatsPageBatterDetail() {
                     </td>
                     <td>{item.AB}</td>
                     <td>{item.H}</td>
-                    <td>{item.AVG.toFixed(3)}</td>
+                    <td>{item.AVG}</td>
                     <td>{item["2B"]}</td>
                     <td>{item["3B"]}</td>
                     <td>{item.HR}</td>
                     <td>{item.BB}</td>
-                    <td>{item.OBP.toFixed(3)}</td>
-                    <td>{item.SLG.toFixed(3)}</td>
-                    <td>{item.OPS.toFixed(3)}</td>
+                    <td>{item.OBP}</td>
+                    <td>{item.SLG}</td>
+                    <td>{item.OPS}</td>
                   </tr>
                 );
               });
