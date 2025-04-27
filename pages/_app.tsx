@@ -5,10 +5,30 @@ import Layout from "../src/components/commons/layout";
 import "../styles/globals.css";
 import Head from "next/head";
 import { useRouter } from "next/router";
+import { useEffect } from "react";
 
 function MyApp({ Component, pageProps }) {
   const router = useRouter();
   const isResultPage = router.pathname === "/result";
+
+  /* --------- Service Worker 등록 --------- */
+  useEffect(() => {
+    // CSR(Client-Side) 환경에서만 실행
+    if ("serviceWorker" in navigator) {
+      // 페이지 모든 리소스가 로드된 뒤 등록 -> 첫 진입 속도 저하 방지
+      window.addEventListener("load", () => {
+        navigator.serviceWorker
+          .register("/sw.js") // ② public/sw.js → URL 루트 경로
+          .then((reg) => {
+            console.log("✅ Service Worker registered:", reg);
+          })
+          .catch((err) => {
+            console.error("❌ Service Worker registration failed:", err);
+          });
+      });
+    }
+  }, []);
+  /* ---------------------------------------- */
 
   const globalStyles = css`
     @font-face {
