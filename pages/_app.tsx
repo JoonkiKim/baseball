@@ -13,19 +13,11 @@ function MyApp({ Component, pageProps }) {
 
   /* --------- Service Worker 등록 --------- */
   useEffect(() => {
-    // CSR(Client-Side) 환경에서만 실행
     if ("serviceWorker" in navigator) {
-      // 페이지 모든 리소스가 로드된 뒤 등록 -> 첫 진입 속도 저하 방지
-      window.addEventListener("load", () => {
-        navigator.serviceWorker
-          .register("/sw.js") // ② public/sw.js → URL 루트 경로
-          .then((reg) => {
-            console.log("✅ Service Worker registered:", reg);
-          })
-          .catch((err) => {
-            console.error("❌ Service Worker registration failed:", err);
-          });
-      });
+      const onLoad = () =>
+        navigator.serviceWorker.register("/sw.js").catch(console.error); // 등록 실패 시 콘솔 확인
+      window.addEventListener("load", onLoad);
+      return () => window.removeEventListener("load", onLoad);
     }
   }, []);
   /* ---------------------------------------- */
