@@ -13,6 +13,7 @@ import {
   ScoreDisplay,
 } from "./modal.style";
 import API from "../../../commons/apis/api";
+import { useModalBack } from "../../../commons/hooks/useModalBack";
 
 interface IScoreEditModalProps {
   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -27,6 +28,7 @@ export default function ScorePatchInputModal({
   order,
   cellValue,
 }: IScoreEditModalProps) {
+  useModalBack(() => setIsModalOpen(false));
   const router = useRouter();
   const [score, setScore] = useState<number>(Number(cellValue));
 

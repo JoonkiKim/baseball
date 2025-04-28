@@ -7,6 +7,7 @@ import {
   ModalTitle,
 } from "./modal.style";
 import { useState } from "react";
+import { useModalBack } from "../../../commons/hooks/useModalBack";
 
 interface IModalProps {
   setIsHitModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -14,6 +15,7 @@ interface IModalProps {
 }
 
 export default function HitModal(props: IModalProps) {
+  useModalBack(() => props.setIsHitModalOpen(false));
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
 

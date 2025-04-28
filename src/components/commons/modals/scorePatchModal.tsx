@@ -11,6 +11,7 @@ import {
 } from "./modal.style";
 import ScorePatchInputModal from "./scorePatchInputModal";
 import StatPatchInputModal from "./statPatchInputModal"; // ★ 추가
+import { useModalBack } from "../../../commons/hooks/useModalBack";
 
 interface IModalProps {
   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -33,6 +34,7 @@ export default function ScorePatchModal({
 }: IModalProps) {
   const router = useRouter();
 
+  useModalBack(() => setIsModalOpen(false));
   /* 다음 단계 모달 플래그 */
   const [showScoreInputModal, setShowScoreInputModal] = useState(false);
   const [showStatInputModal, setShowStatInputModal] = useState(false);
