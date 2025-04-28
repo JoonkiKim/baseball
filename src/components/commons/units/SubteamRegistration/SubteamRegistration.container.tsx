@@ -16,6 +16,7 @@ import {
   PlayerTable,
 } from "./SubteamRegistration.style";
 import API from "../../../../commons/apis/api";
+import RecordStartModal from "../../modals/recordStart";
 
 interface ISubTeamRegistrationProps {
   isHomeTeam: boolean;
@@ -25,6 +26,7 @@ export default function SubTeamRegistrationComponent({
   isHomeTeam,
 }: ISubTeamRegistrationProps) {
   const router = useRouter();
+  // const [isModalOpen, setIsModalOpen] = useState(false);
   const [homeTeamPlayers, setHomeTeamPlayers] = useRecoilState(
     HomeTeamPlayerListState
   );
@@ -147,6 +149,7 @@ export default function SubTeamRegistrationComponent({
       if (isHomeTeam) {
         router.push(`/matches/${recordId}/awayTeamRegistration`);
       } else {
+        // setIsModalOpen(true)
         const res = await API.post(`/games/${recordId}/start`);
         console.log(res.data);
         router.push(`/matches/${recordId}/records`);
@@ -199,6 +202,7 @@ export default function SubTeamRegistrationComponent({
           <ControlButton onClick={handleSubmit}>제출하기</ControlButton>
         </ButtonContainer>
       </ModalContainer>
+      {/* {isModalOpen && <RecordStartModal setIsModalOpen={setIsModalOpen} />} */}
     </ModalOverlay>
   );
 }
