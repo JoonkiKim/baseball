@@ -75,12 +75,15 @@ export default function MainCalendarPage() {
   // 캘린더 영역 외부 클릭 감지를 위한 ref
   const calendarRef = useRef<HTMLDivElement>(null);
 
+  const [fromDate, setFromDate] = useState("2025-05-06");
+  const [toDate, setToDate] = useState("2025-06-30");
+
   useEffect(() => {
     const fetchMatches = async () => {
       setIsLoading(true);
       try {
-        const res = await API.get("/games");
-        // 새 객체 구조가 반영된 데이터를 불러온다고 가정합니다.
+        const res = await API.get(`/games?from=${fromDate}&to=${toDate}`);
+        console.log(`/games?from=${fromDate}&to=${toDate}`);
         setAllMatchData(res.data);
         // console.log(allMatchData);
       } catch (err) {

@@ -211,29 +211,37 @@ paths:
                 $ref: "#/components/schemas/GroupedTeamResponse"
   /games:
     get:
-      summary: "특정 날짜의 경기 일정 조회"
+      summary: "날짜 범위에 따른 경기 일정 조회"
       tags:
         - games
       parameters:
-        - name: date
+        - name: from
           in: query
           required: true
           schema:
             type: string
             format: date
-          description: "조회할 날짜 (YYYY-MM-DD 형태)"
-          example: "2025-04-13"
+          description: "조회 시작 날짜 (YYYY-MM-DD 형태)"
+          example: "2025-04-23"
+        - name: to
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+          description: "조회 종료 날짜 (YYYY-MM-DD 형태, 미입력 시 from으로부터 6일)"
+          example: "2025-04-25"
       responses:
         "200":
-          description: "특정 날짜의 경기 일정 정보"
+          description: "날짜 범위 내 경기 일정 정보"
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/GameScheduleResponse"
+                $ref: "#/components/schemas/GamesByDatesResponse"
         "400":
           description: "잘못된 파라미터 형식"
         "404":
-          description: "해당 날짜의 경기가 존재하지 않음"
+          description: "해당 날짜 범위의 경기가 존재하지 않음"
 
   /games/{gameId}/players:
     get:
@@ -1317,25 +1325,25 @@ components:
           description: "볼넷 (Base on Balls)"
           example: 1
         AVG:
-          type: number
+          type: string
           format: float
           description: "타율 (Batting Average)"
-          example: 0.312
+          example: "0.312"
         OBP:
-          type: number
+          type: string
           format: float
           description: "출루율 (On-Base Percentage)"
-          example: 0.370
+          example: "0.370"
         SLG:
-          type: number
+          type: string
           format: float
           description: "장타율 (Slugging Percentage)"
-          example: 0.550
+          example: "0.550"
         OPS:
-          type: number
+          type: string
           format: float
           description: "OPS (On-base + Slugging)"
-          example: 0.920
+          example: "0.920"
       required:
         - rank
         - playerName
@@ -2231,3 +2239,82 @@ components:
       required:
         - success
         - playerIds
+    GamesByDatesResponse:
+      type: object
+      properties:
+        range:
+          type: object
+          properties:
+            from:
+              type: string
+              format: date
+              description: "조회 시작 날짜 (YYYY-MM-DD)"
+              example: "2025-04-23"
+            to:
+              type: string
+              format: date
+              description: "조회 종료 날짜 (YYYY-MM-DD)"
+              example: "2025-04-25"
+        days:
+          type: array
+          items:
+            type: object
+            properties:
+              date:
+                type: string
+                format: date
+                description: "날짜 (YYYY-MM-DD)"
+                example: "2025-04-23"
+              dayOfWeek:
+                type: string
+                description: "요일 정보"
+                example: "수"
+              games:
+                type: array
+                description: "해당 날짜의 경기 목록"
+                items:
+                  $ref: "#/components/schemas/Game"
+      required:
+        - range
+        - days
+      example:
+        range:
+          from: "2025-04-23"
+          to: "2025-04-25"
+        days:
+          - date: "2025-04-23"
+            dayOfWeek: "수"
+            games:
+              - time: "10:00"
+                status: "SCHEDULED"
+                homeTeam:
+                  id: 1
+                  name: "정호아카데미"
+                  score: 0
+                awayTeam:
+                  id: 2
+                  name: "재료공"
+                  score: 0
+              - time: "12:00"
+                status: "SCHEDULED"
+                homeTeam:
+                  id: 3
+                  name: "test1"
+                  score: 0
+                awayTeam:
+                  id: 4
+                  name: "test2"
+                  score: 0
+          - date: "2025-04-24"
+            dayOfWeek: "목"
+            games:
+              - time: "14:00"
+                status: "EDITING"
+                homeTeam:
+                  id: 1
+                  name: "정호아카데미"
+                  score: 0
+                awayTeam:
+                  id: 4
+                  name: "test2"
+                  score: 0
