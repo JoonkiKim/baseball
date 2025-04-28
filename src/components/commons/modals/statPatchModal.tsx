@@ -9,6 +9,7 @@ import {
   ModalTitleSmall,
 } from "./modal.style";
 import ScorePatchInputModal from "./scorePatchInputModal";
+import { useModalBack } from "../../../commons/hooks/useModalBack";
 
 interface IModalProps {
   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -23,6 +24,7 @@ export default function StatPatchModal({
   team,
   cellIndex,
 }: IModalProps) {
+  useModalBack(() => setIsModalOpen(false));
   const router = useRouter();
 
   const [showScoreInputModal, setShowScoreInputModal] =

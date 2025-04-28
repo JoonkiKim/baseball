@@ -9,12 +9,14 @@ import {
   ModalOverlay,
   ModalTitleSmall,
 } from "../modal.style";
+import { useModalBack } from "../../../../commons/hooks/useModalBack";
 
 interface IModalProps {
   setIsResultSubmitModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export default function ResultSubmitModal(props: IModalProps) {
+  useModalBack(() => props.setIsResultSubmitModalOpen(false));
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);

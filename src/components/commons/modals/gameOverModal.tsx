@@ -8,12 +8,14 @@ import {
   ModalTitleSmall,
 } from "./modal.style";
 import API from "../../../commons/apis/api";
+import { useModalBack } from "../../../commons/hooks/useModalBack";
 
 interface IModalProps {
   setIsGameEndModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export default function GameOverModal(props: IModalProps) {
+  useModalBack(() => props.setIsGameEndModalOpen(false));
   // 공수교대 종류 선택 시 실행될 함수
   const router = useRouter();
 

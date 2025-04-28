@@ -7,6 +7,7 @@ import {
   ModalTitle,
 } from "./modal.style";
 import { useState } from "react";
+import { useModalBack } from "../../../commons/hooks/useModalBack";
 
 interface IModalProps {
   setIsEtcModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -14,6 +15,7 @@ interface IModalProps {
 }
 
 export default function EtcModal(props: IModalProps) {
+  useModalBack(() => props.setIsEtcModalOpen(false));
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
 

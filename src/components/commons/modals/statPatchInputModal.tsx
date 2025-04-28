@@ -10,6 +10,7 @@ import {
   StatPatchInput,
 } from "./modal.style";
 import API from "../../../commons/apis/api";
+import { useModalBack } from "../../../commons/hooks/useModalBack";
 
 /* ──────────────────────────────────────────
    props
@@ -27,6 +28,7 @@ export default function StatPatchInputModal({
   mode,
   alertMessage,
 }: IStatPatchInputModalProps) {
+  useModalBack(() => setIsModalOpen(false));
   const router = useRouter();
 
   /* msg(문자열) → 객체로 변환 */

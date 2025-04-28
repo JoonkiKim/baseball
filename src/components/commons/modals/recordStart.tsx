@@ -7,13 +7,16 @@ import {
   ModalTitle,
   ModalTitleSmall,
 } from "./modal.style";
+import { useModalBack } from "../../../commons/hooks/useModalBack";
 
 interface IModalProps {
   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export default function RecordStartModal(props: IModalProps) {
+  useModalBack(() => props.setIsModalOpen(false));
   const router = useRouter();
+
   const handleTypeSelect = (type: string) => {
     if (type === "예") {
       props.setIsModalOpen(false);
