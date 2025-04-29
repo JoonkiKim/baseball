@@ -37,6 +37,9 @@ export default function StatsPage() {
     const fetchBatters = async () => {
       try {
         const res = await API.get("/records/batters");
+        // console.log(API.defaults.baseURL);
+        // console.log("responseURL:", (res.request as any).responseURL);
+        // console.log(res.data);
         const sorted = res.data.batters.sort((a, b) => b.H - a.H);
         setHitterData(sorted);
       } catch (e) {
@@ -50,6 +53,7 @@ export default function StatsPage() {
     const fetchPitchers = async () => {
       try {
         const res = await API.get("/records/pitchers");
+        // console.log(res.data.batters);
         const sorted = res.data.pitchers.sort((a, b) => b.K - a.K);
         setPitcherData(sorted);
       } catch (e) {
@@ -183,7 +187,7 @@ export default function StatsPage() {
                   <tr key={idx}>
                     <td>{currentRank}</td>
                     <td>
-                      {item.playerName} ({item.teamName})
+                      {item.playerName} ({item.teamName.slice(0, 3)})
                     </td>
                     <td>{item.AB}</td>
                     <td>{item.H}</td>
@@ -242,7 +246,7 @@ export default function StatsPage() {
                   <tr key={idx}>
                     <td>{currentRank}</td>
                     <td>
-                      {item.playerName} ({item.teamName})
+                      {item.playerName} ({item.teamName.slice(0, 3)})
                     </td>
                     <td>{item.K}</td>
                   </tr>

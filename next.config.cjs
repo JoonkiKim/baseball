@@ -13,6 +13,14 @@ const { execSync } = require("child_process");
 const nextConfig = {
   reactStrictMode: true,
 
+  // API 프록시 설정: /api/* 경로를 환경변수로 지정된 백엔드 주소로 리다이렉트
+  rewrites: async () => [
+    {
+      source: "/api/:path*",
+      destination: `${process.env.NEXT_PUBLIC_API_URL}/:path*`,
+    },
+  ],
+
   webpack: (config, { isServer }) => {
     if (isServer) {
       console.log("🔄 Compiling sw.ts to sw.js...");

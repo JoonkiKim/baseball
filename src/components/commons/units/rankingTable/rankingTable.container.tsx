@@ -17,17 +17,22 @@ export default function RankingTableComponent() {
     const response = await API.get("/teams/grouped", {
       params: { group },
     });
+    // const response = await API.get("/teams/grouped"
+    // );
     return response.data;
   };
 
   useEffect(() => {
     const fetchGroups = async () => {
       try {
+        // const groups = ["A", "B", "C", "D"];
+
         const groups = ["A", "B", "C"];
 
         const results = await Promise.all(
           groups.map((group) => fetchGroupedTeams(group))
         );
+        console.log(results);
 
         const newGroupData: Record<string, any[]> = {};
         groups.forEach((g, i) => {

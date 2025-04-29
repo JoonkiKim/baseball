@@ -15,7 +15,7 @@ interface IModalProps {
 }
 
 export default function HitModal(props: IModalProps) {
-  useModalBack(() => props.setIsHitModalOpen(false));
+  // useModalBack(() => props.setIsHitModalOpen(false));
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
 

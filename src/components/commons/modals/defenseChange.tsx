@@ -13,7 +13,7 @@ interface IModalProps {
 }
 
 export default function DefenseChangeModal(props: IModalProps) {
-  useModalBack(() => props.setIsChangeModalOpen(false));
+  // useModalBack(() => props.setIsChangeModalOpen(false));
   // 공수교대 종류 선택 시 실행될 함수
   const handleTypeSelect = (type: string) => {
     if (type === "예") {

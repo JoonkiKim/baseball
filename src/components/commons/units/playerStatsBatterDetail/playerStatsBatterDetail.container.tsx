@@ -119,7 +119,7 @@ export default function StatsPageBatterDetail() {
                   <tr key={index}>
                     <td>{currentRank}</td>
                     <td>
-                      {item.playerName} ({item.teamName})
+                      {item.playerName} ({item.teamName.slice(0, 3)})
                     </td>
                     <td>{item.AB}</td>
                     <td>{item.H}</td>

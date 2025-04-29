@@ -388,7 +388,8 @@ export default function GameRecordPage() {
       <PlayersRow>
         <PlayerBox>
           <PlayerChangeButton onClick={() => handleSubstitution(true)}>
-            선수교체({router.query.attack === "home" ? "홈" : "원정"})
+            선수교체
+            {/* ({router.query.attack === "home" ? "홈" : "원정"}) */}
           </PlayerChangeButton>
           <OrderBadge>{batter.battingOrder}번</OrderBadge>
           <PlayerWrapper>
@@ -414,7 +415,8 @@ export default function GameRecordPage() {
         </PlayerBox>
         <PlayerBox>
           <PlayerChangeButton onClick={() => handleSubstitution(false)}>
-            선수교체({router.query.attack === "home" ? "원정" : "홈"})
+            선수교체
+            {/* ({router.query.attack === "home" ? "원정" : "홈"}) */}
           </PlayerChangeButton>
           <PlayerWrapper>
             <PlayerPosition>P</PlayerPosition>

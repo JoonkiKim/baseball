@@ -28,7 +28,7 @@ export default function StatPatchInputModal({
   mode,
   alertMessage,
 }: IStatPatchInputModalProps) {
-  useModalBack(() => setIsModalOpen(false));
+  // useModalBack(() => setIsModalOpen(false));
   const router = useRouter();
 
   /* msg(문자열) → 객체로 변환 */

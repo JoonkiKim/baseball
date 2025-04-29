@@ -24,7 +24,7 @@ export default function StatPatchModal({
   team,
   cellIndex,
 }: IModalProps) {
-  useModalBack(() => setIsModalOpen(false));
+  // useModalBack(() => setIsModalOpen(false));
   const router = useRouter();
 
   const [showScoreInputModal, setShowScoreInputModal] =

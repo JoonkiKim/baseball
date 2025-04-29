@@ -28,7 +28,7 @@ export default function ScorePatchInputModal({
   order,
   cellValue,
 }: IScoreEditModalProps) {
-  useModalBack(() => setIsModalOpen(false));
+  // useModalBack(() => setIsModalOpen(false));
   const router = useRouter();
   const [score, setScore] = useState<number>(Number(cellValue));
 

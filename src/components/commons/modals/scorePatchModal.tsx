@@ -34,7 +34,7 @@ export default function ScorePatchModal({
 }: IModalProps) {
   const router = useRouter();
 
-  useModalBack(() => setIsModalOpen(false));
+  // useModalBack(() => setIsModalOpen(false));
   /* 다음 단계 모달 플래그 */
   const [showScoreInputModal, setShowScoreInputModal] = useState(false);
   const [showStatInputModal, setShowStatInputModal] = useState(false);

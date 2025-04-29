@@ -14,7 +14,7 @@ interface IModalProps {
 }
 
 export default function RecordStartModal(props: IModalProps) {
-  useModalBack(() => props.setIsModalOpen(false));
+  // useModalBack(() => props.setIsModalOpen(false));
   const router = useRouter();
 
   const handleTypeSelect = (type: string) => {

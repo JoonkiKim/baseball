@@ -75,8 +75,8 @@ export default function MainCalendarPage() {
   // 캘린더 영역 외부 클릭 감지를 위한 ref
   const calendarRef = useRef<HTMLDivElement>(null);
 
-  const [fromDate, setFromDate] = useState("2025-05-06");
-  const [toDate, setToDate] = useState("2025-06-30");
+  const [fromDate, setFromDate] = useState("2025-04-23");
+  const [toDate, setToDate] = useState("2025-04-25");
 
   useEffect(() => {
     const fetchMatches = async () => {
@@ -84,8 +84,11 @@ export default function MainCalendarPage() {
       try {
         const res = await API.get(`/games?from=${fromDate}&to=${toDate}`);
         console.log(`/games?from=${fromDate}&to=${toDate}`);
+        console.log(res.data);
+        // 백엔드 테스트 시에는 아래의 코드드
+        // setAllMatchData(res.data.days);
         setAllMatchData(res.data);
-        // console.log(allMatchData);
+        console.log(allMatchData);
       } catch (err) {
         console.error("❌ 경기 데이터 요청 에러:", err);
       } finally {
@@ -258,7 +261,7 @@ export default function MainCalendarPage() {
                       isWinner={team2IsWinner}
                       gameStatus={match.status}
                     >
-                      {team2Score ?? "-"}
+                      {match.status === "SCHEDULED" ? "-" : team2Score ?? "-"}
                     </TeamScore>
                   </Team>
 
@@ -293,7 +296,7 @@ export default function MainCalendarPage() {
                       isWinner={team1IsWinner}
                       gameStatus={match.status}
                     >
-                      {team1Score ?? "-"}
+                      {match.status === "SCHEDULED" ? "-" : team1Score ?? "-"}
                     </TeamScore>
                   </Team>
                 </TeamsContainer>

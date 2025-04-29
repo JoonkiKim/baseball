@@ -74,7 +74,7 @@ export default function StatsPagePitcherDetail() {
                   <tr key={index}>
                     <td>{currentRank}</td>
                     <td>
-                      {item.playerName} ({item.teamName})
+                      {item.playerName} ({item.teamName.slice(0, 3)})
                     </td>
                     <td>{item.K}</td>
                   </tr>

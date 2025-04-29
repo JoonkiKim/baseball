@@ -15,7 +15,7 @@ interface IModalProps {
 }
 
 export default function EtcModal(props: IModalProps) {
-  useModalBack(() => props.setIsEtcModalOpen(false));
+  // useModalBack(() => props.setIsEtcModalOpen(false));
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
 

@@ -16,7 +16,7 @@ interface IModalProps {
 }
 
 export default function ResultSubmitModal(props: IModalProps) {
-  useModalBack(() => props.setIsResultSubmitModalOpen(false));
+  // useModalBack(() => props.setIsResultSubmitModalOpen(false));
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
