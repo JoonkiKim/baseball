@@ -83,6 +83,8 @@ export default function RefereeRegisterPage() {
       console.log({ email });
       alert("인증번호가 발송되었습니다. 이메일 수신함을 확인해주세요!");
     } catch (error) {
+      const errorCode = error?.response?.data?.error_code; // 에러코드 추출
+      console.error(error, "error_code:", errorCode);
       console.error("이메일 인증번호 발송 오류:", error);
       alert("인증번호 발송에 실패했습니다. 다시 시도해주세요.");
     }
@@ -99,6 +101,8 @@ export default function RefereeRegisterPage() {
       console.log(payload, response);
       alert("심판 등록에 성공했습니다!");
     } catch (error) {
+      const errorCode = error?.response?.data?.error_code; // 에러코드 추출
+      console.error(error, "error_code:", errorCode);
       console.error("등록 실패:", error);
       alert("심판 등록에 실패했습니다. 이메일과 인증코드를 다시 확인해주세요.");
     }

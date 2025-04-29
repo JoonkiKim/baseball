@@ -51,6 +51,8 @@ export default function HitModal(props: IModalProps) {
         `기록 전송 완료\n` + `${Type}\n` // “안타”, “2루타” 등
       );
     } catch (error) {
+      const errorCode = error?.response?.data?.error_code; // 백엔드에서 내려주는 error_code
+      console.error(error, "error_code:", errorCode);
       console.error("안타 기록 전송 오류:", error);
       alert("안타 기록 전송 오류");
     } finally {

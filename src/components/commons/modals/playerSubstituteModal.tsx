@@ -126,7 +126,10 @@ export default function SubPlayerSelectionModal({
         if (isAway) setAwayTeamPlayers(list);
         else setHomeTeamPlayers(list);
       })
-      .catch((err) => console.error("대체 선수 목록 요청 실패:", err));
+      .catch((err) => {
+        const errorCode = err?.response?.data?.error_code; // 에러코드 추출
+        console.error(err, "error_code:", errorCode);
+      });
   }, [
     isAway,
     isPitcher,

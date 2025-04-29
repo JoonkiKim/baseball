@@ -98,6 +98,8 @@ export default function TeamRegistrationPageComponent(props: IProps) {
           console.log(awayTeamPlayers);
         }
       } catch (err) {
+        const errorCode = err?.response?.data?.error_code; // 에러코드 추출
+        console.error(err, "error_code:", errorCode);
         console.error("팀 선수 목록 요청 에러:", err);
       }
     };
@@ -367,6 +369,8 @@ export default function TeamRegistrationPageComponent(props: IProps) {
         );
       }
     } catch (error) {
+      const errorCode = error?.response?.data?.error_code; // 에러코드 추출
+      console.error(error, "error_code:", errorCode);
       console.error("POST 요청 실패:", error);
       setIsSubmitting(false);
     }

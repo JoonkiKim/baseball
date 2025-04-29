@@ -46,13 +46,21 @@ export default function ResultSubmitModal(props: IModalProps) {
       if (error.response) {
         console.error("오류 응답 상태:", error.response.status);
         if (error.response.status === 400) {
+          const errorCode = error?.response?.data?.error_code; // 에러코드 추출
+          console.error(error, "error_code:", errorCode);
           alert("이미 종료된 경기, 또는 정합성 오류");
         } else if (error.response.status === 404) {
+          const errorCode = error?.response?.data?.error_code; // 에러코드 추출
+          console.error(error, "error_code:", errorCode);
           alert("경기(gameId) 없음");
         } else {
+          const errorCode = error?.response?.data?.error_code; // 에러코드 추출
+          console.error(error, "error_code:", errorCode);
           alert("알 수 없는 오류가 발생했습니다.");
         }
       } else {
+        const errorCode = error?.response?.data?.error_code; // 에러코드 추출
+        console.error(error, "error_code:", errorCode);
         console.error("네트워크 오류 또는 알 수 없는 에러:", error);
         alert("네트워크 오류가 발생했습니다.");
       }

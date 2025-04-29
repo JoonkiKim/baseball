@@ -74,7 +74,9 @@ export default function GameRecordPage() {
       const { awayTeam, homeTeam } = JSON.parse(matchStr);
       setTeamAName(awayTeam.name);
       setTeamBName(homeTeam.name);
-    } catch {
+    } catch (error) {
+      const errorCode = error?.response?.data?.error_code; // 에러코드 추출
+      console.error(error, "error_code:", errorCode);
       console.error("selectedMatch 파싱 실패");
     }
   }, []);
@@ -162,6 +164,8 @@ export default function GameRecordPage() {
           query: { ...router.query, attack: attackValue },
         });
       } catch (error) {
+        const errorCode = error?.response?.data?.error_code; // 에러코드 추출
+        console.error(error, "error_code:", errorCode);
         console.error("이닝 점수 데이터를 가져오는데 오류 발생:", error);
       }
     }
@@ -179,6 +183,8 @@ export default function GameRecordPage() {
         );
         setBatter(res.data);
       } catch (error) {
+        const errorCode = error?.response?.data?.error_code; // 에러코드 추출
+        console.error(error, "error_code:", errorCode);
         console.error("batter 데이터를 가져오는데 오류 발생:", error);
       }
     }
@@ -196,6 +202,8 @@ export default function GameRecordPage() {
         );
         setPitcher(res.data);
       } catch (error) {
+        const errorCode = error?.response?.data?.error_code; // 에러코드 추출
+        console.error(error, "error_code:", errorCode);
         console.error("pitcher 데이터를 가져오는데 오류 발생:", error);
       }
     }
@@ -238,6 +246,8 @@ export default function GameRecordPage() {
           // alert(`볼넷/사구 기록 전송 완료\n응답값: ${JSON.stringify(data)}`)
           alert(`기록 전송 완료\n` + `볼넷/사구`);
         } catch (error) {
+          const errorCode = error?.response?.data?.error_code; // 에러코드 추출
+          console.error(error, "error_code:", errorCode);
           console.error("볼넷/사구 기록 전송 오류:", error);
           alert("볼넷/사구 기록 전송 오류");
         } finally {
@@ -275,6 +285,8 @@ export default function GameRecordPage() {
       alert("공수교대 완료");
       setThisInningScore(0);
     } catch (error) {
+      const errorCode = error?.response?.data?.error_code; // 에러코드 추출
+      console.error(error, "error_code:", errorCode);
       console.error("이닝 득점 전송 오류:", error);
     } finally {
       setIsSubmitting(false);

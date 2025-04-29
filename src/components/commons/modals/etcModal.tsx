@@ -40,7 +40,8 @@ export default function EtcModal(props: IModalProps) {
       console.log(endpoint, requestBody);
       alert(`기록 전송 완료\n` + `${Type}\n`);
     } catch (error) {
-      console.error("etc 기록 전송 오류:", error);
+      const errorCode = error?.response?.data?.error_code; // 백엔드에서 내려주는 error_code
+      console.error(error, "error_code:", errorCode);
       alert("etc 기록 전송 오류");
     } finally {
       setIsSubmitting(false);

@@ -358,6 +358,18 @@ export const RecordButton = styled.button`
   align-items: center;
 `;
 
+export const RecordButtonPlaceholder = styled.div`
+  min-width: 60px;
+  min-height: 30px;
+  border-radius: 4px;
+  background: transparent;
+  border: 1px solid transparent;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
 export const DatePickTotalWrapper = styled.div`
   position: absolute;
   z-index: 999;

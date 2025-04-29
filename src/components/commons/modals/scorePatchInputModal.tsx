@@ -60,6 +60,8 @@ export default function ScorePatchInputModal({
       console.log("점수 수정 응답:", response.data);
       alert("점수가 성공적으로 수정되었습니다.");
     } catch (error) {
+      const errorCode = error?.response?.data?.error_code; // 에러코드 추출
+      console.error(error, "error_code:", errorCode);
       console.error(error);
       alert("점수 수정 중 오류가 발생했습니다.");
     }

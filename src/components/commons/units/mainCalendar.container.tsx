@@ -17,6 +17,7 @@ import {
   MatchCardsContainer,
   MatchTimeLabel,
   RecordButton,
+  RecordButtonPlaceholder,
   StatusBox,
   StyledDatePicker,
   Team,
@@ -30,6 +31,7 @@ import API from "../../../commons/apis/api";
 import { previousDateState, TeamListState } from "../../../commons/stores";
 import { registerLocale } from "react-datepicker";
 import { ko } from "date-fns/locale";
+import { getAccessToken } from "../../../commons/libraries/getAccessToken";
 
 // 새 객체 구조에 맞춘 인터페이스 정의 (matchId → gameId)
 interface RawMatch {
@@ -57,6 +59,12 @@ interface Game {
 }
 
 export default function MainCalendarPage() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    const token = getAccessToken();
+    setIsAuthenticated(!!token); // accessToken이 있으면 true
+  }, []);
   registerLocale("ko", ko);
   moment.tz.setDefault("Asia/Seoul");
   const router = useRouter();
@@ -90,6 +98,8 @@ export default function MainCalendarPage() {
         setAllMatchData(res.data);
         console.log(allMatchData);
       } catch (err) {
+        const errorCode = err?.response?.data?.error_code; // 에러코드 추출
+        console.error(err, "error_code:", errorCode);
         console.error("❌ 경기 데이터 요청 에러:", err);
       } finally {
         setIsLoading(false);
@@ -301,64 +311,57 @@ export default function MainCalendarPage() {
                   </Team>
                 </TeamsContainer>
 
-                {/* 경기기록 버튼 클릭 시, 관련 팀 정보 저장 순서도 awayTeam -> homeTeam로 변경 */}
-                <RecordButton
-                  onClick={() => {
-                    // 선택된 경기 정보를 객체로 구성합니다.
-                    const selectedMatchInfo = {
-                      gameId: match.gameId,
-                      awayTeam: {
-                        id: match.awayTeam.id,
-                        name: match.awayTeam.name,
-                      },
-                      homeTeam: {
-                        id: match.homeTeam.id,
-                        name: match.homeTeam.name,
-                      },
-                      status: match.status,
-                    };
-                    localStorage.setItem(
-                      "selectedMatch",
-                      JSON.stringify(selectedMatchInfo)
-                    );
-
-                    // localStorage를 사용하지 않고, Recoil 스테이트 (TeamListState)를 업데이트 합니다.
-                    // 경기 상태가 "SCHEDULED"인 경우에 팀 정보를 저장하는 예시입니다.
-                    if (match.status === "SCHEDULED") {
-                      setTeamList([
-                        {
-                          homeTeamName: match.homeTeam.name,
-                          homeTeamId: match.homeTeam.id,
-                          awayTeamName: match.awayTeam.name,
-                          awayTeamId: match.awayTeam.id,
+                {isAuthenticated || match.status === "FINALIZED" ? (
+                  <RecordButton
+                    onClick={() => {
+                      const selectedMatchInfo = {
+                        gameId: match.gameId,
+                        awayTeam: {
+                          id: match.awayTeam.id,
+                          name: match.awayTeam.name,
                         },
-                      ]);
-                      console.log("저장된 팀 정보:", {
-                        homeTeamName: match.homeTeam.name,
-                        homeTeamId: match.homeTeam.id,
-                        awayTeamName: match.awayTeam.name,
-                        awayTeamId: match.awayTeam.id,
-                      });
-                    }
+                        homeTeam: {
+                          id: match.homeTeam.id,
+                          name: match.homeTeam.name,
+                        },
+                        status: match.status,
+                      };
+                      localStorage.setItem(
+                        "selectedMatch",
+                        JSON.stringify(selectedMatchInfo)
+                      );
 
-                    // 경기 상태에 따라 이동할 route를 설정합니다.
-                    let route = "";
-                    if (
-                      match.status === "FINALIZED" ||
-                      match.status === "EDITING"
-                    ) {
-                      route = `/matches/${match.gameId}/result`;
-                    } else if (match.status === "SCHEDULED") {
-                      route = `/matches/${match.gameId}/homeTeamRegistration`;
-                    } else if (match.status === "IN_PROGRESS") {
-                      route = `/matches/${match.gameId}/records`;
-                    }
+                      if (match.status === "SCHEDULED") {
+                        setTeamList([
+                          {
+                            homeTeamName: match.homeTeam.name,
+                            homeTeamId: match.homeTeam.id,
+                            awayTeamName: match.awayTeam.name,
+                            awayTeamId: match.awayTeam.id,
+                          },
+                        ]);
+                      }
 
-                    router.push(route);
-                  }}
-                >
-                  경기기록
-                </RecordButton>
+                      let route = "";
+                      if (
+                        match.status === "FINALIZED" ||
+                        match.status === "EDITING"
+                      ) {
+                        route = `/matches/${match.gameId}/result`;
+                      } else if (match.status === "SCHEDULED") {
+                        route = `/matches/${match.gameId}/homeTeamRegistration`;
+                      } else if (match.status === "IN_PROGRESS") {
+                        route = `/matches/${match.gameId}/records`;
+                      }
+
+                      router.push(route);
+                    }}
+                  >
+                    경기기록
+                  </RecordButton>
+                ) : (
+                  <RecordButtonPlaceholder />
+                )}
               </MatchCard>
             );
           })

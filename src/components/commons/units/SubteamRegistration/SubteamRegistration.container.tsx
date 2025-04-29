@@ -46,6 +46,8 @@ export default function SubTeamRegistrationComponent({
           : matchData.awayTeam?.name || "";
         setTeamName(name);
       } catch (err) {
+        const errorCode = err?.response?.data?.error_code; // 에러코드 추출
+        console.error(err, "error_code:", errorCode);
         console.error("JSON parsing error:", err);
       }
     }
@@ -66,6 +68,8 @@ export default function SubTeamRegistrationComponent({
           try {
             parsedData = JSON.parse(res.data);
           } catch (e) {
+            const errorCode = e?.response?.data?.error_code; // 에러코드 추출
+            console.error(e, "error_code:", errorCode);
             console.error("응답 JSON 파싱 실패:", e);
             return;
           }
@@ -88,6 +92,8 @@ export default function SubTeamRegistrationComponent({
         }
       })
       .catch((err) => {
+        const errorCode = err?.response?.data?.error_code; // 에러코드 추출
+        console.error(err, "error_code:", errorCode);
         console.error("선수 목록 불러오기 실패:", err);
       });
   }, [isHomeTeam, router.query.recordId]);
@@ -155,6 +161,8 @@ export default function SubTeamRegistrationComponent({
         router.push(`/matches/${recordId}/records`);
       }
     } catch (err) {
+      const errorCode = err?.response?.data?.error_code; // 에러코드 추출
+      console.error(err, "error_code:", errorCode);
       console.error("교체명단 등록 실패:", err);
     }
   };

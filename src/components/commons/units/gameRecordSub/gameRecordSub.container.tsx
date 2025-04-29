@@ -177,6 +177,8 @@ export default function TeamRegistrationPageComponent() {
               console.log("HomeTeam Players (team API):", parsedData.players);
             })
             .catch((error) => {
+              const errorCode = error?.response?.data?.error_code; // 에러코드 추출
+              console.error(error, "error_code:", errorCode);
               console.error("Error fetching homeTeam players:", error);
             });
         }
@@ -191,11 +193,15 @@ export default function TeamRegistrationPageComponent() {
               console.log("AwayTeam Players (team API):", parsedData.players);
             })
             .catch((error) => {
+              const errorCode = error?.response?.data?.error_code; // 에러코드 추출
+              console.error(error, "error_code:", errorCode);
               console.error("Error fetching awayTeam players:", error);
             });
         }
       }
     } catch (error) {
+      const errorCode = error?.response?.data?.error_code; // 에러코드 추출
+      console.error(error, "error_code:", errorCode);
       console.error("로컬스토리지 파싱 에러:", error);
     }
   }, [isHomeTeam]);
@@ -307,6 +313,8 @@ export default function TeamRegistrationPageComponent() {
           console.log("awayTeamPlayers", awayTeamPlayers);
         }
       } catch (err) {
+        const errorCode = err?.response?.data?.error_code; // 에러코드 추출
+        console.error(err, "error_code:", errorCode);
         console.error("팀 선수 목록 요청 에러:", err);
       }
     };
@@ -685,6 +693,8 @@ export default function TeamRegistrationPageComponent() {
 
       router.push(`/matches/${gameId}/records`);
     } catch (error) {
+      const errorCode = error?.response?.data?.error_code; // 에러코드 추출
+      console.error(error, "error_code:", errorCode);
       console.error("PATCH 요청 에러:", error);
     } finally {
       // 3) 제출 상태 해제

@@ -56,8 +56,10 @@ export default function FinalGameRecordPage() {
         const status: string | null = JSON.parse(stored).status ?? null;
         setMatchStatus(status);
         setIsFinalized(status === "FINALIZED");
-      } catch {
+      } catch (error) {
         // 파싱 오류 대비
+        const errorCode = error?.response?.data?.error_code; // 에러코드 추출
+        console.error(error, "error_code:", errorCode);
         setMatchStatus(null);
         setIsFinalized(false);
       }
@@ -167,6 +169,8 @@ export default function FinalGameRecordPage() {
         setHomePitchers(homePitchers);
       })
       .catch((error) => {
+        const errorCode = error?.response?.data?.error_code; // 에러코드 추출
+        console.error(error, "error_code:", errorCode);
         console.error("API GET 요청 에러:", error);
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps

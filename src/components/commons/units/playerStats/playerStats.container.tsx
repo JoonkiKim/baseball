@@ -43,6 +43,8 @@ export default function StatsPage() {
         const sorted = res.data.batters.sort((a, b) => b.H - a.H);
         setHitterData(sorted);
       } catch (e) {
+        const errorCode = e?.response?.data?.error_code; // 에러코드 추출
+        console.error(e, "error_code:", errorCode);
         console.error("Error fetching hitter stats:", e);
       }
     };
@@ -57,6 +59,8 @@ export default function StatsPage() {
         const sorted = res.data.pitchers.sort((a, b) => b.K - a.K);
         setPitcherData(sorted);
       } catch (e) {
+        const errorCode = e?.response?.data?.error_code; // 에러코드 추출
+        console.error(e, "error_code:", errorCode);
         console.error("Error fetching pitcher stats:", e);
       }
     };

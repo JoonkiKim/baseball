@@ -33,6 +33,8 @@ export default function OutModal(props: IModalProps) {
         alert(`기록 전송 완료\n` + `${Type}\n`);
         console.log(endpoint, requestBody);
       } catch (error) {
+        const errorCode = error?.response?.data?.error_code; // 백엔드에서 내려주는 error_code
+        console.error(error, "error_code:", errorCode);
         console.error("삼진 기록 전송 오류:", error);
         alert("삼진 기록 전송 오류");
       } finally {
