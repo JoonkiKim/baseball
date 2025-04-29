@@ -8,6 +8,10 @@ import {
 } from "./modal.style";
 import { useState } from "react";
 import { useModalBack } from "../../../commons/hooks/useModalBack";
+import {
+  LoadingIcon,
+  LoadingOverlay,
+} from "../../../commons/libraries/loadingOverlay";
 
 interface IModalProps {
   setIsEtcModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -78,6 +82,9 @@ export default function EtcModal(props: IModalProps) {
           희생번트/타격방해
         </ModalButton>
       </ModalContainer>
+      <LoadingOverlay visible={isSubmitting}>
+        <LoadingIcon spin fontSize={48} />
+      </LoadingOverlay>
     </ModalOverlay>
   );
 }

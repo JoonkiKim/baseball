@@ -45,6 +45,10 @@ import {
 } from "../../../../commons/stores";
 import { useRecoilState } from "recoil";
 import ScorePatchModal from "../../modals/scorePatchModal";
+import {
+  LoadingIcon,
+  LoadingOverlay,
+} from "../../../../commons/libraries/loadingOverlay";
 
 interface ISelectedCell {
   score: string;
@@ -519,6 +523,9 @@ export default function GameRecordPage() {
           />
         </ModalWrapper>
       )}
+      <LoadingOverlay visible={isSubmitting}>
+        <LoadingIcon spin fontSize={48} />
+      </LoadingOverlay>
     </GameRecordContainer>
   );
 }

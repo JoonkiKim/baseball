@@ -8,6 +8,10 @@ import {
 } from "./modal.style";
 import { useState } from "react";
 import { useModalBack } from "../../../commons/hooks/useModalBack";
+import {
+  LoadingIcon,
+  LoadingOverlay,
+} from "../../../commons/libraries/loadingOverlay";
 
 interface IModalProps {
   setIsOutModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -66,6 +70,9 @@ export default function OutModal(props: IModalProps) {
           그 외 아웃
         </ModalButton>
       </ModalContainer>
+      <LoadingOverlay visible={isSubmitting}>
+        <LoadingIcon spin fontSize={48} />
+      </LoadingOverlay>
     </ModalOverlay>
   );
 }

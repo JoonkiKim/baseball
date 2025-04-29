@@ -10,6 +10,10 @@ import {
   ModalTitleSmall,
 } from "../modal.style";
 import { useModalBack } from "../../../../commons/hooks/useModalBack";
+import {
+  LoadingIcon,
+  LoadingOverlay,
+} from "../../../../commons/libraries/loadingOverlay";
 
 interface IModalProps {
   setIsResultSubmitModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -95,6 +99,9 @@ export default function ResultSubmitModal(props: IModalProps) {
         >
           아니오
         </ModalCancleButton>
+        <LoadingOverlay visible={isSubmitting}>
+          <LoadingIcon spin fontSize={48} />
+        </LoadingOverlay>
       </ModalContainer>
     </ModalOverlay>
   );

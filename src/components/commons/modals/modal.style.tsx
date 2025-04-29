@@ -1,3 +1,4 @@
+// import { LoadingOutlined } from "@ant-design/icons";
 import styled from "@emotion/styled";
 
 // 모달 관련 스타일
@@ -15,6 +16,7 @@ export const ModalOverlay = styled.div`
 
 export const ModalContainer = styled.div`
   background-color: #fff;
+  position: relative;
   /* margin-top: 20px; */
   width: 80%;
   padding: 20px;

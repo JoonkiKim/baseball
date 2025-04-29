@@ -7,7 +7,12 @@ import {
   ModalTitle,
 } from "./modal.style";
 import { useState } from "react";
-import { useModalBack } from "../../../commons/hooks/useModalBack";
+import { Spin } from "antd";
+import { LoadingOutlined } from "@ant-design/icons";
+import {
+  LoadingIcon,
+  LoadingOverlay,
+} from "../../../commons/libraries/loadingOverlay";
 
 interface IModalProps {
   setIsHitModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -15,11 +20,9 @@ interface IModalProps {
 }
 
 export default function HitModal(props: IModalProps) {
-  // useModalBack(() => props.setIsHitModalOpen(false));
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
 
-  // 안타 종류에 대응하는 값 매핑
   const mapping: { [key: string]: string } = {
     안타: "1B",
     "2루타": "2B",
@@ -27,33 +30,18 @@ export default function HitModal(props: IModalProps) {
     홈런: "HR",
   };
 
-  // 안타 종류 선택 시 실행될 비동기 함수
   const handleTypeSelect = async (Type: string) => {
-    if (isSubmitting) return; // 이미 요청 중이면 무시
+    if (isSubmitting) return;
     setIsSubmitting(true);
 
     try {
       const endpoint = `/games/${router.query.recordId}/batters/${props.playerId}/plate-appearance`;
       const requestBody = { result: mapping[Type] };
-      // alert(
-      //   `안타 기록 전송 완료\n` + `키: ${Type}\n` // “안타”, “2루타” 등
-      // );
-      console.log(props.playerId);
       const { data } = await API.post(endpoint, requestBody);
-      // alert(`안타 기록 전송 완료\n응답값: ${JSON.stringify(data)}`);
-      // alert(
-      //   `기록 전송 완료\n` + `${Type}\n` // “안타”, “2루타” 등
-      // );
-
-      // alert(`안타 기록 전송 완료\n: ${mapping.key}`);
-      console.log(endpoint, requestBody, `${JSON.stringify(data)}`);
-      alert(
-        `기록 전송 완료\n` + `${Type}\n` // “안타”, “2루타” 등
-      );
+      alert(`기록 전송 완료\n${Type}`);
     } catch (error) {
-      const errorCode = error?.response?.data?.error_code; // 백엔드에서 내려주는 error_code
+      const errorCode = error?.response?.data?.error_code;
       console.error(error, "error_code:", errorCode);
-      console.error("안타 기록 전송 오류:", error);
       alert("안타 기록 전송 오류");
     } finally {
       setIsSubmitting(false);
@@ -65,6 +53,7 @@ export default function HitModal(props: IModalProps) {
     <ModalOverlay onClick={() => props.setIsHitModalOpen(false)}>
       <ModalContainer onClick={(e) => e.stopPropagation()}>
         <ModalTitle>종류를 선택해주세요</ModalTitle>
+
         <ModalButton
           onClick={() => handleTypeSelect("안타")}
           disabled={isSubmitting}
@@ -90,6 +79,9 @@ export default function HitModal(props: IModalProps) {
           홈런
         </ModalButton>
       </ModalContainer>
+      <LoadingOverlay visible={isSubmitting}>
+        <LoadingIcon spin fontSize={48} />
+      </LoadingOverlay>
     </ModalOverlay>
   );
 }
