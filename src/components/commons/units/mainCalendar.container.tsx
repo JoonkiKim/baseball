@@ -103,7 +103,9 @@ export default function MainCalendarPage() {
     const fetchMatches = async () => {
       setIsLoading(true);
       try {
-        const res = await API.get(`/games?from=${fromDate}&to=${toDate}`);
+        const res = await API.get(`/games?from=${fromDate}&to=${toDate}`, {
+          withCredentials: true,
+        });
         const authRes = await API.get(`/auth/me`);
         console.log(authRes.data);
         setAuthInfo(authRes.data);

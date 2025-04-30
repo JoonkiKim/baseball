@@ -36,7 +36,9 @@ export default function OutModal(props: IModalProps) {
     try {
       const endpoint = `/games/${router.query.recordId}/plate-appearance`;
       const requestBody = { result: mapping[Type] };
-      const res = await API.post(endpoint, requestBody);
+      const res = await API.post(endpoint, requestBody, {
+        withCredentials: true,
+      });
 
       // 성공 메시지
 

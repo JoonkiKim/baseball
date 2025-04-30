@@ -106,7 +106,9 @@ export default function GameRecordPage() {
   const fetchInningScores = useCallback(async () => {
     if (!recordId) return;
     try {
-      const res = await API.get(`/games/${recordId}/scores`);
+      const res = await API.get(`/games/${recordId}/scores`, {
+        withCredentials: true,
+      });
 
       const response = res.data;
       console.log("스코어보드 응답도착");
@@ -150,7 +152,8 @@ export default function GameRecordPage() {
     try {
       const teamType = attackVal === "home" ? "home" : "away";
       const res = await API.get(
-        `/games/${recordId}/current-batter?teamType=${teamType}`
+        `/games/${recordId}/current-batter?teamType=${teamType}`,
+        { withCredentials: true }
       );
       setBatter(res.data);
 
@@ -167,7 +170,8 @@ export default function GameRecordPage() {
     try {
       const teamType = attackVal === "home" ? "away" : "home";
       const res = await API.get(
-        `/games/${recordId}/current-pitcher?teamType=${teamType}`
+        `/games/${recordId}/current-pitcher?teamType=${teamType}`,
+        { withCredentials: true }
       );
       setPitcher(res.data);
 
@@ -229,9 +233,13 @@ export default function GameRecordPage() {
         setIsSubmitting(true);
         try {
           // 1) POST 요청
-          await API.post(`/games/${recordId}/plate-appearance`, {
-            result: "BB",
-          });
+          await API.post(
+            `/games/${recordId}/plate-appearance`,
+            {
+              result: "BB",
+            },
+            { withCredentials: true }
+          );
 
           // 2) Alert 표시 (확인 클릭 후 다음 로직 실행)
           alert("볼넷/사구 기록 전송 완료");
@@ -275,7 +283,8 @@ export default function GameRecordPage() {
     setIsSubmitting(true);
     try {
       // 1) POST
-      await API.post(`/games/${recordId}/scores`, { runs: thisInningScore });
+      await API.post(`/games/${recordId}/scores`, { runs: thisInningScore }),
+        { withCredentials: true };
       // 2) 사용자 알림 (확인 클릭 후 다음 단계)
       console.log({ runs: thisInningScore });
       alert("공수교대 완료");

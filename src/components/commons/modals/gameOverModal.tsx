@@ -26,7 +26,8 @@ export default function GameOverModal(props: IModalProps) {
       console.log("경기종료 요청 바디:", requestBody);
       const response = await API.post(
         `/games/${router.query.recordId}/results`,
-        requestBody
+        requestBody,
+        { withCredentials: true }
       );
       console.log(
         `/games/${router.query.recordId}/results`,

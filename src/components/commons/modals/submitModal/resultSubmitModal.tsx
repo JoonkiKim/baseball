@@ -31,7 +31,8 @@ export default function ResultSubmitModal(props: IModalProps) {
 
     try {
       const response = await API.post(
-        `/games/${router.query.recordId}/results/finalize`
+        `/games/${router.query.recordId}/results/finalize`,
+        { withCredentials: true }
       );
       console.log(
         `/games/${router.query.recordId}/results/finalize`,

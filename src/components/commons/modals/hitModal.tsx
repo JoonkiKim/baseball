@@ -36,7 +36,11 @@ export default function HitModal(props: IModalProps) {
 
     try {
       const endpoint = `/games/${router.query.recordId}/plate-appearance`;
-      const res = await API.post(endpoint, { result: mapping[Type] });
+      const res = await API.post(
+        endpoint,
+        { result: mapping[Type] },
+        { withCredentials: true }
+      );
       console.log({ result: mapping[Type] });
       // POST 성공 시 부모 onSuccess 콜백 실행
       alert(`기록 전송 완료\n${Type}`);

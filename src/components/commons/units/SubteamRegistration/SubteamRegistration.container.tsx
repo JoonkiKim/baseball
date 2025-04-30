@@ -65,7 +65,7 @@ export default function SubTeamRegistrationComponent({
     const teamType = isHomeTeam ? "home" : "away";
     const url = `/games/${recordId}/players-with-in-lineup?teamType=${teamType}`;
 
-    API.get(url)
+    API.get(url, { withCredentials: true })
       .then((res) => {
         let parsedData;
         console.log("응답이 도착!(교체선수선택)");
@@ -157,14 +157,17 @@ export default function SubTeamRegistrationComponent({
       const teamType = isHomeTeam ? "home" : "away";
       const res = await API.post(
         `/games/${recordId}/substitution?teamType=${teamType}`,
-        payload
+        payload,
+        { withCredentials: true }
       );
       console.log(res.data);
 
       if (isHomeTeam) {
         router.push(`/matches/${recordId}/awayTeamRegistration`);
       } else {
-        const startRes = await API.post(`/games/${recordId}/start`);
+        const startRes = await API.post(`/games/${recordId}/start`, {
+          withCredentials: true,
+        });
         console.log(startRes.data);
         router.push(`/matches/${recordId}/records`);
       }

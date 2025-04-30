@@ -175,7 +175,9 @@ export default function TeamRegistrationPageComponent() {
         const homeTeamId = selectedMatch?.homeTeam?.id;
         if (homeTeamId) {
           // API.get(`/teams/${homeTeamId}/players`)
-          API.get(`/games/${router.query.recordId}/players?teamType=home`)
+          API.get(`/games/${router.query.recordId}/players?teamType=home`, {
+            withCredentials: true,
+          })
             .then((res) => {
               const parsedData =
                 typeof res.data === "string" ? JSON.parse(res.data) : res.data;
@@ -192,7 +194,9 @@ export default function TeamRegistrationPageComponent() {
         const awayTeamId = selectedMatch?.awayTeam?.id;
         if (awayTeamId) {
           // API.get(`/teams/${awayTeamId}/players`)
-          API.get(`/games/${router.query.recordId}/players?teamType=away`)
+          API.get(`/games/${router.query.recordId}/players?teamType=away`, {
+            withCredentials: true,
+          })
             .then((res) => {
               const parsedData =
                 typeof res.data === "string" ? JSON.parse(res.data) : res.data;
@@ -223,7 +227,8 @@ export default function TeamRegistrationPageComponent() {
         if (queryValue === "true") {
           // 홈팀
           const res = await API.get(
-            `/games/${router.query.recordId}/lineup?teamType=home`
+            `/games/${router.query.recordId}/lineup?teamType=home`,
+            { withCredentials: true }
           );
           const dataObj =
             typeof res.data === "string" ? JSON.parse(res.data) : res.data;
@@ -272,7 +277,8 @@ export default function TeamRegistrationPageComponent() {
         } else {
           // 원정팀
           const res = await API.get(
-            `/games/${router.query.recordId}/lineup?teamType=away`
+            `/games/${router.query.recordId}/lineup?teamType=away`,
+            { withCredentials: true }
           );
 
           const dataObj =
@@ -710,7 +716,9 @@ export default function TeamRegistrationPageComponent() {
       const gameId = router.query.recordId;
       const teamType = isHomeTeam ? "home" : "away";
       const url = `/games/${gameId}/lineup?teamType=${teamType}`;
-      const response = await API.patch(url, formattedObject);
+      const response = await API.patch(url, formattedObject, {
+        withCredentials: true,
+      });
       console.log("전송 성공:", response.data);
 
       router.push(`/matches/${gameId}/records`);

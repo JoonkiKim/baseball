@@ -118,7 +118,9 @@ export default function SubPlayerSelectionModal({
       ? "substitutable-pitchers"
       : "substitutable-batters";
 
-    API.get(`/games/${recordId}/${endpoint}?teamType=${teamType}`)
+    API.get(`/games/${recordId}/${endpoint}?teamType=${teamType}`, {
+      withCredentials: true,
+    })
       .then((res) => {
         const data =
           typeof res.data === "string" ? JSON.parse(res.data) : res.data;

@@ -85,7 +85,10 @@ export default function TeamRegistrationPageComponent(props: IProps) {
       try {
         if (router.asPath.includes("homeTeamRegistration")) {
           // const res = await API.get(`/teams/${teamInfo[0].homeTeamId}/players`);
-          const res = await API.get(`/games/${recordId}/players?teamType=home`);
+          const res = await API.get(
+            `/games/${recordId}/players?teamType=home`,
+            { withCredentials: true }
+          );
           console.log("응답이 도착!(홈팀멤버)");
           console.log(res.data);
           const dataObj =
@@ -96,7 +99,10 @@ export default function TeamRegistrationPageComponent(props: IProps) {
         } else {
           // const res = await API.get(`/teams/${teamInfo[0].awayTeamId}/players`);
 
-          const res = await API.get(`/games/${recordId}/players?teamType=away`);
+          const res = await API.get(
+            `/games/${recordId}/players?teamType=away`,
+            { withCredentials: true }
+          );
           console.log("응답이 도착!(원정팀멤버)");
           const dataObj =
             typeof res.data === "string" ? JSON.parse(res.data) : res.data;
@@ -372,7 +378,7 @@ export default function TeamRegistrationPageComponent(props: IProps) {
     try {
       const teamType = props.isHomeTeam ? "home" : "away";
       const url = `/games/${recordId}/lineup?teamType=${teamType}`;
-      const res = await API.post(url, requestBody);
+      const res = await API.post(url, requestBody, { withCredentials: true });
       console.log("POST 요청 성공:", res.data);
       setPlayers(updatedPlayers);
       setIsSubmitting(false);
