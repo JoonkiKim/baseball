@@ -268,6 +268,10 @@ export default function MainCalendarPage() {
           </p>
         ) : matchesForSelectedDate.length > 0 ? (
           matchesForSelectedDate.map((match, index) => {
+            const canRecord =
+              authInfo.role === "umpire" &&
+              Array.isArray(authInfo.gameIds) &&
+              authInfo.gameIds.includes(match.gameId!);
             // 기존 구조: homeTeam을 team1, awayTeam을 team2로 사용
             const team1Score = match.homeTeam.score;
             const team2Score = match.awayTeam.score;
@@ -388,6 +392,56 @@ export default function MainCalendarPage() {
                 ) : (
                   <RecordButtonPlaceholder />
                 )}
+                {/* {canRecord ||
+                match.status === "FINALIZED" ||
+                match.status === "EDITING" ? (
+                  <RecordButton
+                    onClick={() => {
+                      const selectedMatchInfo = {
+                        gameId: match.gameId,
+                        awayTeam: {
+                          id: match.awayTeam.id,
+                          name: match.awayTeam.name,
+                        },
+                        homeTeam: {
+                          id: match.homeTeam.id,
+                          name: match.homeTeam.name,
+                        },
+                        status: match.status,
+                      };
+                      localStorage.setItem(
+                        "selectedMatch",
+                        JSON.stringify(selectedMatchInfo)
+                      );
+                      if (match.status === "SCHEDULED") {
+                        setTeamList([
+                          {
+                            homeTeamName: match.homeTeam.name,
+                            homeTeamId: match.homeTeam.id,
+                            awayTeamName: match.awayTeam.name,
+                            awayTeamId: match.awayTeam.id,
+                          },
+                        ]);
+                      }
+                      let route = "";
+                      if (
+                        match.status === "FINALIZED" ||
+                        match.status === "EDITING"
+                      ) {
+                        route = `/matches/${match.gameId}/result`;
+                      } else if (match.status === "SCHEDULED") {
+                        route = `/matches/${match.gameId}/homeTeamRegistration`;
+                      } else if (match.status === "IN_PROGRESS") {
+                        route = `/matches/${match.gameId}/records`;
+                      }
+                      router.push(route);
+                    }}
+                  >
+                    경기기록
+                  </RecordButton>
+                ) : (
+                  <RecordButtonPlaceholder />
+                )} */}
               </MatchCard>
             );
           })

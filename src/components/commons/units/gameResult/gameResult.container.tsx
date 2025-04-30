@@ -31,7 +31,7 @@ import { useRouter } from "next/router";
 import ResultSubmitModal from "../../modals/submitModal/resultSubmitModal";
 import API from "../../../../commons/apis/api";
 import ScorePatchModal from "../../modals/scorePatchModal";
-import { gameId } from "../../../../commons/stores";
+import { authMe, gameId } from "../../../../commons/stores";
 import { useRecoilState } from "recoil";
 import {
   LoadingIcon,
@@ -59,7 +59,7 @@ export default function FinalGameRecordPage() {
   const [matchStatus, setMatchStatus] = useState<string | null>(null);
   const [isFinalized, setIsFinalized] = useState<boolean>(false);
   // const [recordId] = useRecoilState(gameId);
-
+  const [authInfo, setAuthInfo] = useRecoilState(authMe);
   const recordId = router.query.recordId;
   /* ───────── 클라이언트(브라우저)에서만 실행 ───────── */
   useEffect(() => {

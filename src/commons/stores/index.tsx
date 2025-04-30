@@ -1,9 +1,19 @@
 import { atom } from "recoil";
 import { string } from "yup";
 
-export const authMe = atom({
+// 1. Auth 정보용 인터페이스 정의
+interface AuthInfo {
+  role: string;
+  gameIds: number[];
+}
+
+// 2. atom 선언을 객체(default)로 변경
+export const authMe = atom<AuthInfo>({
   key: "authMe",
-  default: [{ role: "", gameIds: [] }],
+  default: {
+    role: "",
+    gameIds: [],
+  },
 });
 
 export interface ITeamList {
