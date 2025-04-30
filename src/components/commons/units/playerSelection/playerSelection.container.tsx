@@ -85,8 +85,8 @@ export default function PlayerSelectionPage({
           setPageTitle("교체할 선수를 선택해주세요");
         }
       } catch (error) {
-        const errorCode = error?.response?.data?.error_code; // 에러코드 추출
-        console.error(error, "error_code:", errorCode);
+        const errorCode = error?.response?.data?.errorCode; // 에러코드 추출
+        console.error(error, "errorCode:", errorCode);
         // 유효한 URL이 아닐 경우 무시
       }
     }

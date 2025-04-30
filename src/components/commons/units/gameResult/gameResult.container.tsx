@@ -1,6 +1,12 @@
 // FinalGameRecordPage.tsx
 
-import React, { useState, useEffect, useRef, useLayoutEffect } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useLayoutEffect,
+  useCallback,
+} from "react";
 import {
   Container,
   ScoreBoardWrapper,
@@ -25,6 +31,13 @@ import { useRouter } from "next/router";
 import ResultSubmitModal from "../../modals/submitModal/resultSubmitModal";
 import API from "../../../../commons/apis/api";
 import ScorePatchModal from "../../modals/scorePatchModal";
+import { gameId } from "../../../../commons/stores";
+import { useRecoilState } from "recoil";
+import {
+  LoadingIcon,
+  LoadingOverlay,
+} from "../../../../commons/libraries/loadingOverlay";
+import { getAccessToken } from "../../../../commons/libraries/getAccessToken";
 
 interface ISelectedCell {
   cellValue: string;
@@ -40,11 +53,14 @@ export default function FinalGameRecordPage() {
   const inningHeaders = ["", "1", "2", "3", "4", "5", "6", "7", "R", "H"];
   const router = useRouter();
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
   // ➊ 초기값은 “비어 있음”으로 설정
-  const [matchStr, setMatchStr] = useState<string | null>(null);
+  const [, setMatchStr] = useState<string | null>(null);
   const [matchStatus, setMatchStatus] = useState<string | null>(null);
   const [isFinalized, setIsFinalized] = useState<boolean>(false);
+  // const [recordId] = useRecoilState(gameId);
 
+  const recordId = router.query.recordId;
   /* ───────── 클라이언트(브라우저)에서만 실행 ───────── */
   useEffect(() => {
     // localStorage 접근은 반드시 브라우저에서!
@@ -58,8 +74,8 @@ export default function FinalGameRecordPage() {
         setIsFinalized(status === "FINALIZED");
       } catch (error) {
         // 파싱 오류 대비
-        const errorCode = error?.response?.data?.error_code; // 에러코드 추출
-        console.error(error, "error_code:", errorCode);
+        const errorCode = error?.response?.data?.errorCode; // 에러코드 추출
+        console.error(error, "errorCode:", errorCode);
         setMatchStatus(null);
         setIsFinalized(false);
       }
@@ -68,9 +84,9 @@ export default function FinalGameRecordPage() {
       setMatchStatus(null);
       setIsFinalized(false);
     }
-  }, [router.query]); // 필요하다면 router.query 등 의존성 추가
+  }, [recordId]); // 필요하다면 router.query 등 의존성 추가
 
-  console.log(matchStatus); // 확인용
+  // console.log(matchStatus); // 확인용
 
   // 팀 이름 상태
   const [teamAName, setTeamAName] = useState("");
@@ -107,87 +123,134 @@ export default function FinalGameRecordPage() {
   // scoreboard DOM 컨테이너 ref
   const scoreboardRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    API.get(`/games/${router.query.recordId}/results`)
-      .then((response) => {
-        const { scoreboard, teamSummary, batterStats, pitcherStats } =
-          response.data;
+  // useEffect(() => {
+  //   if (!recordId) return;
+  //   API.get(`/games/${recordId}/results`)
+  //     .then((response) => {
+  //       const { scoreboard, teamSummary, batterStats, pitcherStats } =
+  //         response.data;
+  //       console.log(recordId);
+  //       console.log("응답이 왔어요!", response.data);
+  //       // 마지막 이닝 정보 저장
+  //       const lastEntry = scoreboard[scoreboard.length - 1] || {
+  //         inning: 0,
+  //         inningHalf: "",
+  //       };
+  //       lastEntryRef.current = lastEntry;
 
-        console.log(response.data);
-        // 마지막 이닝 정보 저장
-        const lastEntry = scoreboard[scoreboard.length - 1] || {
-          inning: 0,
-          inningHalf: "",
-        };
-        lastEntryRef.current = lastEntry;
+  //       // console.log 메시지
+  //       // const { inning, inningHalf } = lastEntry;
+  //       // if (inningHalf === "TOP") {
+  //       //   console.log(`${inning}회초에 공격끝남`);
+  //       // } else {
+  //       //   console.log(`${inning}회말에 공격끝남`);
+  //       // }
 
-        // console.log 메시지
-        const { inning, inningHalf } = lastEntry;
-        if (inningHalf === "TOP") {
-          console.log(`${inning}회초에 공격끝남`);
-        } else {
-          console.log(`${inning}회말에 공격끝남`);
-        }
+  //       // 팀 이름 셋팅
+  //       setTeamAName(teamSummary.away.name.substring(0, 3));
+  //       setTeamBName(teamSummary.home.name.substring(0, 3));
 
-        // 팀 이름 셋팅
-        setTeamAName(teamSummary.away.name.substring(0, 3));
-        setTeamBName(teamSummary.home.name.substring(0, 3));
+  //       // 스코어보드 배열 복사
+  //       const newTeamAScores = [...defaultTeamAScores];
+  //       const newTeamBScores = [...defaultTeamBScores];
 
-        // 스코어보드 배열 복사
-        const newTeamAScores = [...defaultTeamAScores];
-        const newTeamBScores = [...defaultTeamBScores];
+  //       // scoreboard 데이터 채우기
+  //       scoreboard.forEach((item: any) => {
+  //         const idx = item.inning - 1;
+  //         if (item.inningHalf === "TOP") {
+  //           newTeamAScores[idx] = String(item.runs);
+  //         } else {
+  //           newTeamBScores[idx] = String(item.runs);
+  //         }
+  //       });
 
-        // scoreboard 데이터 채우기
-        scoreboard.forEach((item: any) => {
-          const idx = item.inning - 1;
-          if (item.inningHalf === "TOP") {
-            newTeamAScores[idx] = String(item.runs);
-          } else {
-            newTeamBScores[idx] = String(item.runs);
-          }
-        });
+  //       // 최종 R/H 칸 채우기
+  //       newTeamAScores[7] = String(teamSummary.home.runs);
+  //       newTeamAScores[8] = String(teamSummary.away.hits);
 
-        // 최종 R/H 칸 채우기
-        newTeamAScores[7] = String(teamSummary.home.runs);
-        newTeamAScores[8] = String(teamSummary.away.hits);
+  //       newTeamBScores[7] = String(teamSummary.away.runs);
+  //       newTeamBScores[8] = String(teamSummary.home.hits);
 
-        newTeamBScores[7] = String(teamSummary.away.runs);
-        newTeamBScores[8] = String(teamSummary.home.hits);
+  //       setTeamAScores(newTeamAScores);
+  //       setTeamBScores(newTeamBScores);
 
-        setTeamAScores(newTeamAScores);
-        setTeamBScores(newTeamBScores);
-
-        // 타자/투수 기록
-        setAwayBatters(batterStats.away);
-        setHomeBatters(batterStats.home);
-        setAwayPitchers(pitcherStats.away);
-        setHomePitchers(pitcherStats.home);
-      })
-      .catch((error) => {
-        const errorCode = error?.response?.data?.error_code; // 에러코드 추출
-        console.error(error, "error_code:", errorCode);
-        console.error("API GET 요청 에러:", error);
-      });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [router]);
+  //       // 타자/투수 기록
+  //       setAwayBatters(batterStats.away);
+  //       setHomeBatters(batterStats.home);
+  //       setAwayPitchers(pitcherStats.away);
+  //       setHomePitchers(pitcherStats.home);
+  //     })
+  //     .catch((error) => {
+  //       const errorCode = error?.response?.data?.errorCode; // 에러코드 추출
+  //       console.error(error, "errorCode:", errorCode);
+  //       console.error("API GET 요청 에러:", error);
+  //     });
+  // }, [recordId]);
 
   // 렌더 후 DOM 조작: “끝난 이닝” 반대 half 칸에 "-" 삽입
+
+  // ➊ Fetch results callback
+  const fetchResults = useCallback(async () => {
+    if (!recordId) return;
+    try {
+      const { data } = await API.get(`/games/${recordId}/results`);
+      const { scoreboard, teamSummary, batterStats, pitcherStats } = data;
+      // 마지막 이닝 정보 저장
+      const lastEntry = scoreboard[scoreboard.length - 1] || {
+        inning: 0,
+        inningHalf: "",
+      };
+      lastEntryRef.current = lastEntry;
+      // Update scoreboard
+      const newA = Array(9).fill("");
+      const newB = Array(9).fill("");
+      scoreboard.forEach((item: any) => {
+        const idx = item.inning - 1;
+        if (item.inningHalf === "TOP") newA[idx] = String(item.runs);
+        else newB[idx] = String(item.runs);
+      });
+
+      // 마지막 이닝이 TOP이면 홈팀(배열 B)에 "-" 표시
+      if (lastEntry.inningHalf === "TOP" && lastEntry.inning > 0) {
+        newB[lastEntry.inning - 1] = "-";
+      }
+      newA[7] = String(teamSummary.away.runs);
+      newA[8] = String(teamSummary.away.hits);
+      newB[7] = String(teamSummary.home.runs);
+      newB[8] = String(teamSummary.home.hits);
+      setTeamAScores(newA);
+      setTeamBScores(newB);
+      setTeamAName(teamSummary.away.name.substring(0, 3));
+      setTeamBName(teamSummary.home.name.substring(0, 3));
+
+      // Update stats
+      setAwayBatters(batterStats.away);
+      setHomeBatters(batterStats.home);
+      setAwayPitchers(pitcherStats.away);
+      setHomePitchers(pitcherStats.home);
+      console.log("결과요청됨");
+      console.log(data);
+    } catch (e) {
+      console.error("results GET 실패:", e);
+    }
+  }, [recordId]);
+
+  console.log(awayPitchers);
+  // Mount: load initial results
+  useEffect(() => {
+    fetchResults();
+  }, [fetchResults]);
+
+  // Manual DOM fallback if needed
   useLayoutEffect(() => {
     const entry = lastEntryRef.current;
     const root = scoreboardRef.current;
-    // entry가 없거나 TOP이 아니면 아무것도 하지 않음
     if (!entry || entry.inningHalf !== "TOP" || !root) return;
-
-    const idx = entry.inning - 1;
     const rows = root.querySelectorAll<HTMLElement>(".team-row");
-    if (rows.length < 2) return;
-
-    // 1) 홈팀(두 번째 row)의 해당 이닝 칸을 찾아  "-" 대입
-    const botRow = rows[1];
-    const cells = botRow.querySelectorAll<HTMLElement>(".score-cell");
-    const targetCell = cells[idx];
-    if (targetCell) {
-      targetCell.textContent = "-";
+    const idx = entry.inning - 1;
+    if (rows.length > 1) {
+      const botCells = rows[1].querySelectorAll<HTMLElement>(".score-cell");
+      if (botCells[idx]) botCells[idx].textContent = "-";
     }
   }, [teamAScores, teamBScores]);
 
@@ -202,9 +265,7 @@ export default function FinalGameRecordPage() {
     team: "A" | "B",
     idx: number
   ) => {
-    if (score === "" || score == null || idx === 7 || idx === 8) {
-      return;
-    }
+    if (!score || score === "-" || idx === 7 || idx === 8) return;
     setSelectedCell({ cellValue: score, team, cellIndex: idx });
     setModalMode("score");
     setAlertMessage("");
@@ -218,13 +279,14 @@ export default function FinalGameRecordPage() {
     const msg =
       `id: ${player.batterGameStatsId}\n` +
       `플레이어: ${player.playerName}\n` +
+      `타석: ${player.PA}\n` +
       `타수: ${player.AB}\n` +
       `안타: ${player["H"]}\n` +
       `볼넷/사구: ${player.BB}\n` +
       `2루타: ${player["2B"]}\n` +
       `3루타: ${player["3B"]}\n` +
       `홈런: ${player["HR"]}\n` +
-      `희생타: ${player["SAC"]}\n`;
+      `희플: ${player["SAC"]}\n`;
     setAlertMessage(msg);
     setModalMode("batter");
     setSelectedCell({ cellValue: "", team: "A", cellIndex: 0 });
@@ -266,6 +328,11 @@ export default function FinalGameRecordPage() {
     return currentIndex === firstIndex ? currentOrder : "↑";
   };
 
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  useEffect(() => {
+    const token = getAccessToken();
+    setIsAuthenticated(!!token); // accessToken이 있으면 true
+  }, []);
   return (
     <Container>
       {/* 스코어보드 */}
@@ -322,15 +389,16 @@ export default function FinalGameRecordPage() {
         <RecordTable>
           <thead>
             <tr>
-              <th>순번</th>
+              <th></th>
               <th>이름</th>
+              <th>타석</th>
               <th>타수</th>
               <th>안타</th>
               <th>볼넷</th>
               <th>2루타</th>
               <th>3루타</th>
               <th>홈런</th>
-              <th>희생타</th>
+              <th>희플</th>
             </tr>
           </thead>
           <tbody>
@@ -338,6 +406,17 @@ export default function FinalGameRecordPage() {
               <tr key={idx}>
                 <td>{getDisplayOrder(idx, awayBatters)}</td>
                 <td>{player.playerName}</td>
+                <td>
+                  <EditableInput
+                    type="number"
+                    defaultValue={player.PA}
+                    readOnly
+                    // onClick={() => handleBatterClick(player)}
+                    onClick={
+                      isFinalized ? undefined : () => handleBatterClick(player)
+                    }
+                  />
+                </td>
                 <td>
                   <EditableInput
                     type="number"
@@ -427,7 +506,7 @@ export default function FinalGameRecordPage() {
         <RecordTableP>
           <thead>
             <tr>
-              <th>순번</th>
+              <th></th>
               <th>이름</th>
               <th>삼진</th>
             </tr>
@@ -463,15 +542,16 @@ export default function FinalGameRecordPage() {
         <RecordTable>
           <thead>
             <tr>
-              <th>순번</th>
+              <th></th>
               <th>이름</th>
+              <th>타석</th>
               <th>타수</th>
               <th>안타</th>
               <th>볼넷</th>
               <th>2루타</th>
               <th>3루타</th>
               <th>홈런</th>
-              <th>희생타</th>
+              <th>희플</th>
             </tr>
           </thead>
           <tbody>
@@ -479,6 +559,17 @@ export default function FinalGameRecordPage() {
               <tr key={idx}>
                 <td>{getDisplayOrder(idx, homeBatters)}</td>
                 <td>{player.playerName}</td>
+                <td>
+                  <EditableInput
+                    type="number"
+                    defaultValue={player.PA}
+                    readOnly
+                    // onClick={() => handleBatterClick(player)}
+                    onClick={
+                      isFinalized ? undefined : () => handleBatterClick(player)
+                    }
+                  />
+                </td>
                 <td>
                   <EditableInput
                     type="number"
@@ -568,7 +659,7 @@ export default function FinalGameRecordPage() {
         <RecordTableP>
           <thead>
             <tr>
-              <th>순번</th>
+              <th></th>
               <th>이름</th>
               <th>삼진</th>
             </tr>
@@ -604,18 +695,18 @@ export default function FinalGameRecordPage() {
             <HomeButton>홈으로</HomeButton>
           </a>
         </Link>
-        {matchStatus !== "FINALIZED" && (
+        {matchStatus !== "FINALIZED" && isAuthenticated && (
           <ControlButton onClick={handleSubmitClick}>제출하기</ControlButton>
         )}
       </ButtonContainer>
 
-      {isResultSubmitModalOpen && (
+      {isAuthenticated && isResultSubmitModalOpen && (
         <ResultSubmitModal
           setIsResultSubmitModalOpen={setIsResultSubmitModalOpen}
         />
       )}
 
-      {isScorePatchModalOpen && selectedCell && (
+      {isAuthenticated && isScorePatchModalOpen && selectedCell && (
         <ScorePatchModal
           setIsModalOpen={setIsScorePatchModalOpen}
           cellValue={selectedCell.cellValue}
@@ -624,8 +715,14 @@ export default function FinalGameRecordPage() {
           mode={modalMode}
           statId={selectedStatId}
           alertMessage={alertMessage}
+          onSuccess={fetchResults}
+          // isSubmitting={isSubmitting}
+          // setIsSubmitting={setIsSubmitting}
         />
       )}
+      <LoadingOverlay visible={isSubmitting}>
+        <LoadingIcon spin fontSize={48} />
+      </LoadingOverlay>
     </Container>
   );
 }

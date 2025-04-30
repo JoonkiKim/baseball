@@ -41,8 +41,8 @@ export default function RankingTableComponent() {
 
         setGroupData(newGroupData);
       } catch (err) {
-        const errorCode = err?.response?.data?.error_code; // 에러코드 추출
-        console.error(err, "error_code:", errorCode);
+        const errorCode = err?.response?.data?.errorCode; // 에러코드 추출
+        console.error(err, "errorCode:", errorCode);
         console.error("❌ 그룹 요청 에러:", err);
       }
     };

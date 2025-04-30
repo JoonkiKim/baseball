@@ -197,7 +197,7 @@ export const TableTitle = styled.div`
 export const RecordTable = styled.table`
   width: 100%;
   border-collapse: collapse;
-  min-width: 480px;
+  min-width: 500px;
   text-align: center;
   border-top: 1px solid #000;
   border-bottom: 1px solid #000;
@@ -223,11 +223,11 @@ export const RecordTable = styled.table`
   /* 순번, 이름 열 너비 지정 */
   th:nth-of-type(1),
   td:nth-of-type(1) {
-    width: 5vh;
+    width: 4vh;
   }
   th:nth-of-type(2),
   td:nth-of-type(2) {
-    width: 10vh;
+    width: 8vh;
   }
 `;
 
@@ -251,7 +251,7 @@ export const RecordTableP = styled.table`
   }
   th:nth-of-type(1),
   td:nth-of-type(1) {
-    width: 5vh;
+    width: 4vh;
   }
   th:nth-of-type(2),
   td:nth-of-type(2) {

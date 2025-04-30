@@ -16,7 +16,7 @@ export const Container = styled.div`
   display: flex;
   flex-direction: column;
 
-  margin-top: 20vh;
+  margin-top: 25vh;
   /* justify-content: center; 수직 중앙 정렬 */
   align-items: center; /* 수평 중앙 정렬 */
   /* padding: 20px; */

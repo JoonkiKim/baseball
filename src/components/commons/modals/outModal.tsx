@@ -16,6 +16,7 @@ import {
 interface IModalProps {
   setIsOutModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
   playerId: number;
+  onSuccess?: () => Promise<void>;
 }
 
 export default function OutModal(props: IModalProps) {
@@ -29,29 +30,35 @@ export default function OutModal(props: IModalProps) {
 
   // 아웃 종류 선택 시 실행될 비동기 함수
   const handleTypeSelect = async (Type: string) => {
-    if (isSubmitting) return; // 이미 요청 중이면 무시
+    if (isSubmitting) return;
     setIsSubmitting(true);
 
     try {
       const endpoint = `/games/${router.query.recordId}/plate-appearance`;
       const requestBody = { result: mapping[Type] };
-      await API.post(endpoint, requestBody);
-      // alert(`삼진 기록 전송 완료\n응답값: ${JSON.stringify(data)}`);
-      alert(`기록 전송 완료\n` + `${Type}\n`);
-      console.log(endpoint, requestBody);
+      const res = await API.post(endpoint, requestBody);
+
+      // 성공 메시지
+
+      console.log(endpoint, requestBody, res.data);
+      alert(`기록 전송 완료\n${Type}`);
+      // 부모 onSuccess 콜백 실행
+      if (props.onSuccess) {
+        await props.onSuccess();
+      }
+
+      // 모달 닫기
+      // props.setIsOutModalOpen(false);
     } catch (error) {
-      const errorCode = error?.response?.data?.error_code; // 백엔드에서 내려주는 error_code
-      console.error(error, "error_code:", errorCode);
       console.error("아웃 기록 전송 오류:", error);
       alert("아웃 기록 전송 오류");
     } finally {
-      // router.replace(router.asPath);
-      router.reload();
+      // ① 로딩 해제
       setIsSubmitting(false);
+      // ② 모달 닫기
       props.setIsOutModalOpen(false);
     }
   };
-
   return (
     <ModalOverlay onClick={() => props.setIsOutModalOpen(false)}>
       <ModalContainer onClick={(e) => e.stopPropagation()}>

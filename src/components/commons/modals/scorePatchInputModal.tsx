@@ -1,3 +1,4 @@
+// src/components/modals/scorePatchInputModal.tsx
 import { useState } from "react";
 import { useRouter } from "next/router";
 import {
@@ -13,13 +14,19 @@ import {
   ScoreDisplay,
 } from "./modal.style";
 import API from "../../../commons/apis/api";
-import { useModalBack } from "../../../commons/hooks/useModalBack";
+import {
+  LoadingIcon,
+  LoadingOverlay,
+} from "../../../commons/libraries/loadingOverlay";
 
 interface IScoreEditModalProps {
   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
   suffix: string;
   order: number;
   cellValue: string;
+  onSuccess?: () => Promise<void>;
+  isSubmitting?: boolean;
+  setIsSubmitting?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export default function ScorePatchInputModal({
@@ -27,59 +34,48 @@ export default function ScorePatchInputModal({
   suffix,
   order,
   cellValue,
-}: IScoreEditModalProps) {
-  // useModalBack(() => setIsModalOpen(false));
+  onSuccess,
+}: // isSubmitting,
+// setIsSubmitting,
+IScoreEditModalProps) {
   const router = useRouter();
   const [score, setScore] = useState<number>(Number(cellValue));
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async () => {
-    // 점수가 비어있는 경우 요청을 보내지 않고 경고창을 띄우고 종료
-    if (!score) {
+    if (!score && score !== 0) {
       alert("점수가 입력되지 않았습니다.");
       return;
     }
 
-    console.log(`(초말: ${suffix}, order: ${order}, cellValue: ${cellValue})`);
-    console.log(`제출된 점수: ${score}`);
-
-    // 요청 바디
-    const requestBody = {
-      // inning: order, // 이닝
-      // inningHalf: suffix, // 초/말 구분
-      runs: Number(score), // 수정할 점수
-    };
+    // 변경 여부 확인
+    const originalScore = Number(cellValue);
+    if (score === originalScore) {
+      alert("점수가 수정되지 않았습니다.");
+      return;
+    }
 
     try {
-      // PATCH 요청
-      const response = await API.patch(
+      setIsSubmitting(true);
+      const requestBody = { runs: score };
+      const res = await API.patch(
         `/games/${router.query.recordId}/scores/${order}/${suffix}`,
         requestBody
       );
+      console.log(res);
+      if (onSuccess) {
+        await onSuccess();
+      }
 
-      console.log(requestBody);
-      console.log("점수 수정 응답:", response.data);
       alert("점수가 성공적으로 수정되었습니다.");
-      router.reload();
     } catch (error) {
-      const errorCode = error?.response?.data?.error_code; // 에러코드 추출
-      console.error(error, "error_code:", errorCode);
       console.error(error);
       alert("점수 수정 중 오류가 발생했습니다.");
+    } finally {
+      setIsSubmitting(false);
+      setIsModalOpen(false);
     }
-
-    // 모달 닫기
-    setIsModalOpen(false);
   };
-
-  const handleClose = () => {
-    // 닫기 버튼 클릭 시 모달 닫기
-    setIsModalOpen(false);
-  };
-
-  // 득점 +/-
-  const handleScoreIncrement = () => setScore((prev) => prev + 1);
-  const handleScoreDecrement = () =>
-    setScore((prev) => (prev > 0 ? prev - 1 : 0));
 
   return (
     <ModalOverlay>
@@ -87,14 +83,26 @@ export default function ScorePatchInputModal({
         <ModalTitleSmall>점수를 입력해주세요</ModalTitleSmall>
         <InningScoreContainer>
           <InningScoreControls>
-            <ScoreButton onClick={handleScoreDecrement}>-</ScoreButton>
+            <ScoreButton onClick={() => setScore((p) => Math.max(0, p - 1))}>
+              -
+            </ScoreButton>
             <ScoreDisplay>{score}</ScoreDisplay>
-            <ScoreButton onClick={handleScoreIncrement}>+</ScoreButton>
+            <ScoreButton onClick={() => setScore((p) => p + 1)}>+</ScoreButton>
           </InningScoreControls>
         </InningScoreContainer>
-        <ModalButton onClick={handleSubmit}>수정하기</ModalButton>
-        <ModalCancleButton onClick={handleClose}>닫기</ModalCancleButton>
+        <ModalButton onClick={handleSubmit} disabled={isSubmitting}>
+          수정하기
+        </ModalButton>
+        <ModalCancleButton
+          onClick={() => setIsModalOpen(false)}
+          disabled={isSubmitting}
+        >
+          닫기
+        </ModalCancleButton>
       </ModalContainer>
+      <LoadingOverlay visible={isSubmitting}>
+        <LoadingIcon spin fontSize={48} />
+      </LoadingOverlay>
     </ModalOverlay>
   );
 }

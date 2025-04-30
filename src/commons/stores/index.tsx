@@ -15,6 +15,11 @@ export const TeamListState = atom<ITeamList[]>({
   ],
 });
 
+export const gameId = atom({
+  key: "gameId",
+  default: 0,
+});
+
 export interface IPlayer {
   playerId: number;
   department: string;

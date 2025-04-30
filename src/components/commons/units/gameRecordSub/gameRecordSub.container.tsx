@@ -36,6 +36,10 @@ import {
 } from "../../../../commons/stores/index";
 import API from "../../../../commons/apis/api";
 import SubPlayerSelectionModal from "../../modals/playerSubstituteModal";
+import {
+  LoadingIcon,
+  LoadingOverlay,
+} from "../../../../commons/libraries/loadingOverlay";
 
 // 선수 정보를 나타내는 인터페이스
 interface PlayerInfo {
@@ -159,6 +163,7 @@ export default function TeamRegistrationPageComponent() {
 
   // localStorage에서 selectedMatch 읽고 팀 선수 목록(API) 호출
   useEffect(() => {
+    if (!router.query.recordId) return;
     const selectedMatchStr = localStorage.getItem("selectedMatch");
     if (!selectedMatchStr) {
       console.error("selectedMatch 데이터가 없습니다.");
@@ -169,7 +174,8 @@ export default function TeamRegistrationPageComponent() {
       if (isHomeTeam) {
         const homeTeamId = selectedMatch?.homeTeam?.id;
         if (homeTeamId) {
-          API.get(`/teams/${homeTeamId}/players`)
+          // API.get(`/teams/${homeTeamId}/players`)
+          API.get(`/games/${router.query.recordId}/players?teamType=home`)
             .then((res) => {
               const parsedData =
                 typeof res.data === "string" ? JSON.parse(res.data) : res.data;
@@ -177,15 +183,16 @@ export default function TeamRegistrationPageComponent() {
               console.log("HomeTeam Players (team API):", parsedData.players);
             })
             .catch((error) => {
-              const errorCode = error?.response?.data?.error_code; // 에러코드 추출
-              console.error(error, "error_code:", errorCode);
+              const errorCode = error?.response?.data?.errorCode; // 에러코드 추출
+              console.error(error, "errorCode:", errorCode);
               console.error("Error fetching homeTeam players:", error);
             });
         }
       } else {
         const awayTeamId = selectedMatch?.awayTeam?.id;
         if (awayTeamId) {
-          API.get(`/teams/${awayTeamId}/players`)
+          // API.get(`/teams/${awayTeamId}/players`)
+          API.get(`/games/${router.query.recordId}/players?teamType=away`)
             .then((res) => {
               const parsedData =
                 typeof res.data === "string" ? JSON.parse(res.data) : res.data;
@@ -193,15 +200,15 @@ export default function TeamRegistrationPageComponent() {
               console.log("AwayTeam Players (team API):", parsedData.players);
             })
             .catch((error) => {
-              const errorCode = error?.response?.data?.error_code; // 에러코드 추출
-              console.error(error, "error_code:", errorCode);
+              const errorCode = error?.response?.data?.errorCode; // 에러코드 추출
+              console.error(error, "errorCode:", errorCode);
               console.error("Error fetching awayTeam players:", error);
             });
         }
       }
     } catch (error) {
-      const errorCode = error?.response?.data?.error_code; // 에러코드 추출
-      console.error(error, "error_code:", errorCode);
+      const errorCode = error?.response?.data?.errorCode; // 에러코드 추출
+      console.error(error, "errorCode:", errorCode);
       console.error("로컬스토리지 파싱 에러:", error);
     }
   }, [isHomeTeam]);
@@ -248,7 +255,7 @@ export default function TeamRegistrationPageComponent() {
               position: batter.position,
               playerId: batter.playerId,
               selectedViaModal: false,
-              isWc: batter.isWC ?? false,
+              isWc: batter.isWc ?? false,
             })),
             {
               battingOrder: "P",
@@ -256,7 +263,7 @@ export default function TeamRegistrationPageComponent() {
               position: "P",
               playerId: dataObj.pitcher.playerId,
               selectedViaModal: false,
-              isWc: dataObj.pitcher.isWC ?? false,
+              isWc: dataObj.pitcher.isWc ?? false,
             },
           ];
           // 기존에는 DH가 없으면 P행을 초기화했지만, 이제 API의 pitcher 값을 그대로 유지합니다.
@@ -313,8 +320,8 @@ export default function TeamRegistrationPageComponent() {
           console.log("awayTeamPlayers", awayTeamPlayers);
         }
       } catch (err) {
-        const errorCode = err?.response?.data?.error_code; // 에러코드 추출
-        console.error(err, "error_code:", errorCode);
+        const errorCode = err?.response?.data?.errorCode; // 에러코드 추출
+        console.error(err, "errorCode:", errorCode);
         console.error("팀 선수 목록 요청 에러:", err);
       }
     };
@@ -324,6 +331,10 @@ export default function TeamRegistrationPageComponent() {
   useEffect(() => {
     console.log("Updated homeTeamPlayers:", homeTeamPlayers);
   }, [homeTeamPlayers]);
+
+  useEffect(() => {
+    console.log("Updated awayTeamPlayers:", awayTeamPlayers);
+  }, [awayTeamPlayers]);
 
   // wcMap 계산 (lineupPlayersData & teamPlayersData)
   const wcMap = useMemo(() => {
@@ -704,8 +715,8 @@ export default function TeamRegistrationPageComponent() {
 
       router.push(`/matches/${gameId}/records`);
     } catch (error) {
-      const errorCode = error?.response?.data?.error_code; // 에러코드 추출
-      console.error(error, "error_code:", errorCode);
+      const errorCode = error?.response?.data?.errorCode; // 에러코드 추출
+      console.error(error, "errorCode:", errorCode);
       console.error("PATCH 요청 에러:", error);
     } finally {
       // 3) 제출 상태 해제
@@ -861,6 +872,9 @@ export default function TeamRegistrationPageComponent() {
           rowOrder={players[selectedPlayerIndex!].battingOrder}
         />
       )}
+      <LoadingOverlay visible={isSubmitting}>
+        <LoadingIcon spin fontSize={48} />
+      </LoadingOverlay>
     </Container>
   );
 }

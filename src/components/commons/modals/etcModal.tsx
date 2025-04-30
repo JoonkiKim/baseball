@@ -1,3 +1,4 @@
+// src/components/modals/etcModal.tsx
 import { useRouter } from "next/router";
 import API from "../../../commons/apis/api";
 import {
@@ -7,7 +8,6 @@ import {
   ModalTitle,
 } from "./modal.style";
 import { useState } from "react";
-import { useModalBack } from "../../../commons/hooks/useModalBack";
 import {
   LoadingIcon,
   LoadingOverlay,
@@ -16,40 +16,45 @@ import {
 interface IModalProps {
   setIsEtcModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
   playerId: number;
+  onSuccess?: () => Promise<void>;
 }
 
+const mapping: Record<string, string> = {
+  낫아웃: "SO_DROP",
+  야수선택: "FC",
+  희생플라이: "SF",
+  "희생번트/타격방해": "ETC",
+};
+
 export default function EtcModal(props: IModalProps) {
-  // useModalBack(() => props.setIsEtcModalOpen(false));
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
 
-  // etc매핑
-  const mapping: { [key: string]: string } = {
-    낫아웃: "SO_DROP",
-    야수선택: "FC",
-    희생플라이: "SF",
-    "희생번트/타격방해": "ETC",
-  };
-
-  // etc 종류 선택 시 실행될 비동기 함수
   const handleTypeSelect = async (Type: string) => {
-    if (isSubmitting) return; // 이미 요청 중이면 무시
+    if (isSubmitting) return;
     setIsSubmitting(true);
 
     try {
       const endpoint = `/games/${router.query.recordId}/plate-appearance`;
       const requestBody = { result: mapping[Type] };
       const { data } = await API.post(endpoint, requestBody);
-      // alert(`${mapping[Type]} 기록 전송 완료\n응답값: ${JSON.stringify(data)}`);
-      console.log(endpoint, requestBody);
-      alert(`기록 전송 완료\n` + `${Type}\n`);
+
+      console.log(endpoint, requestBody, data);
+      alert(`기록 전송 완료\n${Type}`);
+      // 부모가 넘겨준 onSuccess 콜백 실행
+      if (props.onSuccess) {
+        await props.onSuccess();
+      }
+
+      // 모달 닫기
+      // props.setIsEtcModalOpen(false);
     } catch (error) {
-      const errorCode = error?.response?.data?.error_code; // 백엔드에서 내려주는 error_code
-      console.error(error, "error_code:", errorCode);
+      console.error("etc 기록 전송 오류:", error);
       alert("etc 기록 전송 오류");
     } finally {
-      router.reload();
+      // ① 로딩 해제
       setIsSubmitting(false);
+      // ② 모달 닫기
       props.setIsEtcModalOpen(false);
     }
   };
@@ -58,31 +63,33 @@ export default function EtcModal(props: IModalProps) {
     <ModalOverlay onClick={() => props.setIsEtcModalOpen(false)}>
       <ModalContainer onClick={(e) => e.stopPropagation()}>
         <ModalTitle>종류를 선택해주세요</ModalTitle>
+
         <ModalButton
-          disabled={isSubmitting}
           onClick={() => handleTypeSelect("낫아웃")}
+          disabled={isSubmitting}
         >
           낫아웃
         </ModalButton>
         <ModalButton
-          disabled={isSubmitting}
           onClick={() => handleTypeSelect("야수선택")}
+          disabled={isSubmitting}
         >
           야수선택
         </ModalButton>
         <ModalButton
-          disabled={isSubmitting}
           onClick={() => handleTypeSelect("희생플라이")}
+          disabled={isSubmitting}
         >
           희생플라이
         </ModalButton>
         <ModalButton
-          disabled={isSubmitting}
           onClick={() => handleTypeSelect("희생번트/타격방해")}
+          disabled={isSubmitting}
         >
           희생번트/타격방해
         </ModalButton>
       </ModalContainer>
+
       <LoadingOverlay visible={isSubmitting}>
         <LoadingIcon spin fontSize={48} />
       </LoadingOverlay>

@@ -31,12 +31,14 @@ import {
   HomeTeamPlayerListState,
   AwayTeamPlayerListState,
   IHAPlayer,
+  gameId,
 } from "../../../../commons/stores/index";
 import API from "../../../../commons/apis/api";
 import {
   LoadingIcon,
   LoadingOverlay,
 } from "../../../../commons/libraries/loadingOverlay";
+import { count } from "console";
 
 interface PlayerInfo {
   battingOrder: number | string;
@@ -65,6 +67,8 @@ const positionOptions = [
 
 export default function TeamRegistrationPageComponent(props: IProps) {
   const router = useRouter();
+  // const [recordId, setGameId] = useRecoilState(gameId);
+  const recordId = router.query.recordId;
   const [teamInfo] = useRecoilState(TeamListState);
   const [homeTeamPlayers, setHomeTeamPlayers] = useRecoilState(
     HomeTeamPlayerListState
@@ -77,24 +81,23 @@ export default function TeamRegistrationPageComponent(props: IProps) {
 
   useEffect(() => {
     const fetchTeamPlayers = async () => {
+      if (!recordId) return;
       try {
         if (router.asPath.includes("homeTeamRegistration")) {
           // const res = await API.get(`/teams/${teamInfo[0].homeTeamId}/players`);
-          const res = await API.get(
-            `/games/${router.query.recordId}/players?teamType=home`
-          );
+          const res = await API.get(`/games/${recordId}/players?teamType=home`);
+          console.log("응답이 도착!(홈팀멤버)");
           console.log(res.data);
           const dataObj =
             typeof res.data === "string" ? JSON.parse(res.data) : res.data;
           setHomeTeamName(dataObj.name);
           setHomeTeamPlayers(dataObj.players);
-          console.log("homeTeamPlayers", homeTeamPlayers);
+          // console.log("homeTeamPlayers", homeTeamPlayers);
         } else {
           // const res = await API.get(`/teams/${teamInfo[0].awayTeamId}/players`);
 
-          const res = await API.get(
-            `/games/${router.query.recordId}/players?teamType=away`
-          );
+          const res = await API.get(`/games/${recordId}/players?teamType=away`);
+          console.log("응답이 도착!(원정팀멤버)");
           const dataObj =
             typeof res.data === "string" ? JSON.parse(res.data) : res.data;
           setAwayTeamName(dataObj.name);
@@ -102,15 +105,25 @@ export default function TeamRegistrationPageComponent(props: IProps) {
           console.log(awayTeamPlayers);
         }
       } catch (err) {
-        const errorCode = err?.response?.data?.error_code; // 에러코드 추출
-        console.error(err, "error_code:", errorCode);
+        const errorCode = err?.response?.data?.errorCode; // 에러코드 추출
+        console.error(err, "errorCode:", errorCode);
         console.error("팀 선수 목록 요청 에러:", err);
       }
     };
     fetchTeamPlayers();
-  }, [router.asPath, teamInfo, setHomeTeamPlayers, setAwayTeamPlayers]);
-  console.log("awayTeamPlayers", awayTeamPlayers);
-  console.log("homeTeamPlayers", homeTeamPlayers);
+  }, [recordId, router.asPath]);
+  useEffect(() => {
+    // 둘 다 빈 배열일 때는 아무 것도 하지 않음
+    // if (awayTeamPlayers.length === 0 && homeTeamPlayers.length === 0) return;
+    console.log(homeTeamName);
+    // // 하나라도 값이 있으면 로그 출력
+    if (awayTeamPlayers.length > 0) {
+      console.log("awayTeamPlayers", awayTeamPlayers);
+    }
+    if (homeTeamPlayers.length > 0) {
+      console.log("homeTeamPlayers", homeTeamPlayers);
+    }
+  }, [awayTeamPlayers, homeTeamPlayers]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [players, setPlayers] = useState<PlayerInfo[]>([
@@ -178,7 +191,7 @@ export default function TeamRegistrationPageComponent(props: IProps) {
     } else {
       setLocalPlayerList(awayTeamPlayers);
     }
-  }, [router.asPath, homeTeamPlayers, awayTeamPlayers]);
+  }, []);
 
   const handleSelectPlayer = (sel: {
     name: string;
@@ -323,6 +336,7 @@ export default function TeamRegistrationPageComponent(props: IProps) {
       }, [])
     );
     const wildcardCount = uniqueWildcardNames.size;
+    console.log(wildcardCount);
     if (wildcardCount > 3) {
       alert(`와일드카드 제한을 초과했습니다 (현재 ${wildcardCount}명)`);
       return;
@@ -357,7 +371,7 @@ export default function TeamRegistrationPageComponent(props: IProps) {
     setIsSubmitting(true);
     try {
       const teamType = props.isHomeTeam ? "home" : "away";
-      const url = `/games/${router.query.recordId}/lineup?teamType=${teamType}`;
+      const url = `/games/${recordId}/lineup?teamType=${teamType}`;
       const res = await API.post(url, requestBody);
       console.log("POST 요청 성공:", res.data);
       setPlayers(updatedPlayers);
@@ -365,16 +379,16 @@ export default function TeamRegistrationPageComponent(props: IProps) {
 
       if (props.isHomeTeam) {
         router.push(
-          `/matches/${router.query.recordId}/homeTeamRegistration/homeTeamSubRegistration`
+          `/matches/${recordId}/homeTeamRegistration/homeTeamSubRegistration`
         );
       } else {
         router.push(
-          `/matches/${router.query.recordId}/awayTeamRegistration/awayTeamSubRegistration`
+          `/matches/${recordId}/awayTeamRegistration/awayTeamSubRegistration`
         );
       }
     } catch (error) {
-      const errorCode = error?.response?.data?.error_code; // 에러코드 추출
-      console.error(error, "error_code:", errorCode);
+      const errorCode = error?.response?.data?.errorCode; // 에러코드 추출
+      console.error(error, "errorCode:", errorCode);
       console.error("POST 요청 실패:", error);
       setIsSubmitting(false);
     }
@@ -385,7 +399,7 @@ export default function TeamRegistrationPageComponent(props: IProps) {
     if (router.isReady) {
       setShowTitle(true);
     }
-  }, [router.isReady]);
+  }, [recordId, router.isReady]);
 
   // ① watch로 가져오기
   const watchedPlayers = watch("players");
@@ -393,7 +407,8 @@ export default function TeamRegistrationPageComponent(props: IProps) {
   // ② 상태나 렌더링마다 로그 찍기 (의존성 배열에 watchedPlayers)
   useEffect(() => {
     console.log("watch('players'):", watchedPlayers);
-  }, [watchedPlayers]);
+    console.log(router.asPath.includes("homeTeamRegistration"));
+  }, []);
 
   return (
     <Container onClick={() => setOpenPositionRow(null)}>
@@ -421,10 +436,13 @@ export default function TeamRegistrationPageComponent(props: IProps) {
               index === 0 ? "dummy" : players[index - 1].position || "";
             const isRowEnabled =
               index === 0 || (prevName.trim() !== "" && prevPos.trim() !== "");
-
             const globalPlayer = localPlayerList.find(
               (p) => p.name === currentName
             );
+
+            // const globalPlayer = localPlayerList.find(
+            //   (p) => p.name === currentName
+            // );
 
             return (
               <PlayerRow key={`${player.battingOrder}-${index}`}>

@@ -28,7 +28,11 @@ import {
 } from "./mainCalendar.style";
 import { formatDate2, formatDateToYMD } from "../../../commons/libraries/utils";
 import API from "../../../commons/apis/api";
-import { previousDateState, TeamListState } from "../../../commons/stores";
+import {
+  gameId,
+  previousDateState,
+  TeamListState,
+} from "../../../commons/stores";
 import { registerLocale } from "react-datepicker";
 import { ko } from "date-fns/locale";
 import { getAccessToken } from "../../../commons/libraries/getAccessToken";
@@ -53,18 +57,25 @@ interface Game {
     name: string;
     score: number | null;
   };
-  currentInning?: number;
-  inning_half?: string;
+  inning?: number;
+  inningHalf?: string;
   gameId?: number; // gameId로 변경 (예: 1001, 1002, 1003 등)
 }
 
 export default function MainCalendarPage() {
-  const [isAuthenticated, setIsAuthenticated] = useState(true);
+  // const [recordId, setGameId] = useRecoilState(gameId);
+
+  // 일반유저 열어놓기
+  const [isAuthenticated] = useState(true);
+
+  // 일반 유저 닫아놓기
+  // const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   // useEffect(() => {
   //   const token = getAccessToken();
   //   setIsAuthenticated(!!token); // accessToken이 있으면 true
   // }, []);
+
   registerLocale("ko", ko);
   moment.tz.setDefault("Asia/Seoul");
   const router = useRouter();
@@ -84,7 +95,7 @@ export default function MainCalendarPage() {
   const calendarRef = useRef<HTMLDivElement>(null);
 
   const [fromDate, setFromDate] = useState("2025-04-23");
-  const [toDate, setToDate] = useState("2025-04-25");
+  const [toDate, setToDate] = useState("2025-04-26");
 
   useEffect(() => {
     const fetchMatches = async () => {
@@ -95,11 +106,12 @@ export default function MainCalendarPage() {
         console.log(res.data);
         // 백엔드 테스트 시에는 아래의 코드드
         setAllMatchData(res.data.days);
+
         // setAllMatchData(res.data);
         console.log(allMatchData);
       } catch (err) {
-        const errorCode = err?.response?.data?.error_code; // 에러코드 추출
-        console.error(err, "error_code:", errorCode);
+        const errorCode = err?.response?.data?.errorCode; // 에러코드 추출
+        console.error(err, "errorCode:", errorCode);
         console.error("❌ 경기 데이터 요청 에러:", err);
       } finally {
         setIsLoading(false);
@@ -288,9 +300,9 @@ export default function MainCalendarPage() {
                         ? "경기예정"
                         : match.status === "FINALIZED"
                         ? "경기종료"
-                        : match.status === "IN_PROGRESS" && match.currentInning
-                        ? `${match.currentInning}회${
-                            match.inning_half === "TOP" ? "초" : "말"
+                        : match.status === "IN_PROGRESS" && match.inning
+                        ? `${match.inning}회${
+                            match.inningHalf === "TOP" ? "초" : "말"
                           }`
                         : match.status === "EDITING"
                         ? "경기종료"
@@ -311,7 +323,9 @@ export default function MainCalendarPage() {
                   </Team>
                 </TeamsContainer>
 
-                {isAuthenticated || match.status === "FINALIZED" ? (
+                {isAuthenticated ||
+                match.status === "FINALIZED" ||
+                match.status === "EDITING" ? (
                   <RecordButton
                     onClick={() => {
                       const selectedMatchInfo = {
@@ -326,6 +340,10 @@ export default function MainCalendarPage() {
                         },
                         status: match.status,
                       };
+                      // 💡 Recoil 상태에도 저장
+                      // setGameId(match.gameId);
+
+                      // console.log("gameId", gameId);
                       localStorage.setItem(
                         "selectedMatch",
                         JSON.stringify(selectedMatchInfo)

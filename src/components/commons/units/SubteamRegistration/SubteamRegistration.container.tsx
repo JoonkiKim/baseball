@@ -4,6 +4,7 @@ import { useRecoilState } from "recoil";
 import { useRouter } from "next/router";
 import {
   AwayTeamPlayerListState,
+  gameId,
   HomeTeamPlayerListState,
 } from "../../../../commons/stores";
 import {
@@ -17,6 +18,10 @@ import {
 } from "./SubteamRegistration.style";
 import API from "../../../../commons/apis/api";
 import RecordStartModal from "../../modals/recordStart";
+import {
+  LoadingIcon,
+  LoadingOverlay,
+} from "../../../../commons/libraries/loadingOverlay";
 
 interface ISubTeamRegistrationProps {
   isHomeTeam: boolean;
@@ -26,7 +31,7 @@ export default function SubTeamRegistrationComponent({
   isHomeTeam,
 }: ISubTeamRegistrationProps) {
   const router = useRouter();
-  // const [isModalOpen, setIsModalOpen] = useState(false);
+  const recordId = router.query.recordId;
   const [homeTeamPlayers, setHomeTeamPlayers] = useRecoilState(
     HomeTeamPlayerListState
   );
@@ -35,6 +40,7 @@ export default function SubTeamRegistrationComponent({
   );
 
   const [teamName, setTeamName] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const matchDataString = localStorage.getItem("selectedMatch");
@@ -46,15 +52,14 @@ export default function SubTeamRegistrationComponent({
           : matchData.awayTeam?.name || "";
         setTeamName(name);
       } catch (err) {
-        const errorCode = err?.response?.data?.error_code; // 에러코드 추출
-        console.error(err, "error_code:", errorCode);
+        const errorCode = err?.response?.data?.errorCode;
+        console.error(err, "errorCode:", errorCode);
         console.error("JSON parsing error:", err);
       }
     }
   }, [isHomeTeam]);
 
   useEffect(() => {
-    const recordId = router.query.recordId;
     if (!recordId) return;
 
     const teamType = isHomeTeam ? "home" : "away";
@@ -63,13 +68,14 @@ export default function SubTeamRegistrationComponent({
     API.get(url)
       .then((res) => {
         let parsedData;
+        console.log("응답이 도착!(교체선수선택)");
 
         if (typeof res.data === "string") {
           try {
             parsedData = JSON.parse(res.data);
           } catch (e) {
-            const errorCode = e?.response?.data?.error_code; // 에러코드 추출
-            console.error(e, "error_code:", errorCode);
+            const errorCode = e?.response?.data?.errorCode;
+            console.error(e, "errorCode:", errorCode);
             console.error("응답 JSON 파싱 실패:", e);
             return;
           }
@@ -92,11 +98,11 @@ export default function SubTeamRegistrationComponent({
         }
       })
       .catch((err) => {
-        const errorCode = err?.response?.data?.error_code; // 에러코드 추출
-        console.error(err, "error_code:", errorCode);
+        const errorCode = err?.response?.data?.errorCode;
+        console.error(err, "errorCode:", errorCode);
         console.error("선수 목록 불러오기 실패:", err);
       });
-  }, [isHomeTeam, router.query.recordId]);
+  }, [recordId]);
 
   const allPlayersList = router.asPath.includes("homeTeamSubRegistration")
     ? homeTeamPlayers
@@ -121,25 +127,28 @@ export default function SubTeamRegistrationComponent({
         : [...prev, { id: player.id, name: player.name }]
     );
   };
+
   const handleSubmit = async () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
     console.log("선택된 선수 목록:", selectedPlayers);
-    // ① 아무도 선택하지 않은 경우 먼저 확인을 받는다
+
     if (selectedPlayers.length === 0) {
       const proceed = window.confirm(
         "교체선수를 한명도 선택하지 않았습니다. 이대로 제출하시겠습니까?"
       );
-      if (!proceed) return; // 사용자가 취소를 누르면 여기서 중단
+      if (!proceed) {
+        setIsSubmitting(false);
+        return;
+      }
     }
-
-    console.log("선택된 선수 목록:", selectedPlayers);
-    const recordId = router.query.recordId;
 
     if (!recordId) {
       console.error("recordId가 존재하지 않습니다.");
+      setIsSubmitting(false);
       return;
     }
 
-    // ② 선택한 선수 id만 추출해 요청 바디를 만든다
     const playerIds = selectedPlayers.map((p) => p.id);
     const payload = { playerIds };
     console.log(payload);
@@ -155,17 +164,19 @@ export default function SubTeamRegistrationComponent({
       if (isHomeTeam) {
         router.push(`/matches/${recordId}/awayTeamRegistration`);
       } else {
-        // setIsModalOpen(true)
-        const res = await API.post(`/games/${recordId}/start`);
-        console.log(res.data);
+        const startRes = await API.post(`/games/${recordId}/start`);
+        console.log(startRes.data);
         router.push(`/matches/${recordId}/records`);
       }
     } catch (err) {
-      const errorCode = err?.response?.data?.error_code; // 에러코드 추출
-      console.error(err, "error_code:", errorCode);
+      const errorCode = err?.response?.data?.errorCode;
+      console.error(err, "errorCode:", errorCode);
       console.error("교체명단 등록 실패:", err);
+    } finally {
+      setIsSubmitting(false);
     }
   };
+
   return (
     <ModalOverlay>
       <ModalContainer onClick={handleContainerClick}>
@@ -190,7 +201,8 @@ export default function SubTeamRegistrationComponent({
                 <tr
                   key={player.id}
                   onClick={() => {
-                    if (!isDisabled) togglePlayerSelection(player);
+                    if (!isDisabled && !isSubmitting)
+                      togglePlayerSelection(player);
                   }}
                   style={{
                     backgroundColor: isSelected ? "#f2f2f2" : "transparent",
@@ -207,13 +219,14 @@ export default function SubTeamRegistrationComponent({
           </tbody>
         </PlayerTable>
         <ButtonContainer>
-          <ControlButton onClick={handleSubmit}>제출하기</ControlButton>
+          <ControlButton onClick={handleSubmit} disabled={isSubmitting}>
+            {isSubmitting ? "제출 중..." : "제출하기"}
+          </ControlButton>
         </ButtonContainer>
       </ModalContainer>
-      {/* {isModalOpen && <RecordStartModal setIsModalOpen={setIsModalOpen} />} */}
-      {/* <LoadingOverlay visible={isSubmitting}>
-              <LoadingIcon spin fontSize={48} />
-            </LoadingOverlay> */}
+      <LoadingOverlay visible={isSubmitting}>
+        <LoadingIcon spin fontSize={48} />
+      </LoadingOverlay>
     </ModalOverlay>
   );
 }

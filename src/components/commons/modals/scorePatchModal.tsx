@@ -21,6 +21,9 @@ interface IModalProps {
   mode?: "score" | "batter" | "pitcher";
   alertMessage?: string; // batter/pitcher 모드에서 보여줄 alert
   statId?: number | null;
+  onSuccess?: () => Promise<void>;
+  isSubmitting?: boolean;
+  setIsSubmitting?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export default function ScorePatchModal({
@@ -31,6 +34,9 @@ export default function ScorePatchModal({
   mode = "score",
   alertMessage,
   statId,
+  onSuccess,
+  isSubmitting,
+  setIsSubmitting,
 }: IModalProps) {
   const router = useRouter();
 
@@ -92,6 +98,9 @@ export default function ScorePatchModal({
           suffix={suffix}
           order={order}
           cellValue={cellValue}
+          onSuccess={onSuccess}
+          isSubmitting={isSubmitting}
+          setIsSubmitting={setIsSubmitting}
         />
       )}
 
@@ -101,6 +110,9 @@ export default function ScorePatchModal({
           setIsModalOpen={setIsModalOpen}
           mode={mode as "batter" | "pitcher"}
           alertMessage={alertMessage}
+          onSuccess={onSuccess}
+          // isSubmitting={isSubmitting}
+          // setIsSubmitting={setIsSubmitting}
         />
       )}
     </>

@@ -22,7 +22,7 @@ export default function StatsPageBatterDetail() {
     const sortedData = [...hitterStats].sort((a, b) => b.H - a.H);
     setHitterData(sortedData);
   }, [hitterStats]);
-
+  console.log(hitterData);
   // Rate(비율) 정렬 키인지 체크
   const isRateKey = ["AVG", "OBP", "SLG", "OPS"].includes(
     hitterSortKey as string
@@ -31,6 +31,7 @@ export default function StatsPageBatterDetail() {
   const filtered = hitterData.filter((p) => p.PA >= p.teamGameCount * 2);
 
   type HitterNumericKey =
+    | "PA"
     | "AB"
     | "H"
     | "2B"
@@ -62,6 +63,9 @@ export default function StatsPageBatterDetail() {
             <tr>
               <th>순위</th>
               <th style={{ width: "25vw" }}>선수</th>
+              <th onClick={() => handleSortHitter("PA")}>
+                타수 <ArrowIcon>{getArrow(hitterSortKey, "PA")}</ArrowIcon>
+              </th>
               <th onClick={() => handleSortHitter("AB")}>
                 타수 <ArrowIcon>{getArrow(hitterSortKey, "AB")}</ArrowIcon>
               </th>
@@ -121,6 +125,7 @@ export default function StatsPageBatterDetail() {
                     <td>
                       {item.playerName} ({item.teamName.slice(0, 3)})
                     </td>
+                    <td>{item.PA}</td>
                     <td>{item.AB}</td>
                     <td>{item.H}</td>
                     <td>{item.AVG}</td>

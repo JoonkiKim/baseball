@@ -1,4 +1,4 @@
-// import { useRouter } from "next/router";
+// src/components/modals/hitModal.tsx
 import { useRouter } from "next/router";
 import API from "../../../commons/apis/api";
 import {
@@ -8,8 +8,6 @@ import {
   ModalTitle,
 } from "./modal.style";
 import { useState } from "react";
-import { Spin } from "antd";
-import { LoadingOutlined } from "@ant-design/icons";
 import {
   LoadingIcon,
   LoadingOverlay,
@@ -18,36 +16,41 @@ import {
 interface IModalProps {
   setIsHitModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
   playerId: number;
+  onSuccess?: () => Promise<void>;
 }
+
+const mapping: Record<string, string> = {
+  안타: "1B",
+  "2루타": "2B",
+  "3루타": "3B",
+  홈런: "HR",
+};
 
 export default function HitModal(props: IModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
-
-  const mapping: { [key: string]: string } = {
-    안타: "1B",
-    "2루타": "2B",
-    "3루타": "3B",
-    홈런: "HR",
-  };
 
   const handleTypeSelect = async (Type: string) => {
     if (isSubmitting) return;
     setIsSubmitting(true);
 
     try {
-      // const endpoint = `/games/${router.query.recordId}/batters/${props.playerId}/plate-appearance`;
       const endpoint = `/games/${router.query.recordId}/plate-appearance`;
-      const requestBody = { result: mapping[Type] };
-      const { data } = await API.post(endpoint, requestBody);
+      const res = await API.post(endpoint, { result: mapping[Type] });
+      console.log({ result: mapping[Type] });
+      // POST 성공 시 부모 onSuccess 콜백 실행
       alert(`기록 전송 완료\n${Type}`);
+      if (props.onSuccess) await props.onSuccess();
+      // props.setIsHitModalOpen(false);
+
+      console.log(res.data);
     } catch (error) {
-      const errorCode = error?.response?.data?.error_code;
-      console.error(error, "error_code:", errorCode);
+      console.error("안타 기록 전송 오류:", error);
       alert("안타 기록 전송 오류");
     } finally {
-      router.reload();
+      // ① 로딩 해제
       setIsSubmitting(false);
+      // ② 모달 닫기
       props.setIsHitModalOpen(false);
     }
   };

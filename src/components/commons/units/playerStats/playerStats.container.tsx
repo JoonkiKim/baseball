@@ -43,8 +43,8 @@ export default function StatsPage() {
         const sorted = res.data.batters.sort((a, b) => b.H - a.H);
         setHitterData(sorted);
       } catch (e) {
-        const errorCode = e?.response?.data?.error_code; // 에러코드 추출
-        console.error(e, "error_code:", errorCode);
+        const errorCode = e?.response?.data?.errorCode; // 에러코드 추출
+        console.error(e, "errorCode:", errorCode);
         console.error("Error fetching hitter stats:", e);
       }
     };
@@ -59,8 +59,8 @@ export default function StatsPage() {
         const sorted = res.data.pitchers.sort((a, b) => b.K - a.K);
         setPitcherData(sorted);
       } catch (e) {
-        const errorCode = e?.response?.data?.error_code; // 에러코드 추출
-        console.error(e, "error_code:", errorCode);
+        const errorCode = e?.response?.data?.errorCode; // 에러코드 추출
+        console.error(e, "errorCode:", errorCode);
         console.error("Error fetching pitcher stats:", e);
       }
     };
@@ -80,6 +80,7 @@ export default function StatsPage() {
   }, [hitterData]);
 
   type HitterNumericKey =
+    | "PA"
     | "AB"
     | "H"
     | "2B"
@@ -134,6 +135,9 @@ export default function StatsPage() {
             <tr>
               <th>순위</th>
               <th style={{ width: "25vw" }}>선수</th>
+              <th onClick={() => handleSortHitter("PA")}>
+                타석 <ArrowIcon>{getArrow(hitterSortKey, "PA")}</ArrowIcon>
+              </th>
               <th onClick={() => handleSortHitter("AB")}>
                 타수 <ArrowIcon>{getArrow(hitterSortKey, "AB")}</ArrowIcon>
               </th>
@@ -193,6 +197,7 @@ export default function StatsPage() {
                     <td>
                       {item.playerName} ({item.teamName.slice(0, 3)})
                     </td>
+                    <td>{item.PA}</td>
                     <td>{item.AB}</td>
                     <td>{item.H}</td>
                     <td>{item.AVG}</td>
