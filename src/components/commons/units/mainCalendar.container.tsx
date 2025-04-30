@@ -59,12 +59,12 @@ interface Game {
 }
 
 export default function MainCalendarPage() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(true);
 
-  useEffect(() => {
-    const token = getAccessToken();
-    setIsAuthenticated(!!token); // accessToken이 있으면 true
-  }, []);
+  // useEffect(() => {
+  //   const token = getAccessToken();
+  //   setIsAuthenticated(!!token); // accessToken이 있으면 true
+  // }, []);
   registerLocale("ko", ko);
   moment.tz.setDefault("Asia/Seoul");
   const router = useRouter();
@@ -94,8 +94,8 @@ export default function MainCalendarPage() {
         console.log(`/games?from=${fromDate}&to=${toDate}`);
         console.log(res.data);
         // 백엔드 테스트 시에는 아래의 코드드
-        // setAllMatchData(res.data.days);
-        setAllMatchData(res.data);
+        setAllMatchData(res.data.days);
+        // setAllMatchData(res.data);
         console.log(allMatchData);
       } catch (err) {
         const errorCode = err?.response?.data?.error_code; // 에러코드 추출

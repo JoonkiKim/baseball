@@ -25,7 +25,7 @@ export default function EtcModal(props: IModalProps) {
 
   // etc매핑
   const mapping: { [key: string]: string } = {
-    낫아웃: "K_DROP",
+    낫아웃: "SO_DROP",
     야수선택: "FC",
     희생플라이: "SF",
     "희생번트/타격방해": "ETC",
@@ -37,7 +37,7 @@ export default function EtcModal(props: IModalProps) {
     setIsSubmitting(true);
 
     try {
-      const endpoint = `/games/${router.query.recordId}/batters/${props.playerId}/plate-appearance`;
+      const endpoint = `/games/${router.query.recordId}/plate-appearance`;
       const requestBody = { result: mapping[Type] };
       const { data } = await API.post(endpoint, requestBody);
       // alert(`${mapping[Type]} 기록 전송 완료\n응답값: ${JSON.stringify(data)}`);
@@ -48,6 +48,7 @@ export default function EtcModal(props: IModalProps) {
       console.error(error, "error_code:", errorCode);
       alert("etc 기록 전송 오류");
     } finally {
+      router.reload();
       setIsSubmitting(false);
       props.setIsEtcModalOpen(false);
     }

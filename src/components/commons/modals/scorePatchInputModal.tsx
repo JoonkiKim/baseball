@@ -44,8 +44,8 @@ export default function ScorePatchInputModal({
 
     // 요청 바디
     const requestBody = {
-      inning: order, // 이닝
-      inningHalf: suffix, // 초/말 구분
+      // inning: order, // 이닝
+      // inningHalf: suffix, // 초/말 구분
       runs: Number(score), // 수정할 점수
     };
 
@@ -59,6 +59,7 @@ export default function ScorePatchInputModal({
       console.log(requestBody);
       console.log("점수 수정 응답:", response.data);
       alert("점수가 성공적으로 수정되었습니다.");
+      router.reload();
     } catch (error) {
       const errorCode = error?.response?.data?.error_code; // 에러코드 추출
       console.error(error, "error_code:", errorCode);

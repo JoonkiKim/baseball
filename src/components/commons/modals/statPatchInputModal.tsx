@@ -116,6 +116,7 @@ export default function StatPatchInputModal({
       console.log("응답:", res.data);
 
       alert("스탯 수정이 완료되었습니다.");
+      router.reload();
       setIsModalOpen(false);
     } catch (err) {
       const errorCode = err?.response?.data?.error_code; // 에러코드 추출

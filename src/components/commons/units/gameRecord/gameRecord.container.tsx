@@ -123,16 +123,20 @@ export default function GameRecordPage() {
   useEffect(() => {
     async function fetchInningScores() {
       try {
+        console.log(router.query.recordId);
+        console.log(router.query);
         const res = await API.get(`/games/${router.query.recordId}/scores`);
-        const response =
-          typeof res.data === "string" ? JSON.parse(res.data) : res.data;
+        console.log(res.data.scoreboard);
+        // const response =
+        //   typeof res.data === "string" ? JSON.parse(res.data) : res.data;
+        const response = res.data;
 
         // 1~7회 점수 채우기
         const newTeamAScores = new Array(9).fill("");
         const newTeamBScores = new Array(9).fill("");
 
-        if (response.scores && Array.isArray(response.scores)) {
-          response.scores.forEach((scoreEntry) => {
+        if (response.scoreboard && Array.isArray(response.scoreboard)) {
+          response.scoreboard.forEach((scoreEntry) => {
             const inningIndex = scoreEntry.inning - 1;
             if (inningIndex >= 0 && inningIndex < 7) {
               if (scoreEntry.inningHalf === "TOP") {
@@ -145,10 +149,11 @@ export default function GameRecordPage() {
         }
 
         // R, H 컬럼 채우기
-        newTeamAScores[7] = response.teamStats.away.runs;
-        newTeamAScores[8] = response.teamStats.away.hits;
-        newTeamBScores[7] = response.teamStats.home.runs;
-        newTeamBScores[8] = response.teamStats.home.hits;
+        newTeamAScores[7] = response.teamSummary.home.runs;
+        newTeamAScores[8] = response.teamSummary.away.hits;
+
+        newTeamBScores[7] = response.teamSummary.away.runs;
+        newTeamBScores[8] = response.teamSummary.home.hits;
 
         setTeamAScores(newTeamAScores);
         setTeamBScores(newTeamBScores);
@@ -156,17 +161,18 @@ export default function GameRecordPage() {
         // attack 쿼리 매번 재설정
         let attackValue = "away";
         if (
-          response.scores &&
-          Array.isArray(response.scores) &&
-          response.scores.length > 0
+          response.scoreboard &&
+          Array.isArray(response.scoreboard) &&
+          response.scoreboard.length > 0
         ) {
-          const lastScore = response.scores[response.scores.length - 1];
+          const lastScore = response.scoreboard[response.scoreboard.length - 1];
           attackValue = lastScore.inningHalf === "TOP" ? "home" : "away";
         }
         router.replace({
           pathname: router.pathname,
           query: { ...router.query, attack: attackValue },
         });
+        console.log(attackValue);
       } catch (error) {
         const errorCode = error?.response?.data?.error_code; // 에러코드 추출
         console.error(error, "error_code:", errorCode);
@@ -193,7 +199,7 @@ export default function GameRecordPage() {
       }
     }
     fetchBatter();
-  }, [router.query.recordId, router.query.attack]);
+  }, [router.query.recordId, router.query.attack, router.asPath]);
 
   // pitcher API 요청
   useEffect(() => {
@@ -244,7 +250,7 @@ export default function GameRecordPage() {
         if (isSubmitting) return; // 이미 요청 중이면 무시
         setIsSubmitting(true);
         try {
-          const endpoint = `/games/${router.query.recordId}/batters/${batter.playerId}/plate-appearance`;
+          const endpoint = `/games/${router.query.recordId}/plate-appearance`;
           const requestBody = { result: "BB" };
           const { data } = await API.post(endpoint, requestBody);
           // alert(`볼넷/사구 기록 전송 완료\n응답값: ${JSON.stringify(data)}`)
@@ -255,6 +261,7 @@ export default function GameRecordPage() {
           console.error("볼넷/사구 기록 전송 오류:", error);
           alert("볼넷/사구 기록 전송 오류");
         } finally {
+          router.reload();
           setIsSubmitting(false);
         }
         break;
@@ -284,9 +291,11 @@ export default function GameRecordPage() {
       const gameId = router.query.recordId;
       const endpoint = `/games/${gameId}/scores`;
       const requestBody = { runs: thisInningScore };
+      console.log(requestBody);
       await API.post(endpoint, requestBody);
       console.log("이닝 득점 전송완료", requestBody);
       alert("공수교대 완료");
+      router.reload();
       setThisInningScore(0);
     } catch (error) {
       const errorCode = error?.response?.data?.error_code; // 에러코드 추출
@@ -510,7 +519,10 @@ export default function GameRecordPage() {
       )}
       {isGameEndModalOpen && (
         <ModalWrapper onClose={() => setIsGameEndModalOpen(false)}>
-          <GameOverModal setIsGameEndModalOpen={setIsGameEndModalOpen} />
+          <GameOverModal
+            inningScore={thisInningScore}
+            setIsGameEndModalOpen={setIsGameEndModalOpen}
+          />
         </ModalWrapper>
       )}
       {isScorePatchModalOpen && selectedCell && (

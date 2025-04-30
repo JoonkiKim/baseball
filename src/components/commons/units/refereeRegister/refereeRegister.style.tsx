@@ -67,6 +67,7 @@ export const EmailButton = styled.button`
   font-family: "KBO-Dia-Gothic_bold";
   font-size: 9px;
   width: 25vw;
+  color: black;
   border: 1px solid #bdbdbd;
   /* border-radius: 4px; */
   max-height: 25px;

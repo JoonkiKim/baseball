@@ -12,6 +12,7 @@ import { useModalBack } from "../../../commons/hooks/useModalBack";
 
 interface IModalProps {
   setIsGameEndModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  inningScore: number;
 }
 
 export default function GameOverModal(props: IModalProps) {
@@ -21,8 +22,11 @@ export default function GameOverModal(props: IModalProps) {
 
   const handleTypeSelect = async (type: string) => {
     if (type === "예") {
+      const requestBody = { runs: props.inningScore };
+      console.log("경기종료 요청 바디:", requestBody);
       const response = await API.post(
-        `/games/${router.query.recordId}/results`
+        `/games/${router.query.recordId}/results`,
+        requestBody
       );
       console.log(
         `/games/${router.query.recordId}/results`,

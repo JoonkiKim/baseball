@@ -1,3 +1,4 @@
+// import { useRouter } from "next/router";
 import { useRouter } from "next/router";
 import API from "../../../commons/apis/api";
 import {
@@ -35,7 +36,8 @@ export default function HitModal(props: IModalProps) {
     setIsSubmitting(true);
 
     try {
-      const endpoint = `/games/${router.query.recordId}/batters/${props.playerId}/plate-appearance`;
+      // const endpoint = `/games/${router.query.recordId}/batters/${props.playerId}/plate-appearance`;
+      const endpoint = `/games/${router.query.recordId}/plate-appearance`;
       const requestBody = { result: mapping[Type] };
       const { data } = await API.post(endpoint, requestBody);
       alert(`기록 전송 완료\n${Type}`);
@@ -44,6 +46,7 @@ export default function HitModal(props: IModalProps) {
       console.error(error, "error_code:", errorCode);
       alert("안타 기록 전송 오류");
     } finally {
+      router.reload();
       setIsSubmitting(false);
       props.setIsHitModalOpen(false);
     }

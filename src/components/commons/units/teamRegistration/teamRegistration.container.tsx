@@ -33,6 +33,10 @@ import {
   IHAPlayer,
 } from "../../../../commons/stores/index";
 import API from "../../../../commons/apis/api";
+import {
+  LoadingIcon,
+  LoadingOverlay,
+} from "../../../../commons/libraries/loadingOverlay";
 
 interface PlayerInfo {
   battingOrder: number | string;
@@ -546,6 +550,9 @@ export default function TeamRegistrationPageComponent(props: IProps) {
           allowDuplicates={players[selectedPlayerIndex].battingOrder === "P"}
         />
       )}
+      <LoadingOverlay visible={isSubmitting}>
+        <LoadingIcon spin fontSize={48} />
+      </LoadingOverlay>
     </Container>
   );
 }

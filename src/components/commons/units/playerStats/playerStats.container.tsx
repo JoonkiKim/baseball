@@ -49,7 +49,7 @@ export default function StatsPage() {
       }
     };
     fetchBatters();
-  }, [setHitterData]);
+  }, []);
 
   useEffect(() => {
     const fetchPitchers = async () => {
@@ -65,7 +65,7 @@ export default function StatsPage() {
       }
     };
     fetchPitchers();
-  }, [setPitcherData]);
+  }, []);
   // --------------------
 
   // PA >= teamGameCount * 2 이상인 선수만 콘솔 출력 (디버깅용)

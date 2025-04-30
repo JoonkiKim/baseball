@@ -101,7 +101,7 @@ export default function FinalGameRecordPage() {
   const [alertMessage, setAlertMessage] = useState<string>("");
 
   // 마지막 이닝 정보 보관(ref)
-  const lastEntryRef = useRef<{ inning: number; inning_half: string } | null>(
+  const lastEntryRef = useRef<{ inning: number; inningHalf: string } | null>(
     null
   );
   // scoreboard DOM 컨테이너 ref
@@ -110,34 +110,28 @@ export default function FinalGameRecordPage() {
   useEffect(() => {
     API.get(`/games/${router.query.recordId}/results`)
       .then((response) => {
-        const {
-          scoreboard,
-          awayTeam,
-          homeTeam,
-          awayBatters,
-          homeBatters,
-          awayPitchers,
-          homePitchers,
-        } = response.data;
+        const { scoreboard, teamSummary, batterStats, pitcherStats } =
+          response.data;
 
+        console.log(response.data);
         // 마지막 이닝 정보 저장
         const lastEntry = scoreboard[scoreboard.length - 1] || {
           inning: 0,
-          inning_half: "",
+          inningHalf: "",
         };
         lastEntryRef.current = lastEntry;
 
         // console.log 메시지
-        const { inning, inning_half } = lastEntry;
-        if (inning_half === "TOP") {
+        const { inning, inningHalf } = lastEntry;
+        if (inningHalf === "TOP") {
           console.log(`${inning}회초에 공격끝남`);
         } else {
           console.log(`${inning}회말에 공격끝남`);
         }
 
         // 팀 이름 셋팅
-        setTeamAName(awayTeam.name.substring(0, 3));
-        setTeamBName(homeTeam.name.substring(0, 3));
+        setTeamAName(teamSummary.away.name.substring(0, 3));
+        setTeamBName(teamSummary.home.name.substring(0, 3));
 
         // 스코어보드 배열 복사
         const newTeamAScores = [...defaultTeamAScores];
@@ -146,7 +140,7 @@ export default function FinalGameRecordPage() {
         // scoreboard 데이터 채우기
         scoreboard.forEach((item: any) => {
           const idx = item.inning - 1;
-          if (item.inning_half === "TOP") {
+          if (item.inningHalf === "TOP") {
             newTeamAScores[idx] = String(item.runs);
           } else {
             newTeamBScores[idx] = String(item.runs);
@@ -154,19 +148,20 @@ export default function FinalGameRecordPage() {
         });
 
         // 최종 R/H 칸 채우기
-        newTeamAScores[7] = String(awayTeam.runs);
-        newTeamAScores[8] = String(awayTeam.hits);
-        newTeamBScores[7] = String(homeTeam.runs);
-        newTeamBScores[8] = String(homeTeam.hits);
+        newTeamAScores[7] = String(teamSummary.home.runs);
+        newTeamAScores[8] = String(teamSummary.away.hits);
+
+        newTeamBScores[7] = String(teamSummary.away.runs);
+        newTeamBScores[8] = String(teamSummary.home.hits);
 
         setTeamAScores(newTeamAScores);
         setTeamBScores(newTeamBScores);
 
         // 타자/투수 기록
-        setAwayBatters(awayBatters);
-        setHomeBatters(homeBatters);
-        setAwayPitchers(awayPitchers);
-        setHomePitchers(homePitchers);
+        setAwayBatters(batterStats.away);
+        setHomeBatters(batterStats.home);
+        setAwayPitchers(pitcherStats.away);
+        setHomePitchers(pitcherStats.home);
       })
       .catch((error) => {
         const errorCode = error?.response?.data?.error_code; // 에러코드 추출
@@ -181,7 +176,7 @@ export default function FinalGameRecordPage() {
     const entry = lastEntryRef.current;
     const root = scoreboardRef.current;
     // entry가 없거나 TOP이 아니면 아무것도 하지 않음
-    if (!entry || entry.inning_half !== "TOP" || !root) return;
+    if (!entry || entry.inningHalf !== "TOP" || !root) return;
 
     const idx = entry.inning - 1;
     const rows = root.querySelectorAll<HTMLElement>(".team-row");
@@ -224,7 +219,7 @@ export default function FinalGameRecordPage() {
       `id: ${player.batterGameStatsId}\n` +
       `플레이어: ${player.playerName}\n` +
       `타수: ${player.AB}\n` +
-      `안타: ${player["1B"]}\n` +
+      `안타: ${player["H"]}\n` +
       `볼넷/사구: ${player.BB}\n` +
       `2루타: ${player["2B"]}\n` +
       `3루타: ${player["3B"]}\n` +
@@ -254,14 +249,21 @@ export default function FinalGameRecordPage() {
     currentIndex: number,
     batters: any[]
   ): string | number => {
-    if (currentIndex === 0) return batters[currentIndex].battingOrder;
-    if (
-      batters[currentIndex].battingOrder ===
-      batters[currentIndex - 1].battingOrder
-    ) {
-      return "↑";
+    const currentOrder = batters[currentIndex].battingOrder;
+    // 해당 order가 배열에 몇 번 등장하는지 확인
+    const occurrences = batters.filter(
+      (b) => b.battingOrder === currentOrder
+    ).length;
+    if (occurrences <= 1) {
+      // 중복이 아니면 그냥 숫자 반환
+      return currentOrder;
     }
-    return batters[currentIndex].battingOrder;
+    // 중복이면, 첫 등장 위치를 구해서
+    const firstIndex = batters.findIndex(
+      (b) => b.battingOrder === currentOrder
+    );
+    // 현재 인덱스가 첫 번째면 숫자, 아니면 화살표
+    return currentIndex === firstIndex ? currentOrder : "↑";
   };
 
   return (
@@ -350,7 +352,7 @@ export default function FinalGameRecordPage() {
                 <td>
                   <EditableInput
                     type="number"
-                    defaultValue={player["1B"]}
+                    defaultValue={player["H"]}
                     readOnly
                     // onClick={() => handleBatterClick(player)}
                     onClick={
@@ -491,7 +493,7 @@ export default function FinalGameRecordPage() {
                 <td>
                   <EditableInput
                     type="number"
-                    defaultValue={player["1B"]}
+                    defaultValue={player["H"]}
                     readOnly
                     // onClick={() => handleBatterClick(player)}
                     onClick={

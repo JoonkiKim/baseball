@@ -296,7 +296,7 @@ export default function TeamRegistrationPageComponent() {
               position: batter.position,
               playerId: batter.playerId,
               selectedViaModal: false,
-              isWc: batter.isWC ?? false,
+              isWc: batter.isWc ?? false,
             })),
             {
               battingOrder: "P",
@@ -304,7 +304,7 @@ export default function TeamRegistrationPageComponent() {
               position: "P",
               playerId: dataObj.pitcher.playerId,
               selectedViaModal: false,
-              isWc: dataObj.pitcher.isWC ?? false,
+              isWc: dataObj.pitcher.isWc ?? false,
             },
           ];
           // 원정팀도 DH 여부 상관없이 API의 pitcher 값을 그대로 사용합니다.
@@ -650,15 +650,26 @@ export default function TeamRegistrationPageComponent() {
     // const pitcherCandidate = updatedCurrentPlayers.find(
     //   (p: any) => p.position === "P"
     // );
+    // const batters = updatedCurrentPlayers
+    //   .filter((p: any) => p.battingOrder !== "P")
+    //   .slice(0, -1)
+    //   .map((p: any) => ({
+    //     battingOrder: p.battingOrder,
+    //     playerId: p.playerId,
+    //     position: p.position,
+    //   }));
     const batters = updatedCurrentPlayers
+      // 투수(P) 행은 제외
       .filter((p: any) => p.battingOrder !== "P")
       .slice(0, -1)
-      .map((p: any) => ({
-        battingOrder: p.battingOrder,
+      // map의 두 번째 인자 index를 이용해 순서대로 1~9를 부여
+      .map((p: any, idx: number) => ({
+        battingOrder: idx + 1,
         playerId: p.playerId,
         position: p.position,
       }));
 
+    console.log("batters", batters);
     // pitcher: 항상 맨마지막행(index가 9인 선수)
     const pitcherRow = updatedCurrentPlayers[9]; //
     console.log(pitcherRow);
@@ -688,7 +699,7 @@ export default function TeamRegistrationPageComponent() {
       const gameId = router.query.recordId;
       const teamType = isHomeTeam ? "home" : "away";
       const url = `/games/${gameId}/lineup?teamType=${teamType}`;
-      const response = await API.post(url, formattedObject);
+      const response = await API.patch(url, formattedObject);
       console.log("전송 성공:", response.data);
 
       router.push(`/matches/${gameId}/records`);

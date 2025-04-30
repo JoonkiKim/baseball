@@ -211,6 +211,9 @@ export default function SubTeamRegistrationComponent({
         </ButtonContainer>
       </ModalContainer>
       {/* {isModalOpen && <RecordStartModal setIsModalOpen={setIsModalOpen} />} */}
+      {/* <LoadingOverlay visible={isSubmitting}>
+              <LoadingIcon spin fontSize={48} />
+            </LoadingOverlay> */}
     </ModalOverlay>
   );
 }

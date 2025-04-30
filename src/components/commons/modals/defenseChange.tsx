@@ -1,4 +1,5 @@
 import { useModalBack } from "../../../commons/hooks/useModalBack";
+import { useRouter } from "next/router";
 import {
   ModalButton,
   ModalCancleButton,
@@ -13,6 +14,7 @@ interface IModalProps {
 }
 
 export default function DefenseChangeModal(props: IModalProps) {
+  const router = useRouter();
   // useModalBack(() => props.setIsChangeModalOpen(false));
   // 공수교대 종류 선택 시 실행될 함수
   const handleTypeSelect = (type: string) => {
@@ -20,6 +22,7 @@ export default function DefenseChangeModal(props: IModalProps) {
       // 모달 닫기 전, 부모에서 전달받은 onConfirm 함수 실행 → 상태 토글
       props.onConfirm();
       props.setIsChangeModalOpen(false);
+      // router.reload();
     } else {
       props.setIsChangeModalOpen(false);
     }
