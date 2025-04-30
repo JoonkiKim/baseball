@@ -1,6 +1,11 @@
 import { atom } from "recoil";
 import { string } from "yup";
 
+export const authMe = atom({
+  key: "authMe",
+  default: [{ role: "", gameIds: [] }],
+});
+
 export interface ITeamList {
   homeTeamName: string;
   homeTeamId: number;

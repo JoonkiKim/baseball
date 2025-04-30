@@ -29,6 +29,7 @@ import {
 import { formatDate2, formatDateToYMD } from "../../../commons/libraries/utils";
 import API from "../../../commons/apis/api";
 import {
+  authMe,
   gameId,
   previousDateState,
   TeamListState,
@@ -91,6 +92,7 @@ export default function MainCalendarPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [timedOut, setTimedOut] = useState(false);
 
+  const [authInfo, setAuthInfo] = useRecoilState(authMe);
   // 캘린더 영역 외부 클릭 감지를 위한 ref
   const calendarRef = useRef<HTMLDivElement>(null);
 
@@ -102,6 +104,10 @@ export default function MainCalendarPage() {
       setIsLoading(true);
       try {
         const res = await API.get(`/games?from=${fromDate}&to=${toDate}`);
+        const authRes = await API.get(`/auth/me`);
+        console.log(authRes.data);
+        setAuthInfo(authRes.data);
+
         console.log(`/games?from=${fromDate}&to=${toDate}`);
         console.log(res.data);
         // 백엔드 테스트 시에는 아래의 코드드
