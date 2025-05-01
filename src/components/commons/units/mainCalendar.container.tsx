@@ -99,13 +99,21 @@ export default function MainCalendarPage() {
   const [fromDate, setFromDate] = useState("2025-04-23");
   const [toDate, setToDate] = useState("2025-04-26");
 
+  // const currentGameId =
+  //   typeof router.query.recordId === "string"
+  //     ? Number(router.query.recordId)
+  //     : null;
   useEffect(() => {
     const fetchMatches = async () => {
       setIsLoading(true);
       try {
-        const res = await API.get(`/games?from=${fromDate}&to=${toDate}`, {
-          withCredentials: true,
-        });
+        const res = await API.get(
+          `/games?from=${fromDate}&to=${toDate}`,
+
+          {
+            withCredentials: true,
+          }
+        );
         const authRes = await API.get(`/auth/me`);
         console.log(authRes.data);
         setAuthInfo(authRes.data);
@@ -334,8 +342,10 @@ export default function MainCalendarPage() {
                     </TeamScore>
                   </Team>
                 </TeamsContainer>
-
-                {isAuthenticated ||
+                {/* 
+                {(authInfo.role === "umpire" &&
+                  // && currentGameId !== null
+                  authInfo.gameIds.includes(currentGameId)) ||
                 match.status === "FINALIZED" ||
                 match.status === "EDITING" ? (
                   <RecordButton
@@ -391,8 +401,8 @@ export default function MainCalendarPage() {
                   </RecordButton>
                 ) : (
                   <RecordButtonPlaceholder />
-                )}
-                {/* {canRecord ||
+                )} */}
+                {canRecord ||
                 match.status === "FINALIZED" ||
                 match.status === "EDITING" ? (
                   <RecordButton
@@ -441,7 +451,7 @@ export default function MainCalendarPage() {
                   </RecordButton>
                 ) : (
                   <RecordButtonPlaceholder />
-                )} */}
+                )}
               </MatchCard>
             );
           })

@@ -86,6 +86,21 @@ export default function FinalGameRecordPage() {
     }
   }, [recordId]); // 필요하다면 router.query 등 의존성 추가
 
+  useEffect(() => {
+    const fetchAuthInfo = async () => {
+      try {
+        const authRes = await API.get("/auth/me");
+        setAuthInfo(authRes.data);
+      } catch (error) {
+        console.error("Failed to fetch auth info:", error);
+      }
+    };
+    fetchAuthInfo();
+  }, []);
+
+  const currentGameId = typeof recordId === "string" ? Number(recordId) : null;
+
+  console.log(currentGameId);
   // console.log(matchStatus); // 확인용
 
   // 팀 이름 상태
@@ -235,7 +250,7 @@ export default function FinalGameRecordPage() {
     }
   }, [recordId]);
 
-  console.log(awayPitchers);
+  // console.log(awayPitchers);
   // Mount: load initial results
   useEffect(() => {
     fetchResults();
@@ -328,11 +343,12 @@ export default function FinalGameRecordPage() {
     return currentIndex === firstIndex ? currentOrder : "↑";
   };
 
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  useEffect(() => {
-    const token = getAccessToken();
-    setIsAuthenticated(!!token); // accessToken이 있으면 true
-  }, []);
+  // const [isAuthenticated, setIsAuthenticated] = useState(false);
+  // useEffect(() => {
+  //   const token = getAccessToken();
+  //   setIsAuthenticated(!!token); // accessToken이 있으면 true
+  // }, []);
+
   return (
     <Container>
       {/* 스코어보드 */}
@@ -357,7 +373,7 @@ export default function FinalGameRecordPage() {
                   : () => handleScoreCellClick(score, "A", idx)
               }
             >
-              <EditableInputScore type="number" defaultValue={score} readOnly />
+              <EditableInputScore type="number" value={score} readOnly />
             </TeamScoreCell>
           ))}
         </TeamRow>
@@ -376,7 +392,7 @@ export default function FinalGameRecordPage() {
                   : () => handleScoreCellClick(score, "B", idx)
               }
             >
-              <EditableInputScore type="number" defaultValue={score} readOnly />
+              <EditableInputScore type="number" value={score} readOnly />
             </TeamScoreCell>
           ))}
         </TeamRow>
@@ -403,13 +419,13 @@ export default function FinalGameRecordPage() {
           </thead>
           <tbody>
             {awayBatters.map((player, idx) => (
-              <tr key={idx}>
+              <tr key={player.batterGameStatsId}>
                 <td>{getDisplayOrder(idx, awayBatters)}</td>
                 <td>{player.playerName}</td>
                 <td>
                   <EditableInput
                     type="number"
-                    defaultValue={player.PA}
+                    value={player.PA}
                     readOnly
                     // onClick={() => handleBatterClick(player)}
                     onClick={
@@ -420,7 +436,7 @@ export default function FinalGameRecordPage() {
                 <td>
                   <EditableInput
                     type="number"
-                    defaultValue={player.AB}
+                    value={player.AB}
                     readOnly
                     // onClick={() => handleBatterClick(player)}
                     onClick={
@@ -431,7 +447,7 @@ export default function FinalGameRecordPage() {
                 <td>
                   <EditableInput
                     type="number"
-                    defaultValue={player["H"]}
+                    value={player["H"]}
                     readOnly
                     // onClick={() => handleBatterClick(player)}
                     onClick={
@@ -442,7 +458,7 @@ export default function FinalGameRecordPage() {
                 <td>
                   <EditableInput
                     type="number"
-                    defaultValue={player.BB}
+                    value={player.BB}
                     readOnly
                     // onClick={() => handleBatterClick(player)}
                     onClick={
@@ -453,7 +469,7 @@ export default function FinalGameRecordPage() {
                 <td>
                   <EditableInput
                     type="number"
-                    defaultValue={player["2B"]}
+                    value={player["2B"]}
                     readOnly
                     // onClick={() => handleBatterClick(player)}
                     onClick={
@@ -464,7 +480,7 @@ export default function FinalGameRecordPage() {
                 <td>
                   <EditableInput
                     type="number"
-                    defaultValue={player["3B"]}
+                    value={player["3B"]}
                     readOnly
                     // onClick={() => handleBatterClick(player)}
                     onClick={
@@ -475,7 +491,7 @@ export default function FinalGameRecordPage() {
                 <td>
                   <EditableInput
                     type="number"
-                    defaultValue={player.HR}
+                    value={player.HR}
                     readOnly
                     // onClick={() => handleBatterClick(player)}
                     onClick={
@@ -486,7 +502,7 @@ export default function FinalGameRecordPage() {
                 <td>
                   <EditableInput
                     type="number"
-                    defaultValue={player.SAC}
+                    value={player.SAC}
                     readOnly
                     // onClick={() => handleBatterClick(player)}
                     onClick={
@@ -513,13 +529,13 @@ export default function FinalGameRecordPage() {
           </thead>
           <tbody>
             {awayPitchers.map((pitcher, idx) => (
-              <tr key={idx}>
+              <tr key={pitcher.pitcherGameStatsId}>
                 <td>{idx + 1}</td>
                 <td>{pitcher.playerName}</td>
                 <td>
                   <EditableInput
                     type="number"
-                    defaultValue={pitcher.K}
+                    value={pitcher.K}
                     readOnly
                     // onClick={() => handlePitcherClick(pitcher)}
                     onClick={
@@ -556,13 +572,13 @@ export default function FinalGameRecordPage() {
           </thead>
           <tbody>
             {homeBatters.map((player, idx) => (
-              <tr key={idx}>
+              <tr key={player.batterGameStatsId}>
                 <td>{getDisplayOrder(idx, homeBatters)}</td>
                 <td>{player.playerName}</td>
                 <td>
                   <EditableInput
                     type="number"
-                    defaultValue={player.PA}
+                    value={player.PA}
                     readOnly
                     // onClick={() => handleBatterClick(player)}
                     onClick={
@@ -573,7 +589,7 @@ export default function FinalGameRecordPage() {
                 <td>
                   <EditableInput
                     type="number"
-                    defaultValue={player.AB}
+                    value={player.AB}
                     readOnly
                     // onClick={() => handleBatterClick(player)}
                     onClick={
@@ -584,7 +600,7 @@ export default function FinalGameRecordPage() {
                 <td>
                   <EditableInput
                     type="number"
-                    defaultValue={player["H"]}
+                    value={player["H"]}
                     readOnly
                     // onClick={() => handleBatterClick(player)}
                     onClick={
@@ -595,7 +611,7 @@ export default function FinalGameRecordPage() {
                 <td>
                   <EditableInput
                     type="number"
-                    defaultValue={player.BB}
+                    value={player.BB}
                     readOnly
                     // onClick={() => handleBatterClick(player)}
                     onClick={
@@ -606,7 +622,7 @@ export default function FinalGameRecordPage() {
                 <td>
                   <EditableInput
                     type="number"
-                    defaultValue={player["2B"]}
+                    value={player["2B"]}
                     readOnly
                     // onClick={() => handleBatterClick(player)}
                     onClick={
@@ -617,7 +633,7 @@ export default function FinalGameRecordPage() {
                 <td>
                   <EditableInput
                     type="number"
-                    defaultValue={player["3B"]}
+                    value={player["3B"]}
                     readOnly
                     // onClick={() => handleBatterClick(player)}
                     onClick={
@@ -628,7 +644,7 @@ export default function FinalGameRecordPage() {
                 <td>
                   <EditableInput
                     type="number"
-                    defaultValue={player.HR}
+                    value={player.HR}
                     readOnly
                     // onClick={() => handleBatterClick(player)}
                     onClick={
@@ -639,7 +655,7 @@ export default function FinalGameRecordPage() {
                 <td>
                   <EditableInput
                     type="number"
-                    defaultValue={player.SAC}
+                    value={player.SAC}
                     readOnly
                     // onClick={() => handleBatterClick(player)}
                     onClick={
@@ -666,13 +682,13 @@ export default function FinalGameRecordPage() {
           </thead>
           <tbody>
             {homePitchers.map((pitcher, idx) => (
-              <tr key={idx}>
+              <tr key={pitcher.pitcherGameStatsId}>
                 <td>{idx + 1}</td>
                 <td>{pitcher.playerName}</td>
                 <td>
                   <EditableInput
                     type="number"
-                    defaultValue={pitcher.K}
+                    value={pitcher.K}
                     readOnly
                     // onClick={() => handlePitcherClick(pitcher)}
                     onClick={
@@ -695,31 +711,42 @@ export default function FinalGameRecordPage() {
             <HomeButton>홈으로</HomeButton>
           </a>
         </Link>
-        {matchStatus !== "FINALIZED" && isAuthenticated && (
-          <ControlButton onClick={handleSubmitClick}>제출하기</ControlButton>
-        )}
+        {matchStatus !== "FINALIZED" &&
+          // && isAuthenticated
+          authInfo.role === "umpire" &&
+          // && currentGameId !== null
+          authInfo.gameIds.includes(currentGameId) && (
+            <ControlButton onClick={handleSubmitClick}>제출하기</ControlButton>
+          )}
       </ButtonContainer>
 
-      {isAuthenticated && isResultSubmitModalOpen && (
-        <ResultSubmitModal
-          setIsResultSubmitModalOpen={setIsResultSubmitModalOpen}
-        />
-      )}
+      {authInfo.role === "umpire" &&
+        // && currentGameId !== null
+        authInfo.gameIds.includes(currentGameId) &&
+        isResultSubmitModalOpen && (
+          <ResultSubmitModal
+            setIsResultSubmitModalOpen={setIsResultSubmitModalOpen}
+          />
+        )}
 
-      {isAuthenticated && isScorePatchModalOpen && selectedCell && (
-        <ScorePatchModal
-          setIsModalOpen={setIsScorePatchModalOpen}
-          cellValue={selectedCell.cellValue}
-          team={selectedCell.team}
-          cellIndex={selectedCell.cellIndex}
-          mode={modalMode}
-          statId={selectedStatId}
-          alertMessage={alertMessage}
-          onSuccess={fetchResults}
-          // isSubmitting={isSubmitting}
-          // setIsSubmitting={setIsSubmitting}
-        />
-      )}
+      {authInfo.role === "umpire" &&
+        // && currentGameId !== null
+        authInfo.gameIds.includes(currentGameId) &&
+        isScorePatchModalOpen &&
+        selectedCell && (
+          <ScorePatchModal
+            setIsModalOpen={setIsScorePatchModalOpen}
+            cellValue={selectedCell.cellValue}
+            team={selectedCell.team}
+            cellIndex={selectedCell.cellIndex}
+            mode={modalMode}
+            statId={selectedStatId}
+            alertMessage={alertMessage}
+            onSuccess={fetchResults}
+            // isSubmitting={isSubmitting}
+            // setIsSubmitting={setIsSubmitting}
+          />
+        )}
       <LoadingOverlay visible={isSubmitting}>
         <LoadingIcon spin fontSize={48} />
       </LoadingOverlay>

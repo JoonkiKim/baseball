@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -15,6 +15,11 @@ import {
   EmailButton,
 } from "./refereeRegister.style";
 import API from "../../../../commons/apis/api";
+import { useRouter } from "next/router";
+import {
+  LoadingIcon,
+  LoadingOverlay,
+} from "../../../../commons/libraries/loadingOverlay";
 
 // 폼에서 다룰 데이터 타입 정의 (숫자 타입으로 변경)
 interface RefereeFormData {
@@ -47,7 +52,9 @@ const schema = yup.object().shape({
 });
 
 export default function RefereeRegisterPage() {
+  const router = useRouter();
   // react-hook-form 훅 사용, yup resolver 연결
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const {
     register,
     handleSubmit,
@@ -59,6 +66,7 @@ export default function RefereeRegisterPage() {
   // ① 인증번호 발송 버튼 클릭 시 실행되는 함수
   // ① 인증번호 발송 버튼 클릭 시 실행되는 함수
   const handleSendVerification = async () => {
+    if (isSubmitting) return;
     const email = getValues("email").trim();
 
     // 1) 빈값 체크
@@ -77,6 +85,7 @@ export default function RefereeRegisterPage() {
       return;
     }
 
+    setIsSubmitting(true);
     try {
       // POST /auth/email/request
       await API.post("/auth/email/request", { email });
@@ -87,11 +96,15 @@ export default function RefereeRegisterPage() {
       console.error(error, "errorCode:", errorCode);
       console.error("이메일 인증번호 발송 오류:", error);
       alert("인증번호 발송에 실패했습니다. 다시 시도해주세요.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   // 폼 제출 핸들러
   const onSubmit: SubmitHandler<RefereeFormData> = async (data) => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
     try {
       const payload = {
         email: data.email,
@@ -102,11 +115,14 @@ export default function RefereeRegisterPage() {
       });
       console.log(payload, response);
       alert("심판 등록에 성공했습니다!");
+      router.push(`/matches`);
     } catch (error) {
       const errorCode = error?.response?.data?.errorCode; // 에러코드 추출
       console.error(error, "errorCode:", errorCode);
       console.error("등록 실패:", error);
       alert("심판 등록에 실패했습니다. 이메일과 인증코드를 다시 확인해주세요.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -126,7 +142,11 @@ export default function RefereeRegisterPage() {
               {...register("email")}
               $noBottom
             />
-            <EmailButton type="button" onClick={handleSendVerification}>
+            <EmailButton
+              type="button"
+              onClick={handleSendVerification}
+              disabled={isSubmitting}
+            >
               인증번호 발송
             </EmailButton>
           </WrapperForEmail>
@@ -175,8 +195,13 @@ export default function RefereeRegisterPage() {
         </FieldWrapper> */}
 
         {/* 등록 버튼 */}
-        <SignUpButton type="submit">심판 등록하기</SignUpButton>
+        <SignUpButton type="submit" disabled={isSubmitting}>
+          심판 등록하기
+        </SignUpButton>
       </Form>
+      <LoadingOverlay visible={isSubmitting}>
+        <LoadingIcon spin fontSize={48} />
+      </LoadingOverlay>
     </Container>
   );
 }
