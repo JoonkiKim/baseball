@@ -157,6 +157,7 @@ export default function RefereeRegisterPage() {
     fetchAuthInfo();
   }, []);
 
+  console.log("authRes.data", authInfo);
   if (authInfo.role === "UMPIRE") {
     return (
       <ModalOverlay>
