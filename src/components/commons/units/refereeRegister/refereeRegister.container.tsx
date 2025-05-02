@@ -148,7 +148,7 @@ export default function RefereeRegisterPage() {
           withCredentials: true,
         });
         setAuthInfo(authRes.data);
-        console.log("authRes.data");
+        console.log("authRes.data", authRes.data);
       } catch (error) {
         setError(error);
         console.error("Failed to fetch auth info:", error);
