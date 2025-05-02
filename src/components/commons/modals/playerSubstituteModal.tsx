@@ -111,6 +111,7 @@ export default function SubPlayerSelectionModal({
   );
   const isAway = router.query.isHomeTeam === "false";
   const [error, setError] = useState(null);
+
   useEffect(() => {
     const recordId = router.query.recordId;
     if (!recordId) return;

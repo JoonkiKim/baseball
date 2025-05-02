@@ -36,7 +36,7 @@ import {
 } from "../../../commons/stores";
 import { registerLocale } from "react-datepicker";
 import { ko } from "date-fns/locale";
-import { getAccessToken } from "../../../commons/libraries/getAccessToken";
+// import { getAccessToken } from "../../../commons/libraries/getAccessToken";
 import ErrorAlert from "../../../commons/libraries/showErrorCode";
 
 // 새 객체 구조에 맞춘 인터페이스 정의 (matchId → gameId)
@@ -81,6 +81,8 @@ export default function MainCalendarPage() {
   registerLocale("ko", ko);
   moment.tz.setDefault("Asia/Seoul");
   const router = useRouter();
+  // 에러 상태
+  const [error, setError] = useState(null);
 
   // TeamListState 및 날짜 상태 등 Recoil 상태 불러오기
   const [teamList, setTeamList] = useRecoilState(TeamListState);
@@ -108,13 +110,9 @@ export default function MainCalendarPage() {
     const fetchMatches = async () => {
       setIsLoading(true);
       try {
-        const res = await API.get(
-          `/games?from=${fromDate}&to=${toDate}`,
-
-          {
-            withCredentials: true,
-          }
-        );
+        const res = await API.get(`/games?from=${fromDate}&to=${toDate}`, {
+          withCredentials: true,
+        });
         const authRes = await API.get(`/auth/me`, {
           withCredentials: true,
         });
@@ -130,7 +128,7 @@ export default function MainCalendarPage() {
         console.log(allMatchData);
       } catch (err) {
         const errorCode = err?.response?.data?.errorCode; // 에러코드 추출
-        setError(err);
+        // setError(err);
         console.error(err, "errorCode:", errorCode);
         console.error("❌ 경기 데이터 요청 에러:", err);
       } finally {
@@ -197,9 +195,6 @@ export default function MainCalendarPage() {
     }
     setIsCalendarOpen(false);
   };
-
-  // 에러 상태
-  const [error, setError] = useState(null);
 
   return (
     <Container>
@@ -468,7 +463,7 @@ export default function MainCalendarPage() {
           </p>
         )}
       </MatchCardsContainer>
-      <ErrorAlert error={error} />
+      {/* <ErrorAlert error={error} /> */}
     </Container>
   );
 }

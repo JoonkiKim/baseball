@@ -61,7 +61,8 @@ export default function FinalGameRecordPage() {
   const [isFinalized, setIsFinalized] = useState<boolean>(false);
   // const [recordId] = useRecoilState(gameId);
   const [authInfo, setAuthInfo] = useRecoilState(authMe);
-  const recordId = router.query.recordId;
+  const [recordId, setRecordId] = useState(router.query.recordId);
+  // const recordId = router.query.recordId;
   const [error, setError] = useState(null);
   /* ───────── 클라이언트(브라우저)에서만 실행 ───────── */
   useEffect(() => {
