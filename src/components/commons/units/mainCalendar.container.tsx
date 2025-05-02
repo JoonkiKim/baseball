@@ -99,8 +99,8 @@ export default function MainCalendarPage() {
   // 캘린더 영역 외부 클릭 감지를 위한 ref
   const calendarRef = useRef<HTMLDivElement>(null);
 
-  const [fromDate, setFromDate] = useState("2025-04-23");
-  const [toDate, setToDate] = useState("2025-04-26");
+  const [fromDate, setFromDate] = useState("2025-05-01");
+  const [toDate, setToDate] = useState("2025-06-10");
 
   // const currentGameId =
   //   typeof router.query.recordId === "string"
