@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import styled from "@emotion/styled";
 import { useRecoilState } from "recoil";
 import { useRouter } from "next/router";
@@ -7,6 +7,7 @@ import {
   HomeTeamPlayerListState,
   AwayTeamPlayerListState,
 } from "../../../commons/stores";
+import ErrorAlert from "../../../commons/libraries/showErrorCode";
 
 export const ModalOverlay = styled.div`
   position: fixed;
@@ -109,7 +110,7 @@ export default function SubPlayerSelectionModal({
     HomeTeamPlayerListState
   );
   const isAway = router.query.isHomeTeam === "false";
-
+  const [error, setError] = useState(null);
   useEffect(() => {
     const recordId = router.query.recordId;
     if (!recordId) return;
@@ -131,6 +132,7 @@ export default function SubPlayerSelectionModal({
       .catch((err) => {
         const errorCode = err?.response?.data?.errorCode; // 에러코드 추출
         console.error(err, "errorCode:", errorCode);
+        setError(err);
       });
   }, [
     isAway,
@@ -242,6 +244,7 @@ export default function SubPlayerSelectionModal({
           </ControlButton>
         </ButtonContainer>
       </ModalContainer>
+      <ErrorAlert error={error} />
     </ModalOverlay>
   );
 }

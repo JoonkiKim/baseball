@@ -8,9 +8,11 @@ import {
 } from "./rankingTable.style";
 
 import API from "../../../../commons/apis/api"; // api.ts에서 axios 인스턴스 가져옴
+import ErrorAlert from "../../../../commons/libraries/showErrorCode";
 
 export default function RankingTableComponent() {
   const [groupData, setGroupData] = useState<Record<string, any[]>>({});
+  const [error, setError] = useState(null);
 
   // 그룹별 팀 정보 가져오는 함수
   const fetchGroupedTeams = async (group: string) => {
@@ -41,6 +43,7 @@ export default function RankingTableComponent() {
 
         setGroupData(newGroupData);
       } catch (err) {
+        setError(err);
         const errorCode = err?.response?.data?.errorCode; // 에러코드 추출
         console.error(err, "errorCode:", errorCode);
         console.error("❌ 그룹 요청 에러:", err);
@@ -96,6 +99,7 @@ export default function RankingTableComponent() {
           </div>
         ))}
       </div>
+      <ErrorAlert error={error} />
     </RankingContainer>
   );
 }

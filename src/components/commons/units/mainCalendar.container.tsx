@@ -37,6 +37,7 @@ import {
 import { registerLocale } from "react-datepicker";
 import { ko } from "date-fns/locale";
 import { getAccessToken } from "../../../commons/libraries/getAccessToken";
+import ErrorAlert from "../../../commons/libraries/showErrorCode";
 
 // 새 객체 구조에 맞춘 인터페이스 정의 (matchId → gameId)
 interface RawMatch {
@@ -114,19 +115,22 @@ export default function MainCalendarPage() {
             withCredentials: true,
           }
         );
-        const authRes = await API.get(`/auth/me`);
+        const authRes = await API.get(`/auth/me`, {
+          withCredentials: true,
+        });
         console.log(authRes.data);
         setAuthInfo(authRes.data);
 
         console.log(`/games?from=${fromDate}&to=${toDate}`);
         console.log(res.data);
-        // 백엔드 테스트 시에는 아래의 코드드
+        // 백엔드 테스트 시에는 아래의 코드
         setAllMatchData(res.data.days);
 
         // setAllMatchData(res.data);
         console.log(allMatchData);
       } catch (err) {
         const errorCode = err?.response?.data?.errorCode; // 에러코드 추출
+        setError(err);
         console.error(err, "errorCode:", errorCode);
         console.error("❌ 경기 데이터 요청 에러:", err);
       } finally {
@@ -193,6 +197,9 @@ export default function MainCalendarPage() {
     }
     setIsCalendarOpen(false);
   };
+
+  // 에러 상태
+  const [error, setError] = useState(null);
 
   return (
     <Container>
@@ -461,6 +468,7 @@ export default function MainCalendarPage() {
           </p>
         )}
       </MatchCardsContainer>
+      <ErrorAlert error={error} />
     </Container>
   );
 }

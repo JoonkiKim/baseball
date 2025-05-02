@@ -48,6 +48,7 @@ import {
   LoadingIcon,
   LoadingOverlay,
 } from "../../../../commons/libraries/loadingOverlay";
+import ErrorAlert from "../../../../commons/libraries/showErrorCode";
 
 export default function GameRecordPage() {
   const router = useRouter();
@@ -143,6 +144,7 @@ export default function GameRecordPage() {
       setAttackVal(newAttack);
     } catch (err) {
       console.error("이닝 점수 로드 실패:", err);
+      setError(err);
     }
   }, [recordId]);
 
@@ -161,6 +163,7 @@ export default function GameRecordPage() {
       console.log("타자 응답도착");
     } catch (err) {
       console.error("타자 로드 실패:", err);
+      setError(err);
     }
   }, [recordId]);
 
@@ -178,6 +181,7 @@ export default function GameRecordPage() {
       console.log("투수 응답도착");
     } catch (err) {
       console.error("투수 로드 실패:", err);
+      setError(err);
     }
   }, [recordId]);
 
@@ -250,7 +254,8 @@ export default function GameRecordPage() {
           await fetchPitcher();
         } catch (e) {
           console.error("볼넷/사구 오류:", e);
-          alert("볼넷/사구 오류");
+          setError(e);
+          // alert("볼넷/사구 오류");
         } finally {
           setIsSubmitting(false);
         }
@@ -297,7 +302,8 @@ export default function GameRecordPage() {
       await fetchPitcher();
     } catch (error) {
       console.error("교대 오류:", error);
-      alert("교대 오류");
+      setError(error);
+      // alert("교대 오류");
     } finally {
       setIsSubmitting(false);
       setIsChangeModalOpen(false);
@@ -326,6 +332,8 @@ export default function GameRecordPage() {
     setSelectedCell({ score: String(score), team, index: idx });
     setIsScorePatchModalOpen(true);
   };
+  // 에러 상태
+  const [error, setError] = useState(null);
 
   return (
     <GameRecordContainer>
@@ -522,6 +530,7 @@ export default function GameRecordPage() {
       <LoadingOverlay visible={isSubmitting}>
         <LoadingIcon spin fontSize={48} />
       </LoadingOverlay>
+      <ErrorAlert error={error} />
     </GameRecordContainer>
   );
 }

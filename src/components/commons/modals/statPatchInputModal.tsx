@@ -15,6 +15,7 @@ import {
   LoadingIcon,
   LoadingOverlay,
 } from "../../../commons/libraries/loadingOverlay";
+import ErrorAlert from "../../../commons/libraries/showErrorCode";
 
 /* ──────────────────────────────────────────
    props
@@ -37,6 +38,7 @@ export default function StatPatchInputModal({
   // useModalBack(() => setIsModalOpen(false));
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState(null);
 
   /* msg(문자열) → 객체로 변환 */
   const parseMessage = (msg: string): StatFields => {
@@ -140,7 +142,8 @@ export default function StatPatchInputModal({
       alert("스탯 수정이 완료되었습니다.");
     } catch (err) {
       console.error(err);
-      alert("수정 실패");
+      // alert("수정 실패");
+      setError(err);
     } finally {
       setIsSubmitting(false);
       setIsModalOpen(false);
@@ -199,6 +202,7 @@ export default function StatPatchInputModal({
       <LoadingOverlay visible={isSubmitting}>
         <LoadingIcon spin fontSize={48} />
       </LoadingOverlay>
+      <ErrorAlert error={error} />
     </ModalOverlay>
   );
 }

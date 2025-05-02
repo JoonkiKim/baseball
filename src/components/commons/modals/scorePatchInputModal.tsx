@@ -18,6 +18,7 @@ import {
   LoadingIcon,
   LoadingOverlay,
 } from "../../../commons/libraries/loadingOverlay";
+import ErrorAlert from "../../../commons/libraries/showErrorCode";
 
 interface IScoreEditModalProps {
   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -41,7 +42,7 @@ IScoreEditModalProps) {
   const router = useRouter();
   const [score, setScore] = useState<number>(Number(cellValue));
   const [isSubmitting, setIsSubmitting] = useState(false);
-
+  const [error, setError] = useState(null);
   const handleSubmit = async () => {
     if (!score && score !== 0) {
       alert("점수가 입력되지 않았습니다.");
@@ -71,7 +72,8 @@ IScoreEditModalProps) {
       alert("점수가 성공적으로 수정되었습니다.");
     } catch (error) {
       console.error(error);
-      alert("점수 수정 중 오류가 발생했습니다.");
+      // alert("점수 수정 중 오류가 발생했습니다.");
+      setError(error);
     } finally {
       setIsSubmitting(false);
       setIsModalOpen(false);
@@ -104,6 +106,7 @@ IScoreEditModalProps) {
       <LoadingOverlay visible={isSubmitting}>
         <LoadingIcon spin fontSize={48} />
       </LoadingOverlay>
+      <ErrorAlert error={error} />
     </ModalOverlay>
   );
 }

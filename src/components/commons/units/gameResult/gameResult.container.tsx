@@ -38,6 +38,7 @@ import {
   LoadingOverlay,
 } from "../../../../commons/libraries/loadingOverlay";
 import { getAccessToken } from "../../../../commons/libraries/getAccessToken";
+import ErrorAlert from "../../../../commons/libraries/showErrorCode";
 
 interface ISelectedCell {
   cellValue: string;
@@ -61,6 +62,7 @@ export default function FinalGameRecordPage() {
   // const [recordId] = useRecoilState(gameId);
   const [authInfo, setAuthInfo] = useRecoilState(authMe);
   const recordId = router.query.recordId;
+  const [error, setError] = useState(null);
   /* ───────── 클라이언트(브라우저)에서만 실행 ───────── */
   useEffect(() => {
     // localStorage 접근은 반드시 브라우저에서!
@@ -74,6 +76,7 @@ export default function FinalGameRecordPage() {
         setIsFinalized(status === "FINALIZED");
       } catch (error) {
         // 파싱 오류 대비
+        setError(error);
         const errorCode = error?.response?.data?.errorCode; // 에러코드 추출
         console.error(error, "errorCode:", errorCode);
         setMatchStatus(null);
@@ -89,9 +92,12 @@ export default function FinalGameRecordPage() {
   useEffect(() => {
     const fetchAuthInfo = async () => {
       try {
-        const authRes = await API.get("/auth/me");
+        const authRes = await API.get("/auth/me", {
+          withCredentials: true,
+        });
         setAuthInfo(authRes.data);
       } catch (error) {
+        setError(error);
         console.error("Failed to fetch auth info:", error);
       }
     };
@@ -247,6 +253,7 @@ export default function FinalGameRecordPage() {
       console.log(data);
     } catch (e) {
       console.error("results GET 실패:", e);
+      setError(e);
     }
   }, [recordId]);
 
@@ -750,6 +757,7 @@ export default function FinalGameRecordPage() {
       <LoadingOverlay visible={isSubmitting}>
         <LoadingIcon spin fontSize={48} />
       </LoadingOverlay>
+      <ErrorAlert error={error} />
     </Container>
   );
 }

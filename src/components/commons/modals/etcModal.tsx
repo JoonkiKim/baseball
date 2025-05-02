@@ -12,6 +12,7 @@ import {
   LoadingIcon,
   LoadingOverlay,
 } from "../../../commons/libraries/loadingOverlay";
+import ErrorAlert from "../../../commons/libraries/showErrorCode";
 
 interface IModalProps {
   setIsEtcModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -25,6 +26,7 @@ const mapping: Record<string, string> = {
   희생플라이: "SF",
   "희생번트/타격방해": "ETC",
 };
+const [error, setError] = useState(null);
 
 export default function EtcModal(props: IModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -50,7 +52,8 @@ export default function EtcModal(props: IModalProps) {
       // props.setIsEtcModalOpen(false);
     } catch (error) {
       console.error("etc 기록 전송 오류:", error);
-      alert("etc 기록 전송 오류");
+      setError(error);
+      // alert("etc 기록 전송 오류");
     } finally {
       // ① 로딩 해제
       setIsSubmitting(false);
@@ -93,6 +96,7 @@ export default function EtcModal(props: IModalProps) {
       <LoadingOverlay visible={isSubmitting}>
         <LoadingIcon spin fontSize={48} />
       </LoadingOverlay>
+      <ErrorAlert error={error} />
     </ModalOverlay>
   );
 }

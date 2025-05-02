@@ -22,6 +22,7 @@ import {
   LoadingIcon,
   LoadingOverlay,
 } from "../../../../commons/libraries/loadingOverlay";
+import ErrorAlert from "../../../../commons/libraries/showErrorCode";
 
 interface ISubTeamRegistrationProps {
   isHomeTeam: boolean;
@@ -41,7 +42,7 @@ export default function SubTeamRegistrationComponent({
 
   const [teamName, setTeamName] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-
+  const [error, setError] = useState(null);
   useEffect(() => {
     const matchDataString = localStorage.getItem("selectedMatch");
     if (matchDataString) {
@@ -52,6 +53,7 @@ export default function SubTeamRegistrationComponent({
           : matchData.awayTeam?.name || "";
         setTeamName(name);
       } catch (err) {
+        setError(err);
         const errorCode = err?.response?.data?.errorCode;
         console.error(err, "errorCode:", errorCode);
         console.error("JSON parsing error:", err);
@@ -74,6 +76,7 @@ export default function SubTeamRegistrationComponent({
           try {
             parsedData = JSON.parse(res.data);
           } catch (e) {
+            setError(e);
             const errorCode = e?.response?.data?.errorCode;
             console.error(e, "errorCode:", errorCode);
             console.error("응답 JSON 파싱 실패:", e);
@@ -98,6 +101,7 @@ export default function SubTeamRegistrationComponent({
         }
       })
       .catch((err) => {
+        setError(err);
         const errorCode = err?.response?.data?.errorCode;
         console.error(err, "errorCode:", errorCode);
         console.error("선수 목록 불러오기 실패:", err);
@@ -172,6 +176,7 @@ export default function SubTeamRegistrationComponent({
         router.push(`/matches/${recordId}/records`);
       }
     } catch (err) {
+      setError(err);
       const errorCode = err?.response?.data?.errorCode;
       console.error(err, "errorCode:", errorCode);
       console.error("교체명단 등록 실패:", err);
@@ -230,6 +235,7 @@ export default function SubTeamRegistrationComponent({
       <LoadingOverlay visible={isSubmitting}>
         <LoadingIcon spin fontSize={48} />
       </LoadingOverlay>
+      <ErrorAlert error={error} />
     </ModalOverlay>
   );
 }

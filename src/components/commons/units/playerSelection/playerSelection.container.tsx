@@ -4,6 +4,7 @@ import { useRecoilState } from "recoil";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { playerListState } from "../../../../commons/stores";
+import ErrorAlert from "../../../../commons/libraries/showErrorCode";
 
 // 페이지 전체를 감싸는 컨테이너 스타일 (모달 오버레이 제거)
 const PageContainer = styled.div`
@@ -75,7 +76,7 @@ export default function PlayerSelectionPage({
   const router = useRouter();
   const [playerList] = useRecoilState(playerListState);
   const [pageTitle, setPageTitle] = useState("선수를 선택해주세요");
-
+  const [error, setError] = useState(null);
   // document.referrer를 사용해 직전 페이지가 /records/substitution인지 확인
   useEffect(() => {
     if (typeof document !== "undefined") {
@@ -85,6 +86,7 @@ export default function PlayerSelectionPage({
           setPageTitle("교체할 선수를 선택해주세요");
         }
       } catch (error) {
+        setError(error);
         const errorCode = error?.response?.data?.errorCode; // 에러코드 추출
         console.error(error, "errorCode:", errorCode);
         // 유효한 URL이 아닐 경우 무시
@@ -134,6 +136,7 @@ export default function PlayerSelectionPage({
         </tbody>
       </PlayerTable>
       <BackButton onClick={() => router.back()}>뒤로가기</BackButton>
+      <ErrorAlert error={error} />
     </PageContainer>
   );
 }

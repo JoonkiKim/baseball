@@ -12,6 +12,7 @@ import {
   LoadingIcon,
   LoadingOverlay,
 } from "../../../commons/libraries/loadingOverlay";
+import ErrorAlert from "../../../commons/libraries/showErrorCode";
 
 interface IModalProps {
   setIsOutModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -22,6 +23,8 @@ interface IModalProps {
 export default function OutModal(props: IModalProps) {
   // useModalBack(() => props.setIsOutModalOpen(false));
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const [error, setError] = useState(null);
   const router = useRouter();
   const mapping: { [key: string]: string } = {
     삼진: "SO",
@@ -53,7 +56,8 @@ export default function OutModal(props: IModalProps) {
       // props.setIsOutModalOpen(false);
     } catch (error) {
       console.error("아웃 기록 전송 오류:", error);
-      alert("아웃 기록 전송 오류");
+      // alert("아웃 기록 전송 오류");
+      setError(error);
     } finally {
       // ① 로딩 해제
       setIsSubmitting(false);
@@ -81,6 +85,7 @@ export default function OutModal(props: IModalProps) {
       <LoadingOverlay visible={isSubmitting}>
         <LoadingIcon spin fontSize={48} />
       </LoadingOverlay>
+      <ErrorAlert error={error} />
     </ModalOverlay>
   );
 }

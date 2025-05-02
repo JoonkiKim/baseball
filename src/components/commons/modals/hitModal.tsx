@@ -12,6 +12,7 @@ import {
   LoadingIcon,
   LoadingOverlay,
 } from "../../../commons/libraries/loadingOverlay";
+import ErrorAlert from "../../../commons/libraries/showErrorCode";
 
 interface IModalProps {
   setIsHitModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -29,6 +30,7 @@ const mapping: Record<string, string> = {
 export default function HitModal(props: IModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
+  const [error, setError] = useState(null);
 
   const handleTypeSelect = async (Type: string) => {
     if (isSubmitting) return;
@@ -50,7 +52,8 @@ export default function HitModal(props: IModalProps) {
       console.log(res.data);
     } catch (error) {
       console.error("안타 기록 전송 오류:", error);
-      alert("안타 기록 전송 오류");
+      // alert("안타 기록 전송 오류");
+      setError(error);
     } finally {
       // ① 로딩 해제
       setIsSubmitting(false);
@@ -92,6 +95,7 @@ export default function HitModal(props: IModalProps) {
       <LoadingOverlay visible={isSubmitting}>
         <LoadingIcon spin fontSize={48} />
       </LoadingOverlay>
+      <ErrorAlert error={error} />
     </ModalOverlay>
   );
 }

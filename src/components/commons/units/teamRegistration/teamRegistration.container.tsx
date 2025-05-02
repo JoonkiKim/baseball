@@ -39,6 +39,7 @@ import {
   LoadingOverlay,
 } from "../../../../commons/libraries/loadingOverlay";
 import { count } from "console";
+import ErrorAlert from "../../../../commons/libraries/showErrorCode";
 
 interface PlayerInfo {
   battingOrder: number | string;
@@ -78,7 +79,7 @@ export default function TeamRegistrationPageComponent(props: IProps) {
   );
   const [homeTeamName, setHomeTeamName] = useState("");
   const [awayTeamName, setAwayTeamName] = useState("");
-
+  const [error, setError] = useState(null);
   useEffect(() => {
     const fetchTeamPlayers = async () => {
       if (!recordId) return;
@@ -111,6 +112,7 @@ export default function TeamRegistrationPageComponent(props: IProps) {
           console.log(awayTeamPlayers);
         }
       } catch (err) {
+        setError(err);
         const errorCode = err?.response?.data?.errorCode; // 에러코드 추출
         console.error(err, "errorCode:", errorCode);
         console.error("팀 선수 목록 요청 에러:", err);
@@ -393,6 +395,7 @@ export default function TeamRegistrationPageComponent(props: IProps) {
         );
       }
     } catch (error) {
+      setError(error);
       const errorCode = error?.response?.data?.errorCode; // 에러코드 추출
       console.error(error, "errorCode:", errorCode);
       console.error("POST 요청 실패:", error);
@@ -577,6 +580,7 @@ export default function TeamRegistrationPageComponent(props: IProps) {
       <LoadingOverlay visible={isSubmitting}>
         <LoadingIcon spin fontSize={48} />
       </LoadingOverlay>
+      <ErrorAlert error={error} />
     </Container>
   );
 }

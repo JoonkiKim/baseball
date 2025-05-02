@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 
 import {
@@ -16,6 +16,7 @@ import {
   pitcherStatsState,
 } from "../../../../commons/stores";
 import API from "../../../../commons/apis/api";
+import ErrorAlert from "../../../../commons/libraries/showErrorCode";
 
 export default function StatsPage() {
   /* ▼ / ▲ 표시 결정 유틸 */
@@ -31,7 +32,7 @@ export default function StatsPage() {
   const [pitcherData, setPitcherData] = useRecoilState(pitcherStatsState);
   const [pitcherSortKey, setPitcherSortKey] =
     React.useState<keyof (typeof pitcherData)[0]>("K");
-
+  const [error, setError] = useState(null);
   // --- 데이터 Fetch ---
   useEffect(() => {
     const fetchBatters = async () => {
@@ -43,6 +44,7 @@ export default function StatsPage() {
         const sorted = res.data.batters.sort((a, b) => b.H - a.H);
         setHitterData(sorted);
       } catch (e) {
+        setError(e);
         const errorCode = e?.response?.data?.errorCode; // 에러코드 추출
         console.error(e, "errorCode:", errorCode);
         console.error("Error fetching hitter stats:", e);
@@ -59,6 +61,7 @@ export default function StatsPage() {
         const sorted = res.data.pitchers.sort((a, b) => b.K - a.K);
         setPitcherData(sorted);
       } catch (e) {
+        setError(e);
         const errorCode = e?.response?.data?.errorCode; // 에러코드 추출
         console.error(e, "errorCode:", errorCode);
         console.error("Error fetching pitcher stats:", e);
@@ -270,6 +273,7 @@ export default function StatsPage() {
           <MoreButton>더보기</MoreButton>
         </Link>
       </div>
+      <ErrorAlert error={error} />
     </RankingContainer>
   );
 }

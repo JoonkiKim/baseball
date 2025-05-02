@@ -40,6 +40,7 @@ import {
   LoadingIcon,
   LoadingOverlay,
 } from "../../../../commons/libraries/loadingOverlay";
+import ErrorAlert from "../../../../commons/libraries/showErrorCode";
 
 // 선수 정보를 나타내는 인터페이스
 interface PlayerInfo {
@@ -121,6 +122,7 @@ export default function TeamRegistrationPageComponent() {
   const [awayTeamPlayers, setAwayTeamPlayers] = useRecoilState(
     AwayTeamPlayerListState
   );
+  const [error, setError] = useState(null);
 
   // 팀 API 응답 (선수 목록)
   const [teamPlayersData, setTeamPlayersData] = useState<any[]>([]);
@@ -185,6 +187,7 @@ export default function TeamRegistrationPageComponent() {
               console.log("HomeTeam Players (team API):", parsedData.players);
             })
             .catch((error) => {
+              setError(error);
               const errorCode = error?.response?.data?.errorCode; // 에러코드 추출
               console.error(error, "errorCode:", errorCode);
               console.error("Error fetching homeTeam players:", error);
@@ -204,6 +207,7 @@ export default function TeamRegistrationPageComponent() {
               console.log("AwayTeam Players (team API):", parsedData.players);
             })
             .catch((error) => {
+              setError(error);
               const errorCode = error?.response?.data?.errorCode; // 에러코드 추출
               console.error(error, "errorCode:", errorCode);
               console.error("Error fetching awayTeam players:", error);
@@ -211,6 +215,7 @@ export default function TeamRegistrationPageComponent() {
         }
       }
     } catch (error) {
+      setError(error);
       const errorCode = error?.response?.data?.errorCode; // 에러코드 추출
       console.error(error, "errorCode:", errorCode);
       console.error("로컬스토리지 파싱 에러:", error);
@@ -326,6 +331,7 @@ export default function TeamRegistrationPageComponent() {
           console.log("awayTeamPlayers", awayTeamPlayers);
         }
       } catch (err) {
+        setError(err);
         const errorCode = err?.response?.data?.errorCode; // 에러코드 추출
         console.error(err, "errorCode:", errorCode);
         console.error("팀 선수 목록 요청 에러:", err);
@@ -723,6 +729,7 @@ export default function TeamRegistrationPageComponent() {
 
       router.push(`/matches/${gameId}/records`);
     } catch (error) {
+      setError(error);
       const errorCode = error?.response?.data?.errorCode; // 에러코드 추출
       console.error(error, "errorCode:", errorCode);
       console.error("PATCH 요청 에러:", error);
@@ -883,6 +890,7 @@ export default function TeamRegistrationPageComponent() {
       <LoadingOverlay visible={isSubmitting}>
         <LoadingIcon spin fontSize={48} />
       </LoadingOverlay>
+      <ErrorAlert error={error} />
     </Container>
   );
 }

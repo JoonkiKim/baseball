@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -20,6 +20,17 @@ import {
   LoadingIcon,
   LoadingOverlay,
 } from "../../../../commons/libraries/loadingOverlay";
+import { useRecoilState } from "recoil";
+import { authMe } from "../../../../commons/stores";
+
+import {
+  ModalButton,
+  ModalContainer,
+  ModalOverlay,
+  ModalTitleSmall,
+} from "../../modals/modal.style";
+import Link from "next/link";
+import ErrorAlert from "../../../../commons/libraries/showErrorCode";
 
 // 폼에서 다룰 데이터 타입 정의 (숫자 타입으로 변경)
 interface RefereeFormData {
@@ -53,6 +64,7 @@ const schema = yup.object().shape({
 
 export default function RefereeRegisterPage() {
   const router = useRouter();
+  const [error, setError] = useState(null);
   // react-hook-form 훅 사용, yup resolver 연결
   const [isSubmitting, setIsSubmitting] = useState(false);
   const {
@@ -92,10 +104,11 @@ export default function RefereeRegisterPage() {
       console.log({ email });
       alert("인증번호가 발송되었습니다. 이메일 수신함을 확인해주세요!");
     } catch (error) {
+      setError(error);
       const errorCode = error?.response?.data?.errorCode; // 에러코드 추출
       console.error(error, "errorCode:", errorCode);
       console.error("이메일 인증번호 발송 오류:", error);
-      alert("인증번호 발송에 실패했습니다. 다시 시도해주세요.");
+      // alert("인증번호 발송에 실패했습니다. 다시 시도해주세요.");
     } finally {
       setIsSubmitting(false);
     }
@@ -117,6 +130,7 @@ export default function RefereeRegisterPage() {
       alert("심판 등록에 성공했습니다!");
       router.push(`/`);
     } catch (error) {
+      setError(error);
       const errorCode = error?.response?.data?.errorCode; // 에러코드 추출
       console.error(error, "errorCode:", errorCode);
       console.error("등록 실패:", error);
@@ -125,6 +139,35 @@ export default function RefereeRegisterPage() {
       setIsSubmitting(false);
     }
   };
+
+  const [authInfo, setAuthInfo] = useRecoilState(authMe);
+  useEffect(() => {
+    const fetchAuthInfo = async () => {
+      try {
+        const authRes = await API.get("/auth/me", {
+          withCredentials: true,
+        });
+        setAuthInfo(authRes.data);
+      } catch (error) {
+        setError(error);
+        console.error("Failed to fetch auth info:", error);
+      }
+    };
+    fetchAuthInfo();
+  }, []);
+
+  if (authInfo.role === "umpire") {
+    return (
+      <ModalOverlay>
+        <ModalContainer>
+          <ModalTitleSmall>이미 등록된 심판입니다!</ModalTitleSmall>
+          <Link href="/" passHref>
+            <ModalButton as="a">확인</ModalButton>
+          </Link>
+        </ModalContainer>
+      </ModalOverlay>
+    );
+  }
 
   return (
     <Container>
@@ -202,6 +245,7 @@ export default function RefereeRegisterPage() {
       <LoadingOverlay visible={isSubmitting}>
         <LoadingIcon spin fontSize={48} />
       </LoadingOverlay>
+      <ErrorAlert error={error} />
     </Container>
   );
 }
