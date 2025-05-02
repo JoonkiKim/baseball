@@ -115,7 +115,7 @@ export default function RefereeRegisterPage() {
       });
       console.log(payload, response);
       alert("심판 등록에 성공했습니다!");
-      router.push(`/matches`);
+      router.push(`/`);
     } catch (error) {
       const errorCode = error?.response?.data?.errorCode; // 에러코드 추출
       console.error(error, "errorCode:", errorCode);
