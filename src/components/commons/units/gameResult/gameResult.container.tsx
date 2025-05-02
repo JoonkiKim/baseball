@@ -721,14 +721,14 @@ export default function FinalGameRecordPage() {
         </Link>
         {matchStatus !== "FINALIZED" &&
           // && isAuthenticated
-          authInfo.role === "umpire" &&
+          authInfo.role === "UMPIRE" &&
           // && currentGameId !== null
           authInfo.gameIds.includes(currentGameId) && (
             <ControlButton onClick={handleSubmitClick}>제출하기</ControlButton>
           )}
       </ButtonContainer>
 
-      {authInfo.role === "umpire" &&
+      {authInfo.role === "UMPIRE" &&
         // && currentGameId !== null
         authInfo.gameIds.includes(currentGameId) &&
         isResultSubmitModalOpen && (
@@ -737,7 +737,7 @@ export default function FinalGameRecordPage() {
           />
         )}
 
-      {authInfo.role === "umpire" &&
+      {authInfo.role === "UMPIRE" &&
         // && currentGameId !== null
         authInfo.gameIds.includes(currentGameId) &&
         isScorePatchModalOpen &&

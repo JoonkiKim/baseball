@@ -148,6 +148,7 @@ export default function RefereeRegisterPage() {
           withCredentials: true,
         });
         setAuthInfo(authRes.data);
+        console.log("authRes.data");
       } catch (error) {
         setError(error);
         console.error("Failed to fetch auth info:", error);
@@ -156,7 +157,7 @@ export default function RefereeRegisterPage() {
     fetchAuthInfo();
   }, []);
 
-  if (authInfo.role === "umpire") {
+  if (authInfo.role === "UMPIRE") {
     return (
       <ModalOverlay>
         <ModalContainer>
