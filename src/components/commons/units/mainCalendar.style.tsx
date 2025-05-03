@@ -224,7 +224,7 @@ export const MatchCard = styled.div`
 export const MatchTimeLabel = styled.div`
   font-weight: 500;
   color: #000;
-  margin-right: 8px;
+  /* margin-right: 8px; */
   font-size: 16px; /* 기본값 */
 
   /* Small */
@@ -242,11 +242,14 @@ export const MatchTimeLabel = styled.div`
 `;
 
 export const TeamsContainer = styled.div`
+  /* background-color: red; */
   display: flex;
   align-items: center;
   flex: 1;
   justify-content: center;
   gap: 16px; /* 기본값 */
+  margin-left: 5px;
+  margin-right: 5px;
 
   /* Small */
   @media only screen and (max-width: 480px) {
@@ -275,7 +278,9 @@ export const TeamName = styled.div`
   color: #000;
   font-size: 16px; /* 기본값 */
   margin-bottom: 7px;
-  white-space: pre;
+  /* white-space: pre; */
+  width: 20vw;
+  text-align: center;
   /* background-color: red; */
 `;
 
@@ -286,9 +291,12 @@ export const TeamScore = styled.div<{
 }>`
   font-weight: 600;
   font-size: 12px;
-  /* 경기종료 시 승리팀은 빨간색, 그렇지 않으면 기본 검정색 */
-  color: ${({ isWinner, gameStatus }) =>
-    gameStatus === "FINALIZED" && isWinner ? "#FF0000" : "#000"};
+  color: ${({ isForfeit, isWinner, gameStatus }) =>
+    isForfeit
+      ? "#FF0000"
+      : gameStatus === "FINALIZED" && isWinner
+      ? "#FF0000"
+      : "#000"};
 `;
 
 export const StatusBox = styled.div<{ status: string }>`

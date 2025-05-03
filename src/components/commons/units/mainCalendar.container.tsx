@@ -274,7 +274,6 @@ export default function MainCalendarPage() {
     fetchMatches();
   }, [fromDate, toDate, router]);
   console.log(authInfo);
-
   useEffect(() => {
     const timer = setTimeout(() => {
       if (isLoading) {
@@ -436,27 +435,15 @@ export default function MainCalendarPage() {
                 <TeamsContainer>
                   {/* awayTeam을 왼쪽에 노출 */}
                   <Team>
-                    <TeamName style={{ textAlign: "right" }}>
-                      {(() => {
-                        const name = match.awayTeam.name;
-                        if (name.length >= 5) {
-                          return name.slice(0, 5);
-                        }
-                        const padCount = 5 - name.length;
-                        const filler = "뷁".repeat(padCount);
-                        return (
-                          <>
-                            <span style={{ color: "transparent" }}>
-                              {filler}
-                            </span>
-                            {name}
-                          </>
-                        );
-                      })()}
+                    <TeamName>
+                      {match.awayTeam.name.length >= 5
+                        ? match.awayTeam.name.slice(0, 5)
+                        : match.awayTeam.name.padEnd(5, " ")}
                     </TeamName>
                     <TeamScore
                       isWinner={team2IsWinner}
                       gameStatus={match.status}
+                      isForfeit={match.awayTeam.score === "몰수승"}
                     >
                       {match.status === "SCHEDULED" ? "-" : team2Score ?? "-"}
                     </TeamScore>
@@ -488,27 +475,15 @@ export default function MainCalendarPage() {
 
                   {/* homeTeam을 오른쪽에 노출 */}
                   <Team>
-                    <TeamName style={{ textAlign: "left" }}>
-                      {(() => {
-                        const name = match.homeTeam.name;
-                        if (name.length >= 5) {
-                          return name.slice(0, 5);
-                        }
-                        const padCount = 5 - name.length;
-                        const filler = "뷁".repeat(padCount);
-                        return (
-                          <>
-                            {name}
-                            <span style={{ color: "transparent" }}>
-                              {filler}
-                            </span>
-                          </>
-                        );
-                      })()}
+                    <TeamName>
+                      {match.homeTeam.name.length >= 5
+                        ? match.homeTeam.name.slice(0, 5)
+                        : match.homeTeam.name.padEnd(5, " ")}
                     </TeamName>
                     <TeamScore
                       isWinner={team1IsWinner}
                       gameStatus={match.status}
+                      isForfeit={match.homeTeam.score === "몰수승"}
                     >
                       {match.status === "SCHEDULED" ? "-" : team1Score ?? "-"}
                     </TeamScore>
