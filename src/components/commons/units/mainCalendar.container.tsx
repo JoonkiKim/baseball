@@ -435,7 +435,7 @@ export default function MainCalendarPage() {
                 <TeamsContainer>
                   {/* awayTeam을 왼쪽에 노출 */}
                   <Team>
-                    <TeamName>
+                    <TeamName style={{ textAlign: "right" }}>
                       {match.awayTeam.name.length >= 5
                         ? match.awayTeam.name.slice(0, 5)
                         : match.awayTeam.name.padEnd(5, " ")}
@@ -474,7 +474,7 @@ export default function MainCalendarPage() {
 
                   {/* homeTeam을 오른쪽에 노출 */}
                   <Team>
-                    <TeamName>
+                    <TeamName style={{ textAlign: "left" }}>
                       {match.homeTeam.name.length >= 5
                         ? match.homeTeam.name.slice(0, 5)
                         : match.homeTeam.name.padEnd(5, " ")}
