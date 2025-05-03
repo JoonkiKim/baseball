@@ -42,6 +42,7 @@ export default function RankingTableComponent() {
         });
 
         setGroupData(newGroupData);
+        console.log(groupData);
       } catch (err) {
         setError(err);
         const errorCode = err?.response?.data?.errorCode; // 에러코드 추출

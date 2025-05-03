@@ -41,7 +41,7 @@ export default function StatsPage() {
         const res = await API.get("/records/batters");
         // console.log(API.defaults.baseURL);
         // console.log("responseURL:", (res.request as any).responseURL);
-        // console.log(res.data);
+        console.log(res.data);
         const sorted = res.data.batters.sort((a, b) => b.H - a.H);
         setHitterData(sorted);
       } catch (e) {
