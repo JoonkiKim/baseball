@@ -414,7 +414,7 @@ export default function MainCalendarPage() {
         ) : matchesForSelectedDate.length > 0 ? (
           matchesForSelectedDate.map((match, index) => {
             const canRecord =
-              authInfo.role === "umpire" &&
+              authInfo.role === "UMPIRE" &&
               Array.isArray(authInfo.gameIds) &&
               authInfo.gameIds.includes(match.gameId!);
             // 기존 구조: homeTeam을 team1, awayTeam을 team2로 사용
