@@ -176,7 +176,15 @@ export default function PlayerSelectionModal({
                 >
                   <td>{player.departmentName}</td>
                   <td>{player.name}</td>
-                  <td>{player.isWc ? "WC" : ""}</td>
+                  <td>
+                    {player.isElite && player.isWc
+                      ? "선출/WC"
+                      : player.isElite
+                      ? "선출"
+                      : player.isWc
+                      ? "WC"
+                      : ""}
+                  </td>
                 </tr>
               );
             })}

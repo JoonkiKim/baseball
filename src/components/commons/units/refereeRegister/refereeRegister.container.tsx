@@ -115,7 +115,7 @@ export default function RefereeRegisterPage() {
       // POST /auth/email/request
       await API.post("/auth/email/request", { email });
       console.log({ email });
-      alert("인증번호가 발송되었습니다. 이메일 수신함을 확인해주세요!");
+      alert("인증번호가 발송되었습니다. \n이메일 수신함을 확인해주세요!");
     } catch (error) {
       setError(error);
       const errorCode = error?.response?.data?.errorCode; // 에러코드 추출
