@@ -371,7 +371,7 @@ export default function GameRecordPage() {
 
         {/* Team A */}
         <TeamRow>
-          <TeamNameCell>{teamAName}</TeamNameCell>
+          <TeamNameCell>{teamAName.slice(0, 3)}</TeamNameCell>
           {teamAScores.map((s, i) => (
             <TeamScoreCell
               key={i}
@@ -384,7 +384,7 @@ export default function GameRecordPage() {
 
         {/* Team B */}
         <TeamRow>
-          <TeamNameCell>{teamBName}</TeamNameCell>
+          <TeamNameCell>{teamBName.slice(0, 3)}</TeamNameCell>
           {teamBScores.map((s, i) => (
             <TeamScoreCell
               key={i}

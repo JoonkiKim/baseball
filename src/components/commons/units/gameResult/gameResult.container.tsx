@@ -102,12 +102,9 @@ export default function FinalGameRecordPage() {
     if (!router.isReady) return;
     (async () => {
       try {
-        const authRes = await API.get(
-          "/auth/me"
-          //   , {
-          //   withCredentials: true
-          // }
-        );
+        const authRes = await API.get("/auth/me", {
+          withCredentials: true,
+        });
         setAuthInfo(authRes.data);
         console.log("Fetched auth info:", authRes.data);
       } catch (err) {
