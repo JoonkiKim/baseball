@@ -280,6 +280,7 @@ export const TeamName = styled.div`
 export const TeamScore = styled.div<{
   isWinner?: boolean;
   gameStatus?: string;
+  isForfeit?: boolean;
 }>`
   font-weight: 600;
   font-size: 12px;

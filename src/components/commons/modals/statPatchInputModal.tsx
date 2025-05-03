@@ -136,7 +136,11 @@ export default function StatPatchInputModal({
         return;
       }
 
-      const res = await API.patch(url, body, { withCredentials: true });
+      const res = await API.patch(
+        url,
+        body
+        // { withCredentials: true }
+      );
       console.log("응답:", res.data);
       if (onSuccess) await onSuccess();
       alert("스탯 수정이 완료되었습니다.");

@@ -1,5 +1,5 @@
 // PlayerSelectionModal.tsx
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import styled from "@emotion/styled";
 import { useRecoilState } from "recoil";
 import { useRouter } from "next/router";
@@ -109,6 +109,12 @@ export default function PlayerSelectionModal({
   const allPlayersList = router.asPath.includes("homeTeamRegistration")
     ? homeTeamPlayers
     : awayTeamPlayers;
+  // ↓ 여기를 추가: name 기준 가나(한국어) 정렬
+  const sortedPlayers = useMemo(
+    () =>
+      [...allPlayersList].sort((a, b) => a.name.localeCompare(b.name, "ko")),
+    [allPlayersList]
+  );
 
   useEffect(() => {
     window.history.pushState(null, "", window.location.href);
@@ -156,7 +162,7 @@ export default function PlayerSelectionModal({
             </tr>
           </thead>
           <tbody>
-            {allPlayersList.map((player) => {
+            {sortedPlayers.map((player) => {
               const isAlreadySelected =
                 !allowDuplicates && selectedPlayerIds.includes(player.id);
               return (

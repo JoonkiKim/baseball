@@ -32,8 +32,8 @@ export default function ResultSubmitModal(props: IModalProps) {
 
     try {
       const response = await API.post(
-        `/games/${router.query.recordId}/results/finalize`,
-        { withCredentials: true }
+        `/games/${router.query.recordId}/results/finalize`
+        // { withCredentials: true }
       );
       console.log(
         `/games/${router.query.recordId}/results/finalize`,
@@ -41,8 +41,8 @@ export default function ResultSubmitModal(props: IModalProps) {
         response.status
       );
 
-      if (response.status === 201) {
-        alert("경기 종료 및 확정 성공");
+      if (response.status === 201 || 200) {
+        // alert("경기 종료 및 확정 성공");
         localStorage.removeItem("selectedMatch");
         localStorage.removeItem("lineup_away");
         localStorage.removeItem("lineup_home");

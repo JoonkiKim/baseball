@@ -39,19 +39,23 @@ export default function OutModal(props: IModalProps) {
     try {
       const endpoint = `/games/${router.query.recordId}/plate-appearance`;
       const requestBody = { result: mapping[Type] };
-      const res = await API.post(endpoint, requestBody, {
-        withCredentials: true,
-      });
+      const res = await API.post(
+        endpoint,
+        requestBody
+        //   , {
+        //   withCredentials: true,
+        // }
+      );
 
       // 성공 메시지
 
       console.log(endpoint, requestBody, res.data);
-      alert(`기록 전송 완료\n${Type}`);
+
       // 부모 onSuccess 콜백 실행
       if (props.onSuccess) {
         await props.onSuccess();
       }
-
+      alert(`기록 전송 완료\n${Type}`);
       // 모달 닫기
       // props.setIsOutModalOpen(false);
     } catch (error) {

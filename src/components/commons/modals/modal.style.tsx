@@ -28,6 +28,32 @@ export const ModalContainer = styled.div`
   justify-content: center;
 `;
 
+export const ModalOverlayEx = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5); /* 어두운 반투명 배경 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+export const ModalContainerEx = styled.div`
+  background-color: #fff;
+  position: relative;
+  /* margin-top: 20px; */
+  width: 80%;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+`;
+
 export const LongModalContainer = styled.div`
   background-color: #fff;
   margin-top: 100px;
@@ -51,9 +77,20 @@ export const ModalTitle = styled.h2`
 `;
 
 export const ModalTitleSmall = styled.h2`
+  white-space: pre-line;
   margin-bottom: 30px;
   margin-top: 20px;
   font-size: 18px;
+
+  font-family: "KBO-Dia-Gothic_medium";
+  font-weight: 300;
+`;
+
+export const ModalTitleSmaller = styled.h2`
+  white-space: pre-line;
+  margin-bottom: 30px;
+  margin-top: 20px;
+  font-size: 15px;
 
   font-family: "KBO-Dia-Gothic_medium";
   font-weight: 300;
@@ -75,7 +112,42 @@ export const ModalButton = styled.button`
   cursor: pointer;
 `;
 
+export const ModalButtonEx = styled.button`
+  display: block;
+  width: 80%;
+  height: 48px;
+  margin-bottom: 30px;
+  padding: 12px;
+  background-color: rgba(0, 0, 0, 0.75);
+  border: none;
+  color: #fff;
+  font-size: 14px;
+  border-radius: 100px;
+  font-family: "KBO-Dia-Gothic_medium";
+  font-weight: 300;
+  cursor: pointer;
+`;
+
 export const ModalCancleButton = styled.button`
+  display: block;
+  width: 80%;
+  margin-bottom: 10px;
+  padding: 12px;
+  background-color: #f5f5f5;
+  border: none;
+  color: #000000;
+  font-size: 14px;
+  font-family: "KBO-Dia-Gothic_medium";
+  font-weight: 300;
+  border-radius: 100px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #bdbdbd;
+  }
+`;
+
+export const ModalCancleButtonEx = styled.button`
   display: block;
   width: 80%;
   margin-bottom: 10px;

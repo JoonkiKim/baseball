@@ -55,7 +55,7 @@ export const RankingTable = styled.table`
         /* font-weight: 600; */
         color: #000000;
         padding: 12px;
-        text-align: left;
+        text-align: center;
         border-bottom: 1px solid #000000;
         border-top: 1px solid #000000;
 
@@ -75,6 +75,7 @@ export const RankingTable = styled.table`
 
   tbody {
     tr {
+      /* background-color: red; */
       border-bottom: 1px solid #e8e8e8;
 
       &:last-of-type {
@@ -82,11 +83,13 @@ export const RankingTable = styled.table`
       }
 
       td {
+        /* background-color: red; */
         font-family: "KBO-Dia-Gothic_medium";
         /* font-weight: 400; */
         color: #000;
         text-align: left;
         padding: 12px;
+        text-align: center;
 
         ${small} {
           font-size: 12px;
@@ -115,7 +118,7 @@ export const RankingTableP = styled.table`
         /* font-weight: 600; */
         color: #000000;
         padding: 12px;
-        text-align: left;
+        text-align: center;
         border-bottom: 1px solid #000000;
         border-top: 1px solid #000000;
 
@@ -145,7 +148,7 @@ export const RankingTableP = styled.table`
         font-family: "KBO-Dia-Gothic_medium";
         /* font-weight: 400; */
         color: #000;
-        text-align: left;
+        text-align: center;
         padding: 12px;
 
         ${small} {
@@ -176,7 +179,12 @@ export const RankingTableP = styled.table`
 
   th:nth-of-type(3),
   td:nth-of-type(3) {
-    width: 20vh; /* 원하는 값으로 조정 */
+    width: 12vh; /* 원하는 값으로 조정 */
+    /* background-color: red; */
+    /* display: flex;
+    flex-direction: column; */
+    /* justify-content: center; */
+    /* align-items: center; */
   }
 `;
 

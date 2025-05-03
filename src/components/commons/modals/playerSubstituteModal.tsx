@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import styled from "@emotion/styled";
 import { useRecoilState } from "recoil";
 import { useRouter } from "next/router";
@@ -120,9 +120,12 @@ export default function SubPlayerSelectionModal({
       ? "substitutable-pitchers"
       : "substitutable-batters";
 
-    API.get(`/games/${recordId}/${endpoint}?teamType=${teamType}`, {
-      withCredentials: true,
-    })
+    API.get(
+      `/games/${recordId}/${endpoint}?teamType=${teamType}`
+      //   , {
+      //   withCredentials: true,
+      // }
+    )
       .then((res) => {
         const data =
           typeof res.data === "string" ? JSON.parse(res.data) : res.data;
@@ -158,6 +161,10 @@ export default function SubPlayerSelectionModal({
     minimal.batters || [];
   const originalPitcherId: number | null = minimal.pitcher?.playerId ?? null;
   const players = isAway ? awayTeamPlayers : homeTeamPlayers;
+  const sortedPlayers = useMemo(
+    () => [...players].sort((a, b) => a.name.localeCompare(b.name, "ko")),
+    [players]
+  );
 
   const handleRowClick = (player: any) => {
     onSelectPlayer({
@@ -183,7 +190,7 @@ export default function SubPlayerSelectionModal({
             </tr>
           </thead>
           <tbody>
-            {players.map((player) => {
+            {sortedPlayers.map((player) => {
               let disabled: boolean;
 
               if (isPitcher) {

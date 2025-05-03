@@ -5,10 +5,11 @@ import {
   ModalOverlay,
   ModalTitleSmall,
 } from "../../components/commons/modals/modal.style";
+import { useState } from "react";
 
 // 백엔드 정의 에러 코드 -> 한국어 메시지 맵
 const ERROR_MESSAGE_MAP = {
-  ERR_NETWORK: "경기 일정을 불러올 수 없습니다",
+  ERR_NETWORK: "credential설정",
   INTERNAL_SERVER_ERROR: "서버 내부 오류가 발생했습니다.",
   NOT_FOUND: "요청한 리소스를 찾을 수 없습니다.",
   UMPIRE_NOT_FOUND: "심판을 찾을 수 없습니다.",
@@ -55,7 +56,8 @@ const ERROR_MESSAGE_MAP = {
 };
 
 export default function ErrorAlert({ error }) {
-  if (!error) return null;
+  const [visible, setVisible] = useState(true);
+  if (!error || !visible) return null;
 
   const code = error.response?.data?.code || error.code;
   const message =
@@ -69,9 +71,7 @@ export default function ErrorAlert({ error }) {
     <ModalOverlay>
       <ModalContainer>
         <ModalTitleSmall>{message}</ModalTitleSmall>
-        <Link href="/" passHref>
-          <ModalButton as="a">확인</ModalButton>
-        </Link>
+        <ModalButton onClick={() => setVisible(false)}>확인</ModalButton>
       </ModalContainer>
     </ModalOverlay>
   );

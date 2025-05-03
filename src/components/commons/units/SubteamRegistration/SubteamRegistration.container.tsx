@@ -4,7 +4,6 @@ import { useRecoilState } from "recoil";
 import { useRouter } from "next/router";
 import {
   AwayTeamPlayerListState,
-  gameId,
   HomeTeamPlayerListState,
 } from "../../../../commons/stores";
 import {
@@ -17,12 +16,19 @@ import {
   PlayerTable,
 } from "./SubteamRegistration.style";
 import API from "../../../../commons/apis/api";
-import RecordStartModal from "../../modals/recordStart";
 import {
   LoadingIcon,
   LoadingOverlay,
 } from "../../../../commons/libraries/loadingOverlay";
 import ErrorAlert from "../../../../commons/libraries/showErrorCode";
+import {
+  ModalButton,
+  ModalButtonEx,
+  ModalCancleButtonEx,
+  ModalContainerEx,
+  ModalOverlayEx,
+  ModalTitleSmaller,
+} from "../../modals/modal.style";
 
 interface ISubTeamRegistrationProps {
   isHomeTeam: boolean;
@@ -31,6 +37,9 @@ interface ISubTeamRegistrationProps {
 export default function SubTeamRegistrationComponent({
   isHomeTeam,
 }: ISubTeamRegistrationProps) {
+  const [validationError, setValidationError] = useState<string | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmMessage, setConfirmMessage] = useState("");
   const router = useRouter();
   const recordId = router.query.recordId;
   const [homeTeamPlayers, setHomeTeamPlayers] = useRecoilState(
@@ -39,10 +48,10 @@ export default function SubTeamRegistrationComponent({
   const [awayTeamPlayers, setAwayTeamPlayers] = useRecoilState(
     AwayTeamPlayerListState
   );
-
   const [teamName, setTeamName] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<any>(null);
+
   useEffect(() => {
     const matchDataString = localStorage.getItem("selectedMatch");
     if (matchDataString) {
@@ -52,10 +61,8 @@ export default function SubTeamRegistrationComponent({
           ? matchData.homeTeam?.name || ""
           : matchData.awayTeam?.name || "";
         setTeamName(name);
-      } catch (err) {
+      } catch (err: any) {
         setError(err);
-        const errorCode = err?.response?.data?.errorCode;
-        console.error(err, "errorCode:", errorCode);
         console.error("JSON parsing error:", err);
       }
     }
@@ -63,47 +70,23 @@ export default function SubTeamRegistrationComponent({
 
   useEffect(() => {
     if (!recordId) return;
-
     const teamType = isHomeTeam ? "home" : "away";
     const url = `/games/${recordId}/players-with-in-lineup?teamType=${teamType}`;
-
-    API.get(url, { withCredentials: true })
+    API.get(url)
       .then((res) => {
-        let parsedData;
-        console.log("응답이 도착!(교체선수선택)");
-
-        if (typeof res.data === "string") {
-          try {
-            parsedData = JSON.parse(res.data);
-          } catch (e) {
-            setError(e);
-            const errorCode = e?.response?.data?.errorCode;
-            console.error(e, "errorCode:", errorCode);
-            console.error("응답 JSON 파싱 실패:", e);
-            return;
-          }
+        const parsed =
+          typeof res.data === "string" ? JSON.parse(res.data) : res.data;
+        const players = parsed.players;
+        if (Array.isArray(players)) {
+          isHomeTeam
+            ? setHomeTeamPlayers(players)
+            : setAwayTeamPlayers(players);
         } else {
-          parsedData = res.data;
-        }
-
-        const players = parsedData.players;
-        if (!Array.isArray(players)) {
           console.error("players가 배열이 아님:", players);
-          return;
-        }
-
-        if (isHomeTeam) {
-          setHomeTeamPlayers(players);
-          console.log("home", players);
-        } else {
-          setAwayTeamPlayers(players);
-          console.log("away", players);
         }
       })
       .catch((err) => {
         setError(err);
-        const errorCode = err?.response?.data?.errorCode;
-        console.error(err, "errorCode:", errorCode);
         console.error("선수 목록 불러오기 실패:", err);
       });
   }, [recordId]);
@@ -111,7 +94,6 @@ export default function SubTeamRegistrationComponent({
   const allPlayersList = router.asPath.includes("homeTeamSubRegistration")
     ? homeTeamPlayers
     : awayTeamPlayers;
-  console.log("allPlayersList:", allPlayersList);
 
   const handleContainerClick = (e: React.MouseEvent) => e.stopPropagation();
 
@@ -132,58 +114,52 @@ export default function SubTeamRegistrationComponent({
     );
   };
 
-  const handleSubmit = async () => {
-    if (isSubmitting) return;
+  const proceedSubmission = async () => {
     setIsSubmitting(true);
-    console.log("선택된 선수 목록:", selectedPlayers);
-
-    if (selectedPlayers.length === 0) {
-      const proceed = window.confirm(
-        "교체선수를 한명도 선택하지 않았습니다. 이대로 제출하시겠습니까?"
-      );
-      if (!proceed) {
-        setIsSubmitting(false);
-        return;
-      }
-    }
-
     if (!recordId) {
       console.error("recordId가 존재하지 않습니다.");
       setIsSubmitting(false);
       return;
     }
-
     const playerIds = selectedPlayers.map((p) => p.id);
-    const payload = { playerIds };
-    console.log(payload);
-
     try {
       const teamType = isHomeTeam ? "home" : "away";
-      const res = await API.post(
-        `/games/${recordId}/substitution?teamType=${teamType}`,
-        payload,
-        { withCredentials: true }
-      );
-      console.log(res.data);
-
+      await API.post(`/games/${recordId}/substitution?teamType=${teamType}`, {
+        playerIds,
+      });
       if (isHomeTeam) {
         router.push(`/matches/${recordId}/awayTeamRegistration`);
       } else {
-        const startRes = await API.post(`/games/${recordId}/start`, {
-          withCredentials: true,
-        });
-        console.log(startRes.data);
+        await API.post(`/games/${recordId}/start`);
         router.push(`/matches/${recordId}/records`);
       }
     } catch (err) {
       setError(err);
-      const errorCode = err?.response?.data?.errorCode;
-      console.error(err, "errorCode:", errorCode);
       console.error("교체명단 등록 실패:", err);
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  const handleSubmit = () => {
+    if (isSubmitting) return;
+    if (selectedPlayers.length === 0) {
+      setConfirmMessage(
+        "교체선수를 한명도 선택하지 않았습니다.\n이대로 제출하시겠습니까?"
+      );
+      setConfirmOpen(true);
+    } else {
+      proceedSubmission();
+    }
+  };
+
+  useEffect(() => {
+    const originalAlert = window.alert;
+    window.alert = (msg: string) => setValidationError(msg);
+    return () => {
+      window.alert = originalAlert;
+    };
+  }, []);
 
   return (
     <ModalOverlay>
@@ -204,7 +180,6 @@ export default function SubTeamRegistrationComponent({
                 (p) => p.id === player.id
               );
               const isDisabled = player.inLineup;
-
               return (
                 <tr
                   key={player.id}
@@ -236,6 +211,40 @@ export default function SubTeamRegistrationComponent({
         <LoadingIcon spin fontSize={48} />
       </LoadingOverlay>
       <ErrorAlert error={error} />
+      {validationError && (
+        <ModalOverlayEx>
+          <ModalContainerEx>
+            <ModalTitleSmaller>{validationError}</ModalTitleSmaller>
+            <ModalButtonEx onClick={() => setValidationError(null)}>
+              예
+            </ModalButtonEx>
+            <ModalCancleButtonEx onClick={() => setValidationError(null)}>
+              아니오
+            </ModalCancleButtonEx>
+          </ModalContainerEx>
+        </ModalOverlayEx>
+      )}
+      {confirmOpen && (
+        <ModalOverlayEx>
+          <ModalContainerEx>
+            <ModalTitleSmaller>{confirmMessage}</ModalTitleSmaller>
+            {/* <p style={{ whiteSpace: "pre-line", margin: "1rem 0" }}>
+              {confirmMessage}
+            </p> */}
+            <ModalButtonEx
+              onClick={() => {
+                setConfirmOpen(false);
+                proceedSubmission();
+              }}
+            >
+              예
+            </ModalButtonEx>
+            <ModalCancleButtonEx onClick={() => setConfirmOpen(false)}>
+              아니오
+            </ModalCancleButtonEx>
+          </ModalContainerEx>
+        </ModalOverlayEx>
+      )}
     </ModalOverlay>
   );
 }

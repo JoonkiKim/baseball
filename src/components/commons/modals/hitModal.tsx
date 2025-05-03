@@ -40,15 +40,16 @@ export default function HitModal(props: IModalProps) {
       const endpoint = `/games/${router.query.recordId}/plate-appearance`;
       const res = await API.post(
         endpoint,
-        { result: mapping[Type] },
-        { withCredentials: true }
+        { result: mapping[Type] }
+        // ,
+        // { withCredentials: true }
       );
       console.log({ result: mapping[Type] });
       // POST 성공 시 부모 onSuccess 콜백 실행
-      alert(`기록 전송 완료\n${Type}`);
+
       if (props.onSuccess) await props.onSuccess();
       // props.setIsHitModalOpen(false);
-
+      alert(`기록 전송 완료\n${Type}`);
       console.log(res.data);
     } catch (error) {
       console.error("안타 기록 전송 오류:", error);

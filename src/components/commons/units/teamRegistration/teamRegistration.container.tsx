@@ -40,6 +40,13 @@ import {
 } from "../../../../commons/libraries/loadingOverlay";
 import { count } from "console";
 import ErrorAlert from "../../../../commons/libraries/showErrorCode";
+import {
+  ModalButton,
+  ModalContainer,
+  ModalOverlay,
+  ModalTitleSmall,
+  ModalTitleSmaller,
+} from "../../modals/modal.style";
 
 interface PlayerInfo {
   battingOrder: number | string;
@@ -68,6 +75,8 @@ const positionOptions = [
 
 export default function TeamRegistrationPageComponent(props: IProps) {
   const router = useRouter();
+  // 기존 useState 훅들 아래에 추가
+  const [validationError, setValidationError] = useState<string | null>(null);
   // const [recordId, setGameId] = useRecoilState(gameId);
   const recordId = router.query.recordId;
   const [teamInfo] = useRecoilState(TeamListState);
@@ -87,8 +96,8 @@ export default function TeamRegistrationPageComponent(props: IProps) {
         if (router.asPath.includes("homeTeamRegistration")) {
           // const res = await API.get(`/teams/${teamInfo[0].homeTeamId}/players`);
           const res = await API.get(
-            `/games/${recordId}/players?teamType=home`,
-            { withCredentials: true }
+            `/games/${recordId}/players?teamType=home`
+            // { withCredentials: true }
           );
           console.log("응답이 도착!(홈팀멤버)");
           console.log(res.data);
@@ -101,8 +110,8 @@ export default function TeamRegistrationPageComponent(props: IProps) {
           // const res = await API.get(`/teams/${teamInfo[0].awayTeamId}/players`);
 
           const res = await API.get(
-            `/games/${recordId}/players?teamType=away`,
-            { withCredentials: true }
+            `/games/${recordId}/players?teamType=away`
+            // { withCredentials: true }
           );
           console.log("응답이 도착!(원정팀멤버)");
           const dataObj =
@@ -249,7 +258,7 @@ export default function TeamRegistrationPageComponent(props: IProps) {
     const blankNameNonP = nonPRows.find((player) => !player.name?.trim());
     if (blankNameNonP) {
       alert(
-        `${blankNameNonP.battingOrder}번 타자의 선수명 입력칸이 비어 있습니다.`
+        `${blankNameNonP.battingOrder}번 타자의 선수명 입력칸이 \n 비어 있습니다.`
       );
       return;
     }
@@ -258,7 +267,7 @@ export default function TeamRegistrationPageComponent(props: IProps) {
     );
     if (blankPositionNonP) {
       alert(
-        `${blankPositionNonP.battingOrder}번 타자의 포지션 입력칸이 비어 있습니다.`
+        `${blankPositionNonP.battingOrder}번 타자의 포지션 입력칸이 \n  비어 있습니다.`
       );
       return;
     }
@@ -269,7 +278,7 @@ export default function TeamRegistrationPageComponent(props: IProps) {
     const hasP = nonPPositions.includes("P");
     if (hasDH && hasP) {
       alert(
-        "1번~9번 타순에서는 DH와 P를 동시에 선택할 수 없습니다. DH만 선택하거나 P만 선택해주세요."
+        "1번~9번 타순에서는 \n DH와 P를 동시에 선택할 수 없습니다. \n DH만 선택하거나 P만 선택해주세요."
       );
       return;
     }
@@ -280,7 +289,7 @@ export default function TeamRegistrationPageComponent(props: IProps) {
       const nonPpitcher = nonPRows.find((player) => player.position === "P");
       if (nonPpitcher && pRow && nonPpitcher.name !== pRow.name) {
         alert(
-          "1번~9번 타순에 투수가 있는 경우, 해당 선수명과 P행 선수명이 일치해야 합니다."
+          "1번~9번 타순에 투수가 있는 경우, \n 해당 선수명과 P행 선수명이 \n  일치해야 합니다."
         );
         return;
       }
@@ -290,7 +299,7 @@ export default function TeamRegistrationPageComponent(props: IProps) {
     if (hasDH) {
       if (pRow && nonPRows.some((player) => player.name === pRow.name)) {
         alert(
-          "1번~9번 타순에 DH가 있는 경우, P행의 선수명은 1번~9번 타순 내에 존재해서는 안됩니다."
+          "1번~9번 타순에 DH가 있는 경우, \nP행의 선수명은 1번~9번 타순 내에 \n존재해서는 안됩니다."
         );
         return;
       }
@@ -346,7 +355,7 @@ export default function TeamRegistrationPageComponent(props: IProps) {
     const wildcardCount = uniqueWildcardNames.size;
     console.log(wildcardCount);
     if (wildcardCount > 3) {
-      alert(`와일드카드 제한을 초과했습니다 (현재 ${wildcardCount}명)`);
+      alert(`와일드카드 제한을 초과했습니다\n (현재 ${wildcardCount}명)`);
       return;
     }
 
@@ -380,7 +389,11 @@ export default function TeamRegistrationPageComponent(props: IProps) {
     try {
       const teamType = props.isHomeTeam ? "home" : "away";
       const url = `/games/${recordId}/lineup?teamType=${teamType}`;
-      const res = await API.post(url, requestBody, { withCredentials: true });
+      const res = await API.post(
+        url,
+        requestBody
+        // { withCredentials: true }
+      );
       console.log("POST 요청 성공:", res.data);
       setPlayers(updatedPlayers);
       setIsSubmitting(false);
@@ -417,6 +430,16 @@ export default function TeamRegistrationPageComponent(props: IProps) {
   useEffect(() => {
     console.log("watch('players'):", watchedPlayers);
     console.log(router.asPath.includes("homeTeamRegistration"));
+  }, []);
+
+  useEffect(() => {
+    const originalAlert = window.alert;
+    window.alert = (msg: string) => {
+      setValidationError(msg);
+    };
+    return () => {
+      window.alert = originalAlert;
+    };
   }, []);
 
   return (
@@ -581,6 +604,17 @@ export default function TeamRegistrationPageComponent(props: IProps) {
         <LoadingIcon spin fontSize={48} />
       </LoadingOverlay>
       <ErrorAlert error={error} />
+      {validationError && (
+        <ModalOverlay>
+          <ModalContainer>
+            <ModalTitleSmaller>{validationError}</ModalTitleSmaller>
+
+            <ModalButton onClick={() => setValidationError(null)}>
+              확인
+            </ModalButton>
+          </ModalContainer>
+        </ModalOverlay>
+      )}
     </Container>
   );
 }

@@ -7,7 +7,7 @@ import {
   ModalOverlay,
   ModalTitle,
 } from "./modal.style";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   LoadingIcon,
   LoadingOverlay,
@@ -30,6 +30,7 @@ const mapping: Record<string, string> = {
 
 export default function EtcModal(props: IModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  // const [validationError, setValidationError] = useState<string | null>(null);
   const router = useRouter();
 
   const handleTypeSelect = async (Type: string) => {
@@ -42,12 +43,12 @@ export default function EtcModal(props: IModalProps) {
       const { data } = await API.post(endpoint, requestBody);
 
       console.log(endpoint, requestBody, data);
-      alert(`기록 전송 완료\n${Type}`);
+
       // 부모가 넘겨준 onSuccess 콜백 실행
       if (props.onSuccess) {
         await props.onSuccess();
       }
-
+      alert(`기록 전송 완료\n${Type}`);
       // 모달 닫기
       // props.setIsEtcModalOpen(false);
     } catch (error) {
@@ -61,6 +62,15 @@ export default function EtcModal(props: IModalProps) {
       props.setIsEtcModalOpen(false);
     }
   };
+  // useEffect(() => {
+  //   const originalAlert = window.alert;
+  //   window.alert = (msg: string) => {
+  //     setValidationError(msg);
+  //   };
+  //   return () => {
+  //     window.alert = originalAlert;
+  //   };
+  // }, []);
 
   return (
     <ModalOverlay onClick={() => props.setIsEtcModalOpen(false)}>

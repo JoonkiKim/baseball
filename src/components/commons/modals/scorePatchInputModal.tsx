@@ -61,8 +61,8 @@ IScoreEditModalProps) {
       const requestBody = { runs: score };
       const res = await API.patch(
         `/games/${router.query.recordId}/scores/${order}/${suffix}`,
-        requestBody,
-        { withCredentials: true }
+        requestBody
+        // { withCredentials: true }
       );
       console.log(res);
       if (onSuccess) {

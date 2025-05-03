@@ -39,6 +39,12 @@ import {
 } from "../../../../commons/libraries/loadingOverlay";
 import { getAccessToken } from "../../../../commons/libraries/getAccessToken";
 import ErrorAlert from "../../../../commons/libraries/showErrorCode";
+import {
+  ModalButton,
+  ModalContainer,
+  ModalOverlay,
+  ModalTitleSmaller,
+} from "../../modals/modal.style";
 
 interface ISelectedCell {
   cellValue: string;
@@ -61,10 +67,11 @@ export default function FinalGameRecordPage() {
   const [isFinalized, setIsFinalized] = useState<boolean>(false);
   // const [recordId] = useRecoilState(gameId);
   const [authInfo, setAuthInfo] = useRecoilState(authMe);
-  const [recordId, setRecordId] = useState(router.query.recordId);
+  // const [recordId, setRecordId] = useState(router.query.recordId);
   // const recordId = router.query.recordId;
   const [error, setError] = useState(null);
   /* ───────── 클라이언트(브라우저)에서만 실행 ───────── */
+  const recordId = router.query.recordId;
   useEffect(() => {
     // localStorage 접근은 반드시 브라우저에서!
     const stored = localStorage.getItem("selectedMatch");
@@ -91,23 +98,28 @@ export default function FinalGameRecordPage() {
   }, [recordId]); // 필요하다면 router.query 등 의존성 추가
 
   useEffect(() => {
-    const fetchAuthInfo = async () => {
+    if (!router.isReady) return;
+    (async () => {
       try {
-        const authRes = await API.get("/auth/me", {
-          withCredentials: true,
-        });
+        const authRes = await API.get(
+          "/auth/me"
+          //   , {
+          //   withCredentials: true
+          // }
+        );
         setAuthInfo(authRes.data);
-      } catch (error) {
-        setError(error);
-        console.error("Failed to fetch auth info:", error);
+        console.log("Fetched auth info:", authRes.data);
+      } catch (err) {
+        setError(err);
+        console.error("Failed to fetch auth info:", err);
       }
-    };
-    fetchAuthInfo();
-  }, []);
+    })();
+  }, [router.isReady]);
+  // console.log(authInfo);
 
-  const currentGameId = typeof recordId === "string" ? Number(recordId) : null;
+  // const currentGameId = typeof recordId === "string" ? Number(recordId) : null;
 
-  console.log(currentGameId);
+  // console.log(currentGameId);
   // console.log(matchStatus); // 확인용
 
   // 팀 이름 상태
@@ -356,6 +368,18 @@ export default function FinalGameRecordPage() {
   //   const token = getAccessToken();
   //   setIsAuthenticated(!!token); // accessToken이 있으면 true
   // }, []);
+
+  const [validationError, setValidationError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const originalAlert = window.alert;
+    window.alert = (msg: string) => {
+      setValidationError(msg);
+    };
+    return () => {
+      window.alert = originalAlert;
+    };
+  }, []);
 
   return (
     <Container>
@@ -723,14 +747,14 @@ export default function FinalGameRecordPage() {
           // && isAuthenticated
           authInfo.role === "UMPIRE" &&
           // && currentGameId !== null
-          authInfo.gameIds.includes(currentGameId) && (
+          authInfo.gameIds.includes(Number(router.query.recordId)) && (
             <ControlButton onClick={handleSubmitClick}>제출하기</ControlButton>
           )}
       </ButtonContainer>
 
       {authInfo.role === "UMPIRE" &&
         // && currentGameId !== null
-        authInfo.gameIds.includes(currentGameId) &&
+        authInfo.gameIds.includes(Number(router.query.recordId)) &&
         isResultSubmitModalOpen && (
           <ResultSubmitModal
             setIsResultSubmitModalOpen={setIsResultSubmitModalOpen}
@@ -739,7 +763,7 @@ export default function FinalGameRecordPage() {
 
       {authInfo.role === "UMPIRE" &&
         // && currentGameId !== null
-        authInfo.gameIds.includes(currentGameId) &&
+        authInfo.gameIds.includes(Number(router.query.recordId)) &&
         isScorePatchModalOpen &&
         selectedCell && (
           <ScorePatchModal
@@ -759,6 +783,17 @@ export default function FinalGameRecordPage() {
         <LoadingIcon spin fontSize={48} />
       </LoadingOverlay>
       <ErrorAlert error={error} />
+      {!isSubmitting && validationError && (
+        <ModalOverlay>
+          <ModalContainer>
+            <ModalTitleSmaller>{validationError}</ModalTitleSmaller>
+
+            <ModalButton onClick={() => setValidationError(null)}>
+              확인
+            </ModalButton>
+          </ModalContainer>
+        </ModalOverlay>
+      )}
     </Container>
   );
 }

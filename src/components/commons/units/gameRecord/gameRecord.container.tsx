@@ -49,6 +49,12 @@ import {
   LoadingOverlay,
 } from "../../../../commons/libraries/loadingOverlay";
 import ErrorAlert from "../../../../commons/libraries/showErrorCode";
+import {
+  ModalButton,
+  ModalContainer,
+  ModalOverlay,
+  ModalTitleSmaller,
+} from "../../modals/modal.style";
 
 export default function GameRecordPage() {
   const [error, setError] = useState(null);
@@ -109,7 +115,7 @@ export default function GameRecordPage() {
     if (!recordId) return;
     try {
       const res = await API.get(`/games/${recordId}/scores`, {
-        withCredentials: true,
+        // withCredentials: true,
       });
 
       const response = res.data;
@@ -155,8 +161,8 @@ export default function GameRecordPage() {
     try {
       const teamType = attackVal === "home" ? "home" : "away";
       const res = await API.get(
-        `/games/${recordId}/current-batter?teamType=${teamType}`,
-        { withCredentials: true }
+        `/games/${recordId}/current-batter?teamType=${teamType}`
+        // { withCredentials: true }
       );
       setBatter(res.data);
 
@@ -174,8 +180,8 @@ export default function GameRecordPage() {
     try {
       const teamType = attackVal === "home" ? "away" : "home";
       const res = await API.get(
-        `/games/${recordId}/current-pitcher?teamType=${teamType}`,
-        { withCredentials: true }
+        `/games/${recordId}/current-pitcher?teamType=${teamType}`
+        // { withCredentials: true }
       );
       setPitcher(res.data);
 
@@ -242,17 +248,16 @@ export default function GameRecordPage() {
             `/games/${recordId}/plate-appearance`,
             {
               result: "BB",
-            },
-            { withCredentials: true }
+            }
+            // { withCredentials: true }
           );
-
-          // 2) Alert 표시 (확인 클릭 후 다음 로직 실행)
-          alert("볼넷/사구 기록 전송 완료");
 
           // 3) GET 요청들만 다시 실행
           await fetchInningScores();
           await fetchBatter();
           await fetchPitcher();
+          // 2) Alert 표시 (확인 클릭 후 다음 로직 실행)
+          alert("볼넷/사구 기록 전송 완료");
         } catch (e) {
           console.error("볼넷/사구 오류:", e);
           setError(e);
@@ -290,10 +295,10 @@ export default function GameRecordPage() {
     try {
       // 1) POST
       await API.post(`/games/${recordId}/scores`, { runs: thisInningScore }),
-        { withCredentials: true };
-      // 2) 사용자 알림 (확인 클릭 후 다음 단계)
-      console.log({ runs: thisInningScore });
-      alert("공수교대 완료");
+        // { withCredentials: true };
+        // 2) 사용자 알림 (확인 클릭 후 다음 단계)
+        console.log({ runs: thisInningScore });
+
       // 3) 로컬 state 리셋
       setIsSubstitutionSwapped((prev) => !prev);
       setThisInningScore(0);
@@ -301,6 +306,7 @@ export default function GameRecordPage() {
       await fetchInningScores();
       await fetchBatter();
       await fetchPitcher();
+      alert("공수교대 완료");
     } catch (error) {
       console.error("교대 오류:", error);
       setError(error);
@@ -334,6 +340,17 @@ export default function GameRecordPage() {
     setIsScorePatchModalOpen(true);
   };
   // 에러 상태
+  const [validationError, setValidationError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const originalAlert = window.alert;
+    window.alert = (msg: string) => {
+      setValidationError(msg);
+    };
+    return () => {
+      window.alert = originalAlert;
+    };
+  }, []);
 
   return (
     <GameRecordContainer>
@@ -526,7 +543,17 @@ export default function GameRecordPage() {
           }}
         />
       )}
+      {!isSubmitting && validationError && (
+        <ModalOverlay>
+          <ModalContainer>
+            <ModalTitleSmaller>{validationError}</ModalTitleSmaller>
 
+            <ModalButton onClick={() => setValidationError(null)}>
+              확인
+            </ModalButton>
+          </ModalContainer>
+        </ModalOverlay>
+      )}
       <LoadingOverlay visible={isSubmitting}>
         <LoadingIcon spin fontSize={48} />
       </LoadingOverlay>

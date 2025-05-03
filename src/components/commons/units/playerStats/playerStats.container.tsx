@@ -9,6 +9,7 @@ import {
   TableTitle,
   ArrowIcon,
   MoreButton,
+  ArrowIconNone,
 } from "./playerStats.style";
 import { useRecoilState } from "recoil";
 import {
@@ -137,7 +138,7 @@ export default function StatsPage() {
           <thead>
             <tr>
               <th>순위</th>
-              <th style={{ width: "25vw" }}>선수</th>
+              <th style={{ width: "25vw", textAlign: "left" }}>선수</th>
               <th onClick={() => handleSortHitter("PA")}>
                 타석 <ArrowIcon>{getArrow(hitterSortKey, "PA")}</ArrowIcon>
               </th>
@@ -197,20 +198,53 @@ export default function StatsPage() {
                 return (
                   <tr key={idx}>
                     <td>{currentRank}</td>
-                    <td>
+                    <td style={{ textAlign: "left" }}>
                       {item.playerName} ({item.teamName.slice(0, 3)})
                     </td>
-                    <td>{item.PA}</td>
-                    <td>{item.AB}</td>
-                    <td>{item.H}</td>
-                    <td>{item.AVG}</td>
-                    <td>{item["2B"]}</td>
-                    <td>{item["3B"]}</td>
-                    <td>{item.HR}</td>
-                    <td>{item.BB}</td>
-                    <td>{item.OBP}</td>
-                    <td>{item.SLG}</td>
-                    <td>{item.OPS}</td>
+                    <td>
+                      {item.PA}
+                      <ArrowIconNone> ▽ </ArrowIconNone>
+                    </td>
+                    <td>
+                      {item.AB}
+                      <ArrowIconNone> ▽ </ArrowIconNone>
+                    </td>
+                    <td>
+                      {item.H}
+                      <ArrowIconNone> ▽ </ArrowIconNone>
+                    </td>
+                    <td>
+                      {item.AVG}
+                      <ArrowIconNone> ▽ </ArrowIconNone>
+                    </td>
+                    <td>
+                      {item["2B"]}
+                      <ArrowIconNone> ▽ </ArrowIconNone>
+                    </td>
+                    <td>
+                      {item["3B"]}
+                      <ArrowIconNone> ▽ </ArrowIconNone>
+                    </td>
+                    <td>
+                      {item.HR}
+                      <ArrowIconNone> ▽ </ArrowIconNone>
+                    </td>
+                    <td>
+                      {item.BB}
+                      <ArrowIconNone> ▽ </ArrowIconNone>
+                    </td>
+                    <td>
+                      {item.OBP}
+                      <ArrowIconNone> ▽ </ArrowIconNone>
+                    </td>
+                    <td>
+                      {item.SLG}
+                      <ArrowIconNone> ▽ </ArrowIconNone>
+                    </td>
+                    <td>
+                      {item.OPS}
+                      <ArrowIconNone> ▽ </ArrowIconNone>
+                    </td>
                   </tr>
                 );
               });
@@ -231,8 +265,11 @@ export default function StatsPage() {
           <thead>
             <tr>
               <th>순위</th>
-              <th style={{ width: "25vw" }}>선수</th>
-              <th onClick={() => handleSortPitcher("K")}>
+              <th style={{ width: "25vw", textAlign: "left" }}>선수</th>
+              <th
+                onClick={() => handleSortPitcher("K")}
+                style={{ textAlign: "left" }}
+              >
                 삼진 <ArrowIcon>{getArrow(pitcherSortKey, "K")}</ArrowIcon>
               </th>
             </tr>
@@ -257,10 +294,13 @@ export default function StatsPage() {
                 return (
                   <tr key={idx}>
                     <td>{currentRank}</td>
-                    <td>
+                    <td style={{ textAlign: "left" }}>
                       {item.playerName} ({item.teamName.slice(0, 3)})
                     </td>
-                    <td>{item.K}</td>
+                    <td style={{ textAlign: "left" }}>
+                      {item.K}
+                      <ArrowIconNone> ▽ </ArrowIconNone>
+                    </td>
                   </tr>
                 );
               });

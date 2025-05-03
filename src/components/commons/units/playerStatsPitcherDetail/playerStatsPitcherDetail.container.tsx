@@ -8,6 +8,7 @@ import {
 } from "./playerStatsPitcherDetail.style"; // 스타일 임포트
 import { useRecoilState } from "recoil";
 import { pitcherStatsState } from "../../../../commons/stores";
+import { ArrowIconNone } from "../playerStats/playerStats.style";
 
 export default function StatsPagePitcherDetail() {
   // Recoil의 pitcherStatsState에서 투수 기록 데이터를 불러옴
@@ -43,8 +44,11 @@ export default function StatsPagePitcherDetail() {
           <thead>
             <tr>
               <th>순위</th>
-              <th style={{ width: "25vw" }}>선수</th>
-              <th onClick={() => handleSortPitcher("K")}>
+              <th style={{ width: "25vw", textAlign: "left" }}>선수</th>
+              <th
+                onClick={() => handleSortPitcher("K")}
+                style={{ textAlign: "left" }}
+              >
                 삼진 <ArrowIcon>▼</ArrowIcon>
               </th>
             </tr>
@@ -73,10 +77,12 @@ export default function StatsPagePitcherDetail() {
                 return (
                   <tr key={index}>
                     <td>{currentRank}</td>
-                    <td>
+                    <td style={{ textAlign: "left" }}>
                       {item.playerName} ({item.teamName.slice(0, 3)})
                     </td>
-                    <td>{item.K}</td>
+                    <td style={{ textAlign: "left" }}>
+                      {item.K} <ArrowIconNone> ▽ </ArrowIconNone>
+                    </td>
                   </tr>
                 );
               });

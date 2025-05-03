@@ -49,15 +49,16 @@ interface RawMatch {
 interface Game {
   time: string;
   status: string;
+  winnerTeamId?: number;
   homeTeam: {
     id: number;
     name: string;
-    score: number | null;
+    score: number | null | string;
   };
   awayTeam: {
     id: number;
     name: string;
-    score: number | null;
+    score: number | null | string;
   };
   inning?: number;
   inningHalf?: string;
@@ -99,45 +100,178 @@ export default function MainCalendarPage() {
   // 캘린더 영역 외부 클릭 감지를 위한 ref
   const calendarRef = useRef<HTMLDivElement>(null);
 
-  const [fromDate, setFromDate] = useState("2025-05-01");
+  // const [fromDate, setFromDate] = useState("2025-05-01");
+  // const [toDate, setToDate] = useState("2025-06-10");
+
+  const [fromDate, setFromDate] = useState("2025-03-01");
   const [toDate, setToDate] = useState("2025-06-10");
 
   // const currentGameId =
   //   typeof router.query.recordId === "string"
   //     ? Number(router.query.recordId)
   //     : null;
+  // useEffect(() => {
+  //   const fetchMatches = async () => {
+  //     setIsLoading(true);
+  //     try {
+  //       const res = await API.get(
+  //         `/games?from=${fromDate}&to=${toDate}`
+  //         //   ,
+  //         //   {
+  //         //   withCredentials: true,
+  //         // }
+  //       );
+  //       const authRes = await API.get(`/auth/me`, {
+  //         withCredentials: true,
+  //       });
+  //       console.log(authRes.data);
+  //       setAuthInfo(authRes.data);
+
+  //       console.log(`/games?from=${fromDate}&to=${toDate}`);
+  //       console.log(res.data);
+  //       // 백엔드 테스트 시에는 아래의 코드
+  //       setAllMatchData(res.data.days);
+
+  //       // setAllMatchData(res.data);
+  //       console.log(allMatchData);
+  //     } catch (err) {
+  //       const errorCode = err?.response?.data?.errorCode; // 에러코드 추출
+  //       // setError(err);
+  //       console.error(err, "errorCode:", errorCode);
+  //       console.error("❌ 경기 데이터 요청 에러:", err);
+  //     } finally {
+  //       setIsLoading(false);
+  //     }
+  //   };
+
+  //   fetchMatches();
+  // }, []);
+
+  // useEffect(() => {
+  //   const fetchMatches = async () => {
+  //     setIsLoading(true);
+  //     try {
+  //       const res = await API.get(
+  //         `/games?from=${fromDate}&to=${toDate}`
+  //         // , {
+  //         //   withCredentials: true,
+  //         // }
+  //       );
+  //       const kstDays: RawMatch[] = res.data.days.map((day: RawMatch) => {
+  //         const kst = moment.utc(day.date).tz("Asia/Seoul");
+  //         const games = day.games.map((game: Game) => {
+  //           if (
+  //             game.winnerTeamId != null &&
+  //             game.homeTeam.score == null &&
+  //             game.awayTeam.score == null
+  //           ) {
+  //             if (game.winnerTeamId === game.homeTeam.id) {
+  //               return {
+  //                 ...game,
+  //                 homeTeam: { ...game.homeTeam, score: "몰수승" },
+  //               };
+  //             } else if (game.winnerTeamId === game.awayTeam.id) {
+  //               return {
+  //                 ...game,
+  //                 awayTeam: { ...game.awayTeam, score: "몰수승" },
+  //               };
+  //             }
+  //           }
+  //           return game;
+  //         });
+
+  //         return {
+  //             ...day,
+  //   date: kst.format("YYYY-MM-DD"),
+  //   dayOfWeek: kst.locale("ko").format("dd"),
+  //   games,
+  //         };
+  //       });
+  //       const authRes = await API.get(
+  //         `/auth/me`
+  //         //   , {
+  //         //   withCredentials: true,
+  //         // }
+  //       );
+  //       setAuthInfo(authRes.data);
+  //       console.log(allMatchData);
+  //       setAllMatchData(kstDays);
+  //       console.log(authInfo);
+  //     } catch (err) {
+  //       console.error(err);
+  //     } finally {
+  //       setIsLoading(false);
+  //     }
+  //   };
+
+  //   fetchMatches();
+  // }, [fromDate, toDate]);
   useEffect(() => {
     const fetchMatches = async () => {
       setIsLoading(true);
       try {
-        const res = await API.get(`/games?from=${fromDate}&to=${toDate}`, {
-          withCredentials: true,
+        const res = await API.get(
+          `/games?from=${fromDate}&to=${toDate}`
+          // , {
+          //   withCredentials: true,
+          // }
+        );
+        const kstDays: RawMatch[] = res.data.days.map((day: RawMatch) => {
+          const kst = moment.utc(day.date).tz("Asia/Seoul");
+          const games = day.games.map((game: Game) => {
+            // 시간 UTC→KST 변환
+            const utcDate = day.date.substring(0, 10);
+            const utcDateTime = moment.utc(`${utcDate}T${game.time}:00Z`);
+            const kstTime = utcDateTime
+              .clone()
+              .tz("Asia/Seoul")
+              .format("HH:mm");
+            if (
+              game.winnerTeamId != null &&
+              game.homeTeam.score == null &&
+              game.awayTeam.score == null
+            ) {
+              if (game.winnerTeamId === game.homeTeam.id) {
+                return {
+                  ...game,
+                  time: kstTime,
+                  homeTeam: { ...game.homeTeam, score: "몰수승" },
+                };
+              } else {
+                return {
+                  ...game,
+                  time: kstTime,
+                  awayTeam: { ...game.awayTeam, score: "몰수승" },
+                };
+              }
+            }
+            return { ...game, time: kstTime };
+          });
+
+          return {
+            ...day,
+            date: kst.format("YYYY-MM-DD"),
+            dayOfWeek: kst.locale("ko").format("dd"),
+            games,
+          };
         });
         const authRes = await API.get(`/auth/me`, {
           withCredentials: true,
         });
-        console.log(authRes.data);
         setAuthInfo(authRes.data);
-
-        console.log(`/games?from=${fromDate}&to=${toDate}`);
-        console.log(res.data);
-        // 백엔드 테스트 시에는 아래의 코드
-        setAllMatchData(res.data.days);
-
-        // setAllMatchData(res.data);
+        console.log(authInfo);
+        setAllMatchData(kstDays);
         console.log(allMatchData);
       } catch (err) {
-        const errorCode = err?.response?.data?.errorCode; // 에러코드 추출
-        // setError(err);
-        console.error(err, "errorCode:", errorCode);
-        console.error("❌ 경기 데이터 요청 에러:", err);
+        console.error(err);
+        setError(err);
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchMatches();
-  }, []);
+  }, [fromDate, toDate]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -279,7 +413,7 @@ export default function MainCalendarPage() {
         ) : matchesForSelectedDate.length > 0 ? (
           matchesForSelectedDate.map((match, index) => {
             const canRecord =
-              authInfo.role === "UMPIRE" &&
+              authInfo.role === "umpire" &&
               Array.isArray(authInfo.gameIds) &&
               authInfo.gameIds.includes(match.gameId!);
             // 기존 구조: homeTeam을 team1, awayTeam을 team2로 사용
@@ -345,7 +479,7 @@ export default function MainCalendarPage() {
                   </Team>
                 </TeamsContainer>
                 {/* 
-                {(authInfo.role === "UMPIRE" &&
+                {(authInfo.role === "umpire" &&
                   // && currentGameId !== null
                   authInfo.gameIds.includes(currentGameId)) ||
                 match.status === "FINALIZED" ||
@@ -463,7 +597,7 @@ export default function MainCalendarPage() {
           </p>
         )}
       </MatchCardsContainer>
-      {/* <ErrorAlert error={error} /> */}
+      <ErrorAlert error={error} />
     </Container>
   );
 }
