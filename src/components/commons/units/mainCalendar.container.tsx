@@ -118,51 +118,53 @@ export default function MainCalendarPage() {
           //   withCredentials: true,
           // }
         );
-        const kstDays: RawMatch[] = res.data.days.map((day: RawMatch) => {
-          const kst = moment.utc(day.date).tz("Asia/Seoul");
-          const games = day.games.map((game: Game) => {
-            // 시간 UTC→KST 변환
-            const utcDate = day.date.substring(0, 10);
-            const utcDateTime = moment.utc(`${utcDate}T${game.time}:00Z`);
-            const kstTime = utcDateTime
-              .clone()
-              .tz("Asia/Seoul")
-              .format("HH:mm");
-            if (
-              game.winnerTeamId != null &&
-              game.homeTeam.score == null &&
-              game.awayTeam.score == null
-            ) {
-              if (game.winnerTeamId === game.homeTeam.id) {
-                return {
-                  ...game,
-                  time: kstTime,
-                  homeTeam: { ...game.homeTeam, score: "몰수승" },
-                };
-              } else {
-                return {
-                  ...game,
-                  time: kstTime,
-                  awayTeam: { ...game.awayTeam, score: "몰수승" },
-                };
-              }
-            }
-            return { ...game, time: kstTime };
-          });
 
-          return {
-            ...day,
-            date: kst.format("YYYY-MM-DD"),
-            dayOfWeek: kst.locale("ko").format("dd"),
-            games,
-          };
-        });
+        // const kstDays: RawMatch[] = res.data.days.map((day: RawMatch) => {
+        //   const kst = moment.utc(day.date).tz("Asia/Seoul");
+        //   const games = day.games.map((game: Game) => {
+        //     // 시간 UTC→KST 변환
+        //     const utcDate = day.date.substring(0, 10);
+        //     const utcDateTime = moment.utc(`${utcDate}T${game.time}:00Z`);
+        //     const kstTime = utcDateTime
+        //       .clone()
+        //       .tz("Asia/Seoul")
+        //       .format("HH:mm");
+        //     if (
+        //       game.winnerTeamId != null &&
+        //       game.homeTeam.score == null &&
+        //       game.awayTeam.score == null
+        //     ) {
+        //       if (game.winnerTeamId === game.homeTeam.id) {
+        //         return {
+        //           ...game,
+        //           time: kstTime,
+        //           homeTeam: { ...game.homeTeam, score: "몰수승" },
+        //         };
+        //       } else {
+        //         return {
+        //           ...game,
+        //           time: kstTime,
+        //           awayTeam: { ...game.awayTeam, score: "몰수승" },
+        //         };
+        //       }
+        //     }
+        //     return { ...game, time: kstTime };
+        //   });
+
+        //   return {
+        //     ...day,
+        //     date: kst.format("YYYY-MM-DD"),
+        //     dayOfWeek: kst.locale("ko").format("dd"),
+        //     games,
+        //   };
+        // });
         const authRes = await API.get(`/auth/me`, {
           withCredentials: true,
         });
         setAuthInfo(authRes.data);
         console.log(authInfo);
-        setAllMatchData(kstDays);
+        // setAllMatchData(kstDays);
+        setAllMatchData(res.data.days);
         console.log("allMatchData", allMatchData);
       } catch (err) {
         console.error(err);
