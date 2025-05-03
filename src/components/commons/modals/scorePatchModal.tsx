@@ -24,6 +24,7 @@ interface IModalProps {
   onSuccess?: () => Promise<void>;
   isSubmitting?: boolean;
   setIsSubmitting?: React.Dispatch<React.SetStateAction<boolean>>;
+  // setError: React.Dispatch<any>;
 }
 
 export default function ScorePatchModal({
@@ -37,7 +38,8 @@ export default function ScorePatchModal({
   onSuccess,
   isSubmitting,
   setIsSubmitting,
-}: IModalProps) {
+}: // setError,
+IModalProps) {
   const router = useRouter();
 
   // useModalBack(() => setIsModalOpen(false));
@@ -101,11 +103,13 @@ export default function ScorePatchModal({
           onSuccess={onSuccess}
           isSubmitting={isSubmitting}
           setIsSubmitting={setIsSubmitting}
+          // setError={setError}
         />
       )}
 
       {showStatInputModal && (
         <StatPatchInputModal
+          // setError={setError}
           key={statId}
           setIsModalOpen={setIsModalOpen}
           mode={mode as "batter" | "pitcher"}

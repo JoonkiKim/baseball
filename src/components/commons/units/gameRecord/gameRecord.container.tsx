@@ -161,7 +161,7 @@ export default function GameRecordPage() {
     async (newAttakVal) => {
       if (!recordId || !attackVal) return;
       try {
-        const teamType = attackVal === "home" ? "home" : "away";
+        const teamType = newAttakVal === "home" ? "home" : "away";
         console.log("useEffect내부 팀타입", teamType);
         const res = await API.get(
           `/games/${recordId}/current-batter?teamType=${teamType}`
@@ -184,7 +184,7 @@ export default function GameRecordPage() {
     async (newAttack) => {
       if (!recordId || !attackVal) return;
       try {
-        const teamType = attackVal === "home" ? "away" : "home";
+        const teamType = newAttack === "home" ? "away" : "home";
         const res = await API.get(
           `/games/${recordId}/current-pitcher?teamType=${teamType}`
           // { withCredentials: true }

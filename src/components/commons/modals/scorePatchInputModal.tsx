@@ -19,6 +19,8 @@ import {
   LoadingOverlay,
 } from "../../../commons/libraries/loadingOverlay";
 import ErrorAlert from "../../../commons/libraries/showErrorCode";
+import { errorGlobal } from "../../../commons/stores";
+import { useRecoilState } from "recoil";
 
 interface IScoreEditModalProps {
   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -42,7 +44,8 @@ IScoreEditModalProps) {
   const router = useRouter();
   const [score, setScore] = useState<number>(Number(cellValue));
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState(null);
+  // const [error, setError] = useState(null);
+  const [error, setError] = useRecoilState(errorGlobal);
   const handleSubmit = async () => {
     if (!score && score !== 0) {
       alert("점수가 입력되지 않았습니다.");

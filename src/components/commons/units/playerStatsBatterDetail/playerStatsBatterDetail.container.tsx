@@ -65,7 +65,7 @@ export default function StatsPageBatterDetail() {
               <th>순위</th>
               <th style={{ width: "25vw", textAlign: "left" }}>선수</th>
               <th onClick={() => handleSortHitter("PA")}>
-                타수 <ArrowIcon>{getArrow(hitterSortKey, "PA")}</ArrowIcon>
+                타석 <ArrowIcon>{getArrow(hitterSortKey, "PA")}</ArrowIcon>
               </th>
               <th onClick={() => handleSortHitter("AB")}>
                 타수 <ArrowIcon>{getArrow(hitterSortKey, "AB")}</ArrowIcon>
@@ -105,7 +105,7 @@ export default function StatsPageBatterDetail() {
               let tieCount = 0;
               let prevValue: number | null = null;
               // slice 해서 최대 20명까지 출력
-              return displayData.slice(0, 20).map((item, index) => {
+              return displayData.map((item, index) => {
                 const currentValue = item[hitterSortKey] as number;
                 if (index === 0) {
                   currentRank = 1;

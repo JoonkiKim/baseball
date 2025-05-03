@@ -31,7 +31,7 @@ import { useRouter } from "next/router";
 import ResultSubmitModal from "../../modals/submitModal/resultSubmitModal";
 import API from "../../../../commons/apis/api";
 import ScorePatchModal from "../../modals/scorePatchModal";
-import { authMe, gameId } from "../../../../commons/stores";
+import { authMe, errorGlobal, gameId } from "../../../../commons/stores";
 import { useRecoilState } from "recoil";
 import {
   LoadingIcon,
@@ -69,7 +69,8 @@ export default function FinalGameRecordPage() {
   const [authInfo, setAuthInfo] = useRecoilState(authMe);
   // const [recordId, setRecordId] = useState(router.query.recordId);
   // const recordId = router.query.recordId;
-  const [error, setError] = useState(null);
+  // const [error, setError] = useState(null);
+  const [error, setError] = useRecoilState(errorGlobal);
   /* ───────── 클라이언트(브라우저)에서만 실행 ───────── */
   const recordId = router.query.recordId;
   useEffect(() => {
@@ -254,8 +255,8 @@ export default function FinalGameRecordPage() {
       newB[8] = String(teamSummary.home.hits);
       setTeamAScores(newA);
       setTeamBScores(newB);
-      setTeamAName(teamSummary.away.name.substring(0, 3));
-      setTeamBName(teamSummary.home.name.substring(0, 3));
+      setTeamAName(teamSummary.away.name);
+      setTeamBName(teamSummary.home.name);
 
       // Update stats
       setAwayBatters(batterStats.away);
@@ -393,7 +394,7 @@ export default function FinalGameRecordPage() {
 
         {/* 팀 A (원정) */}
         <TeamRow className="team-row">
-          <TeamNameCell>{teamAName}</TeamNameCell>
+          <TeamNameCell>{teamAName.slice(0, 3)}</TeamNameCell>
           {teamAScores.map((score, idx) => (
             <TeamScoreCell
               key={idx}
@@ -412,7 +413,7 @@ export default function FinalGameRecordPage() {
 
         {/* 팀 B (홈) */}
         <TeamRow className="team-row">
-          <TeamNameCell>{teamBName}</TeamNameCell>
+          <TeamNameCell>{teamBName.slice(0, 3)}</TeamNameCell>
           {teamBScores.map((score, idx) => (
             <TeamScoreCell
               key={idx}
@@ -743,29 +744,33 @@ export default function FinalGameRecordPage() {
             <HomeButton>홈으로</HomeButton>
           </a>
         </Link>
-        {matchStatus !== "FINALIZED" &&
-          // && isAuthenticated
-          authInfo.role === "UMPIRE" &&
-          // && currentGameId !== null
-          authInfo.gameIds.includes(Number(router.query.recordId)) && (
-            <ControlButton onClick={handleSubmitClick}>제출하기</ControlButton>
-          )}
+        {matchStatus !== "FINALIZED" && (
+          // // && isAuthenticated
+          // authInfo.role === "UMPIRE" &&
+          // // && currentGameId !== null
+          // authInfo.gameIds.includes(Number(router.query.recordId)) &&
+          <ControlButton onClick={handleSubmitClick}>제출하기</ControlButton>
+        )}
       </ButtonContainer>
 
-      {authInfo.role === "UMPIRE" &&
-        // && currentGameId !== null
-        authInfo.gameIds.includes(Number(router.query.recordId)) &&
+      {
+        // authInfo.role === "UMPIRE" &&
+        //   // && currentGameId !== null
+        //   authInfo.gameIds.includes(Number(router.query.recordId)) &&
+
         isResultSubmitModalOpen && (
           <ResultSubmitModal
             setIsResultSubmitModalOpen={setIsResultSubmitModalOpen}
           />
-        )}
+        )
+      }
 
-      {authInfo.role === "UMPIRE" &&
-        // && currentGameId !== null
-        authInfo.gameIds.includes(Number(router.query.recordId)) &&
-        isScorePatchModalOpen &&
-        selectedCell && (
+      {
+        // authInfo.role === "UMPIRE" &&
+        //   // && currentGameId !== null
+        //   authInfo.gameIds.includes(Number(router.query.recordId))
+        //   &&
+        isScorePatchModalOpen && selectedCell && (
           <ScorePatchModal
             setIsModalOpen={setIsScorePatchModalOpen}
             cellValue={selectedCell.cellValue}
@@ -775,14 +780,21 @@ export default function FinalGameRecordPage() {
             statId={selectedStatId}
             alertMessage={alertMessage}
             onSuccess={fetchResults}
+            // setError={setError}
             // isSubmitting={isSubmitting}
             // setIsSubmitting={setIsSubmitting}
           />
-        )}
+        )
+      }
       <LoadingOverlay visible={isSubmitting}>
         <LoadingIcon spin fontSize={48} />
       </LoadingOverlay>
-      <ErrorAlert error={error} />
+      <ErrorAlert
+        error={error}
+        onClose={() => {
+          setError(null); // ErrorAlert 언마운트
+        }}
+      />
       {!isSubmitting && validationError && (
         <ModalOverlay>
           <ModalContainer>

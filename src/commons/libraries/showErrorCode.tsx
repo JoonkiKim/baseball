@@ -55,11 +55,17 @@ const ERROR_MESSAGE_MAP = {
   GAME_NOT_EDITABLE: "경기를 수정할 수 없습니다.",
 };
 
-export default function ErrorAlert({ error }) {
+export default function ErrorAlert({
+  error,
+  onClose, // ⬅️ 부모가 넘겨줄 콜백(선택 사항)
+}: {
+  error: any;
+  onClose?: () => void;
+}) {
   const [visible, setVisible] = useState(true);
   if (!error || !visible) return null;
 
-  const code = error.response?.data?.errorCode || error.code;
+  const code = error.response?.data?.code || error.code;
   const message =
     code && ERROR_MESSAGE_MAP[code]
       ? ERROR_MESSAGE_MAP[code]
@@ -71,7 +77,7 @@ export default function ErrorAlert({ error }) {
     <ModalOverlay>
       <ModalContainer>
         <ModalTitleSmall>{message}</ModalTitleSmall>
-        <ModalButton onClick={() => setVisible(false)}>확인</ModalButton>
+        <ModalButton onClick={onClose}>확인</ModalButton>
       </ModalContainer>
     </ModalOverlay>
   );

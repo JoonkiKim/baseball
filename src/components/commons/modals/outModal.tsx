@@ -29,6 +29,7 @@ export default function OutModal(props: IModalProps) {
   const mapping: { [key: string]: string } = {
     삼진: "SO",
     "그 외 아웃": "O",
+    희생플라이: "SF",
   };
 
   // 아웃 종류 선택 시 실행될 비동기 함수
@@ -78,6 +79,12 @@ export default function OutModal(props: IModalProps) {
           disabled={isSubmitting}
         >
           삼진
+        </ModalButton>
+        <ModalButton
+          onClick={() => handleTypeSelect("희생플라이")}
+          disabled={isSubmitting}
+        >
+          희생플라이
         </ModalButton>
         <ModalButton
           onClick={() => handleTypeSelect("그 외 아웃")}

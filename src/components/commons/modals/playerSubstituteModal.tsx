@@ -132,6 +132,8 @@ export default function SubPlayerSelectionModal({
         const list = data.players;
         if (isAway) setAwayTeamPlayers(list);
         else setHomeTeamPlayers(list);
+
+        console.log("list", list);
       })
       .catch((err) => {
         const errorCode = err?.response?.data?.errorCode; // 에러코드 추출

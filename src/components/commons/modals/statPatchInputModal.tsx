@@ -16,6 +16,8 @@ import {
   LoadingOverlay,
 } from "../../../commons/libraries/loadingOverlay";
 import ErrorAlert from "../../../commons/libraries/showErrorCode";
+import { useRecoilState } from "recoil";
+import { errorGlobal } from "../../../commons/stores";
 
 /* ──────────────────────────────────────────
    props
@@ -34,12 +36,13 @@ export default function StatPatchInputModal({
   mode,
   alertMessage,
   onSuccess,
-}: IStatPatchInputModalProps) {
+}: // setError
+IStatPatchInputModalProps) {
   // useModalBack(() => setIsModalOpen(false));
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState(null);
-
+  // const [error, setError] = useState(null);
+  const [error, setError] = useRecoilState(errorGlobal);
   /* msg(문자열) → 객체로 변환 */
   const parseMessage = (msg: string): StatFields => {
     const obj: StatFields = {};

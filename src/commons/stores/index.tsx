@@ -299,3 +299,10 @@ export const substitutionSwappedState = atom<boolean>({
   key: "substitutionSwappedState",
   default: true,
 });
+
+export const errorGlobal = atom<string>({
+  key: "errorGlobal",
+  default: "",
+});
+
+// const [error, setError] = useState(null);
