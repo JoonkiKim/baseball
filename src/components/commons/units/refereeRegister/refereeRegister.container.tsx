@@ -28,6 +28,7 @@ import {
   ModalContainer,
   ModalOverlay,
   ModalTitleSmall,
+  ModalTitleSmaller,
 } from "../../modals/modal.style";
 import Link from "next/link";
 import ErrorAlert from "../../../../commons/libraries/showErrorCode";
@@ -75,6 +76,18 @@ export default function RefereeRegisterPage() {
   } = useForm({
     resolver: yupResolver(schema),
   });
+  const [validationError, setValidationError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const originalAlert = window.alert;
+    window.alert = (msg: string) => {
+      setValidationError(msg);
+    };
+    return () => {
+      window.alert = originalAlert;
+    };
+  }, []);
+
   // ① 인증번호 발송 버튼 클릭 시 실행되는 함수
   // ① 인증번호 발송 버튼 클릭 시 실행되는 함수
   const handleSendVerification = async () => {
@@ -248,6 +261,17 @@ export default function RefereeRegisterPage() {
         <LoadingIcon spin fontSize={48} />
       </LoadingOverlay>
       <ErrorAlert error={error} />
+      {!isSubmitting && validationError && (
+        <ModalOverlay>
+          <ModalContainer>
+            <ModalTitleSmaller>{validationError}</ModalTitleSmaller>
+
+            <ModalButton onClick={() => setValidationError(null)}>
+              확인
+            </ModalButton>
+          </ModalContainer>
+        </ModalOverlay>
+      )}
     </Container>
   );
 }
