@@ -275,6 +275,7 @@ export const TeamName = styled.div`
   color: #000;
   font-size: 16px; /* 기본값 */
   margin-bottom: 7px;
+  white-space: pre;
 `;
 
 export const TeamScore = styled.div<{

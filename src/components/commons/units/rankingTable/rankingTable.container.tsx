@@ -27,9 +27,9 @@ export default function RankingTableComponent() {
   useEffect(() => {
     const fetchGroups = async () => {
       try {
-        // const groups = ["A", "B", "C", "D"];
+        const groups = ["A", "B", "C", "D"];
 
-        const groups = ["A", "B", "C"];
+        // const groups = ["A", "B", "C"];
 
         const results = await Promise.all(
           groups.map((group) => fetchGroupedTeams(group))

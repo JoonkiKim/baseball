@@ -208,6 +208,7 @@ export default function MainCalendarPage() {
   // }, [fromDate, toDate]);
   useEffect(() => {
     const fetchMatches = async () => {
+      if (!router) return;
       setIsLoading(true);
       try {
         const res = await API.get(
@@ -271,7 +272,7 @@ export default function MainCalendarPage() {
     };
 
     fetchMatches();
-  }, [fromDate, toDate]);
+  }, [fromDate, toDate, router]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -434,7 +435,11 @@ export default function MainCalendarPage() {
                 <TeamsContainer>
                   {/* awayTeam을 왼쪽에 노출 */}
                   <Team>
-                    <TeamName>{match.awayTeam.name}</TeamName>
+                    <TeamName>
+                      {match.awayTeam.name.length >= 5
+                        ? match.awayTeam.name.slice(0, 5)
+                        : match.awayTeam.name.padEnd(5, " ")}
+                    </TeamName>
                     <TeamScore
                       isWinner={team2IsWinner}
                       gameStatus={match.status}
@@ -469,7 +474,11 @@ export default function MainCalendarPage() {
 
                   {/* homeTeam을 오른쪽에 노출 */}
                   <Team>
-                    <TeamName>{match.homeTeam.name}</TeamName>
+                    <TeamName>
+                      {match.homeTeam.name.length >= 5
+                        ? match.homeTeam.name.slice(0, 5)
+                        : match.homeTeam.name.padEnd(5, " ")}
+                    </TeamName>
                     <TeamScore
                       isWinner={team1IsWinner}
                       gameStatus={match.status}
