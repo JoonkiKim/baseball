@@ -744,33 +744,29 @@ export default function FinalGameRecordPage() {
             <HomeButton>홈으로</HomeButton>
           </a>
         </Link>
-        {matchStatus !== "FINALIZED" && (
-          // // && isAuthenticated
-          // authInfo.role === "UMPIRE" &&
-          // // && currentGameId !== null
-          // authInfo.gameIds.includes(Number(router.query.recordId)) &&
-          <ControlButton onClick={handleSubmitClick}>제출하기</ControlButton>
-        )}
+        {matchStatus !== "FINALIZED" &&
+          // && isAuthenticated
+          authInfo.role === "UMPIRE" &&
+          // && currentGameId !== null
+          authInfo.gameIds.includes(Number(router.query.recordId)) && (
+            <ControlButton onClick={handleSubmitClick}>제출하기</ControlButton>
+          )}
       </ButtonContainer>
 
-      {
-        // authInfo.role === "UMPIRE" &&
-        //   // && currentGameId !== null
-        //   authInfo.gameIds.includes(Number(router.query.recordId)) &&
-
+      {authInfo.role === "UMPIRE" &&
+        // && currentGameId !== null
+        authInfo.gameIds.includes(Number(router.query.recordId)) &&
         isResultSubmitModalOpen && (
           <ResultSubmitModal
             setIsResultSubmitModalOpen={setIsResultSubmitModalOpen}
           />
-        )
-      }
+        )}
 
-      {
-        // authInfo.role === "UMPIRE" &&
-        //   // && currentGameId !== null
-        //   authInfo.gameIds.includes(Number(router.query.recordId))
-        //   &&
-        isScorePatchModalOpen && selectedCell && (
+      {authInfo.role === "UMPIRE" &&
+        // && currentGameId !== null
+        authInfo.gameIds.includes(Number(router.query.recordId)) &&
+        isScorePatchModalOpen &&
+        selectedCell && (
           <ScorePatchModal
             setIsModalOpen={setIsScorePatchModalOpen}
             cellValue={selectedCell.cellValue}
@@ -784,8 +780,7 @@ export default function FinalGameRecordPage() {
             // isSubmitting={isSubmitting}
             // setIsSubmitting={setIsSubmitting}
           />
-        )
-      }
+        )}
       <LoadingOverlay visible={isSubmitting}>
         <LoadingIcon spin fontSize={48} />
       </LoadingOverlay>
