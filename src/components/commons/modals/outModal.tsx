@@ -55,7 +55,7 @@ export default function OutModal(props: IModalProps) {
       if (props.onSuccess) {
         await props.onSuccess();
       }
-      alert(`기록 전송 완료\n${Type}`);
+      // alert(`기록 전송 완료\n${Type}`);
       // 모달 닫기
       // props.setIsOutModalOpen(false);
     } catch (error) {

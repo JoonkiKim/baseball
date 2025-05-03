@@ -91,26 +91,26 @@ export default function TeamRegistrationPageComponent(props: IProps) {
   const [error, setError] = useState(null);
   useEffect(() => {
     const fetchTeamPlayers = async () => {
-      if (!recordId) return;
+      if (!router.query.recordId) return;
       try {
         if (router.asPath.includes("homeTeamRegistration")) {
           // const res = await API.get(`/teams/${teamInfo[0].homeTeamId}/players`);
           const res = await API.get(
-            `/games/${recordId}/players?teamType=home`
+            `/games/${router.query.recordId}/players?teamType=home`
             // { withCredentials: true }
           );
           console.log("응답이 도착!(홈팀멤버)");
-          console.log(res.data);
+          // console.log(res.data);
           const dataObj =
             typeof res.data === "string" ? JSON.parse(res.data) : res.data;
           setHomeTeamName(dataObj.name);
           setHomeTeamPlayers(dataObj.players);
-          // console.log("homeTeamPlayers", homeTeamPlayers);
+          console.log("homeTeamPlayers", homeTeamPlayers);
         } else {
           // const res = await API.get(`/teams/${teamInfo[0].awayTeamId}/players`);
 
           const res = await API.get(
-            `/games/${recordId}/players?teamType=away`
+            `/games/${router.query.recordId}/players?teamType=away`
             // { withCredentials: true }
           );
           console.log("응답이 도착!(원정팀멤버)");
@@ -128,19 +128,20 @@ export default function TeamRegistrationPageComponent(props: IProps) {
       }
     };
     fetchTeamPlayers();
-  }, [recordId, router.asPath]);
-  useEffect(() => {
-    // 둘 다 빈 배열일 때는 아무 것도 하지 않음
-    // if (awayTeamPlayers.length === 0 && homeTeamPlayers.length === 0) return;
-    console.log(homeTeamName);
-    // // 하나라도 값이 있으면 로그 출력
-    if (awayTeamPlayers.length > 0) {
-      console.log("awayTeamPlayers", awayTeamPlayers);
-    }
-    if (homeTeamPlayers.length > 0) {
-      console.log("homeTeamPlayers", homeTeamPlayers);
-    }
-  }, [awayTeamPlayers, homeTeamPlayers]);
+  }, [router.query.recordId]);
+  console.log("homeTeamPlayers", homeTeamPlayers);
+  // useEffect(() => {
+  //   // 둘 다 빈 배열일 때는 아무 것도 하지 않음
+  //   // if (awayTeamPlayers.length === 0 && homeTeamPlayers.length === 0) return;
+  //   console.log(homeTeamName);
+  //   // // 하나라도 값이 있으면 로그 출력
+  //   if (awayTeamPlayers.length > 0) {
+  //     console.log("awayTeamPlayers", awayTeamPlayers);
+  //   }
+  //   if (homeTeamPlayers.length > 0) {
+  //     console.log("homeTeamPlayers", homeTeamPlayers);
+  //   }
+  // }, [awayTeamPlayers, homeTeamPlayers]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [players, setPlayers] = useState<PlayerInfo[]>([
@@ -202,13 +203,16 @@ export default function TeamRegistrationPageComponent(props: IProps) {
   );
 
   const [localPlayerList, setLocalPlayerList] = useState<IHAPlayer[]>([]);
+
   useEffect(() => {
+    if (!router.query.recordId) return;
     if (router.asPath.includes("homeTeamRegistration")) {
       setLocalPlayerList(homeTeamPlayers);
     } else {
       setLocalPlayerList(awayTeamPlayers);
     }
-  }, []);
+  }, [router.query.recordId, homeTeamPlayers, awayTeamPlayers]);
+  console.log("localPlayerList", localPlayerList);
 
   const handleSelectPlayer = (sel: {
     name: string;
@@ -471,11 +475,7 @@ export default function TeamRegistrationPageComponent(props: IProps) {
             const globalPlayer = localPlayerList.find(
               (p) => p.name === currentName
             );
-
-            // const globalPlayer = localPlayerList.find(
-            //   (p) => p.name === currentName
-            // );
-
+            console.log(globalPlayer);
             return (
               <PlayerRow key={`${player.battingOrder}-${index}`}>
                 <OrderNumber>{player.battingOrder}</OrderNumber>

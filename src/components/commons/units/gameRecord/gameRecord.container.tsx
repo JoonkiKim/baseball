@@ -108,7 +108,7 @@ export default function GameRecordPage() {
   // 로딩 상태
   const [isSubmitting, setIsSubmitting] = useState(false);
   // attack 쿼리 동기화를 위한 state
-  const [attackVal, setAttackVal] = useState("away");
+  const [attackVal, setAttackVal] = useState("");
 
   // ── 1) 이닝 점수 GET ──
   const fetchInningScores = useCallback(async () => {
@@ -149,48 +149,56 @@ export default function GameRecordPage() {
         newAttack = last.inningHalf === "TOP" ? "home" : "away";
       }
       setAttackVal(newAttack);
+      return newAttack;
     } catch (err) {
       console.error("이닝 점수 로드 실패:", err);
       setError(err);
     }
-  }, [recordId]);
+  }, [router.query.recordId, attackVal]);
 
   // ── 2) 현재 타자 GET ──
-  const fetchBatter = useCallback(async () => {
-    if (!recordId || !attackVal) return;
-    try {
-      const teamType = attackVal === "home" ? "home" : "away";
-      const res = await API.get(
-        `/games/${recordId}/current-batter?teamType=${teamType}`
-        // { withCredentials: true }
-      );
-      setBatter(res.data);
+  const fetchBatter = useCallback(
+    async (newAttakVal) => {
+      if (!recordId || !attackVal) return;
+      try {
+        const teamType = attackVal === "home" ? "home" : "away";
+        console.log("useEffect내부 팀타입", teamType);
+        const res = await API.get(
+          `/games/${recordId}/current-batter?teamType=${teamType}`
+          // { withCredentials: true }
+        );
+        setBatter(res.data);
 
-      setBatterPlayerId(res.data.playerId);
-      console.log("타자 응답도착");
-    } catch (err) {
-      console.error("타자 로드 실패:", err);
-      setError(err);
-    }
-  }, [recordId]);
+        setBatterPlayerId(res.data.playerId);
+        console.log("타자 응답도착");
+      } catch (err) {
+        console.error("타자 로드 실패:", err);
+        setError(err);
+      }
+    },
+    [recordId, attackVal]
+  );
 
   // ── 3) 현재 투수 GET ──
-  const fetchPitcher = useCallback(async () => {
-    if (!recordId || !attackVal) return;
-    try {
-      const teamType = attackVal === "home" ? "away" : "home";
-      const res = await API.get(
-        `/games/${recordId}/current-pitcher?teamType=${teamType}`
-        // { withCredentials: true }
-      );
-      setPitcher(res.data);
+  const fetchPitcher = useCallback(
+    async (newAttack) => {
+      if (!recordId || !attackVal) return;
+      try {
+        const teamType = attackVal === "home" ? "away" : "home";
+        const res = await API.get(
+          `/games/${recordId}/current-pitcher?teamType=${teamType}`
+          // { withCredentials: true }
+        );
+        setPitcher(res.data);
 
-      console.log("투수 응답도착");
-    } catch (err) {
-      console.error("투수 로드 실패:", err);
-      setError(err);
-    }
-  }, [recordId]);
+        console.log("투수 응답도착");
+      } catch (err) {
+        console.error("투수 로드 실패:", err);
+        setError(err);
+      }
+    },
+    [recordId, attackVal]
+  );
 
   // ── 마운트 및 의존성 변경 시 호출 ──
   useEffect(() => {
@@ -209,10 +217,10 @@ export default function GameRecordPage() {
   }, [fetchInningScores]);
 
   useEffect(() => {
-    fetchBatter();
+    fetchBatter(attackVal);
   }, [fetchBatter]);
   useEffect(() => {
-    fetchPitcher();
+    fetchPitcher(attackVal);
   }, [fetchPitcher]);
 
   // ── 4) attack 쿼리 실제 동기화 ──
@@ -253,11 +261,11 @@ export default function GameRecordPage() {
           );
 
           // 3) GET 요청들만 다시 실행
-          await fetchInningScores();
-          await fetchBatter();
-          await fetchPitcher();
+          const newAttack = await fetchInningScores();
+          await fetchBatter(newAttack);
+          await fetchPitcher(newAttack);
           // 2) Alert 표시 (확인 클릭 후 다음 로직 실행)
-          alert("볼넷/사구 기록 전송 완료");
+          // alert("볼넷/사구 기록 전송 완료");
         } catch (e) {
           console.error("볼넷/사구 오류:", e);
           setError(e);
@@ -303,10 +311,10 @@ export default function GameRecordPage() {
       setIsSubstitutionSwapped((prev) => !prev);
       setThisInningScore(0);
       // 4) GET 리패치
-      await fetchInningScores();
-      await fetchBatter();
-      await fetchPitcher();
-      alert("공수교대 완료");
+      // alert("공수교대 완료");
+      const newAttack = await fetchInningScores();
+      await fetchBatter(newAttack);
+      await fetchPitcher(newAttack);
     } catch (error) {
       console.error("교대 오류:", error);
       setError(error);
@@ -318,10 +326,10 @@ export default function GameRecordPage() {
   }, [
     recordId,
     thisInningScore,
-    // isSubmitting,
-    // fetchInningScores,
-    // fetchBatter,
-    // fetchPitcher,
+    isSubmitting,
+    fetchInningScores,
+    fetchBatter,
+    fetchPitcher,
     setIsSubstitutionSwapped,
   ]);
 
@@ -470,9 +478,9 @@ export default function GameRecordPage() {
           setIsHitModalOpen={setIsHitModalOpen}
           playerId={batterPlayerId}
           onSuccess={async () => {
-            await fetchInningScores();
-            await fetchBatter();
-            await fetchPitcher();
+            const newAttack = await fetchInningScores();
+            await fetchBatter(newAttack);
+            await fetchPitcher(newAttack);
           }}
         />
       )}
@@ -481,9 +489,9 @@ export default function GameRecordPage() {
           setIsOutModalOpen={setIsOutModalOpen}
           playerId={batterPlayerId}
           onSuccess={async () => {
-            await fetchInningScores();
-            await fetchBatter();
-            await fetchPitcher();
+            const newAttack = await fetchInningScores();
+            await fetchBatter(newAttack);
+            await fetchPitcher(newAttack);
           }}
         />
       )}
@@ -492,9 +500,9 @@ export default function GameRecordPage() {
           setIsEtcModalOpen={setIsEtcModalOpen}
           playerId={batterPlayerId}
           onSuccess={async () => {
-            await fetchInningScores();
-            await fetchBatter();
-            await fetchPitcher();
+            const newAttack = await fetchInningScores();
+            await fetchBatter(newAttack);
+            await fetchPitcher(newAttack);
           }}
         />
       )}
@@ -534,9 +542,9 @@ export default function GameRecordPage() {
           onSuccess={async () => {
             // setIsSubmitting(true);
             try {
-              await fetchInningScores();
-              await fetchBatter();
-              await fetchPitcher();
+              const newAttack = await fetchInningScores();
+              await fetchBatter(newAttack);
+              await fetchPitcher(newAttack);
             } finally {
               // setIsSubmitting(false);
             }

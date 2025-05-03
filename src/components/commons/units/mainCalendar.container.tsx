@@ -256,9 +256,12 @@ export default function MainCalendarPage() {
             games,
           };
         });
-        const authRes = await API.get(`/auth/me`, {
-          withCredentials: true,
-        });
+        const authRes = await API.get(
+          `/auth/me`
+          //   , {
+          //   withCredentials: true,
+          // }
+        );
         setAuthInfo(authRes.data);
         console.log(authInfo);
         setAllMatchData(kstDays);
@@ -549,56 +552,60 @@ export default function MainCalendarPage() {
                 ) : (
                   <RecordButtonPlaceholder />
                 )} */}
-                {canRecord ||
-                match.status === "FINALIZED" ||
-                match.status === "EDITING" ? (
-                  <RecordButton
-                    onClick={() => {
-                      const selectedMatchInfo = {
-                        gameId: match.gameId,
-                        awayTeam: {
-                          id: match.awayTeam.id,
-                          name: match.awayTeam.name,
-                        },
-                        homeTeam: {
-                          id: match.homeTeam.id,
-                          name: match.homeTeam.name,
-                        },
-                        status: match.status,
-                      };
-                      localStorage.setItem(
-                        "selectedMatch",
-                        JSON.stringify(selectedMatchInfo)
-                      );
-                      if (match.status === "SCHEDULED") {
-                        setTeamList([
-                          {
-                            homeTeamName: match.homeTeam.name,
-                            homeTeamId: match.homeTeam.id,
-                            awayTeamName: match.awayTeam.name,
-                            awayTeamId: match.awayTeam.id,
+                {
+                  // canRecord
+                  //  ||
+                  match.status === "FINALIZED" ||
+                  match.status === "EDITING" ||
+                  match.status === "SCHEDULED" ? (
+                    <RecordButton
+                      onClick={() => {
+                        const selectedMatchInfo = {
+                          gameId: match.gameId,
+                          awayTeam: {
+                            id: match.awayTeam.id,
+                            name: match.awayTeam.name,
                           },
-                        ]);
-                      }
-                      let route = "";
-                      if (
-                        match.status === "FINALIZED" ||
-                        match.status === "EDITING"
-                      ) {
-                        route = `/matches/${match.gameId}/result`;
-                      } else if (match.status === "SCHEDULED") {
-                        route = `/matches/${match.gameId}/homeTeamRegistration`;
-                      } else if (match.status === "IN_PROGRESS") {
-                        route = `/matches/${match.gameId}/records`;
-                      }
-                      router.push(route);
-                    }}
-                  >
-                    경기기록
-                  </RecordButton>
-                ) : (
-                  <RecordButtonPlaceholder />
-                )}
+                          homeTeam: {
+                            id: match.homeTeam.id,
+                            name: match.homeTeam.name,
+                          },
+                          status: match.status,
+                        };
+                        localStorage.setItem(
+                          "selectedMatch",
+                          JSON.stringify(selectedMatchInfo)
+                        );
+                        if (match.status === "SCHEDULED") {
+                          setTeamList([
+                            {
+                              homeTeamName: match.homeTeam.name,
+                              homeTeamId: match.homeTeam.id,
+                              awayTeamName: match.awayTeam.name,
+                              awayTeamId: match.awayTeam.id,
+                            },
+                          ]);
+                        }
+                        let route = "";
+                        if (
+                          match.status === "FINALIZED" ||
+                          match.status === "EDITING"
+                        ) {
+                          route = `/matches/${match.gameId}/result`;
+                        } else if (match.status === "SCHEDULED") {
+                          route = `/matches/${match.gameId}/homeTeamRegistration`;
+                        } else if (match.status === "IN_PROGRESS") {
+                          route = `/matches/${match.gameId}/records`;
+                        }
+                        router.push(route);
+                      }}
+                    >
+                      경기기록
+                    </RecordButton>
+                  ) : (
+                    <RecordButtonPlaceholder />
+                  )
+                }
               </MatchCard>
             );
           })

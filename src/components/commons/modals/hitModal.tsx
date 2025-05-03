@@ -49,7 +49,7 @@ export default function HitModal(props: IModalProps) {
 
       if (props.onSuccess) await props.onSuccess();
       // props.setIsHitModalOpen(false);
-      alert(`기록 전송 완료\n${Type}`);
+      // alert(`기록 전송 완료\n${Type}`);
       console.log(res.data);
     } catch (error) {
       console.error("안타 기록 전송 오류:", error);
