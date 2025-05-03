@@ -394,8 +394,9 @@ export default function MainCalendarPage() {
 
                 {canRecord ||
                 match.status === "FINALIZED" ||
-                match.status === "EDITING" ||
-                match.status === "SCHEDULED" ? (
+                match.status === "EDITING" ? (
+                  // ||
+                  // match.status === "SCHEDULED"
                   <RecordButton
                     onClick={() => {
                       const selectedMatchInfo = {
