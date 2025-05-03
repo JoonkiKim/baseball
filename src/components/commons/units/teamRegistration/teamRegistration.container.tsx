@@ -32,6 +32,7 @@ import {
   AwayTeamPlayerListState,
   IHAPlayer,
   gameId,
+  lastRouteState,
 } from "../../../../commons/stores/index";
 import API from "../../../../commons/apis/api";
 import {
@@ -445,7 +446,15 @@ export default function TeamRegistrationPageComponent(props: IProps) {
       window.alert = originalAlert;
     };
   }, []);
-
+  const [lastRoute, setLastRoute] = useRecoilState(lastRouteState);
+  // 페이지가 마운트될 때 현재 경로 저장
+  useEffect(() => {
+    if (router.pathname !== "/") {
+      // 홈은 굳이 저장하지 않음
+      setLastRoute(router.asPath);
+    }
+  }, [router.asPath]);
+  console.log("lastRoute", lastRoute);
   return (
     <Container onClick={() => setOpenPositionRow(null)}>
       <LargeTitle>라인업을 등록해주세요</LargeTitle>

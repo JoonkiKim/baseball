@@ -5,6 +5,7 @@ import { useRouter } from "next/router";
 import {
   AwayTeamPlayerListState,
   HomeTeamPlayerListState,
+  lastRouteState,
 } from "../../../../commons/stores";
 import {
   ButtonContainer,
@@ -160,6 +161,14 @@ export default function SubTeamRegistrationComponent({
       window.alert = originalAlert;
     };
   }, []);
+  const [, setLastRoute] = useRecoilState(lastRouteState);
+  // 페이지가 마운트될 때 현재 경로 저장
+  useEffect(() => {
+    if (router.pathname !== "/") {
+      // 홈은 굳이 저장하지 않음
+      setLastRoute(router.asPath);
+    }
+  }, [router.asPath]);
 
   return (
     <ModalOverlay>

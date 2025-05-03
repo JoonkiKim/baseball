@@ -1,5 +1,7 @@
 import { atom } from "recoil";
 import { string } from "yup";
+import { recoilPersist } from "recoil-persist";
+const { persistAtom } = recoilPersist();
 
 // 1. Auth 정보용 인터페이스 정의
 interface AuthInfo {
@@ -306,3 +308,9 @@ export const errorGlobal = atom<string>({
 });
 
 // const [error, setError] = useState(null);
+
+export const lastRouteState = atom<string | null>({
+  key: "lastRouteState",
+  default: "/",
+  effects_UNSTABLE: [persistAtom], // 추가
+});
