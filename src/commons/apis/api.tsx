@@ -7,7 +7,6 @@ const API = axios.create({
   },
 });
 
-// /games 요청에만 credentials 붙이기 (단, GET & …/result 로 끝나면 예외)
 API.interceptors.request.use(
   (config) => {
     if (config.url?.includes("/games")) {

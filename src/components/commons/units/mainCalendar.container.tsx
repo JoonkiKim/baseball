@@ -273,6 +273,7 @@ export default function MainCalendarPage() {
 
     fetchMatches();
   }, [fromDate, toDate, router]);
+  console.log(authInfo);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -436,9 +437,22 @@ export default function MainCalendarPage() {
                   {/* awayTeam을 왼쪽에 노출 */}
                   <Team>
                     <TeamName style={{ textAlign: "right" }}>
-                      {match.awayTeam.name.length >= 5
-                        ? match.awayTeam.name.slice(0, 5)
-                        : match.awayTeam.name.padEnd(5, " ")}
+                      {(() => {
+                        const name = match.awayTeam.name;
+                        if (name.length >= 5) {
+                          return name.slice(0, 5);
+                        }
+                        const padCount = 5 - name.length;
+                        const filler = "뷁".repeat(padCount);
+                        return (
+                          <>
+                            <span style={{ color: "transparent" }}>
+                              {filler}
+                            </span>
+                            {name}
+                          </>
+                        );
+                      })()}
                     </TeamName>
                     <TeamScore
                       isWinner={team2IsWinner}
@@ -475,9 +489,22 @@ export default function MainCalendarPage() {
                   {/* homeTeam을 오른쪽에 노출 */}
                   <Team>
                     <TeamName style={{ textAlign: "left" }}>
-                      {match.homeTeam.name.length >= 5
-                        ? match.homeTeam.name.slice(0, 5)
-                        : match.homeTeam.name.padEnd(5, " ")}
+                      {(() => {
+                        const name = match.homeTeam.name;
+                        if (name.length >= 5) {
+                          return name.slice(0, 5);
+                        }
+                        const padCount = 5 - name.length;
+                        const filler = "뷁".repeat(padCount);
+                        return (
+                          <>
+                            {name}
+                            <span style={{ color: "transparent" }}>
+                              {filler}
+                            </span>
+                          </>
+                        );
+                      })()}
                     </TeamName>
                     <TeamScore
                       isWinner={team1IsWinner}
