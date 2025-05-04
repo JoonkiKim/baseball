@@ -360,6 +360,9 @@ export default function GameRecordPage() {
     };
   }, []);
 
+  const isHomeAttack = router.query.attack === "home";
+  console.log("isHomeAttack", isHomeAttack);
+
   return (
     <GameRecordContainer>
       <ScoreBoardWrapper>
@@ -421,7 +424,7 @@ export default function GameRecordPage() {
 
       <PlayersRow>
         <PlayerBox>
-          <PlayerChangeButton onClick={() => handleSubstitution(false)}>
+          <PlayerChangeButton onClick={() => handleSubstitution(isHomeAttack)}>
             선수교체
           </PlayerChangeButton>
           <OrderBadge>{batter.battingOrder}번</OrderBadge>
@@ -438,7 +441,7 @@ export default function GameRecordPage() {
           </PlayerWrapper>
         </PlayerBox>
         <PlayerBox>
-          <PlayerChangeButton onClick={() => handleSubstitution(true)}>
+          <PlayerChangeButton onClick={() => handleSubstitution(!isHomeAttack)}>
             선수교체
           </PlayerChangeButton>
           <PlayerWrapper>

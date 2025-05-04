@@ -157,9 +157,12 @@ export default function MainCalendarPage() {
             games,
           };
         });
-        const authRes = await API.get(`/auth/me`, {
-          withCredentials: true,
-        });
+        const authRes = await API.get(
+          `/auth/me`
+          //   , {
+          //   withCredentials: true,
+          // }
+        );
         setAuthInfo(authRes.data);
         console.log(authInfo);
         setAllMatchData(kstDays);
