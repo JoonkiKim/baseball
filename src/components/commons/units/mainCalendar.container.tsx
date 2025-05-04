@@ -64,6 +64,7 @@ interface Game {
   inning?: number;
   inningHalf?: string;
   gameId?: number; // gameId로 변경 (예: 1001, 1002, 1003 등)
+  isForfeit: boolean;
 }
 
 export default function MainCalendarPage() {
@@ -326,16 +327,47 @@ export default function MainCalendarPage() {
               Array.isArray(authInfo.gameIds) &&
               authInfo.gameIds.includes(match.gameId!);
             // 기존 구조: homeTeam을 team1, awayTeam을 team2로 사용
+            // const team1Score = match.homeTeam.score;
+            // const team2Score = match.awayTeam.score;
+            // const team1IsWinner =
+            //   team1Score !== null &&
+            //   team2Score !== null &&
+            //   team1Score > team2Score;
+            // const team2IsWinner =
+            //   team1Score !== null &&
+            //   team2Score !== null &&
+            //   team2Score > team1Score;
+            /* ────────── ⬇︎ ① map 안, team 스코어 계산 위치를 교체/추가 ────────── */
             const team1Score = match.homeTeam.score;
             const team2Score = match.awayTeam.score;
-            const team1IsWinner =
-              team1Score !== null &&
-              team2Score !== null &&
-              team1Score > team2Score;
-            const team2IsWinner =
-              team1Score !== null &&
-              team2Score !== null &&
-              team2Score > team1Score;
+
+            /* 몰수 경기(isForfeit)면 표시용 스코어를 가공한다 */
+            let displayHomeScore: number | string | null = team1Score;
+            let displayAwayScore: number | string | null = team2Score;
+
+            if (match.isForfeit && match.winnerTeamId) {
+              if (match.winnerTeamId === match.homeTeam.id) {
+                displayHomeScore = "몰수승";
+                displayAwayScore = "-";
+              } else if (match.winnerTeamId === match.awayTeam.id) {
+                displayAwayScore = "몰수승";
+                displayHomeScore = "-";
+              }
+            }
+
+            /* 승패 하이라이트 계산도 몰수 여부에 따라 달리 계산 */
+            const team1IsWinner = match.isForfeit
+              ? match.winnerTeamId === match.homeTeam.id
+              : team1Score !== null &&
+                team2Score !== null &&
+                team1Score > team2Score;
+
+            const team2IsWinner = match.isForfeit
+              ? match.winnerTeamId === match.awayTeam.id
+              : team1Score !== null &&
+                team2Score !== null &&
+                team2Score > team1Score;
+            /* ─────────────────────────────────────────────────────────────────────── */
 
             return (
               <MatchCard key={index}>
@@ -351,9 +383,11 @@ export default function MainCalendarPage() {
                     <TeamScore
                       isWinner={team2IsWinner}
                       gameStatus={match.status}
-                      isForfeit={match.awayTeam.score === "몰수승"}
+                      isForfeit={displayAwayScore === "몰수승"}
                     >
-                      {match.status === "SCHEDULED" ? "-" : team2Score ?? "-"}
+                      {match.status === "SCHEDULED"
+                        ? "-"
+                        : displayAwayScore ?? "-"}
                     </TeamScore>
                   </Team>
 
@@ -388,12 +422,15 @@ export default function MainCalendarPage() {
                         ? match.homeTeam.name.slice(0, 5)
                         : match.homeTeam.name.padEnd(5, " ")}
                     </TeamName>
+
                     <TeamScore
                       isWinner={team1IsWinner}
                       gameStatus={match.status}
-                      isForfeit={match.homeTeam.score === "몰수승"}
+                      isForfeit={displayHomeScore === "몰수승"}
                     >
-                      {match.status === "SCHEDULED" ? "-" : team1Score ?? "-"}
+                      {match.status === "SCHEDULED"
+                        ? "-"
+                        : displayHomeScore ?? "-"}
                     </TeamScore>
                   </Team>
                 </TeamsContainer>
