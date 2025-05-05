@@ -560,7 +560,7 @@ export default function FinalGameRecordPage() {
           <tbody>
             {awayPitchers.map((pitcher, idx) => (
               <tr key={pitcher.pitcherGameStatsId}>
-                <td>{idx + 1}</td>
+                <td>{idx === 0 ? "" : "↑"}</td>
                 <td>{pitcher.playerName}</td>
                 <td>
                   <EditableInput
@@ -713,7 +713,7 @@ export default function FinalGameRecordPage() {
           <tbody>
             {homePitchers.map((pitcher, idx) => (
               <tr key={pitcher.pitcherGameStatsId}>
-                <td>{idx + 1}</td>
+                <td>{idx === 0 ? "" : "↑"}</td>
                 <td>{pitcher.playerName}</td>
                 <td>
                   <EditableInput
