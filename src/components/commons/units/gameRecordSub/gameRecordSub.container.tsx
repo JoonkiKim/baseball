@@ -41,6 +41,12 @@ import {
   LoadingOverlay,
 } from "../../../../commons/libraries/loadingOverlay";
 import ErrorAlert from "../../../../commons/libraries/showErrorCode";
+import {
+  ModalButton,
+  ModalContainer,
+  ModalOverlay,
+  ModalTitleSmaller,
+} from "../../modals/modal.style";
 
 // 선수 정보를 나타내는 인터페이스
 interface PlayerInfo {
@@ -743,6 +749,16 @@ export default function TeamRegistrationPageComponent() {
       setIsSubmitting(false);
     }
   };
+  const [validationError, setValidationError] = useState<string | null>(null);
+  useEffect(() => {
+    const originalAlert = window.alert;
+    window.alert = (msg: string) => {
+      setValidationError(msg);
+    };
+    return () => {
+      window.alert = originalAlert;
+    };
+  }, []);
 
   return (
     <Container onClick={() => setOpenPositionRow(null)}>
@@ -896,6 +912,17 @@ export default function TeamRegistrationPageComponent() {
         <LoadingIcon spin fontSize={48} />
       </LoadingOverlay>
       <ErrorAlert error={error} />
+      {!isSubmitting && validationError && (
+        <ModalOverlay>
+          <ModalContainer>
+            <ModalTitleSmaller>{validationError}</ModalTitleSmaller>
+
+            <ModalButton onClick={() => setValidationError(null)}>
+              확인
+            </ModalButton>
+          </ModalContainer>
+        </ModalOverlay>
+      )}
     </Container>
   );
 }
