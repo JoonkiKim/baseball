@@ -129,7 +129,9 @@ export const PlayerNameInput = styled.input<{ hasValue: boolean }>`
   border: none;
   outline: none;
   width: 90%;
-  text-align: left;
+
+  /* text-align: left; */
+  text-align: center;
   /* 입력값이 있으면 왼쪽 정렬, 없으면 가운데 정렬 */
   /* text-align: ${({ hasValue }) => (hasValue ? "left" : "center")}; */
 
@@ -148,7 +150,8 @@ export const PlayerNameInput = styled.input<{ hasValue: boolean }>`
 
 export const WildCardBox = styled.div`
   position: absolute;
-  right: 0;
+  /* right: -8px; */
+  right: -0.5rem;
   /* left: -5; */
   top: 50%;
   transform: translateY(-50%);
@@ -241,7 +244,7 @@ export const PitcherPositionText = styled.span`
   font-family: "KBO-Dia-Gothic_medium";
   font-size: 14px;
   color: #000000;
-  width: 14vw;
+  width: 12vw;
   min-width: 110px;
   border: none;
   text-align: center;

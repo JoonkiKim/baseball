@@ -276,10 +276,11 @@ export const Team = styled.div`
 export const TeamName = styled.div`
   font-weight: 500;
   color: #000;
-  font-size: 16px; /* 기본값 */
+  /* font-size: 16px; 기본값 */
+  font-size: 0.875rem;
   margin-bottom: 7px;
   /* white-space: pre; */
-  width: 20vw;
+  width: 21vw;
   text-align: center;
   /* background-color: red; */
 `;

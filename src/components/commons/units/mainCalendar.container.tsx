@@ -66,6 +66,7 @@ interface Game {
   gameId?: number; // gameId로 변경 (예: 1001, 1002, 1003 등)
   isForfeit: boolean;
 }
+const LOCAL_KEY = "calendarSelectedDate";
 
 export default function MainCalendarPage() {
   // const [recordId, setGameId] = useRecoilState(gameId);
@@ -196,6 +197,20 @@ export default function MainCalendarPage() {
     const matchDay = allMatchData.find((day) => day.date === dateStr);
     setMatchesForSelectedDate(matchDay?.games || []);
   }, [selectedDate, allMatchData]);
+
+  /* ───── ① 첫 로드: localStorage 값이 있으면 복원 ───── */
+  useEffect(() => {
+    const saved = localStorage.getItem(LOCAL_KEY);
+    if (saved) {
+      // "YYYY-MM-DD" 형태로 저장했으므로 moment로 파싱
+      setSelectedDate(moment(saved, "YYYY-MM-DD").toDate());
+    }
+  }, []);
+  useEffect(() => {
+    if (selectedDate) {
+      localStorage.setItem(LOCAL_KEY, formatDateToYMD(selectedDate));
+    }
+  }, [selectedDate]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -376,9 +391,9 @@ export default function MainCalendarPage() {
                   {/* awayTeam을 왼쪽에 노출 */}
                   <Team>
                     <TeamName>
-                      {match.awayTeam.name.length >= 5
-                        ? match.awayTeam.name.slice(0, 5)
-                        : match.awayTeam.name.padEnd(5, " ")}
+                      {match.awayTeam.name.length >= 6
+                        ? match.awayTeam.name.slice(0, 6)
+                        : match.awayTeam.name.padEnd(6, " ")}
                     </TeamName>
                     <TeamScore
                       isWinner={team2IsWinner}
@@ -418,9 +433,9 @@ export default function MainCalendarPage() {
                   {/* homeTeam을 오른쪽에 노출 */}
                   <Team>
                     <TeamName>
-                      {match.homeTeam.name.length >= 5
-                        ? match.homeTeam.name.slice(0, 5)
-                        : match.homeTeam.name.padEnd(5, " ")}
+                      {match.homeTeam.name.length >= 6
+                        ? match.homeTeam.name.slice(0, 6)
+                        : match.homeTeam.name.padEnd(6, " ")}
                     </TeamName>
 
                     <TeamScore
