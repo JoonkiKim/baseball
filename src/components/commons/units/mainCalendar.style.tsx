@@ -10,23 +10,7 @@ export const Container = styled.div`
   min-height: 500px;
   display: flex;
   flex-direction: column;
-
-  /* Small (max-width: 480px) */
-  @media only screen and (max-width: 480px) {
-    padding: 10px;
-  }
-  /* Medium (481px - 768px) */
-  @media only screen and (min-width: 481px) and (max-width: 768px) {
-    padding: 15px;
-  }
-  /* Large (769px - 1024px) */
-  @media only screen and (min-width: 769px) and (max-width: 1024px) {
-    padding: 20px;
-  }
-  /* Extra Large (1025px 이상) */
-  @media only screen and (min-width: 1025px) {
-    padding: 20px;
-  }
+  /* background-color: red; */
 `;
 
 // ─── 헤더 영역 (배경 + 날짜 영역 포함) ─────────────────────────────
@@ -206,6 +190,7 @@ export const MatchCard = styled.div`
   border-bottom: 1px solid #e8e8e8;
   padding: 8px 0;
   height: 10vh;
+  /* background-color: red; */
 
   /* Small */
   @media only screen and (max-width: 480px) {
@@ -353,6 +338,38 @@ export const VsText = styled.div`
   }
 `;
 
+export const BraketText = styled.div`
+  font-weight: 500;
+  margin: 0 8px;
+  font-size: 16px; /* 기본값 */
+  color: #797979;
+  /* width: 15vw; */
+  text-align: center;
+  width: 13vw;
+
+  /* background-color: red; */
+
+  /* Small */
+  @media only screen and (max-width: 480px) {
+    font-size: 14px;
+    /* margin: 0 6px; */
+    /* margin-top: 7px; */
+    padding-top: 8px;
+  }
+  /* Medium */
+  @media only screen and (min-width: 481px) and (max-width: 768px) {
+    font-size: 15px;
+    /* margin: 0 7px; */
+    padding-top: 8px;
+  }
+  /* Large & Extra Large */
+  @media only screen and (min-width: 769px) {
+    font-size: 16px;
+    /* margin: 0 8px; */
+    padding-top: 8px;
+  }
+`;
+
 export const RecordButton = styled.button`
   font-family: "KBO-Dia-Gothic_light";
   background: rgba(0, 0, 0, 0.02);
@@ -361,7 +378,7 @@ export const RecordButton = styled.button`
   border-radius: 4px;
   cursor: pointer;
   font-size: 12px; /* 기본값 */
-  min-width: 60px;
+  min-width: 55px;
   min-height: 30px;
   text-align: center;
   display: flex;
@@ -496,35 +513,3 @@ export const DatePickWrapper = styled.div`
 `;
 
 export const StyledDatePicker = styled(DatePicker)``;
-
-export const BraketText = styled.div`
-  font-weight: 500;
-  margin: 0 8px;
-  font-size: 16px; /* 기본값 */
-  color: #797979;
-  /* width: 15vw; */
-  text-align: center;
-  width: 12vw;
-
-  /* background-color: red; */
-
-  /* Small */
-  @media only screen and (max-width: 480px) {
-    font-size: 14px;
-    /* margin: 0 6px; */
-    /* margin-top: 7px; */
-    padding-top: 8px;
-  }
-  /* Medium */
-  @media only screen and (min-width: 481px) and (max-width: 768px) {
-    font-size: 15px;
-    /* margin: 0 7px; */
-    padding-top: 8px;
-  }
-  /* Large & Extra Large */
-  @media only screen and (min-width: 769px) {
-    font-size: 16px;
-    /* margin: 0 8px; */
-    padding-top: 8px;
-  }
-`;
