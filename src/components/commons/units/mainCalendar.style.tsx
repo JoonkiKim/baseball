@@ -496,3 +496,35 @@ export const DatePickWrapper = styled.div`
 `;
 
 export const StyledDatePicker = styled(DatePicker)``;
+
+export const BraketText = styled.div`
+  font-weight: 500;
+  margin: 0 8px;
+  font-size: 16px; /* 기본값 */
+  color: #797979;
+  /* width: 15vw; */
+  text-align: center;
+  width: 12vw;
+
+  /* background-color: red; */
+
+  /* Small */
+  @media only screen and (max-width: 480px) {
+    font-size: 14px;
+    /* margin: 0 6px; */
+    /* margin-top: 7px; */
+    padding-top: 8px;
+  }
+  /* Medium */
+  @media only screen and (min-width: 481px) and (max-width: 768px) {
+    font-size: 15px;
+    /* margin: 0 7px; */
+    padding-top: 8px;
+  }
+  /* Large & Extra Large */
+  @media only screen and (min-width: 769px) {
+    font-size: 16px;
+    /* margin: 0 8px; */
+    padding-top: 8px;
+  }
+`;

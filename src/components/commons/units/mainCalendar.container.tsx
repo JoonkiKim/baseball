@@ -5,6 +5,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import { useRecoilState } from "recoil";
 import {
   Arrow,
+  BraketText,
   CalendarIcon,
   Container,
   DateDisplay,
@@ -51,6 +52,7 @@ interface Game {
   time: string;
   status: string;
   winnerTeamId?: number;
+  stage: string;
   homeTeam: {
     id: number;
     name: string;
@@ -383,6 +385,44 @@ export default function MainCalendarPage() {
                 team2Score !== null &&
                 team2Score > team1Score;
             /* ─────────────────────────────────────────────────────────────────────── */
+            // 📍 ① map 내부 – 팀 이름/스코어에 들어갈 표시값 먼저 계산
+            const awayTeamNameDisplay =
+              match.awayTeam.name && match.awayTeam.id != null
+                ? match.awayTeam.name.length >= 6
+                  ? match.awayTeam.name.slice(0, 6)
+                  : match.awayTeam.name.padEnd(6, " ")
+                : "-";
+
+            const homeTeamNameDisplay =
+              match.homeTeam.name && match.homeTeam.id != null
+                ? match.homeTeam.name.length >= 6
+                  ? match.homeTeam.name.slice(0, 6)
+                  : match.homeTeam.name.padEnd(6, " ")
+                : "-";
+
+            // 스코어가 null 이거나 팀 정보(id·name) 자체가 없으면 “-”로 통일
+            const awayScoreDisplay =
+              displayAwayScore == null ? "-" : displayAwayScore;
+
+            const homeScoreDisplay =
+              displayHomeScore == null ? "-" : displayHomeScore;
+
+            /* ────────── ⬇︎ ① map 안, stage 라벨 계산 추가 ────────── */
+            const stageLabel = (() => {
+              switch (match.stage) {
+                case "FINAL":
+                  return "결승";
+                case "SEMIFINAL":
+                  return "준결승";
+                case "QF":
+                  return "8강";
+                case "TP":
+                  return "3,4위전";
+                default:
+                  return ""; // stage 값이 없으면 표시하지 않음
+              }
+            })();
+            /* ─────────────────────────────────────────────────────── */
 
             return (
               <MatchCard key={index}>
@@ -390,19 +430,13 @@ export default function MainCalendarPage() {
                 <TeamsContainer>
                   {/* awayTeam을 왼쪽에 노출 */}
                   <Team>
-                    <TeamName>
-                      {match.awayTeam.name.length >= 6
-                        ? match.awayTeam.name.slice(0, 6)
-                        : match.awayTeam.name.padEnd(6, " ")}
-                    </TeamName>
+                    <TeamName>{awayTeamNameDisplay}</TeamName>
                     <TeamScore
                       isWinner={team2IsWinner}
                       gameStatus={match.status}
-                      isForfeit={displayAwayScore === "몰수승"}
+                      isForfeit={awayScoreDisplay === "몰수승"}
                     >
-                      {match.status === "SCHEDULED"
-                        ? "-"
-                        : displayAwayScore ?? "-"}
+                      {match.status === "SCHEDULED" ? "-" : awayScoreDisplay}
                     </TeamScore>
                   </Team>
 
@@ -411,7 +445,7 @@ export default function MainCalendarPage() {
                       display: "flex",
                       flexDirection: "column",
                       alignItems: "center",
-                      marginBottom: "20px",
+                      // marginBottom: "20px",
                     }}
                   >
                     <StatusBox status={match.status}>
@@ -428,24 +462,18 @@ export default function MainCalendarPage() {
                         : ""}
                     </StatusBox>
                     <VsText>vs</VsText>
+                    <BraketText>{stageLabel}</BraketText>
                   </div>
 
                   {/* homeTeam을 오른쪽에 노출 */}
                   <Team>
-                    <TeamName>
-                      {match.homeTeam.name.length >= 6
-                        ? match.homeTeam.name.slice(0, 6)
-                        : match.homeTeam.name.padEnd(6, " ")}
-                    </TeamName>
-
+                    <TeamName>{homeTeamNameDisplay}</TeamName>
                     <TeamScore
                       isWinner={team1IsWinner}
                       gameStatus={match.status}
-                      isForfeit={displayHomeScore === "몰수승"}
+                      isForfeit={homeScoreDisplay === "몰수승"}
                     >
-                      {match.status === "SCHEDULED"
-                        ? "-"
-                        : displayHomeScore ?? "-"}
+                      {match.status === "SCHEDULED" ? "-" : homeScoreDisplay}
                     </TeamScore>
                   </Team>
                 </TeamsContainer>
