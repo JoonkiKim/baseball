@@ -412,11 +412,11 @@ export default function MainCalendarPage() {
               switch (match.stage) {
                 case "FINAL":
                   return "결승";
-                case "SEMIFINAL":
+                case "SEMI_FINAL":
                   return "준결승";
-                case "QF":
+                case "QUARTER_FINAL":
                   return "8강";
-                case "TP":
+                case "THIRD_PLACE":
                   return "3,4위전";
                 default:
                   return ""; // stage 값이 없으면 표시하지 않음
