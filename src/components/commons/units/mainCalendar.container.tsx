@@ -466,7 +466,70 @@ export default function MainCalendarPage() {
                   match.status === "EDITING" ? (
                     <RecordButton
                       onClick={() => {
-                        /* ... */
+                        /* ① recoil-persist(로컬스토리지)에서 마지막 경로 가져오기 */
+                        const persistedRoute = (() => {
+                          try {
+                            const stored = JSON.parse(
+                              localStorage.getItem("recoil-persist") ?? "{}"
+                            );
+                            // recoil-persist로 저장된 lastRouteState 값
+                            return stored.lastRouteState ?? "";
+                          } catch {
+                            return "";
+                          }
+                        })();
+
+                        /* ② 경기 정보 로컬스토리지에 저장(기존 그대로) */
+                        const selectedMatchInfo = {
+                          gameId: match.gameId,
+                          awayTeam: {
+                            id: match.awayTeam.id,
+                            name: match.awayTeam.name,
+                          },
+                          homeTeam: {
+                            id: match.homeTeam.id,
+                            name: match.homeTeam.name,
+                          },
+                          status: match.status,
+                        };
+                        localStorage.setItem(
+                          "selectedMatch",
+                          JSON.stringify(selectedMatchInfo)
+                        );
+
+                        /* ③ SCHEDULED 인 경우 팀목록 세팅(기존 그대로) */
+                        if (match.status === "SCHEDULED") {
+                          setTeamList([
+                            {
+                              homeTeamName: match.homeTeam.name,
+                              homeTeamId: match.homeTeam.id,
+                              awayTeamName: match.awayTeam.name,
+                              awayTeamId: match.awayTeam.id,
+                            },
+                          ]);
+                        }
+
+                        /* ④ 이동 경로 결정 — 요 부분이 변경됨 */
+                        let route = "";
+                        if (
+                          match.status === "FINALIZED" ||
+                          match.status === "EDITING"
+                        ) {
+                          route = `/matches/${match.gameId}/result`;
+                        } else if (match.status === "SCHEDULED") {
+                          /* ­이전 방문 경로(persistedRoute)에 현재 gameId가 포함돼 있으면 그곳으로,
+         아니면 기본 homeTeamRegistration 으로   */
+                          route =
+                            persistedRoute &&
+                            persistedRoute.includes(String(match.gameId))
+                              ? persistedRoute
+                              : `/matches/${match.gameId}/homeTeamRegistration`;
+                        } else if (match.status === "IN_PROGRESS") {
+                          route = `/matches/${match.gameId}/records`;
+                        }
+
+                        /* ⑤ 최종 라우팅 */
+                        router.push(route);
                       }}
                     >
                       경기기록
