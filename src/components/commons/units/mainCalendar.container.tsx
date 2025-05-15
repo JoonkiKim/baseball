@@ -337,284 +337,146 @@ export default function MainCalendarPage() {
               ? "해당 날짜의 경기가 없습니다."
               : "경기 일정을 불러오는 중입니다"}
           </p>
-        ) : matchesForSelectedDate.length > 0 ? (
-          matchesForSelectedDate.map((match, index) => {
-            const canRecord =
-              authInfo.role === "UMPIRE" &&
-              Array.isArray(authInfo.gameIds) &&
-              authInfo.gameIds.includes(match.gameId!);
-            // 기존 구조: homeTeam을 team1, awayTeam을 team2로 사용
-            // const team1Score = match.homeTeam.score;
-            // const team2Score = match.awayTeam.score;
-            // const team1IsWinner =
-            //   team1Score !== null &&
-            //   team2Score !== null &&
-            //   team1Score > team2Score;
-            // const team2IsWinner =
-            //   team1Score !== null &&
-            //   team2Score !== null &&
-            //   team2Score > team1Score;
-            /* ────────── ⬇︎ ① map 안, team 스코어 계산 위치를 교체/추가 ────────── */
-            const team1Score = match.homeTeam.score;
-            const team2Score = match.awayTeam.score;
+        ) : matchesForSelectedDate.filter(
+            (match) =>
+              match.homeTeam.name != null && match.awayTeam.name != null
+          ).length > 0 ? (
+          matchesForSelectedDate
+            .filter(
+              (match) =>
+                match.homeTeam.name != null && match.awayTeam.name != null
+            )
+            .map((match, index) => {
+              const canRecord =
+                authInfo.role === "UMPIRE" &&
+                Array.isArray(authInfo.gameIds) &&
+                authInfo.gameIds.includes(match.gameId!);
 
-            /* 몰수 경기(isForfeit)면 표시용 스코어를 가공한다 */
-            let displayHomeScore: number | string | null = team1Score;
-            let displayAwayScore: number | string | null = team2Score;
+              const team1Score = match.homeTeam.score;
+              const team2Score = match.awayTeam.score;
 
-            if (match.isForfeit && match.winnerTeamId) {
-              if (match.winnerTeamId === match.homeTeam.id) {
-                displayHomeScore = "몰수승";
-                displayAwayScore = "-";
-              } else if (match.winnerTeamId === match.awayTeam.id) {
-                displayAwayScore = "몰수승";
-                displayHomeScore = "-";
+              let displayHomeScore: number | string | null = team1Score;
+              let displayAwayScore: number | string | null = team2Score;
+
+              if (match.isForfeit && match.winnerTeamId) {
+                if (match.winnerTeamId === match.homeTeam.id) {
+                  displayHomeScore = "몰수승";
+                  displayAwayScore = "-";
+                } else if (match.winnerTeamId === match.awayTeam.id) {
+                  displayAwayScore = "몰수승";
+                  displayHomeScore = "-";
+                }
               }
-            }
 
-            /* 승패 하이라이트 계산도 몰수 여부에 따라 달리 계산 */
-            const team1IsWinner = match.isForfeit
-              ? match.winnerTeamId === match.homeTeam.id
-              : team1Score !== null &&
-                team2Score !== null &&
-                team1Score > team2Score;
+              const team1IsWinner = match.isForfeit
+                ? match.winnerTeamId === match.homeTeam.id
+                : team1Score !== null &&
+                  team2Score !== null &&
+                  team1Score > team2Score;
 
-            const team2IsWinner = match.isForfeit
-              ? match.winnerTeamId === match.awayTeam.id
-              : team1Score !== null &&
-                team2Score !== null &&
-                team2Score > team1Score;
-            /* ─────────────────────────────────────────────────────────────────────── */
-            // 📍 ① map 내부 – 팀 이름/스코어에 들어갈 표시값 먼저 계산
-            const awayTeamNameDisplay =
-              match.awayTeam.name && match.awayTeam.id != null
-                ? match.awayTeam.name.length >= 6
+              const team2IsWinner = match.isForfeit
+                ? match.winnerTeamId === match.awayTeam.id
+                : team1Score !== null &&
+                  team2Score !== null &&
+                  team2Score > team1Score;
+
+              const awayTeamNameDisplay =
+                match.awayTeam.name.length >= 6
                   ? match.awayTeam.name.slice(0, 6)
-                  : match.awayTeam.name.padEnd(6, " ")
-                : "-";
+                  : match.awayTeam.name.padEnd(6, " ");
 
-            const homeTeamNameDisplay =
-              match.homeTeam.name && match.homeTeam.id != null
-                ? match.homeTeam.name.length >= 6
+              const homeTeamNameDisplay =
+                match.homeTeam.name.length >= 6
                   ? match.homeTeam.name.slice(0, 6)
-                  : match.homeTeam.name.padEnd(6, " ")
-                : "-";
+                  : match.homeTeam.name.padEnd(6, " ");
 
-            // 스코어가 null 이거나 팀 정보(id·name) 자체가 없으면 “-”로 통일
-            const awayScoreDisplay =
-              displayAwayScore == null ? "-" : displayAwayScore;
+              const awayScoreDisplay =
+                displayAwayScore == null ? "-" : displayAwayScore;
+              const homeScoreDisplay =
+                displayHomeScore == null ? "-" : displayHomeScore;
 
-            const homeScoreDisplay =
-              displayHomeScore == null ? "-" : displayHomeScore;
+              const stageLabel = (() => {
+                switch (match.stage) {
+                  case "FINAL":
+                    return "결승";
+                  case "SEMI_FINAL":
+                    return "준결승";
+                  case "QUARTER_FINAL":
+                    return "8강";
+                  case "THIRD_PLACE":
+                    return "3,4위전";
+                  default:
+                    return "";
+                }
+              })();
 
-            /* ────────── ⬇︎ ① map 안, stage 라벨 계산 추가 ────────── */
-            const stageLabel = (() => {
-              switch (match.stage) {
-                case "FINAL":
-                  return "결승";
-                case "SEMI_FINAL":
-                  return "준결승";
-                case "QUARTER_FINAL":
-                  return "8강";
-                case "THIRD_PLACE":
-                  return "3,4위전";
-                default:
-                  return ""; // stage 값이 없으면 표시하지 않음
-              }
-            })();
-            /* ─────────────────────────────────────────────────────── */
-
-            return (
-              <MatchCard key={index}>
-                <MatchTimeLabel>{match.time}</MatchTimeLabel>
-                <TeamsContainer>
-                  {/* awayTeam을 왼쪽에 노출 */}
-                  <Team>
-                    <TeamName>{awayTeamNameDisplay}</TeamName>
-                    <TeamScore
-                      isWinner={team2IsWinner}
-                      gameStatus={match.status}
-                      isForfeit={awayScoreDisplay === "몰수승"}
+              return (
+                <MatchCard key={index}>
+                  <MatchTimeLabel>{match.time}</MatchTimeLabel>
+                  <TeamsContainer>
+                    <Team>
+                      <TeamName>{awayTeamNameDisplay}</TeamName>
+                      <TeamScore
+                        isWinner={team2IsWinner}
+                        gameStatus={match.status}
+                        isForfeit={awayScoreDisplay === "몰수승"}
+                      >
+                        {match.status === "SCHEDULED" ? "-" : awayScoreDisplay}
+                      </TeamScore>
+                    </Team>
+                    <div
+                      id="matchStatus"
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        margin: "0 5px",
+                        // backgroundColor: "aqua",
+                      }}
                     >
-                      {match.status === "SCHEDULED" ? "-" : awayScoreDisplay}
-                    </TeamScore>
-                  </Team>
-
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      // marginBottom: "20px",
-                    }}
-                  >
-                    <StatusBox status={match.status}>
-                      {match.status === "SCHEDULED"
-                        ? "경기예정"
-                        : match.status === "FINALIZED"
-                        ? "경기종료"
-                        : match.status === "IN_PROGRESS" && match.inning
-                        ? `${match.inning}회${
-                            match.inningHalf === "TOP" ? "초" : "말"
-                          }`
-                        : match.status === "EDITING"
-                        ? "경기종료"
-                        : ""}
-                    </StatusBox>
-                    <VsText>vs</VsText>
-                    <BraketText>{stageLabel}</BraketText>
-                  </div>
-
-                  {/* homeTeam을 오른쪽에 노출 */}
-                  <Team>
-                    <TeamName>{homeTeamNameDisplay}</TeamName>
-                    <TeamScore
-                      isWinner={team1IsWinner}
-                      gameStatus={match.status}
-                      isForfeit={homeScoreDisplay === "몰수승"}
+                      <StatusBox status={match.status}>
+                        {match.status === "SCHEDULED"
+                          ? "경기예정"
+                          : match.status === "FINALIZED"
+                          ? "경기종료"
+                          : match.status === "IN_PROGRESS" && match.inning
+                          ? `${match.inning}회${
+                              match.inningHalf === "TOP" ? "초" : "말"
+                            }`
+                          : match.status === "EDITING"
+                          ? "경기종료"
+                          : ""}
+                      </StatusBox>
+                      <VsText>vs</VsText>
+                      <BraketText>{stageLabel}</BraketText>
+                    </div>
+                    <Team>
+                      <TeamName>{homeTeamNameDisplay}</TeamName>
+                      <TeamScore
+                        isWinner={team1IsWinner}
+                        gameStatus={match.status}
+                        isForfeit={homeScoreDisplay === "몰수승"}
+                      >
+                        {match.status === "SCHEDULED" ? "-" : homeScoreDisplay}
+                      </TeamScore>
+                    </Team>
+                  </TeamsContainer>
+                  {canRecord ||
+                  match.status === "FINALIZED" ||
+                  match.status === "EDITING" ? (
+                    <RecordButton
+                      onClick={() => {
+                        /* ... */
+                      }}
                     >
-                      {match.status === "SCHEDULED" ? "-" : homeScoreDisplay}
-                    </TeamScore>
-                  </Team>
-                </TeamsContainer>
-
-                {canRecord ||
-                match.status === "FINALIZED" ||
-                match.status === "EDITING" ? (
-                  // ||
-                  // match.status === "SCHEDULED"
-                  // <RecordButton
-                  //   onClick={() => {
-                  //     const selectedMatchInfo = {
-                  //       gameId: match.gameId,
-                  //       awayTeam: {
-                  //         id: match.awayTeam.id,
-                  //         name: match.awayTeam.name,
-                  //       },
-                  //       homeTeam: {
-                  //         id: match.homeTeam.id,
-                  //         name: match.homeTeam.name,
-                  //       },
-                  //       status: match.status,
-                  //     };
-                  //     localStorage.setItem(
-                  //       "selectedMatch",
-                  //       JSON.stringify(selectedMatchInfo)
-                  //     );
-                  //     if (match.status === "SCHEDULED") {
-                  //       setTeamList([
-                  //         {
-                  //           homeTeamName: match.homeTeam.name,
-                  //           homeTeamId: match.homeTeam.id,
-                  //           awayTeamName: match.awayTeam.name,
-                  //           awayTeamId: match.awayTeam.id,
-                  //         },
-                  //       ]);
-                  //     }
-                  //     let route = "";
-
-                  //     // (1) 경기 종료(FINALIZED) + recoil-persist 에 저장된 lastRoute 안에
-                  //     //     현재 match.gameId 가 포함돼 있으면, 그 lastRoute 로 이동
-                  //     if (match.status === "FINALIZED") {
-                  //       // lastRouteState 가 비어있거나 gameId 가 없으면 빈 문자열
-                  //       const persistedRoute =
-                  //         lastRoute && lastRoute.includes(String(match.gameId))
-                  //           ? lastRoute
-                  //           : "";
-
-                  //       route =
-                  //         persistedRoute !== ""
-                  //           ? persistedRoute // 예) /matches/3/homeTeamRegistration/homeTeamSubRegistration
-                  //           : `/matches/${match.gameId}/result`;
-                  //     } else if (match.status === "EDITING") {
-                  //       route = `/matches/${match.gameId}/result`;
-                  //     } else if (match.status === "SCHEDULED") {
-                  //       route = `/matches/${match.gameId}/homeTeamRegistration`;
-                  //     } else if (match.status === "IN_PROGRESS") {
-                  //       route = `/matches/${match.gameId}/records`;
-                  //     }
-
-                  //     router.push(route);
-                  //   }}
-                  // >
-                  //   경기기록
-                  // </RecordButton>
-                  <RecordButton
-                    onClick={() => {
-                      /* ① recoil-persist(로컬스토리지)에서 마지막 경로 가져오기 */
-                      const persistedRoute = (() => {
-                        try {
-                          const stored = JSON.parse(
-                            localStorage.getItem("recoil-persist") ?? "{}"
-                          );
-                          // recoil-persist로 저장된 lastRouteState 값
-                          return stored.lastRouteState ?? "";
-                        } catch {
-                          return "";
-                        }
-                      })();
-
-                      /* ② 경기 정보 로컬스토리지에 저장(기존 그대로) */
-                      const selectedMatchInfo = {
-                        gameId: match.gameId,
-                        awayTeam: {
-                          id: match.awayTeam.id,
-                          name: match.awayTeam.name,
-                        },
-                        homeTeam: {
-                          id: match.homeTeam.id,
-                          name: match.homeTeam.name,
-                        },
-                        status: match.status,
-                      };
-                      localStorage.setItem(
-                        "selectedMatch",
-                        JSON.stringify(selectedMatchInfo)
-                      );
-
-                      /* ③ SCHEDULED 인 경우 팀목록 세팅(기존 그대로) */
-                      if (match.status === "SCHEDULED") {
-                        setTeamList([
-                          {
-                            homeTeamName: match.homeTeam.name,
-                            homeTeamId: match.homeTeam.id,
-                            awayTeamName: match.awayTeam.name,
-                            awayTeamId: match.awayTeam.id,
-                          },
-                        ]);
-                      }
-
-                      /* ④ 이동 경로 결정 — 요 부분이 변경됨 */
-                      let route = "";
-                      if (
-                        match.status === "FINALIZED" ||
-                        match.status === "EDITING"
-                      ) {
-                        route = `/matches/${match.gameId}/result`;
-                      } else if (match.status === "SCHEDULED") {
-                        /* ­이전 방문 경로(persistedRoute)에 현재 gameId가 포함돼 있으면 그곳으로,
-         아니면 기본 homeTeamRegistration 으로   */
-                        route =
-                          persistedRoute &&
-                          persistedRoute.includes(String(match.gameId))
-                            ? persistedRoute
-                            : `/matches/${match.gameId}/homeTeamRegistration`;
-                      } else if (match.status === "IN_PROGRESS") {
-                        route = `/matches/${match.gameId}/records`;
-                      }
-
-                      /* ⑤ 최종 라우팅 */
-                      router.push(route);
-                    }}
-                  >
-                    경기기록
-                  </RecordButton>
-                ) : (
-                  <RecordButtonPlaceholder />
-                )}
-              </MatchCard>
-            );
-          })
+                      경기기록
+                    </RecordButton>
+                  ) : (
+                    <RecordButtonPlaceholder />
+                  )}
+                </MatchCard>
+              );
+            })
         ) : (
           <p style={{ textAlign: "center", marginTop: "20px" }}>
             해당 날짜의 경기가 없습니다.

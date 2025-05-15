@@ -227,27 +227,14 @@ export const MatchTimeLabel = styled.div`
 `;
 
 export const TeamsContainer = styled.div`
-  /* background-color: red; */
+  /* background-color: yellow; */
   display: flex;
   align-items: center;
   flex: 1;
   justify-content: center;
-  gap: 16px; /* 기본값 */
+
   margin-left: 5px;
   margin-right: 5px;
-
-  /* Small */
-  @media only screen and (max-width: 480px) {
-    gap: 12px;
-  }
-  /* Medium */
-  @media only screen and (min-width: 481px) and (max-width: 768px) {
-    gap: 14px;
-  }
-  /* Large & Extra Large */
-  @media only screen and (min-width: 769px) {
-    gap: 16px;
-  }
 `;
 
 export const Team = styled.div`
@@ -256,6 +243,9 @@ export const Team = styled.div`
   align-items: center;
   min-width: 50px;
   min-height: 45px;
+  /* background-color: red; */
+  /* margin-right: 5px; */
+  /* margin-right: 10px; */
 `;
 
 export const TeamName = styled.div`
@@ -314,6 +304,7 @@ export const TeamsWrapper = styled.div`
   align-items: center;
   justify-content: space-between;
   width: 100%;
+  /* background-color: red */
 `;
 
 export const VsText = styled.div`
