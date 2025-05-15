@@ -472,7 +472,6 @@ export default function MainCalendarPage() {
                             const stored = JSON.parse(
                               localStorage.getItem("recoil-persist") ?? "{}"
                             );
-                            // recoil-persist로 저장된 lastRouteState 값
                             return stored.lastRouteState ?? "";
                           } catch {
                             return "";
