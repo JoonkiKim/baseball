@@ -16,7 +16,7 @@ API2.interceptors.request.use(
     const url = config.url ?? "";
 
     if (method === "get" && url.includes("/auth/me")) {
-      config.withCredentials = true;
+      config.withCredentials = false;
     }
     return config;
   },
