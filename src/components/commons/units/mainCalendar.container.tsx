@@ -200,17 +200,34 @@ export default function MainCalendarPage() {
     setMatchesForSelectedDate(matchDay?.games || []);
   }, [selectedDate, allMatchData]);
 
-  /* ───── ① 첫 로드: localStorage 값이 있으면 복원 ───── */
+  // /* ───── ① 첫 로드: localStorage 값이 있으면 복원 ───── */
+  // useEffect(() => {
+  //   const saved = localStorage.getItem(LOCAL_KEY);
+  //   if (saved) {
+  //     // "YYYY-MM-DD" 형태로 저장했으므로 moment로 파싱
+  //     setSelectedDate(moment(saved, "YYYY-MM-DD").toDate());
+  //   }
+  // }, []);
+  // useEffect(() => {
+  //   if (selectedDate) {
+  //     localStorage.setItem(LOCAL_KEY, formatDateToYMD(selectedDate));
+  //   }
+  // }, [selectedDate]);
+
+  // [세션스토리지에 저장해서 껐다켜면 오늘날짜로 오게]
+
   useEffect(() => {
-    const saved = localStorage.getItem(LOCAL_KEY);
+    const saved = sessionStorage.getItem(LOCAL_KEY);
     if (saved) {
-      // "YYYY-MM-DD" 형태로 저장했으므로 moment로 파싱
       setSelectedDate(moment(saved, "YYYY-MM-DD").toDate());
+    } else {
+      setSelectedDate(new Date());
     }
   }, []);
+
   useEffect(() => {
     if (selectedDate) {
-      localStorage.setItem(LOCAL_KEY, formatDateToYMD(selectedDate));
+      sessionStorage.setItem(LOCAL_KEY, formatDateToYMD(selectedDate));
     }
   }, [selectedDate]);
 
