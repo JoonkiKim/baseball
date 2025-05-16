@@ -18,7 +18,7 @@ API.interceptors.request.use(
       const isGet = method === "get";
       const isResultEndpoint = url.endsWith("/result");
       if (!(isGet && isResultEndpoint)) {
-        config.withCredentials = false;
+        config.withCredentials = true;
       }
     }
 
