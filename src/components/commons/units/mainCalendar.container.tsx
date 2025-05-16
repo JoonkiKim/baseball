@@ -164,7 +164,7 @@ export default function MainCalendarPage() {
         // });
         const authRes = await API.get(`/auth/me`);
         setAuthInfo(authRes.data);
-        console.log(authInfo);
+        console.log("authInfo", authInfo);
         // setAllMatchData(kstDays);
         setAllMatchData(res.data.days);
         console.log("allMatchData", allMatchData);

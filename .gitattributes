@@ -1,3 +1,0 @@
-.env                          merge=theirs
-src/commons/apis/api.tsx      merge=theirs
-src/commons/apis/api2.tsx     merge=theirs
