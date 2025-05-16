@@ -13,12 +13,6 @@ API.interceptors.request.use(
     const method = config.method?.toLowerCase();
     const url = config.url ?? "";
 
-    // GET요청이고 /auth/me인 경우 withCredentials 제외
-    if (method === "get" && url.includes("/auth/me")) {
-      config.withCredentials = true;
-      return config;
-    }
-
     // games 관련 요청은 기존 로직 유지
     if (url.includes("/games")) {
       const isGet = method === "get";
