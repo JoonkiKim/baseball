@@ -18,6 +18,17 @@ export const BracketContainer = styled.div`
     height: 60%;
   }
 `;
+
+// export const BrackGroundContainer = styled.div`
+//   /* position: relative; */
+//   width: 90%;
+//   height: 100%;
+//   display: flex;
+//   justify-content: center;
+//   align-items: center;
+//   background-color: aqua;
+// `;
+
 export const QFTeamName = styled.div`
   width: 100%;
   height: 100%;
@@ -29,7 +40,7 @@ export const QFTeamName = styled.div`
 // const MARKER_HEIGHT = 6;
 
 // ─── foreignObject 크기 (SVG user units) ───────────────────
-const FO_WIDTH = 50;
+const FO_WIDTH = 65;
 const FO_HEIGHT = 50;
 const HALF_FO_W = FO_WIDTH / 2;
 const HALF_FO_H = FO_HEIGHT / 2;
@@ -41,18 +52,23 @@ const HALF_FO_H = FO_HEIGHT / 2;
 const TeamNameBox = styled.div`
   width: 100%;
   height: 50%;
-  background-color: #f5f5f5;
+  /* background-color: #f5f5f5; */
+
+  background-color: transparent;
   display: flex;
   font-size: 0.7rem;
   flex-direction: row;
   align-items: center;
   justify-content: center;
+  /* text-align: left; */
   color: black;
+  /* border: 1px solid black; */
 `;
 const ScroeBox = styled.div`
   width: 100%;
   height: 50%;
-  background-color: #f5f5f5;
+  /* background-color: #f5f5f5; */
+  background-color: transparent;
   /* border: 1px solid black; */
   padding-bottom: 5px;
   display: flex;
@@ -61,6 +77,23 @@ const ScroeBox = styled.div`
   flex-direction: row;
   align-items: center;
   justify-content: center;
+  /* text-align: center; */
+`;
+
+const ScroeBoxNonePadding = styled.div`
+  width: 100%;
+  height: 50%;
+  /* background-color: #f5f5f5; */
+  background-color: transparent;
+  /* border: 1px solid black; */
+  padding-top: 5px;
+  display: flex;
+  color: black;
+  font-size: 0.7rem;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  /* text-align: center; */
 `;
 // ─── 결승 중앙 정사각형용 ───────────────────────────
 const CENTER_WIDTH = 170; // 한 변(픽셀) - 필요하면 조절하세요
@@ -70,9 +103,14 @@ const CENTER_HEIGHT = 70; // 한 변(픽셀) - 필요하면 조절하세요
 const CenterSquare = styled.div`
   width: 100%;
   height: 100%;
-  background-color: #bdbdbd;
+  background-color: transparent;
+  /* border: 3px solid black; */
+  /* stroke: ; */
 `;
 // ─── 끝점 표시용 컴포넌트 ───────────────────────────
+// ─── EndMarker 중앙 검정 직사각형 크기 ──────────────────────────
+const RECT_WIDTH = 30;
+const RECT_HEIGHT = 30;
 function EndMarker({
   x,
   y,
@@ -95,6 +133,7 @@ function EndMarker({
       y={yNum - HALF_FO_H}
       width={FO_WIDTH}
       height={FO_HEIGHT}
+      // style={{ border: "1px solid black" }}
     >
       <TeamNameBox>
         <div>{label}</div>
@@ -106,14 +145,50 @@ function EndMarker({
   );
 }
 
+function EndMarkerTP({
+  x,
+  y,
+  label,
+  score,
+  isWinner = false,
+}: {
+  x: number | string;
+  y: number | string;
+  label?: React.ReactNode;
+  score?: React.ReactNode;
+  isWinner?: boolean;
+}) {
+  const xNum = typeof x === "string" ? parseFloat(x) : x;
+  const yNum = typeof y === "string" ? parseFloat(y) : y;
+
+  return (
+    <foreignObject
+      x={xNum - HALF_FO_W}
+      y={yNum - HALF_FO_H}
+      width={FO_WIDTH}
+      height={FO_HEIGHT}
+      // style={{ border: "1px solid black" }}
+    >
+      <ScroeBoxNonePadding>
+        <div style={{ color: isWinner ? "red" : "black" }}>{score}</div>
+      </ScroeBoxNonePadding>
+      <TeamNameBox>
+        <div>{label}</div>
+      </TeamNameBox>
+    </foreignObject>
+  );
+}
+
 export default function Bracket() {
   const [games, setGames] = React.useState<any[]>([]);
+  const lineColor = "black";
 
   useEffect(() => {
     API.get("/games/bracket-schedule")
       .then((res) => setGames(res.data.games))
       .catch(console.error);
   }, []);
+  console.log(games);
 
   const findGame = (pos: string) =>
     games.find((g) => g.bracketPosition === pos) || {
@@ -263,20 +338,28 @@ export default function Bracket() {
 
   return (
     <BracketContainer>
+      {/* <BrackGroundContainer> */}
       <svg
         viewBox="0 0 233 396"
         preserveAspectRatio="xMidYMid meet"
         shapeRendering="crispEdges"
         xmlns="http://www.w3.org/2000/svg"
+        style={
+          {
+            // backgroundColor: "white",
+            // borderRadius: "15px",
+            // boxShadow: "12px 12px 2px 1px rgba(0, 0, 0, 0.2)",
+          }
+        }
       >
-        <g transform="translate(116.5,198) scale(0.9) translate(-116.5,-198)">
+        <g transform="translate(116.5,198) scale(0.85) translate(-116.5,-198)">
           <line
             id="1"
             x1="234"
-            y1="0"
+            y1="26"
             x2="234"
             y2="56"
-            stroke={redLineIds.has("1") ? "red" : "#bdbdbd"}
+            stroke={redLineIds.has("1") ? "red" : lineColor}
             strokeWidth="3"
             vectorEffect="non-scaling-stroke"
             strokeLinecap="square"
@@ -286,8 +369,8 @@ export default function Bracket() {
             x1="156"
             y1="56"
             x2="156"
-            y2="0"
-            stroke={redLineIds.has("3") ? "red" : "#bdbdbd"}
+            y2="26"
+            stroke={redLineIds.has("3") ? "red" : lineColor}
             strokeWidth="3"
             vectorEffect="non-scaling-stroke"
             strokeLinecap="square"
@@ -295,10 +378,10 @@ export default function Bracket() {
           <line
             id="4"
             x1="196"
-            y1="99"
+            y1="125"
             x2="196"
             y2="155"
-            stroke={redLineIds.has("4") ? "red" : "#bdbdbd"}
+            stroke={redLineIds.has("4") ? "red" : lineColor}
             strokeWidth="3"
             vectorEffect="non-scaling-stroke"
             strokeLinecap="square"
@@ -307,10 +390,10 @@ export default function Bracket() {
             id="6"
             x1="0"
             y1="-2"
-            x2="56"
+            x2="30"
             y2="-2"
             transform="matrix(0 -1 1 0 38 155)"
-            stroke={redLineIds.has("6") ? "red" : "#bdbdbd"}
+            stroke={redLineIds.has("6") ? "red" : lineColor}
             strokeWidth="3"
             vectorEffect="non-scaling-stroke"
             strokeLinecap="square"
@@ -318,10 +401,10 @@ export default function Bracket() {
           <line
             id="7"
             x1="77"
-            y1="0"
+            y1="26"
             x2="77"
             y2="56"
-            stroke={redLineIds.has("7") ? "red" : "#bdbdbd"}
+            stroke={redLineIds.has("7") ? "red" : lineColor}
             strokeWidth="3"
             vectorEffect="non-scaling-stroke"
             strokeLinecap="square"
@@ -331,20 +414,20 @@ export default function Bracket() {
             x1="-1"
             y1="56"
             x2="-1"
-            y2="0"
-            stroke={redLineIds.has("9") ? "red" : "#bdbdbd"}
+            y2="26"
+            stroke={redLineIds.has("9") ? "red" : lineColor}
             strokeWidth="3"
             vectorEffect="non-scaling-stroke"
             strokeLinecap="square"
           />
           <line
             id="10"
-            x1="0"
-            y1="-2"
+            x1="26"
+            y1="0"
             x2="56"
-            y2="-2"
+            y2="0"
             transform="matrix(0 -1 -1 0 195 297)"
-            stroke={redLineIds.has("10") ? "red" : "#bdbdbd"}
+            stroke={redLineIds.has("10") ? "red" : lineColor}
             strokeWidth="3"
             vectorEffect="non-scaling-stroke"
             strokeLinecap="square"
@@ -353,22 +436,22 @@ export default function Bracket() {
             id="12"
             x1="0"
             y1="-2"
-            x2="56"
+            x2="30"
             y2="-2"
             transform="matrix(0 1 1 0 38 241)"
-            stroke={redLineIds.has("12") ? "red" : "#bdbdbd"}
+            stroke={redLineIds.has("12") ? "red" : lineColor}
             strokeWidth="3"
             vectorEffect="non-scaling-stroke"
             strokeLinecap="square"
           />
           <line
             id="13"
-            x1="0"
+            x1="26"
             y1="-2"
             x2="56"
             y2="-2"
             transform="matrix(0 -1 -1 0 232 396)"
-            stroke={redLineIds.has("13") ? "red" : "#bdbdbd"}
+            stroke={redLineIds.has("13") ? "red" : lineColor}
             strokeWidth="3"
             vectorEffect="non-scaling-stroke"
             strokeLinecap="square"
@@ -377,22 +460,22 @@ export default function Bracket() {
             id="15"
             x1="0"
             y1="-2"
-            x2="56"
+            x2="30"
             y2="-2"
             transform="matrix(0 1 1 0 158 340)"
-            stroke={redLineIds.has("15") ? "red" : "#bdbdbd"}
+            stroke={redLineIds.has("15") ? "red" : lineColor}
             strokeWidth="3"
             vectorEffect="non-scaling-stroke"
             strokeLinecap="square"
           />
           <line
             id="16"
-            x1="0"
+            x1="26"
             y1="-2"
             x2="56"
             y2="-2"
             transform="matrix(0 -1 -1 0 75 396)"
-            stroke={redLineIds.has("16") ? "red" : "#bdbdbd"}
+            stroke={redLineIds.has("16") ? "red" : lineColor}
             strokeWidth="3"
             vectorEffect="non-scaling-stroke"
             strokeLinecap="square"
@@ -401,10 +484,10 @@ export default function Bracket() {
             id="18"
             x1="0"
             y1="-2"
-            x2="56"
+            x2="30"
             y2="-2"
             transform="matrix(0 1 1 0 1 340)"
-            stroke={redLineIds.has("18") ? "red" : "#bdbdbd"}
+            stroke={redLineIds.has("18") ? "red" : lineColor}
             strokeWidth="3"
             vectorEffect="non-scaling-stroke"
             strokeLinecap="square"
@@ -417,7 +500,7 @@ export default function Bracket() {
             y1="57"
             x2="195"
             y2="57"
-            stroke={redLineIds.has("20") ? "red" : "#bdbdbd"}
+            stroke={redLineIds.has("20") ? "red" : lineColor}
             strokeWidth="3"
             vectorEffect="non-scaling-stroke"
             strokeLinecap="square"
@@ -428,7 +511,7 @@ export default function Bracket() {
             y1="57"
             x2="156"
             y2="57"
-            stroke={redLineIds.has("21") ? "red" : "#bdbdbd"}
+            stroke={redLineIds.has("21") ? "red" : lineColor}
             strokeWidth="3"
             vectorEffect="non-scaling-stroke"
             strokeLinecap="square"
@@ -439,7 +522,7 @@ export default function Bracket() {
             y1="156"
             x2="116"
             y2="156"
-            stroke={redLineIds.has("22") ? "red" : "#bdbdbd"}
+            stroke={redLineIds.has("22") ? "red" : lineColor}
             strokeWidth="3"
             vectorEffect="non-scaling-stroke"
             strokeLinecap="square"
@@ -450,7 +533,7 @@ export default function Bracket() {
             y1="156"
             x2="36"
             y2="156"
-            stroke={redLineIds.has("23") ? "red" : "#bdbdbd"}
+            stroke={redLineIds.has("23") ? "red" : lineColor}
             strokeWidth="3"
             vectorEffect="non-scaling-stroke"
             strokeLinecap="square"
@@ -461,18 +544,18 @@ export default function Bracket() {
             y1="57"
             x2="38"
             y2="57"
-            stroke={redLineIds.has("24") ? "red" : "#bdbdbd"}
+            stroke={redLineIds.has("24") ? "red" : lineColor}
             strokeWidth="3"
             vectorEffect="non-scaling-stroke"
             strokeLinecap="square"
           />
           <line
             id="25"
-            x1="38"
+            x1="36"
             y1="57"
             x2="-1"
             y2="57"
-            stroke={redLineIds.has("25") ? "red" : "#bdbdbd"}
+            stroke={redLineIds.has("25") ? "red" : lineColor}
             strokeWidth="3"
             vectorEffect="non-scaling-stroke"
             strokeLinecap="square"
@@ -481,10 +564,10 @@ export default function Bracket() {
             id="26"
             x1="-1"
             y1="-2"
-            x2="38"
+            x2="36"
             y2="-2"
             transform="matrix(-1 0 0 1 233 341)"
-            stroke={redLineIds.has("26") ? "red" : "#bdbdbd"}
+            stroke={redLineIds.has("26") ? "red" : lineColor}
             strokeWidth="3"
             vectorEffect="non-scaling-stroke"
             strokeLinecap="square"
@@ -496,7 +579,7 @@ export default function Bracket() {
             x2="77"
             y2="-2"
             transform="matrix(-1 0 0 1 233 341)"
-            stroke={redLineIds.has("27") ? "red" : "#bdbdbd"}
+            stroke={redLineIds.has("27") ? "red" : lineColor}
             strokeWidth="3"
             vectorEffect="non-scaling-stroke"
             strokeLinecap="square"
@@ -508,31 +591,31 @@ export default function Bracket() {
             x2="38"
             y2="-2"
             transform="matrix(-1 0 0 1 76 341)"
-            stroke={redLineIds.has("28") ? "red" : "#bdbdbd"}
+            stroke={redLineIds.has("28") ? "red" : lineColor}
             strokeWidth="3"
             vectorEffect="non-scaling-stroke"
             strokeLinecap="square"
           />
           <line
             id="29"
-            x1="38"
+            x1="40"
             y1="-2"
             x2="77"
             y2="-2"
             transform="matrix(-1 0 0 1 76 341)"
-            stroke={redLineIds.has("29") ? "red" : "#bdbdbd"}
+            stroke={redLineIds.has("29") ? "red" : lineColor}
             strokeWidth="3"
             vectorEffect="non-scaling-stroke"
             strokeLinecap="square"
           />
           <line
             id="30"
-            x1="-2"
+            x1="0"
             y1="-2"
             x2="78.5"
             y2="-2"
             transform="matrix(-1 0 0 1 195 242)"
-            stroke={redLineIds.has("30") ? "red" : "#bdbdbd"}
+            stroke={redLineIds.has("30") ? "red" : lineColor}
             strokeWidth="3"
             vectorEffect="non-scaling-stroke"
             strokeLinecap="square"
@@ -544,7 +627,7 @@ export default function Bracket() {
             x2="159"
             y2="-2"
             transform="matrix(-1 0 0 1 195 242)"
-            stroke={redLineIds.has("31") ? "red" : "#bdbdbd"}
+            stroke={redLineIds.has("31") ? "red" : lineColor}
             strokeWidth="3"
             vectorEffect="non-scaling-stroke"
             strokeLinecap="square"
@@ -553,13 +636,13 @@ export default function Bracket() {
           {/* 상좌 */}
           <line
             id="32"
-            x1="38"
+            x1="36"
             y1="57"
-            x2="38"
-            y2="99"
+            x2="36"
+            y2="72"
             // transform="matrix(0 -1 -1 0 195 297)"
             stroke={
-              redLineIds.has("7") || redLineIds.has("9") ? "red" : "#bdbdbd"
+              redLineIds.has("7") || redLineIds.has("9") ? "red" : lineColor
             }
             strokeWidth="3"
             vectorEffect="non-scaling-stroke"
@@ -569,12 +652,12 @@ export default function Bracket() {
           <line
             id="33"
             x1="196"
-            y1="99"
+            y1="72"
             x2="196"
             y2="57"
             // transform="matrix(0 -1 -1 0 195 297)"
             stroke={
-              redLineIds.has("1") || redLineIds.has("3") ? "red" : "#bdbdbd"
+              redLineIds.has("1") || redLineIds.has("3") ? "red" : lineColor
             }
             strokeWidth="3"
             vectorEffect="non-scaling-stroke"
@@ -584,13 +667,13 @@ export default function Bracket() {
           {/* 하좌 */}
           <line
             id="34"
-            x1="38"
-            y1="297"
-            x2="38"
+            x1="36"
+            y1="324"
+            x2="36"
             y2="339"
             // transform="matrix(0 -1 -1 0 195 297)"
             stroke={
-              redLineIds.has("16") || redLineIds.has("18") ? "red" : "#bdbdbd"
+              redLineIds.has("16") || redLineIds.has("18") ? "red" : lineColor
             }
             strokeWidth="3"
             vectorEffect="non-scaling-stroke"
@@ -601,12 +684,12 @@ export default function Bracket() {
           <line
             id="35"
             x1="195"
-            y1="297"
+            y1="324"
             x2="195"
             y2="339"
             // transform="matrix(0 -1 -1 0 195 297)"
             stroke={
-              redLineIds.has("13") || redLineIds.has("15") ? "red" : "#bdbdbd"
+              redLineIds.has("13") || redLineIds.has("15") ? "red" : lineColor
             }
             strokeWidth="3"
             vectorEffect="non-scaling-stroke"
@@ -617,12 +700,12 @@ export default function Bracket() {
           <line
             id="36"
             x1="116.5"
-            y1="198"
+            y1="163"
             x2="116.5"
             y2="156"
             // transform="matrix(0 -1 -1 0 195 297)"
             stroke={
-              redLineIds.has("4") || redLineIds.has("6") ? "red" : "#bdbdbd"
+              redLineIds.has("4") || redLineIds.has("6") ? "red" : lineColor
             }
             strokeWidth="3"
             vectorEffect="non-scaling-stroke"
@@ -632,12 +715,12 @@ export default function Bracket() {
           <line
             id="37"
             x1="116.5"
-            y1="198"
+            y1="233"
             x2="116.5"
             y2="240"
             // transform="matrix(0 -1 -1 0 195 297)"
             stroke={
-              redLineIds.has("10") || redLineIds.has("12") ? "red" : "#bdbdbd"
+              redLineIds.has("10") || redLineIds.has("12") ? "red" : lineColor
             }
             strokeWidth="3"
             vectorEffect="non-scaling-stroke"
@@ -653,6 +736,36 @@ export default function Bracket() {
               <CenterSquare />
             </foreignObject>
           </g>
+          {/* EndMarker 쌍의 중앙에 검정 직사각형 */}
+          {Object.entries(markerPositions).map(([pos, { away, home }]) => {
+            const cx = (away[0] + home[0]) / 2 - RECT_WIDTH / 2;
+            const cy = (away[1] + home[1]) / 2 - RECT_HEIGHT / 2;
+            return (
+              <foreignObject
+                key={pos}
+                x={cx}
+                y={cy}
+                width={RECT_WIDTH}
+                height={RECT_HEIGHT}
+              >
+                <div
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    fontSize: "0.8rem",
+                    display: "flex",
+                    flexDirection: "row",
+                    justifyContent: "center",
+                    alignItems: "center",
+
+                    // backgroundColor: "#bdbdbd",
+                  }}
+                >
+                  vs
+                </div>
+              </foreignObject>
+            );
+          })}
 
           {/* 상 좌 1 */}
           {(() => {
@@ -863,7 +976,7 @@ export default function Bracket() {
               />
             );
           })()}
-          {/* 3,4위전전 */}
+          {/* 3,4위전 */}
           {(() => {
             const g = findGame("THIRD_PLACE");
             return (
@@ -881,7 +994,7 @@ export default function Bracket() {
           {(() => {
             const g = findGame("THIRD_PLACE");
             return (
-              <EndMarker
+              <EndMarkerTP
                 x={240}
                 y={230}
                 label={labels.ThirdBot}
@@ -894,6 +1007,7 @@ export default function Bracket() {
           })()}
         </g>
       </svg>
+      {/* </BrackGroundContainer> */}
     </BracketContainer>
   );
 }

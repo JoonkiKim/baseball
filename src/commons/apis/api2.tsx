@@ -6,10 +6,11 @@ const API2 = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
   headers: {
     "Content-Type": "application/json",
+    "ngrok-skip-browser-warning": "69420",
   },
 });
 
-// 2) Request 인터셉터 설정: GET /auth/me 요청만 withCredentials=false
+// // 2) Request 인터셉터 설정: GET /auth/me 요청만 withCredentials=false
 API2.interceptors.request.use(
   (config) => {
     const method = config.method?.toLowerCase();
