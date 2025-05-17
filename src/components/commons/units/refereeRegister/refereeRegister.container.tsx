@@ -32,6 +32,7 @@ import {
 } from "../../modals/modal.style";
 import Link from "next/link";
 import ErrorAlert from "../../../../commons/libraries/showErrorCode";
+import API2 from "../../../../commons/apis/api2";
 
 // 폼에서 다룰 데이터 타입 정의 (숫자 타입으로 변경)
 interface RefereeFormData {
@@ -157,9 +158,7 @@ export default function RefereeRegisterPage() {
   useEffect(() => {
     const fetchAuthInfo = async () => {
       try {
-        const authRes = await API.get("/auth/me", {
-          withCredentials: true,
-        });
+        const authRes = await API2.get("/auth/me");
         setAuthInfo(authRes.data);
         console.log("authRes.data", authRes.data);
       } catch (error) {

@@ -40,6 +40,7 @@ import { registerLocale } from "react-datepicker";
 import { ko } from "date-fns/locale";
 // import { getAccessToken } from "../../../commons/libraries/getAccessToken";
 import ErrorAlert from "../../../commons/libraries/showErrorCode";
+import API2 from "../../../commons/apis/api2";
 
 // 새 객체 구조에 맞춘 인터페이스 정의 (matchId → gameId)
 interface RawMatch {
@@ -162,7 +163,7 @@ export default function MainCalendarPage() {
         //     games,
         //   };
         // });
-        const authRes = await API.get(`/auth/me`);
+        const authRes = await API2.get(`/auth/me`);
         setAuthInfo(authRes.data);
         console.log("authInfo", authInfo);
         // setAllMatchData(kstDays);

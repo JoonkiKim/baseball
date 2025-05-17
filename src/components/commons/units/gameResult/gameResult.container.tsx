@@ -45,6 +45,7 @@ import {
   ModalOverlay,
   ModalTitleSmaller,
 } from "../../modals/modal.style";
+import API2 from "../../../../commons/apis/api2";
 
 interface ISelectedCell {
   cellValue: string;
@@ -102,7 +103,7 @@ export default function FinalGameRecordPage() {
     if (!router.isReady) return;
     (async () => {
       try {
-        const authRes = await API.get("/auth/me");
+        const authRes = await API2.get("/auth/me");
         setAuthInfo(authRes.data);
         console.log("Fetched auth info:", authRes.data);
       } catch (err) {
