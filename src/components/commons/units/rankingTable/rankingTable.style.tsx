@@ -11,6 +11,10 @@ const xlarge = "@media only screen and (min-width: 1025px)"; // Extra Large
 export const RankingContainer = styled.div`
   /* margin-top: 140px; */
   /* background-color: red; */
+  display: flex;
+  flex-direction: column;
+  /* justify-content: center; */
+  /* align-items: center; */
 `;
 
 // 그룹 선택 영역 (예: "A조 ▼")
@@ -31,6 +35,7 @@ export const GroupSelector = styled.div`
   font-family: "KBO-Dia-Gothic_bold";
   color: white;
   border-radius: 25px;
+  margin-top: 10px;
   font-size: 12px;
   padding: 2px;
   height: 5%;
@@ -43,6 +48,7 @@ export const TableWrapper = styled.div`
   margin-bottom: 50px;
   padding: 0 20px;
   /* margin-right: 5vh; */
+  /* background-color: aqua; */
 
   ${small} {
     padding: 0 10px;

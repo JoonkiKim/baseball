@@ -5,29 +5,50 @@ import API from "../../../../commons/apis/api";
 
 // ─── 컨테이너 ───────────────────────────────────────
 export const BracketContainer = styled.div`
-  position: relative;
+  /* position: relative; */
   width: 100%;
-  height: 100vh;
+  height: 80vh;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  /* justify-content: center; */
   align-items: center;
+  margin-top: 120px;
+  /* margin-bottom: 200px; */
 
   /* background-color: aqua; */
   svg {
-    width: 90%;
-    height: 60%;
+    width: 100%;
+    height: 100%;
   }
 `;
 
-// export const BrackGroundContainer = styled.div`
-//   /* position: relative; */
-//   width: 90%;
-//   height: 100%;
-//   display: flex;
-//   justify-content: center;
-//   align-items: center;
-//   background-color: aqua;
-// `;
+export const BrackGroundContainer = styled.div`
+  /* margin-top: 8vh; */
+  /* position: absolute; */
+  width: 90%;
+  height: 77%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  /* background-color: rgba(0, 0, 0, 0.05); */
+  /* background-color: red; */
+  border-radius: 15px;
+  /* margin-bottom: 200px; */
+  /* padding-bottom: 100px; */
+`;
+export const LargeTitle = styled.h1`
+  text-align: center;
+  font-family: "KBO-Dia-Gothic_bold";
+  font-size: 23px;
+  align-self: center;
+  margin-bottom: 3.5vh;
+  width: 340px;
+  margin-top: 3.5vh;
+
+  /* background-color: red; */
+  /* height: 30px; */
+`;
 
 export const QFTeamName = styled.div`
   width: 100%;
@@ -95,6 +116,7 @@ const ScroeBoxNonePadding = styled.div`
   justify-content: center;
   /* text-align: center; */
 `;
+
 // ─── 결승 중앙 정사각형용 ───────────────────────────
 const CENTER_WIDTH = 170; // 한 변(픽셀) - 필요하면 조절하세요
 
@@ -338,676 +360,676 @@ export default function Bracket() {
 
   return (
     <BracketContainer>
-      {/* <BrackGroundContainer> */}
-      <svg
-        viewBox="0 0 233 396"
-        preserveAspectRatio="xMidYMid meet"
-        shapeRendering="crispEdges"
-        xmlns="http://www.w3.org/2000/svg"
-        style={
-          {
-            // backgroundColor: "white",
-            // borderRadius: "15px",
+      <LargeTitle>2025 총장배 토너먼트 대진표</LargeTitle>
+      <BrackGroundContainer>
+        <svg
+          viewBox="0 0 233 396"
+          preserveAspectRatio="xMidYMid meet"
+          shapeRendering="crispEdges"
+          xmlns="http://www.w3.org/2000/svg"
+          style={{
+            backgroundColor: "white",
+            borderRadius: "15px",
             // boxShadow: "12px 12px 2px 1px rgba(0, 0, 0, 0.2)",
-          }
-        }
-      >
-        <g transform="translate(116.5,198) scale(0.85) translate(-116.5,-198)">
-          <line
-            id="1"
-            x1="234"
-            y1="26"
-            x2="234"
-            y2="56"
-            stroke={redLineIds.has("1") ? "red" : lineColor}
-            strokeWidth="3"
-            vectorEffect="non-scaling-stroke"
-            strokeLinecap="square"
-          />
-          <line
-            id="3"
-            x1="156"
-            y1="56"
-            x2="156"
-            y2="26"
-            stroke={redLineIds.has("3") ? "red" : lineColor}
-            strokeWidth="3"
-            vectorEffect="non-scaling-stroke"
-            strokeLinecap="square"
-          />
-          <line
-            id="4"
-            x1="196"
-            y1="125"
-            x2="196"
-            y2="155"
-            stroke={redLineIds.has("4") ? "red" : lineColor}
-            strokeWidth="3"
-            vectorEffect="non-scaling-stroke"
-            strokeLinecap="square"
-          />
-          <line
-            id="6"
-            x1="0"
-            y1="-2"
-            x2="30"
-            y2="-2"
-            transform="matrix(0 -1 1 0 38 155)"
-            stroke={redLineIds.has("6") ? "red" : lineColor}
-            strokeWidth="3"
-            vectorEffect="non-scaling-stroke"
-            strokeLinecap="square"
-          />
-          <line
-            id="7"
-            x1="77"
-            y1="26"
-            x2="77"
-            y2="56"
-            stroke={redLineIds.has("7") ? "red" : lineColor}
-            strokeWidth="3"
-            vectorEffect="non-scaling-stroke"
-            strokeLinecap="square"
-          />
-          <line
-            id="9"
-            x1="-1"
-            y1="56"
-            x2="-1"
-            y2="26"
-            stroke={redLineIds.has("9") ? "red" : lineColor}
-            strokeWidth="3"
-            vectorEffect="non-scaling-stroke"
-            strokeLinecap="square"
-          />
-          <line
-            id="10"
-            x1="26"
-            y1="0"
-            x2="56"
-            y2="0"
-            transform="matrix(0 -1 -1 0 195 297)"
-            stroke={redLineIds.has("10") ? "red" : lineColor}
-            strokeWidth="3"
-            vectorEffect="non-scaling-stroke"
-            strokeLinecap="square"
-          />
-          <line
-            id="12"
-            x1="0"
-            y1="-2"
-            x2="30"
-            y2="-2"
-            transform="matrix(0 1 1 0 38 241)"
-            stroke={redLineIds.has("12") ? "red" : lineColor}
-            strokeWidth="3"
-            vectorEffect="non-scaling-stroke"
-            strokeLinecap="square"
-          />
-          <line
-            id="13"
-            x1="26"
-            y1="-2"
-            x2="56"
-            y2="-2"
-            transform="matrix(0 -1 -1 0 232 396)"
-            stroke={redLineIds.has("13") ? "red" : lineColor}
-            strokeWidth="3"
-            vectorEffect="non-scaling-stroke"
-            strokeLinecap="square"
-          />
-          <line
-            id="15"
-            x1="0"
-            y1="-2"
-            x2="30"
-            y2="-2"
-            transform="matrix(0 1 1 0 158 340)"
-            stroke={redLineIds.has("15") ? "red" : lineColor}
-            strokeWidth="3"
-            vectorEffect="non-scaling-stroke"
-            strokeLinecap="square"
-          />
-          <line
-            id="16"
-            x1="26"
-            y1="-2"
-            x2="56"
-            y2="-2"
-            transform="matrix(0 -1 -1 0 75 396)"
-            stroke={redLineIds.has("16") ? "red" : lineColor}
-            strokeWidth="3"
-            vectorEffect="non-scaling-stroke"
-            strokeLinecap="square"
-          />
-          <line
-            id="18"
-            x1="0"
-            y1="-2"
-            x2="30"
-            y2="-2"
-            transform="matrix(0 1 1 0 1 340)"
-            stroke={redLineIds.has("18") ? "red" : lineColor}
-            strokeWidth="3"
-            vectorEffect="non-scaling-stroke"
-            strokeLinecap="square"
-          />
+          }}
+        >
+          <g transform="translate(116.5,198) scale(0.80) translate(-116.5,-198)">
+            <line
+              id="1"
+              x1="234"
+              y1="26"
+              x2="234"
+              y2="56"
+              stroke={redLineIds.has("1") ? "red" : lineColor}
+              strokeWidth="3"
+              vectorEffect="non-scaling-stroke"
+              strokeLinecap="square"
+            />
+            <line
+              id="3"
+              x1="156"
+              y1="56"
+              x2="156"
+              y2="26"
+              stroke={redLineIds.has("3") ? "red" : lineColor}
+              strokeWidth="3"
+              vectorEffect="non-scaling-stroke"
+              strokeLinecap="square"
+            />
+            <line
+              id="4"
+              x1="196"
+              y1="125"
+              x2="196"
+              y2="155"
+              stroke={redLineIds.has("4") ? "red" : lineColor}
+              strokeWidth="3"
+              vectorEffect="non-scaling-stroke"
+              strokeLinecap="square"
+            />
+            <line
+              id="6"
+              x1="0"
+              y1="-2"
+              x2="30"
+              y2="-2"
+              transform="matrix(0 -1 1 0 38 155)"
+              stroke={redLineIds.has("6") ? "red" : lineColor}
+              strokeWidth="3"
+              vectorEffect="non-scaling-stroke"
+              strokeLinecap="square"
+            />
+            <line
+              id="7"
+              x1="77"
+              y1="26"
+              x2="77"
+              y2="56"
+              stroke={redLineIds.has("7") ? "red" : lineColor}
+              strokeWidth="3"
+              vectorEffect="non-scaling-stroke"
+              strokeLinecap="square"
+            />
+            <line
+              id="9"
+              x1="-1"
+              y1="56"
+              x2="-1"
+              y2="26"
+              stroke={redLineIds.has("9") ? "red" : lineColor}
+              strokeWidth="3"
+              vectorEffect="non-scaling-stroke"
+              strokeLinecap="square"
+            />
+            <line
+              id="10"
+              x1="26"
+              y1="0"
+              x2="56"
+              y2="0"
+              transform="matrix(0 -1 -1 0 195 297)"
+              stroke={redLineIds.has("10") ? "red" : lineColor}
+              strokeWidth="3"
+              vectorEffect="non-scaling-stroke"
+              strokeLinecap="square"
+            />
+            <line
+              id="12"
+              x1="0"
+              y1="-2"
+              x2="30"
+              y2="-2"
+              transform="matrix(0 1 1 0 38 241)"
+              stroke={redLineIds.has("12") ? "red" : lineColor}
+              strokeWidth="3"
+              vectorEffect="non-scaling-stroke"
+              strokeLinecap="square"
+            />
+            <line
+              id="13"
+              x1="26"
+              y1="-2"
+              x2="56"
+              y2="-2"
+              transform="matrix(0 -1 -1 0 232 396)"
+              stroke={redLineIds.has("13") ? "red" : lineColor}
+              strokeWidth="3"
+              vectorEffect="non-scaling-stroke"
+              strokeLinecap="square"
+            />
+            <line
+              id="15"
+              x1="0"
+              y1="-2"
+              x2="30"
+              y2="-2"
+              transform="matrix(0 1 1 0 158 340)"
+              stroke={redLineIds.has("15") ? "red" : lineColor}
+              strokeWidth="3"
+              vectorEffect="non-scaling-stroke"
+              strokeLinecap="square"
+            />
+            <line
+              id="16"
+              x1="26"
+              y1="-2"
+              x2="56"
+              y2="-2"
+              transform="matrix(0 -1 -1 0 75 396)"
+              stroke={redLineIds.has("16") ? "red" : lineColor}
+              strokeWidth="3"
+              vectorEffect="non-scaling-stroke"
+              strokeLinecap="square"
+            />
+            <line
+              id="18"
+              x1="0"
+              y1="-2"
+              x2="30"
+              y2="-2"
+              transform="matrix(0 1 1 0 1 340)"
+              stroke={redLineIds.has("18") ? "red" : lineColor}
+              strokeWidth="3"
+              vectorEffect="non-scaling-stroke"
+              strokeLinecap="square"
+            />
 
-          {/* 가로줄 */}
-          <line
-            id="20"
-            x1="234"
-            y1="57"
-            x2="195"
-            y2="57"
-            stroke={redLineIds.has("20") ? "red" : lineColor}
-            strokeWidth="3"
-            vectorEffect="non-scaling-stroke"
-            strokeLinecap="square"
-          />
-          <line
-            id="21"
-            x1="195"
-            y1="57"
-            x2="156"
-            y2="57"
-            stroke={redLineIds.has("21") ? "red" : lineColor}
-            strokeWidth="3"
-            vectorEffect="non-scaling-stroke"
-            strokeLinecap="square"
-          />
-          <line
-            id="22"
-            x1="196"
-            y1="156"
-            x2="116"
-            y2="156"
-            stroke={redLineIds.has("22") ? "red" : lineColor}
-            strokeWidth="3"
-            vectorEffect="non-scaling-stroke"
-            strokeLinecap="square"
-          />
-          <line
-            id="23"
-            x1="116"
-            y1="156"
-            x2="36"
-            y2="156"
-            stroke={redLineIds.has("23") ? "red" : lineColor}
-            strokeWidth="3"
-            vectorEffect="non-scaling-stroke"
-            strokeLinecap="square"
-          />
-          <line
-            id="24"
-            x1="77"
-            y1="57"
-            x2="38"
-            y2="57"
-            stroke={redLineIds.has("24") ? "red" : lineColor}
-            strokeWidth="3"
-            vectorEffect="non-scaling-stroke"
-            strokeLinecap="square"
-          />
-          <line
-            id="25"
-            x1="36"
-            y1="57"
-            x2="-1"
-            y2="57"
-            stroke={redLineIds.has("25") ? "red" : lineColor}
-            strokeWidth="3"
-            vectorEffect="non-scaling-stroke"
-            strokeLinecap="square"
-          />
-          <line
-            id="26"
-            x1="-1"
-            y1="-2"
-            x2="36"
-            y2="-2"
-            transform="matrix(-1 0 0 1 233 341)"
-            stroke={redLineIds.has("26") ? "red" : lineColor}
-            strokeWidth="3"
-            vectorEffect="non-scaling-stroke"
-            strokeLinecap="square"
-          />
-          <line
-            id="27"
-            x1="38"
-            y1="-2"
-            x2="77"
-            y2="-2"
-            transform="matrix(-1 0 0 1 233 341)"
-            stroke={redLineIds.has("27") ? "red" : lineColor}
-            strokeWidth="3"
-            vectorEffect="non-scaling-stroke"
-            strokeLinecap="square"
-          />
-          <line
-            id="28"
-            x1="-1"
-            y1="-2"
-            x2="38"
-            y2="-2"
-            transform="matrix(-1 0 0 1 76 341)"
-            stroke={redLineIds.has("28") ? "red" : lineColor}
-            strokeWidth="3"
-            vectorEffect="non-scaling-stroke"
-            strokeLinecap="square"
-          />
-          <line
-            id="29"
-            x1="40"
-            y1="-2"
-            x2="77"
-            y2="-2"
-            transform="matrix(-1 0 0 1 76 341)"
-            stroke={redLineIds.has("29") ? "red" : lineColor}
-            strokeWidth="3"
-            vectorEffect="non-scaling-stroke"
-            strokeLinecap="square"
-          />
-          <line
-            id="30"
-            x1="0"
-            y1="-2"
-            x2="78.5"
-            y2="-2"
-            transform="matrix(-1 0 0 1 195 242)"
-            stroke={redLineIds.has("30") ? "red" : lineColor}
-            strokeWidth="3"
-            vectorEffect="non-scaling-stroke"
-            strokeLinecap="square"
-          />
-          <line
-            id="31"
-            x1="78.5"
-            y1="-2"
-            x2="159"
-            y2="-2"
-            transform="matrix(-1 0 0 1 195 242)"
-            stroke={redLineIds.has("31") ? "red" : lineColor}
-            strokeWidth="3"
-            vectorEffect="non-scaling-stroke"
-            strokeLinecap="square"
-          />
+            {/* 가로줄 */}
+            <line
+              id="20"
+              x1="234"
+              y1="57"
+              x2="195"
+              y2="57"
+              stroke={redLineIds.has("20") ? "red" : lineColor}
+              strokeWidth="3"
+              vectorEffect="non-scaling-stroke"
+              strokeLinecap="square"
+            />
+            <line
+              id="21"
+              x1="195"
+              y1="57"
+              x2="156"
+              y2="57"
+              stroke={redLineIds.has("21") ? "red" : lineColor}
+              strokeWidth="3"
+              vectorEffect="non-scaling-stroke"
+              strokeLinecap="square"
+            />
+            <line
+              id="22"
+              x1="196"
+              y1="156"
+              x2="116"
+              y2="156"
+              stroke={redLineIds.has("22") ? "red" : lineColor}
+              strokeWidth="3"
+              vectorEffect="non-scaling-stroke"
+              strokeLinecap="square"
+            />
+            <line
+              id="23"
+              x1="116"
+              y1="156"
+              x2="36"
+              y2="156"
+              stroke={redLineIds.has("23") ? "red" : lineColor}
+              strokeWidth="3"
+              vectorEffect="non-scaling-stroke"
+              strokeLinecap="square"
+            />
+            <line
+              id="24"
+              x1="77"
+              y1="57"
+              x2="38"
+              y2="57"
+              stroke={redLineIds.has("24") ? "red" : lineColor}
+              strokeWidth="3"
+              vectorEffect="non-scaling-stroke"
+              strokeLinecap="square"
+            />
+            <line
+              id="25"
+              x1="36"
+              y1="57"
+              x2="-1"
+              y2="57"
+              stroke={redLineIds.has("25") ? "red" : lineColor}
+              strokeWidth="3"
+              vectorEffect="non-scaling-stroke"
+              strokeLinecap="square"
+            />
+            <line
+              id="26"
+              x1="-1"
+              y1="-2"
+              x2="36"
+              y2="-2"
+              transform="matrix(-1 0 0 1 233 341)"
+              stroke={redLineIds.has("26") ? "red" : lineColor}
+              strokeWidth="3"
+              vectorEffect="non-scaling-stroke"
+              strokeLinecap="square"
+            />
+            <line
+              id="27"
+              x1="38"
+              y1="-2"
+              x2="77"
+              y2="-2"
+              transform="matrix(-1 0 0 1 233 341)"
+              stroke={redLineIds.has("27") ? "red" : lineColor}
+              strokeWidth="3"
+              vectorEffect="non-scaling-stroke"
+              strokeLinecap="square"
+            />
+            <line
+              id="28"
+              x1="-1"
+              y1="-2"
+              x2="38"
+              y2="-2"
+              transform="matrix(-1 0 0 1 76 341)"
+              stroke={redLineIds.has("28") ? "red" : lineColor}
+              strokeWidth="3"
+              vectorEffect="non-scaling-stroke"
+              strokeLinecap="square"
+            />
+            <line
+              id="29"
+              x1="40"
+              y1="-2"
+              x2="77"
+              y2="-2"
+              transform="matrix(-1 0 0 1 76 341)"
+              stroke={redLineIds.has("29") ? "red" : lineColor}
+              strokeWidth="3"
+              vectorEffect="non-scaling-stroke"
+              strokeLinecap="square"
+            />
+            <line
+              id="30"
+              x1="0"
+              y1="-2"
+              x2="78.5"
+              y2="-2"
+              transform="matrix(-1 0 0 1 195 242)"
+              stroke={redLineIds.has("30") ? "red" : lineColor}
+              strokeWidth="3"
+              vectorEffect="non-scaling-stroke"
+              strokeLinecap="square"
+            />
+            <line
+              id="31"
+              x1="78.5"
+              y1="-2"
+              x2="159"
+              y2="-2"
+              transform="matrix(-1 0 0 1 195 242)"
+              stroke={redLineIds.has("31") ? "red" : lineColor}
+              strokeWidth="3"
+              vectorEffect="non-scaling-stroke"
+              strokeLinecap="square"
+            />
 
-          {/* 상좌 */}
-          <line
-            id="32"
-            x1="36"
-            y1="57"
-            x2="36"
-            y2="72"
-            // transform="matrix(0 -1 -1 0 195 297)"
-            stroke={
-              redLineIds.has("7") || redLineIds.has("9") ? "red" : lineColor
-            }
-            strokeWidth="3"
-            vectorEffect="non-scaling-stroke"
-            strokeLinecap="square"
-          />
-          {/* 상우 */}
-          <line
-            id="33"
-            x1="196"
-            y1="72"
-            x2="196"
-            y2="57"
-            // transform="matrix(0 -1 -1 0 195 297)"
-            stroke={
-              redLineIds.has("1") || redLineIds.has("3") ? "red" : lineColor
-            }
-            strokeWidth="3"
-            vectorEffect="non-scaling-stroke"
-            strokeLinecap="square"
-          />
+            {/* 상좌 */}
+            <line
+              id="32"
+              x1="36"
+              y1="57"
+              x2="36"
+              y2="72"
+              // transform="matrix(0 -1 -1 0 195 297)"
+              stroke={
+                redLineIds.has("7") || redLineIds.has("9") ? "red" : lineColor
+              }
+              strokeWidth="3"
+              vectorEffect="non-scaling-stroke"
+              strokeLinecap="square"
+            />
+            {/* 상우 */}
+            <line
+              id="33"
+              x1="196"
+              y1="72"
+              x2="196"
+              y2="57"
+              // transform="matrix(0 -1 -1 0 195 297)"
+              stroke={
+                redLineIds.has("1") || redLineIds.has("3") ? "red" : lineColor
+              }
+              strokeWidth="3"
+              vectorEffect="non-scaling-stroke"
+              strokeLinecap="square"
+            />
 
-          {/* 하좌 */}
-          <line
-            id="34"
-            x1="36"
-            y1="324"
-            x2="36"
-            y2="339"
-            // transform="matrix(0 -1 -1 0 195 297)"
-            stroke={
-              redLineIds.has("16") || redLineIds.has("18") ? "red" : lineColor
-            }
-            strokeWidth="3"
-            vectorEffect="non-scaling-stroke"
-            strokeLinecap="square"
-          />
+            {/* 하좌 */}
+            <line
+              id="34"
+              x1="36"
+              y1="324"
+              x2="36"
+              y2="339"
+              // transform="matrix(0 -1 -1 0 195 297)"
+              stroke={
+                redLineIds.has("16") || redLineIds.has("18") ? "red" : lineColor
+              }
+              strokeWidth="3"
+              vectorEffect="non-scaling-stroke"
+              strokeLinecap="square"
+            />
 
-          {/* 하우 */}
-          <line
-            id="35"
-            x1="195"
-            y1="324"
-            x2="195"
-            y2="339"
-            // transform="matrix(0 -1 -1 0 195 297)"
-            stroke={
-              redLineIds.has("13") || redLineIds.has("15") ? "red" : lineColor
-            }
-            strokeWidth="3"
-            vectorEffect="non-scaling-stroke"
-            strokeLinecap="square"
-          />
+            {/* 하우 */}
+            <line
+              id="35"
+              x1="195"
+              y1="324"
+              x2="195"
+              y2="339"
+              // transform="matrix(0 -1 -1 0 195 297)"
+              stroke={
+                redLineIds.has("13") || redLineIds.has("15") ? "red" : lineColor
+              }
+              strokeWidth="3"
+              vectorEffect="non-scaling-stroke"
+              strokeLinecap="square"
+            />
 
-          {/* 중상 */}
-          <line
-            id="36"
-            x1="116.5"
-            y1="163"
-            x2="116.5"
-            y2="156"
-            // transform="matrix(0 -1 -1 0 195 297)"
-            stroke={
-              redLineIds.has("4") || redLineIds.has("6") ? "red" : lineColor
-            }
-            strokeWidth="3"
-            vectorEffect="non-scaling-stroke"
-            strokeLinecap="square"
-          />
-          {/* 중하 */}
-          <line
-            id="37"
-            x1="116.5"
-            y1="233"
-            x2="116.5"
-            y2="240"
-            // transform="matrix(0 -1 -1 0 195 297)"
-            stroke={
-              redLineIds.has("10") || redLineIds.has("12") ? "red" : lineColor
-            }
-            strokeWidth="3"
-            vectorEffect="non-scaling-stroke"
-            strokeLinecap="square"
-          />
-          <g style={{ isolation: "isolate", zIndex: 10 }}>
-            <foreignObject
-              x={116.5 - CENTER_WIDTH / 2}
-              y={198 - CENTER_HEIGHT / 2}
-              width={CENTER_WIDTH}
-              height={CENTER_HEIGHT}
-            >
-              <CenterSquare />
-            </foreignObject>
-          </g>
-          {/* EndMarker 쌍의 중앙에 검정 직사각형 */}
-          {Object.entries(markerPositions).map(([pos, { away, home }]) => {
-            const cx = (away[0] + home[0]) / 2 - RECT_WIDTH / 2;
-            const cy = (away[1] + home[1]) / 2 - RECT_HEIGHT / 2;
-            return (
+            {/* 중상 */}
+            <line
+              id="36"
+              x1="116.5"
+              y1="163"
+              x2="116.5"
+              y2="156"
+              // transform="matrix(0 -1 -1 0 195 297)"
+              stroke={
+                redLineIds.has("4") || redLineIds.has("6") ? "red" : lineColor
+              }
+              strokeWidth="3"
+              vectorEffect="non-scaling-stroke"
+              strokeLinecap="square"
+            />
+            {/* 중하 */}
+            <line
+              id="37"
+              x1="116.5"
+              y1="233"
+              x2="116.5"
+              y2="240"
+              // transform="matrix(0 -1 -1 0 195 297)"
+              stroke={
+                redLineIds.has("10") || redLineIds.has("12") ? "red" : lineColor
+              }
+              strokeWidth="3"
+              vectorEffect="non-scaling-stroke"
+              strokeLinecap="square"
+            />
+            <g style={{ isolation: "isolate", zIndex: 10 }}>
               <foreignObject
-                key={pos}
-                x={cx}
-                y={cy}
-                width={RECT_WIDTH}
-                height={RECT_HEIGHT}
+                x={116.5 - CENTER_WIDTH / 2}
+                y={198 - CENTER_HEIGHT / 2}
+                width={CENTER_WIDTH}
+                height={CENTER_HEIGHT}
               >
-                <div
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    fontSize: "0.8rem",
-                    display: "flex",
-                    flexDirection: "row",
-                    justifyContent: "center",
-                    alignItems: "center",
-
-                    // backgroundColor: "#bdbdbd",
-                  }}
-                >
-                  vs
-                </div>
+                <CenterSquare />
               </foreignObject>
-            );
-          })}
+            </g>
+            {/* EndMarker 쌍의 중앙에 검정 직사각형 */}
+            {Object.entries(markerPositions).map(([pos, { away, home }]) => {
+              const cx = (away[0] + home[0]) / 2 - RECT_WIDTH / 2;
+              const cy = (away[1] + home[1]) / 2 - RECT_HEIGHT / 2;
+              return (
+                <foreignObject
+                  key={pos}
+                  x={cx}
+                  y={cy}
+                  width={RECT_WIDTH}
+                  height={RECT_HEIGHT}
+                >
+                  <div
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      fontSize: "0.8rem",
+                      display: "flex",
+                      flexDirection: "row",
+                      justifyContent: "center",
+                      alignItems: "center",
 
-          {/* 상 좌 1 */}
-          {(() => {
-            const g = findGame("QF_1");
-            return (
-              <EndMarker
-                x="0"
-                y="0"
-                label={labels.topLeft1}
-                score={labels.topLeft1Score}
-                isWinner={
-                  g.winnerTeamId !== null && g.winnerTeamId === g.awayTeam.id
-                }
-              />
-            );
-          })()}
-          {/* 상 좌 2 */}
-          {(() => {
-            const g = findGame("QF_1");
-            return (
-              <EndMarker
-                x="77"
-                y="0"
-                label={labels.topLeft2}
-                score={labels.topLeft2Score}
-                isWinner={
-                  g.winnerTeamId !== null && g.winnerTeamId === g.homeTeam.id
-                }
-              />
-            );
-          })()}
-          {/* 상 우 1 */}
-          {(() => {
-            const g = findGame("QF_2");
-            return (
-              <EndMarker
-                x="156"
-                y="0"
-                label={labels.topRight1}
-                score={labels.topRight1Score}
-                isWinner={
-                  g.winnerTeamId !== null && g.winnerTeamId === g.awayTeam.id
-                }
-              />
-            );
-          })()}
-          {/* 상 우 2 */}
-          {(() => {
-            const g = findGame("QF_2");
-            return (
-              <EndMarker
-                x="234"
-                y="0"
-                label={labels.topRight2}
-                score={labels.topRight2Score}
-                isWinner={
-                  g.winnerTeamId !== null && g.winnerTeamId === g.homeTeam.id
-                }
-              />
-            );
-          })()}
-          {/* 상 중 좌 */}
-          {(() => {
-            const g = findGame("SF_1");
-            return (
-              <EndMarker
-                x="36"
-                y="99"
-                label={labels.midTopLeft}
-                score={labels.midTopLeftScore}
-                isWinner={
-                  g.winnerTeamId !== null && g.winnerTeamId === g.awayTeam.id
-                }
-              />
-            );
-          })()}
-          {/* 상 중 우 */}
-          {(() => {
-            const g = findGame("SF_1");
-            return (
-              <EndMarker
-                x="196"
-                y="99"
-                label={labels.midTopRight}
-                score={labels.midTopRightScore}
-                isWinner={
-                  g.winnerTeamId !== null && g.winnerTeamId === g.homeTeam.id
-                }
-              />
-            );
-          })()}
-          {/* 하 중 좌 */}
-          {(() => {
-            const g = findGame("SF_2");
-            return (
-              <EndMarker
-                x="36"
-                y="297"
-                label={labels.midBotLeft}
-                score={labels.midBotLeftScore}
-                isWinner={
-                  g.winnerTeamId !== null && g.winnerTeamId === g.awayTeam.id
-                }
-              />
-            );
-          })()}
-          {/* 하 중 우 */}
-          {(() => {
-            const g = findGame("SF_2");
-            return (
-              <EndMarker
-                x="195"
-                y="297"
-                label={labels.midBotRight}
-                score={labels.midBotRightScore}
-                isWinner={
-                  g.winnerTeamId !== null && g.winnerTeamId === g.homeTeam.id
-                }
-              />
-            );
-          })()}
-          {/* 하 좌 1 */}
-          {(() => {
-            const g = findGame("QF_3");
-            return (
-              <EndMarker
-                x="1"
-                y="396"
-                label={labels.botLeft1}
-                score={labels.botLeft1Score}
-                isWinner={
-                  g.winnerTeamId !== null && g.winnerTeamId === g.awayTeam.id
-                }
-              />
-            );
-          })()}
-          {/* 하 좌 2 */}
-          {(() => {
-            const g = findGame("QF_3");
-            return (
-              <EndMarker
-                x="75"
-                y="396"
-                label={labels.botLeft2}
-                score={labels.botLeft2Score}
-                isWinner={
-                  g.winnerTeamId !== null && g.winnerTeamId === g.homeTeam.id
-                }
-              />
-            );
-          })()}
-          {/* 하 우 1 */}
-          {(() => {
-            const g = findGame("QF_4");
-            return (
-              <EndMarker
-                x="158"
-                y="396"
-                label={labels.botRight1}
-                score={labels.botRight1Score}
-                isWinner={
-                  g.winnerTeamId !== null && g.winnerTeamId === g.awayTeam.id
-                }
-              />
-            );
-          })()}
-          {/* 하 우 2 */}
-          {(() => {
-            const g = findGame("QF_4");
-            return (
-              <EndMarker
-                x="232"
-                y="396"
-                label={labels.botRight2}
-                score={labels.botRight2Score}
-                isWinner={
-                  g.winnerTeamId !== null && g.winnerTeamId === g.homeTeam.id
-                }
-              />
-            );
-          })()}
-          {/* 결승전 */}
-          {(() => {
-            const g = findGame("F");
-            return (
-              <EndMarker
-                x={156.5}
-                y={198}
-                label={labels.finalLeft}
-                score={labels.finalLeftScore}
-                isWinner={
-                  g.winnerTeamId !== null && g.winnerTeamId === g.awayTeam.id
-                }
-              />
-            );
-          })()}
-          {(() => {
-            const g = findGame("F");
-            return (
-              <EndMarker
-                x={76.5}
-                y={198}
-                label={labels.finalRight}
-                score={labels.finalRightScore}
-                isWinner={
-                  g.winnerTeamId !== null && g.winnerTeamId === g.homeTeam.id
-                }
-              />
-            );
-          })()}
-          {/* 3,4위전 */}
-          {(() => {
-            const g = findGame("THIRD_PLACE");
-            return (
-              <EndMarker
-                x={240}
-                y={160}
-                label={labels.ThirdTop}
-                score={labels.ThirdTopScore}
-                isWinner={
-                  g.winnerTeamId !== null && g.winnerTeamId === g.awayTeam.id
-                }
-              />
-            );
-          })()}
-          {(() => {
-            const g = findGame("THIRD_PLACE");
-            return (
-              <EndMarkerTP
-                x={240}
-                y={230}
-                label={labels.ThirdBot}
-                score={labels.ThirdBotScore}
-                isWinner={
-                  g.winnerTeamId !== null && g.winnerTeamId === g.homeTeam.id
-                }
-              />
-            );
-          })()}
-        </g>
-      </svg>
-      {/* </BrackGroundContainer> */}
+                      // backgroundColor: "#bdbdbd",
+                    }}
+                  >
+                    vs
+                  </div>
+                </foreignObject>
+              );
+            })}
+
+            {/* 상 좌 1 */}
+            {(() => {
+              const g = findGame("QF_1");
+              return (
+                <EndMarker
+                  x="0"
+                  y="0"
+                  label={labels.topLeft1}
+                  score={labels.topLeft1Score}
+                  isWinner={
+                    g.winnerTeamId !== null && g.winnerTeamId === g.awayTeam.id
+                  }
+                />
+              );
+            })()}
+            {/* 상 좌 2 */}
+            {(() => {
+              const g = findGame("QF_1");
+              return (
+                <EndMarker
+                  x="77"
+                  y="0"
+                  label={labels.topLeft2}
+                  score={labels.topLeft2Score}
+                  isWinner={
+                    g.winnerTeamId !== null && g.winnerTeamId === g.homeTeam.id
+                  }
+                />
+              );
+            })()}
+            {/* 상 우 1 */}
+            {(() => {
+              const g = findGame("QF_2");
+              return (
+                <EndMarker
+                  x="156"
+                  y="0"
+                  label={labels.topRight1}
+                  score={labels.topRight1Score}
+                  isWinner={
+                    g.winnerTeamId !== null && g.winnerTeamId === g.awayTeam.id
+                  }
+                />
+              );
+            })()}
+            {/* 상 우 2 */}
+            {(() => {
+              const g = findGame("QF_2");
+              return (
+                <EndMarker
+                  x="234"
+                  y="0"
+                  label={labels.topRight2}
+                  score={labels.topRight2Score}
+                  isWinner={
+                    g.winnerTeamId !== null && g.winnerTeamId === g.homeTeam.id
+                  }
+                />
+              );
+            })()}
+            {/* 상 중 좌 */}
+            {(() => {
+              const g = findGame("SF_1");
+              return (
+                <EndMarker
+                  x="36"
+                  y="99"
+                  label={labels.midTopLeft}
+                  score={labels.midTopLeftScore}
+                  isWinner={
+                    g.winnerTeamId !== null && g.winnerTeamId === g.awayTeam.id
+                  }
+                />
+              );
+            })()}
+            {/* 상 중 우 */}
+            {(() => {
+              const g = findGame("SF_1");
+              return (
+                <EndMarker
+                  x="196"
+                  y="99"
+                  label={labels.midTopRight}
+                  score={labels.midTopRightScore}
+                  isWinner={
+                    g.winnerTeamId !== null && g.winnerTeamId === g.homeTeam.id
+                  }
+                />
+              );
+            })()}
+            {/* 하 중 좌 */}
+            {(() => {
+              const g = findGame("SF_2");
+              return (
+                <EndMarker
+                  x="36"
+                  y="297"
+                  label={labels.midBotLeft}
+                  score={labels.midBotLeftScore}
+                  isWinner={
+                    g.winnerTeamId !== null && g.winnerTeamId === g.awayTeam.id
+                  }
+                />
+              );
+            })()}
+            {/* 하 중 우 */}
+            {(() => {
+              const g = findGame("SF_2");
+              return (
+                <EndMarker
+                  x="195"
+                  y="297"
+                  label={labels.midBotRight}
+                  score={labels.midBotRightScore}
+                  isWinner={
+                    g.winnerTeamId !== null && g.winnerTeamId === g.homeTeam.id
+                  }
+                />
+              );
+            })()}
+            {/* 하 좌 1 */}
+            {(() => {
+              const g = findGame("QF_3");
+              return (
+                <EndMarker
+                  x="1"
+                  y="396"
+                  label={labels.botLeft1}
+                  score={labels.botLeft1Score}
+                  isWinner={
+                    g.winnerTeamId !== null && g.winnerTeamId === g.awayTeam.id
+                  }
+                />
+              );
+            })()}
+            {/* 하 좌 2 */}
+            {(() => {
+              const g = findGame("QF_3");
+              return (
+                <EndMarker
+                  x="75"
+                  y="396"
+                  label={labels.botLeft2}
+                  score={labels.botLeft2Score}
+                  isWinner={
+                    g.winnerTeamId !== null && g.winnerTeamId === g.homeTeam.id
+                  }
+                />
+              );
+            })()}
+            {/* 하 우 1 */}
+            {(() => {
+              const g = findGame("QF_4");
+              return (
+                <EndMarker
+                  x="158"
+                  y="396"
+                  label={labels.botRight1}
+                  score={labels.botRight1Score}
+                  isWinner={
+                    g.winnerTeamId !== null && g.winnerTeamId === g.awayTeam.id
+                  }
+                />
+              );
+            })()}
+            {/* 하 우 2 */}
+            {(() => {
+              const g = findGame("QF_4");
+              return (
+                <EndMarker
+                  x="232"
+                  y="396"
+                  label={labels.botRight2}
+                  score={labels.botRight2Score}
+                  isWinner={
+                    g.winnerTeamId !== null && g.winnerTeamId === g.homeTeam.id
+                  }
+                />
+              );
+            })()}
+            {/* 결승전 */}
+            {(() => {
+              const g = findGame("F");
+              return (
+                <EndMarker
+                  x={76.5}
+                  y={198}
+                  label={labels.finalLeft}
+                  score={labels.finalLeftScore}
+                  isWinner={
+                    g.winnerTeamId !== null && g.winnerTeamId === g.homeTeam.id
+                  }
+                />
+              );
+            })()}
+            {(() => {
+              const g = findGame("F");
+              return (
+                <EndMarker
+                  x={156.5}
+                  y={198}
+                  label={labels.finalRight}
+                  score={labels.finalRightScore}
+                  isWinner={
+                    g.winnerTeamId !== null && g.winnerTeamId === g.awayTeam.id
+                  }
+                />
+              );
+            })()}
+
+            {/* 3,4위전 */}
+            {(() => {
+              const g = findGame("THIRD_PLACE");
+              return (
+                <EndMarker
+                  x={240}
+                  y={160}
+                  label={labels.ThirdTop}
+                  score={labels.ThirdTopScore}
+                  isWinner={
+                    g.winnerTeamId !== null && g.winnerTeamId === g.awayTeam.id
+                  }
+                />
+              );
+            })()}
+            {(() => {
+              const g = findGame("THIRD_PLACE");
+              return (
+                <EndMarkerTP
+                  x={240}
+                  y={230}
+                  label={labels.ThirdBot}
+                  score={labels.ThirdBotScore}
+                  isWinner={
+                    g.winnerTeamId !== null && g.winnerTeamId === g.homeTeam.id
+                  }
+                />
+              );
+            })()}
+          </g>
+        </svg>
+      </BrackGroundContainer>
     </BracketContainer>
   );
 }

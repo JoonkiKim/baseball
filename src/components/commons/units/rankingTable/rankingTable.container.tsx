@@ -62,10 +62,26 @@ export default function RankingTableComponent() {
         style={{
           // overflowY: "auto",
           marginBottom: "100px",
+          // backgroundColor: "red",
+          // display: "flex",
+          // flexDirection: "column",
         }}
       >
         {Object.entries(groupData).map(([groupKey, teams]) => (
-          <div key={groupKey}>
+          <div
+            key={groupKey}
+            style={{
+              backgroundColor: "white",
+              borderRadius: "15px",
+              width: "90%",
+              // height: "90%",
+              alignSelf: "center",
+              justifySelf: "center",
+              // display: "flex",
+              // flexDirection: "column",
+              // justifyContent: "center",
+            }}
+          >
             <GroupSelectorContainer>
               <GroupSelector>{getGroupName(groupKey)}</GroupSelector>
             </GroupSelectorContainer>
