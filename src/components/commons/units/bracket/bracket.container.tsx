@@ -218,47 +218,195 @@ export default function Bracket() {
       awayTeam: {},
     };
 
+  // 컴포넌트 상단 어딘가에 헬퍼 함수를 하나 추가
+  function makeMatchLabels(pos: string) {
+    const g = findGame(pos);
+    const away = g.awayTeam;
+    const home = g.homeTeam;
+
+    // 이름 유무를 개별 체크
+    const awayName = away.name ?? "";
+    const homeName = home.name ?? "";
+
+    return {
+      // 이름
+      labelAway: awayName,
+      labelHome: homeName,
+      // 점수: 이름이 있을 때만 보여주고, score가 null이면 "-"로
+      scoreAway:
+        awayName !== "" ? (away.score != null ? String(away.score) : "-") : "",
+      scoreHome:
+        homeName !== "" ? (home.score != null ? String(home.score) : "-") : "",
+    };
+  }
+
+  // 하나라도 null이면 둘다 없애도록
+  // function makeMatchLabels(pos: string) {
+  //   const g = findGame(pos);
+  //   const away = g.awayTeam;
+  //   const home = g.homeTeam;
+  //   const hasBothNames =
+  //     away.name != null &&
+  //     away.name !== "" &&
+  //     home.name != null &&
+  //     home.name !== "";
+
+  //   return {
+  //     labelAway: hasBothNames ? away.name! : "",
+  //     labelHome: hasBothNames ? home.name! : "",
+  //     scoreAway: hasBothNames
+  //       ? away.score != null
+  //         ? String(away.score)
+  //         : "-"
+  //       : "",
+  //     scoreHome: hasBothNames
+  //       ? home.score != null
+  //         ? String(home.score)
+  //         : "-"
+  //       : "",
+  //   };
+  // }
+
+  // labels 정의부를 완전히 교체
+  const {
+    labelAway: topLeft1,
+    scoreAway: topLeft1Score,
+    labelHome: topLeft2,
+    scoreHome: topLeft2Score,
+  } = makeMatchLabels("QF_1");
+
+  const {
+    labelAway: topRight1,
+    scoreAway: topRight1Score,
+    labelHome: topRight2,
+    scoreHome: topRight2Score,
+  } = makeMatchLabels("QF_2");
+
+  const {
+    labelAway: midTopLeft,
+    scoreAway: midTopLeftScore,
+    labelHome: midTopRight,
+    scoreHome: midTopRightScore,
+  } = makeMatchLabels("SF_1");
+
+  const {
+    labelAway: midBotLeft,
+    scoreAway: midBotLeftScore,
+    labelHome: midBotRight,
+    scoreHome: midBotRightScore,
+  } = makeMatchLabels("SF_2");
+
+  const {
+    labelAway: botLeft1,
+    scoreAway: botLeft1Score,
+    labelHome: botLeft2,
+    scoreHome: botLeft2Score,
+  } = makeMatchLabels("QF_3");
+
+  const {
+    labelAway: botRight1,
+    scoreAway: botRight1Score,
+    labelHome: botRight2,
+    scoreHome: botRight2Score,
+  } = makeMatchLabels("QF_4");
+
+  const {
+    labelAway: finalLeft,
+    scoreAway: finalLeftScore,
+    labelHome: finalRight,
+    scoreHome: finalRightScore,
+  } = makeMatchLabels("F");
+
+  const {
+    labelAway: ThirdTop,
+    scoreAway: ThirdTopScore,
+    labelHome: ThirdBot,
+    scoreHome: ThirdBotScore,
+  } = makeMatchLabels("THIRD_PLACE");
+
   const labels = {
-    topLeft1: findGame("QF_1").awayTeam.name ?? "-",
-    topLeft1Score: findGame("QF_1").awayTeam.score ?? "-",
-    topLeft2: findGame("QF_1").homeTeam.name ?? "-",
-    topLeft2Score: findGame("QF_1").homeTeam.score ?? "-",
+    topLeft1,
+    topLeft1Score,
+    topLeft2,
+    topLeft2Score,
 
-    topRight1: findGame("QF_2").awayTeam.name ?? "-",
-    topRight1Score: findGame("QF_2").awayTeam.score ?? "-",
-    topRight2: findGame("QF_2").homeTeam.name ?? "-",
-    topRight2Score: findGame("QF_2").homeTeam.score ?? "-",
+    topRight1,
+    topRight1Score,
+    topRight2,
+    topRight2Score,
 
-    midTopLeft: findGame("SF_1").awayTeam.name ?? "-",
-    midTopLeftScore: findGame("SF_1").awayTeam.score ?? "-",
-    midTopRight: findGame("SF_1").homeTeam.name ?? "-",
-    midTopRightScore: findGame("SF_1").homeTeam.score ?? "-",
+    midTopLeft,
+    midTopLeftScore,
+    midTopRight,
+    midTopRightScore,
 
-    midBotLeft: findGame("SF_2").awayTeam.name ?? "-",
-    midBotLeftScore: findGame("SF_2").awayTeam.score ?? "-",
-    midBotRight: findGame("SF_2").homeTeam.name ?? "-",
-    midBotRightScore: findGame("SF_2").homeTeam.score ?? "-",
+    midBotLeft,
+    midBotLeftScore,
+    midBotRight,
+    midBotRightScore,
 
-    botLeft1: findGame("QF_3").awayTeam.name ?? "-",
-    botLeft1Score: findGame("QF_3").awayTeam.score ?? "-",
-    botLeft2: findGame("QF_3").homeTeam.name ?? "-",
-    botLeft2Score: findGame("QF_3").homeTeam.score ?? "-",
+    botLeft1,
+    botLeft1Score,
+    botLeft2,
+    botLeft2Score,
 
-    botRight1: findGame("QF_4").awayTeam.name ?? "-",
-    botRight1Score: findGame("QF_4").awayTeam.score ?? "-",
-    botRight2: findGame("QF_4").homeTeam.name ?? "-",
-    botRight2Score: findGame("QF_4").homeTeam.score ?? "-",
+    botRight1,
+    botRight1Score,
+    botRight2,
+    botRight2Score,
 
-    finalLeft: findGame("F").awayTeam.name ?? "-",
-    finalLeftScore: findGame("F").awayTeam.score ?? "-",
-    finalRight: findGame("F").homeTeam.name ?? "-",
-    finalRightScore: findGame("F").homeTeam.score ?? "-",
+    finalLeft,
+    finalLeftScore,
+    finalRight,
+    finalRightScore,
 
-    ThirdTop: findGame("THIRD_PLACE").awayTeam.name ?? "-",
-    ThirdTopScore: findGame("THIRD_PLACE").awayTeam.score ?? "-",
-    ThirdBot: findGame("THIRD_PLACE").homeTeam.name ?? "-",
-    ThirdBotScore: findGame("THIRD_PLACE").homeTeam.score ?? "-",
+    ThirdTop,
+    ThirdTopScore,
+    ThirdBot,
+    ThirdBotScore,
   };
+
+  // const labels = {
+  //   topLeft1: findGame("QF_1").awayTeam.name ?? "-",
+  //   topLeft1Score: findGame("QF_1").awayTeam.score ?? "-",
+  //   topLeft2: findGame("QF_1").homeTeam.name ?? "-",
+  //   topLeft2Score: findGame("QF_1").homeTeam.score ?? "-",
+
+  //   topRight1: findGame("QF_2").awayTeam.name ?? "-",
+  //   topRight1Score: findGame("QF_2").awayTeam.score ?? "-",
+  //   topRight2: findGame("QF_2").homeTeam.name ?? "-",
+  //   topRight2Score: findGame("QF_2").homeTeam.score ?? "-",
+
+  //   midTopLeft: findGame("SF_1").awayTeam.name ?? "-",
+  //   midTopLeftScore: findGame("SF_1").awayTeam.score ?? "-",
+  //   midTopRight: findGame("SF_1").homeTeam.name ?? "-",
+  //   midTopRightScore: findGame("SF_1").homeTeam.score ?? "-",
+
+  //   midBotLeft: findGame("SF_2").awayTeam.name ?? "-",
+  //   midBotLeftScore: findGame("SF_2").awayTeam.score ?? "-",
+  //   midBotRight: findGame("SF_2").homeTeam.name ?? "-",
+  //   midBotRightScore: findGame("SF_2").homeTeam.score ?? "-",
+
+  //   botLeft1: findGame("QF_3").awayTeam.name ?? "-",
+  //   botLeft1Score: findGame("QF_3").awayTeam.score ?? "-",
+  //   botLeft2: findGame("QF_3").homeTeam.name ?? "-",
+  //   botLeft2Score: findGame("QF_3").homeTeam.score ?? "-",
+
+  //   botRight1: findGame("QF_4").awayTeam.name ?? "-",
+  //   botRight1Score: findGame("QF_4").awayTeam.score ?? "-",
+  //   botRight2: findGame("QF_4").homeTeam.name ?? "-",
+  //   botRight2Score: findGame("QF_4").homeTeam.score ?? "-",
+
+  //   finalLeft: findGame("F").awayTeam.name ?? "-",
+  //   finalLeftScore: findGame("F").awayTeam.score ?? "-",
+  //   finalRight: findGame("F").homeTeam.name ?? "-",
+  //   finalRightScore: findGame("F").homeTeam.score ?? "-",
+
+  //   ThirdTop: findGame("THIRD_PLACE").awayTeam.name ?? "-",
+  //   ThirdTopScore: findGame("THIRD_PLACE").awayTeam.score ?? "-",
+  //   ThirdBot: findGame("THIRD_PLACE").homeTeam.name ?? "-",
+  //   ThirdBotScore: findGame("THIRD_PLACE").homeTeam.score ?? "-",
+  // };
 
   // 브래킷 포지션별 마커 중심 좌표
   const markerPositions: Record<
