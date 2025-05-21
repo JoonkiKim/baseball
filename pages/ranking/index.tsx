@@ -1,5 +1,6 @@
 import Head from "next/head";
 import RankingTableComponent from "../../src/components/commons/units/rankingTable/rankingTable.container";
+import Bracket from "../../src/components/commons/units/bracket/bracket.container";
 
 export default function Ranking() {
   return (
@@ -12,6 +13,7 @@ export default function Ranking() {
       </Head> */}
       <div>
         <RankingTableComponent />
+        {/* <Bracket/> */}
       </div>
     </>
   );
