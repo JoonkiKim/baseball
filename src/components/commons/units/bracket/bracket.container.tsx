@@ -219,53 +219,54 @@ export default function Bracket() {
     };
 
   // 컴포넌트 상단 어딘가에 헬퍼 함수를 하나 추가
-  function makeMatchLabels(pos: string) {
-    const g = findGame(pos);
-    const away = g.awayTeam;
-    const home = g.homeTeam;
-
-    // 이름 유무를 개별 체크
-    const awayName = away.name ?? "";
-    const homeName = home.name ?? "";
-
-    return {
-      // 이름
-      labelAway: awayName,
-      labelHome: homeName,
-      // 점수: 이름이 있을 때만 보여주고, score가 null이면 "-"로
-      scoreAway:
-        awayName !== "" ? (away.score != null ? String(away.score) : "-") : "",
-      scoreHome:
-        homeName !== "" ? (home.score != null ? String(home.score) : "-") : "",
-    };
-  }
-
-  // 하나라도 null이면 둘다 없애도록
+  // 하나 있으면 그거 보여주는 함수
   // function makeMatchLabels(pos: string) {
   //   const g = findGame(pos);
   //   const away = g.awayTeam;
   //   const home = g.homeTeam;
-  //   const hasBothNames =
-  //     away.name != null &&
-  //     away.name !== "" &&
-  //     home.name != null &&
-  //     home.name !== "";
+
+  //   // 이름 유무를 개별 체크
+  //   const awayName = away.name ?? "";
+  //   const homeName = home.name ?? "";
 
   //   return {
-  //     labelAway: hasBothNames ? away.name! : "",
-  //     labelHome: hasBothNames ? home.name! : "",
-  //     scoreAway: hasBothNames
-  //       ? away.score != null
-  //         ? String(away.score)
-  //         : "-"
-  //       : "",
-  //     scoreHome: hasBothNames
-  //       ? home.score != null
-  //         ? String(home.score)
-  //         : "-"
-  //       : "",
+  //     // 이름
+  //     labelAway: awayName,
+  //     labelHome: homeName,
+  //     // 점수: 이름이 있을 때만 보여주고, score가 null이면 "-"로
+  //     scoreAway:
+  //       awayName !== "" ? (away.score != null ? String(away.score) : "-") : "",
+  //     scoreHome:
+  //       homeName !== "" ? (home.score != null ? String(home.score) : "-") : "",
   //   };
   // }
+
+  // 하나라도 null이면 둘다 없애도록
+  function makeMatchLabels(pos: string) {
+    const g = findGame(pos);
+    const away = g.awayTeam;
+    const home = g.homeTeam;
+    const hasBothNames =
+      away.name != null &&
+      away.name !== "" &&
+      home.name != null &&
+      home.name !== "";
+
+    return {
+      labelAway: hasBothNames ? away.name! : "",
+      labelHome: hasBothNames ? home.name! : "",
+      scoreAway: hasBothNames
+        ? away.score != null
+          ? String(away.score)
+          : "-"
+        : "",
+      scoreHome: hasBothNames
+        ? home.score != null
+          ? String(home.score)
+          : "-"
+        : "",
+    };
+  }
 
   // labels 정의부를 완전히 교체
   const {
