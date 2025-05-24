@@ -630,7 +630,7 @@ export default function Bracket() {
             // boxShadow: "12px 12px 2px 1px rgba(0, 0, 0, 0.2)",
           }}
         >
-          <g transform="translate(116.5,198) scale(0.79) translate(-116.5,-198)">
+          <g transform="translate(116.5,198) scale(0.75) translate(-116.5,-198)">
             <line
               id="1"
               x1="234"
