@@ -62,7 +62,7 @@ export const QFTeamName = styled.div`
 
 // ─── foreignObject 크기 (SVG user units) ───────────────────
 const FO_WIDTH = 65;
-const FO_HEIGHT = 50;
+const FO_HEIGHT = 40;
 const HALF_FO_W = FO_WIDTH / 2;
 const HALF_FO_H = FO_HEIGHT / 2;
 
@@ -77,13 +77,14 @@ const TeamNameBox = styled.div`
 
   background-color: transparent;
   display: flex;
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   flex-direction: row;
   align-items: center;
   justify-content: center;
   /* text-align: left; */
   color: black;
-  /* border: 1px solid black; */
+  border: 1px solid black;
+  border-radius: 25px;
 `;
 const ScroeBox = styled.div`
   width: 100%;
@@ -92,6 +93,22 @@ const ScroeBox = styled.div`
   background-color: transparent;
   /* border: 1px solid black; */
   padding-bottom: 5px;
+  display: flex;
+  color: black;
+  font-size: 0.7rem;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  /* text-align: center; */
+`;
+
+const ScroeBoxF = styled.div`
+  width: 100%;
+  height: 50%;
+  /* background-color: #f5f5f5; */
+  background-color: transparent;
+  /* border: 1px solid black; */
+  padding-right: 5px;
   display: flex;
   color: black;
   font-size: 0.7rem;
@@ -133,6 +150,8 @@ const CenterSquare = styled.div`
 // ─── EndMarker 중앙 검정 직사각형 크기 ──────────────────────────
 const RECT_WIDTH = 30;
 const RECT_HEIGHT = 30;
+
+/* 1) EndMarker – 이름이 없으면 바로 null 반환 */
 function EndMarker({
   x,
   y,
@@ -146,6 +165,8 @@ function EndMarker({
   score?: React.ReactNode;
   isWinner?: boolean;
 }) {
+  if (label === "" || label === null || label === undefined) return null;
+
   const xNum = typeof x === "string" ? parseFloat(x) : x;
   const yNum = typeof y === "string" ? parseFloat(y) : y;
 
@@ -155,7 +176,6 @@ function EndMarker({
       y={yNum - HALF_FO_H}
       width={FO_WIDTH}
       height={FO_HEIGHT}
-      // style={{ border: "1px solid black" }}
     >
       <TeamNameBox>
         <div>{label}</div>
@@ -167,6 +187,7 @@ function EndMarker({
   );
 }
 
+/* EndMarkerTP도 동일하게 첫 줄만 추가 */
 function EndMarkerTP({
   x,
   y,
@@ -180,6 +201,8 @@ function EndMarkerTP({
   score?: React.ReactNode;
   isWinner?: boolean;
 }) {
+  if (label === "" || label === null || label === undefined) return null;
+
   const xNum = typeof x === "string" ? parseFloat(x) : x;
   const yNum = typeof y === "string" ? parseFloat(y) : y;
 
@@ -189,7 +212,6 @@ function EndMarkerTP({
       y={yNum - HALF_FO_H}
       width={FO_WIDTH}
       height={FO_HEIGHT}
-      // style={{ border: "1px solid black" }}
     >
       <ScroeBoxNonePadding>
         <div style={{ color: isWinner ? "red" : "black" }}>{score}</div>
@@ -197,6 +219,88 @@ function EndMarkerTP({
       <TeamNameBox>
         <div>{label}</div>
       </TeamNameBox>
+    </foreignObject>
+  );
+}
+
+const RowWrapper = styled.div`
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: row;
+`;
+
+function EndMarkerF({
+  x,
+  y,
+  label,
+  score,
+  isWinner = false,
+}: {
+  x: number | string;
+  y: number | string;
+  label?: React.ReactNode;
+  score?: React.ReactNode;
+  isWinner?: boolean;
+}) {
+  if (label === "" || label === null || label === undefined) return null;
+
+  const xNum = typeof x === "string" ? parseFloat(x) : x;
+  const yNum = typeof y === "string" ? parseFloat(y) : y;
+
+  return (
+    <foreignObject
+      x={xNum - HALF_FO_W}
+      y={yNum - HALF_FO_H}
+      width={FO_WIDTH}
+      height={FO_HEIGHT}
+    >
+      <RowWrapper>
+        <TeamNameBox>
+          <div>{label}</div>
+        </TeamNameBox>
+        <ScroeBox>
+          <div style={{ color: isWinner ? "red" : "black" }}>{score}</div>
+        </ScroeBox>
+      </RowWrapper>
+    </foreignObject>
+  );
+}
+
+/* EndMarkerTP도 동일하게 첫 줄만 추가 */
+function EndMarkerTPF({
+  x,
+  y,
+  label,
+  score,
+  isWinner = false,
+}: {
+  x: number | string;
+  y: number | string;
+  label?: React.ReactNode;
+  score?: React.ReactNode;
+  isWinner?: boolean;
+}) {
+  if (label === "" || label === null || label === undefined) return null;
+
+  const xNum = typeof x === "string" ? parseFloat(x) : x;
+  const yNum = typeof y === "string" ? parseFloat(y) : y;
+
+  return (
+    <foreignObject
+      x={xNum - HALF_FO_W}
+      y={yNum - HALF_FO_H}
+      width={FO_WIDTH}
+      height={FO_HEIGHT}
+    >
+      <RowWrapper>
+        <ScroeBoxNonePadding>
+          <div style={{ color: isWinner ? "red" : "black" }}>{score}</div>
+        </ScroeBoxNonePadding>
+        <TeamNameBox>
+          <div>{label}</div>
+        </TeamNameBox>
+      </RowWrapper>
     </foreignObject>
   );
 }
@@ -242,6 +346,7 @@ export default function Bracket() {
   // }
 
   // 하나라도 null이면 둘다 없애도록
+  /* 2) makeMatchLabels – 이름이 둘 다 없으면 빈 문자열 반환(변경 없음) */
   function makeMatchLabels(pos: string) {
     const g = findGame(pos);
     const away = g.awayTeam;
@@ -267,7 +372,6 @@ export default function Bracket() {
         : "",
     };
   }
-
   // labels 정의부를 완전히 교체
   const {
     labelAway: topLeft1,
@@ -420,7 +524,8 @@ export default function Bracket() {
     SF_2: { away: [36, 297], home: [195, 297] },
     QF_3: { away: [1, 396], home: [75, 396] },
     QF_4: { away: [158, 396], home: [232, 396] },
-    F: { away: [156.5, 198], home: [76.5, 198] },
+    // F: { away: [156.5, 198], home: [76.5, 198] },
+    F: { away: [116.5, 213], home: [116.5, 184] }, // ← home 좌표만 수정
     THIRD_PLACE: { away: [240, 160], home: [240, 230] },
   };
   const pairedLines: Record<string, string> = {
@@ -506,7 +611,10 @@ export default function Bracket() {
     }
   });
   // ────────────────────────────────────────────────────────
-
+  const THIRD_LABEL_W = 80; // 원하는 폭(px)
+  const THIRD_LABEL_H = 18; // 원하는 높이(px)
+  const THIRD_AWAY_X = 240; // markerPositions["THIRD_PLACE"].away[0]
+  const THIRD_AWAY_Y = 160; // markerPositions["THIRD_PLACE"].away[1]
   return (
     <BracketContainer>
       <LargeTitle>2025 총장배 토너먼트 대진표</LargeTitle>
@@ -530,7 +638,7 @@ export default function Bracket() {
               x2="234"
               y2="56"
               stroke={redLineIds.has("1") ? "red" : lineColor}
-              strokeWidth="3"
+              strokeWidth="2"
               vectorEffect="non-scaling-stroke"
               strokeLinecap="square"
             />
@@ -541,7 +649,7 @@ export default function Bracket() {
               x2="156"
               y2="26"
               stroke={redLineIds.has("3") ? "red" : lineColor}
-              strokeWidth="3"
+              strokeWidth="2"
               vectorEffect="non-scaling-stroke"
               strokeLinecap="square"
             />
@@ -552,7 +660,7 @@ export default function Bracket() {
               x2="196"
               y2="155"
               stroke={redLineIds.has("4") ? "red" : lineColor}
-              strokeWidth="3"
+              strokeWidth="2"
               vectorEffect="non-scaling-stroke"
               strokeLinecap="square"
             />
@@ -564,7 +672,7 @@ export default function Bracket() {
               y2="-2"
               transform="matrix(0 -1 1 0 38 155)"
               stroke={redLineIds.has("6") ? "red" : lineColor}
-              strokeWidth="3"
+              strokeWidth="2"
               vectorEffect="non-scaling-stroke"
               strokeLinecap="square"
             />
@@ -575,7 +683,7 @@ export default function Bracket() {
               x2="77"
               y2="56"
               stroke={redLineIds.has("7") ? "red" : lineColor}
-              strokeWidth="3"
+              strokeWidth="2"
               vectorEffect="non-scaling-stroke"
               strokeLinecap="square"
             />
@@ -586,7 +694,7 @@ export default function Bracket() {
               x2="-1"
               y2="26"
               stroke={redLineIds.has("9") ? "red" : lineColor}
-              strokeWidth="3"
+              strokeWidth="2"
               vectorEffect="non-scaling-stroke"
               strokeLinecap="square"
             />
@@ -598,7 +706,7 @@ export default function Bracket() {
               y2="0"
               transform="matrix(0 -1 -1 0 195 297)"
               stroke={redLineIds.has("10") ? "red" : lineColor}
-              strokeWidth="3"
+              strokeWidth="2"
               vectorEffect="non-scaling-stroke"
               strokeLinecap="square"
             />
@@ -610,7 +718,7 @@ export default function Bracket() {
               y2="-2"
               transform="matrix(0 1 1 0 38 241)"
               stroke={redLineIds.has("12") ? "red" : lineColor}
-              strokeWidth="3"
+              strokeWidth="2"
               vectorEffect="non-scaling-stroke"
               strokeLinecap="square"
             />
@@ -622,7 +730,7 @@ export default function Bracket() {
               y2="-2"
               transform="matrix(0 -1 -1 0 232 396)"
               stroke={redLineIds.has("13") ? "red" : lineColor}
-              strokeWidth="3"
+              strokeWidth="2"
               vectorEffect="non-scaling-stroke"
               strokeLinecap="square"
             />
@@ -634,7 +742,7 @@ export default function Bracket() {
               y2="-2"
               transform="matrix(0 1 1 0 158 340)"
               stroke={redLineIds.has("15") ? "red" : lineColor}
-              strokeWidth="3"
+              strokeWidth="2"
               vectorEffect="non-scaling-stroke"
               strokeLinecap="square"
             />
@@ -646,7 +754,7 @@ export default function Bracket() {
               y2="-2"
               transform="matrix(0 -1 -1 0 75 396)"
               stroke={redLineIds.has("16") ? "red" : lineColor}
-              strokeWidth="3"
+              strokeWidth="2"
               vectorEffect="non-scaling-stroke"
               strokeLinecap="square"
             />
@@ -658,7 +766,7 @@ export default function Bracket() {
               y2="-2"
               transform="matrix(0 1 1 0 1 340)"
               stroke={redLineIds.has("18") ? "red" : lineColor}
-              strokeWidth="3"
+              strokeWidth="2"
               vectorEffect="non-scaling-stroke"
               strokeLinecap="square"
             />
@@ -671,7 +779,7 @@ export default function Bracket() {
               x2="195"
               y2="57"
               stroke={redLineIds.has("20") ? "red" : lineColor}
-              strokeWidth="3"
+              strokeWidth="2"
               vectorEffect="non-scaling-stroke"
               strokeLinecap="square"
             />
@@ -682,7 +790,7 @@ export default function Bracket() {
               x2="156"
               y2="57"
               stroke={redLineIds.has("21") ? "red" : lineColor}
-              strokeWidth="3"
+              strokeWidth="2"
               vectorEffect="non-scaling-stroke"
               strokeLinecap="square"
             />
@@ -693,7 +801,7 @@ export default function Bracket() {
               x2="116"
               y2="156"
               stroke={redLineIds.has("22") ? "red" : lineColor}
-              strokeWidth="3"
+              strokeWidth="2"
               vectorEffect="non-scaling-stroke"
               strokeLinecap="square"
             />
@@ -704,7 +812,7 @@ export default function Bracket() {
               x2="36"
               y2="156"
               stroke={redLineIds.has("23") ? "red" : lineColor}
-              strokeWidth="3"
+              strokeWidth="2"
               vectorEffect="non-scaling-stroke"
               strokeLinecap="square"
             />
@@ -715,7 +823,7 @@ export default function Bracket() {
               x2="38"
               y2="57"
               stroke={redLineIds.has("24") ? "red" : lineColor}
-              strokeWidth="3"
+              strokeWidth="2"
               vectorEffect="non-scaling-stroke"
               strokeLinecap="square"
             />
@@ -726,7 +834,7 @@ export default function Bracket() {
               x2="-1"
               y2="57"
               stroke={redLineIds.has("25") ? "red" : lineColor}
-              strokeWidth="3"
+              strokeWidth="2"
               vectorEffect="non-scaling-stroke"
               strokeLinecap="square"
             />
@@ -738,7 +846,7 @@ export default function Bracket() {
               y2="-2"
               transform="matrix(-1 0 0 1 233 341)"
               stroke={redLineIds.has("26") ? "red" : lineColor}
-              strokeWidth="3"
+              strokeWidth="2"
               vectorEffect="non-scaling-stroke"
               strokeLinecap="square"
             />
@@ -750,7 +858,7 @@ export default function Bracket() {
               y2="-2"
               transform="matrix(-1 0 0 1 233 341)"
               stroke={redLineIds.has("27") ? "red" : lineColor}
-              strokeWidth="3"
+              strokeWidth="2"
               vectorEffect="non-scaling-stroke"
               strokeLinecap="square"
             />
@@ -762,7 +870,7 @@ export default function Bracket() {
               y2="-2"
               transform="matrix(-1 0 0 1 76 341)"
               stroke={redLineIds.has("28") ? "red" : lineColor}
-              strokeWidth="3"
+              strokeWidth="2"
               vectorEffect="non-scaling-stroke"
               strokeLinecap="square"
             />
@@ -774,7 +882,7 @@ export default function Bracket() {
               y2="-2"
               transform="matrix(-1 0 0 1 76 341)"
               stroke={redLineIds.has("29") ? "red" : lineColor}
-              strokeWidth="3"
+              strokeWidth="2"
               vectorEffect="non-scaling-stroke"
               strokeLinecap="square"
             />
@@ -786,7 +894,7 @@ export default function Bracket() {
               y2="-2"
               transform="matrix(-1 0 0 1 195 242)"
               stroke={redLineIds.has("30") ? "red" : lineColor}
-              strokeWidth="3"
+              strokeWidth="2"
               vectorEffect="non-scaling-stroke"
               strokeLinecap="square"
             />
@@ -798,7 +906,7 @@ export default function Bracket() {
               y2="-2"
               transform="matrix(-1 0 0 1 195 242)"
               stroke={redLineIds.has("31") ? "red" : lineColor}
-              strokeWidth="3"
+              strokeWidth="2"
               vectorEffect="non-scaling-stroke"
               strokeLinecap="square"
             />
@@ -809,12 +917,12 @@ export default function Bracket() {
               x1="36"
               y1="57"
               x2="36"
-              y2="72"
+              y2="78"
               // transform="matrix(0 -1 -1 0 195 297)"
               stroke={
                 redLineIds.has("7") || redLineIds.has("9") ? "red" : lineColor
               }
-              strokeWidth="3"
+              strokeWidth="2"
               vectorEffect="non-scaling-stroke"
               strokeLinecap="square"
             />
@@ -822,14 +930,14 @@ export default function Bracket() {
             <line
               id="33"
               x1="196"
-              y1="72"
+              y1="78"
               x2="196"
               y2="57"
               // transform="matrix(0 -1 -1 0 195 297)"
               stroke={
                 redLineIds.has("1") || redLineIds.has("3") ? "red" : lineColor
               }
-              strokeWidth="3"
+              strokeWidth="2"
               vectorEffect="non-scaling-stroke"
               strokeLinecap="square"
             />
@@ -838,14 +946,14 @@ export default function Bracket() {
             <line
               id="34"
               x1="36"
-              y1="324"
+              y1="318"
               x2="36"
               y2="339"
               // transform="matrix(0 -1 -1 0 195 297)"
               stroke={
                 redLineIds.has("16") || redLineIds.has("18") ? "red" : lineColor
               }
-              strokeWidth="3"
+              strokeWidth="2"
               vectorEffect="non-scaling-stroke"
               strokeLinecap="square"
             />
@@ -854,14 +962,14 @@ export default function Bracket() {
             <line
               id="35"
               x1="195"
-              y1="324"
+              y1="318"
               x2="195"
               y2="339"
               // transform="matrix(0 -1 -1 0 195 297)"
               stroke={
                 redLineIds.has("13") || redLineIds.has("15") ? "red" : lineColor
               }
-              strokeWidth="3"
+              strokeWidth="2"
               vectorEffect="non-scaling-stroke"
               strokeLinecap="square"
             />
@@ -877,7 +985,7 @@ export default function Bracket() {
               stroke={
                 redLineIds.has("4") || redLineIds.has("6") ? "red" : lineColor
               }
-              strokeWidth="3"
+              strokeWidth="2"
               vectorEffect="non-scaling-stroke"
               strokeLinecap="square"
             />
@@ -892,7 +1000,7 @@ export default function Bracket() {
               stroke={
                 redLineIds.has("10") || redLineIds.has("12") ? "red" : lineColor
               }
-              strokeWidth="3"
+              strokeWidth="2"
               vectorEffect="non-scaling-stroke"
               strokeLinecap="square"
             />
@@ -922,7 +1030,7 @@ export default function Bracket() {
                     style={{
                       width: "100%",
                       height: "100%",
-                      fontSize: "0.8rem",
+                      fontSize: "0.6rem",
                       display: "flex",
                       flexDirection: "row",
                       justifyContent: "center",
@@ -1031,7 +1139,7 @@ export default function Bracket() {
             {(() => {
               const g = findGame("SF_2");
               return (
-                <EndMarker
+                <EndMarkerTP
                   x="36"
                   y="297"
                   label={labels.midBotLeft}
@@ -1046,7 +1154,7 @@ export default function Bracket() {
             {(() => {
               const g = findGame("SF_2");
               return (
-                <EndMarker
+                <EndMarkerTP
                   x="195"
                   y="297"
                   label={labels.midBotRight}
@@ -1061,7 +1169,7 @@ export default function Bracket() {
             {(() => {
               const g = findGame("QF_3");
               return (
-                <EndMarker
+                <EndMarkerTP
                   x="1"
                   y="396"
                   label={labels.botLeft1}
@@ -1076,8 +1184,8 @@ export default function Bracket() {
             {(() => {
               const g = findGame("QF_3");
               return (
-                <EndMarker
-                  x="75"
+                <EndMarkerTP
+                  x="77"
                   y="396"
                   label={labels.botLeft2}
                   score={labels.botLeft2Score}
@@ -1091,7 +1199,7 @@ export default function Bracket() {
             {(() => {
               const g = findGame("QF_4");
               return (
-                <EndMarker
+                <EndMarkerTP
                   x="158"
                   y="396"
                   label={labels.botRight1}
@@ -1106,8 +1214,8 @@ export default function Bracket() {
             {(() => {
               const g = findGame("QF_4");
               return (
-                <EndMarker
-                  x="232"
+                <EndMarkerTP
+                  x="234"
                   y="396"
                   label={labels.botRight2}
                   score={labels.botRight2Score}
@@ -1117,35 +1225,98 @@ export default function Bracket() {
                 />
               );
             })()}
-            {/* 결승전 */}
+            {/* 결승전 – HOME(위쪽) */}
             {(() => {
               const g = findGame("F");
               return (
-                <EndMarker
-                  x={76.5}
-                  y={198}
-                  label={labels.finalLeft}
-                  score={labels.finalLeftScore}
-                  isWinner={
-                    g.winnerTeamId !== null && g.winnerTeamId === g.homeTeam.id
-                  }
-                />
+                <React.Fragment>
+                  {/* EndMarker 본체 — 점수는 숨김 */}
+                  <EndMarker
+                    x={116.5}
+                    y={184}
+                    label={labels.finalLeft}
+                    score={
+                      <span style={{ visibility: "hidden" }}>
+                        {labels.finalLeftScore}
+                      </span>
+                    }
+                    isWinner={
+                      g.winnerTeamId !== null &&
+                      g.winnerTeamId === g.homeTeam.id
+                    }
+                  />
+
+                  {/* EndMarker 오른쪽에 보이는 점수 박스 */}
+                  <foreignObject
+                    x={116.5 + HALF_FO_W + 2}
+                    y={184 - HALF_FO_H}
+                    width={35}
+                    height={FO_HEIGHT}
+                  >
+                    <ScroeBoxF>
+                      <div>{labels.finalLeftScore}</div>
+                    </ScroeBoxF>
+                  </foreignObject>
+                </React.Fragment>
               );
             })()}
+
+            {/* 결승전 – AWAY(아래쪽) */}
             {(() => {
               const g = findGame("F");
               return (
-                <EndMarker
-                  x={156.5}
-                  y={198}
-                  label={labels.finalRight}
-                  score={labels.finalRightScore}
-                  isWinner={
-                    g.winnerTeamId !== null && g.winnerTeamId === g.awayTeam.id
-                  }
-                />
+                <React.Fragment>
+                  {/* EndMarker 본체 — 점수는 숨김 */}
+                  <EndMarkerTP
+                    x={116.5}
+                    y={213}
+                    label={labels.finalRight}
+                    score={
+                      <span style={{ visibility: "hidden" }}>
+                        {labels.finalRightScore}
+                      </span>
+                    }
+                    isWinner={
+                      g.winnerTeamId !== null &&
+                      g.winnerTeamId === g.awayTeam.id
+                    }
+                  />
+
+                  {/* EndMarker 오른쪽에 보이는 점수 박스 */}
+                  <foreignObject
+                    x={116.5 + HALF_FO_W + 2}
+                    y={213}
+                    width={35}
+                    height={FO_HEIGHT}
+                  >
+                    <ScroeBoxF>
+                      <div>{labels.finalRightScore}</div>
+                    </ScroeBoxF>
+                  </foreignObject>
+                </React.Fragment>
               );
             })()}
+            <foreignObject
+              x={THIRD_AWAY_X - THIRD_LABEL_W / 2}
+              y={THIRD_AWAY_Y - HALF_FO_H - THIRD_LABEL_H - 2} // EndMarker 위에 2px 간격
+              width={THIRD_LABEL_W}
+              height={THIRD_LABEL_H}
+            >
+              <div
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  fontSize: "0.75rem",
+                  // fontWeight: 500,
+                  fontWeight: "bold",
+                }}
+              >
+                3,4위전
+              </div>
+            </foreignObject>
 
             {/* 3,4위전 */}
             {(() => {
