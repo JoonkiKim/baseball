@@ -522,8 +522,8 @@ export default function Bracket() {
     QF_2: { away: [156, 0], home: [234, 0] },
     SF_1: { away: [36, 99], home: [196, 99] },
     SF_2: { away: [36, 297], home: [195, 297] },
-    QF_3: { away: [1, 396], home: [75, 396] },
-    QF_4: { away: [158, 396], home: [232, 396] },
+    QF_3: { away: [1, 396], home: [77, 396] },
+    QF_4: { away: [158, 396], home: [234, 396] },
     // F: { away: [156.5, 198], home: [76.5, 198] },
     F: { away: [116.5, 213], home: [116.5, 184] }, // ← home 좌표만 수정
     THIRD_PLACE: { away: [240, 160], home: [240, 230] },
@@ -1036,7 +1036,7 @@ export default function Bracket() {
                       justifyContent: "center",
                       alignItems: "center",
 
-                      // backgroundColor: "#bdbdbd",
+                      backgroundColor: "transparent",
                     }}
                   >
                     vs
