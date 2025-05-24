@@ -61,7 +61,7 @@ export const QFTeamName = styled.div`
 // const MARKER_HEIGHT = 6;
 
 // ─── foreignObject 크기 (SVG user units) ───────────────────
-const FO_WIDTH = 65;
+const FO_WIDTH = 63;
 const FO_HEIGHT = 40;
 const HALF_FO_W = FO_WIDTH / 2;
 const HALF_FO_H = FO_HEIGHT / 2;
@@ -630,7 +630,7 @@ export default function Bracket() {
             // boxShadow: "12px 12px 2px 1px rgba(0, 0, 0, 0.2)",
           }}
         >
-          <g transform="translate(116.5,198) scale(0.75) translate(-116.5,-198)">
+          <g transform="translate(116.5,198) scale(0.80) translate(-116.5,-198)">
             <line
               id="1"
               x1="234"
