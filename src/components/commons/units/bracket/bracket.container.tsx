@@ -42,7 +42,7 @@ export const LargeTitle = styled.h1`
   font-family: "KBO-Dia-Gothic_bold";
   font-size: 23px;
   align-self: center;
-  margin-bottom: 3.5vh;
+  margin-bottom: 1vh;
   width: 340px;
   margin-top: 3.5vh;
 
@@ -1037,6 +1037,8 @@ export default function Bracket() {
                       alignItems: "center",
 
                       backgroundColor: "transparent",
+
+                      // backgroundColor: "red",
                     }}
                   >
                     vs
