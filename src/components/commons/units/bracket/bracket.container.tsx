@@ -347,31 +347,64 @@ export default function Bracket() {
 
   // 하나라도 null이면 둘다 없애도록
   /* 2) makeMatchLabels – 이름이 둘 다 없으면 빈 문자열 반환(변경 없음) */
+  // function makeMatchLabels(pos: string) {
+  //   const g = findGame(pos);
+  //   const away = g.awayTeam;
+  //   const home = g.homeTeam;
+  //   const hasBothNames =
+  //     away.name != null &&
+  //     away.name !== "" &&
+  //     home.name != null &&
+  //     home.name !== "";
+
+  //   return {
+  //     labelAway: hasBothNames ? away.name! : "",
+  //     labelHome: hasBothNames ? home.name! : "",
+  //     scoreAway: hasBothNames
+  //       ? away.score != null
+  //         ? String(away.score)
+  //         : "-"
+  //       : "",
+  //     scoreHome: hasBothNames
+  //       ? home.score != null
+  //         ? String(home.score)
+  //         : "-"
+  //       : "",
+  //   };
+  // }
+
+  // ─── makeMatchLabels 함수 수정 ────────────────────────
   function makeMatchLabels(pos: string) {
     const g = findGame(pos);
     const away = g.awayTeam;
     const home = g.homeTeam;
-    const hasBothNames =
-      away.name != null &&
-      away.name !== "" &&
-      home.name != null &&
-      home.name !== "";
 
-    return {
-      labelAway: hasBothNames ? away.name! : "",
-      labelHome: hasBothNames ? home.name! : "",
-      scoreAway: hasBothNames
+    // 이름 레이블 (기존 로직 유지)
+    const awayName = away.name ?? "";
+    const homeName = home.name ?? "";
+
+    // 점수: winnerTeamId가 null 이면 "-" 고정, 아니면 실제 score 또는 "-"
+    const scoreAway =
+      g.winnerTeamId != null && awayName !== ""
         ? away.score != null
           ? String(away.score)
           : "-"
-        : "",
-      scoreHome: hasBothNames
+        : "-";
+    const scoreHome =
+      g.winnerTeamId != null && homeName !== ""
         ? home.score != null
           ? String(home.score)
           : "-"
-        : "",
+        : "-";
+
+    return {
+      labelAway: awayName,
+      labelHome: homeName,
+      scoreAway,
+      scoreHome,
     };
   }
+
   // labels 정의부를 완전히 교체
   const {
     labelAway: topLeft1,
@@ -470,50 +503,6 @@ export default function Bracket() {
     ThirdBot,
     ThirdBotScore,
   };
-
-  // const labels = {
-  //   topLeft1: findGame("QF_1").awayTeam.name ?? "-",
-  //   topLeft1Score: findGame("QF_1").awayTeam.score ?? "-",
-  //   topLeft2: findGame("QF_1").homeTeam.name ?? "-",
-  //   topLeft2Score: findGame("QF_1").homeTeam.score ?? "-",
-
-  //   topRight1: findGame("QF_2").awayTeam.name ?? "-",
-  //   topRight1Score: findGame("QF_2").awayTeam.score ?? "-",
-  //   topRight2: findGame("QF_2").homeTeam.name ?? "-",
-  //   topRight2Score: findGame("QF_2").homeTeam.score ?? "-",
-
-  //   midTopLeft: findGame("SF_1").awayTeam.name ?? "-",
-  //   midTopLeftScore: findGame("SF_1").awayTeam.score ?? "-",
-  //   midTopRight: findGame("SF_1").homeTeam.name ?? "-",
-  //   midTopRightScore: findGame("SF_1").homeTeam.score ?? "-",
-
-  //   midBotLeft: findGame("SF_2").awayTeam.name ?? "-",
-  //   midBotLeftScore: findGame("SF_2").awayTeam.score ?? "-",
-  //   midBotRight: findGame("SF_2").homeTeam.name ?? "-",
-  //   midBotRightScore: findGame("SF_2").homeTeam.score ?? "-",
-
-  //   botLeft1: findGame("QF_3").awayTeam.name ?? "-",
-  //   botLeft1Score: findGame("QF_3").awayTeam.score ?? "-",
-  //   botLeft2: findGame("QF_3").homeTeam.name ?? "-",
-  //   botLeft2Score: findGame("QF_3").homeTeam.score ?? "-",
-
-  //   botRight1: findGame("QF_4").awayTeam.name ?? "-",
-  //   botRight1Score: findGame("QF_4").awayTeam.score ?? "-",
-  //   botRight2: findGame("QF_4").homeTeam.name ?? "-",
-  //   botRight2Score: findGame("QF_4").homeTeam.score ?? "-",
-
-  //   finalLeft: findGame("F").awayTeam.name ?? "-",
-  //   finalLeftScore: findGame("F").awayTeam.score ?? "-",
-  //   finalRight: findGame("F").homeTeam.name ?? "-",
-  //   finalRightScore: findGame("F").homeTeam.score ?? "-",
-
-  //   ThirdTop: findGame("THIRD_PLACE").awayTeam.name ?? "-",
-  //   ThirdTopScore: findGame("THIRD_PLACE").awayTeam.score ?? "-",
-  //   ThirdBot: findGame("THIRD_PLACE").homeTeam.name ?? "-",
-  //   ThirdBotScore: findGame("THIRD_PLACE").homeTeam.score ?? "-",
-  // };
-
-  // 브래킷 포지션별 마커 중심 좌표
   const markerPositions: Record<
     string,
     { away: [number, number]; home: [number, number] }
@@ -579,9 +568,9 @@ export default function Bracket() {
     "9": { start: [0, 0] },
     "10": { start: [195, 297] }, // matrix(0 -1 -1 0 195 297) 적용 결과
     "12": { start: [36, 297] }, // matrix(0 1 1 0 38 241)
-    "13": { start: [232, 396] }, // matrix(0 -1 -1 0 232 396)
+    "13": { start: [234, 396] }, // matrix(0 -1 -1 0 232 396)
     "15": { start: [158, 396] }, // matrix(0 1 1 0 158 340)
-    "16": { start: [75, 396] }, // matrix(0 -1 -1 0 75 396)
+    "16": { start: [77, 396] }, // matrix(0 -1 -1 0 75 396)
     "18": { start: [1, 396] }, // matrix(0 1 1 0 1 340)
 
     // 가로줄
