@@ -71,7 +71,7 @@ const HALF_FO_H = FO_HEIGHT / 2;
 // const CSS_MARKER_H = "5rem";
 
 const TeamNameBox = styled.div`
-  box-sizing: border-box;
+  /* box-sizing: border-box; */
   width: 100%;
   height: 50%;
   /* background-color: #f5f5f5; */
@@ -84,8 +84,9 @@ const TeamNameBox = styled.div`
   justify-content: center;
   /* text-align: left; */
   color: black;
-  border: 1px solid black;
+  /* border: 1px solid black; */
   border-radius: 25px;
+  box-shadow: inset 0 0 0 1px black;
 `;
 const ScroeBox = styled.div`
   width: 100%;
