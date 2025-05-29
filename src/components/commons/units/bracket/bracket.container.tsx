@@ -61,7 +61,7 @@ export const QFTeamName = styled.div`
 // const MARKER_HEIGHT = 6;
 
 // ─── foreignObject 크기 (SVG user units) ───────────────────
-const FO_WIDTH = 63;
+const FO_WIDTH = 60;
 const FO_HEIGHT = 40;
 const HALF_FO_W = FO_WIDTH / 2;
 const HALF_FO_H = FO_HEIGHT / 2;
@@ -71,20 +71,22 @@ const HALF_FO_H = FO_HEIGHT / 2;
 // const CSS_MARKER_H = "5rem";
 
 const TeamNameBox = styled.div`
-  box-sizing: border-box;
+  /* box-sizing: border-box; */
   width: 100%;
   height: 50%;
   /* background-color: #f5f5f5; */
 
   background-color: transparent;
   display: flex;
-  font-size: 0.65rem;
+  font-size: 0.62rem;
   flex-direction: row;
   align-items: center;
   justify-content: center;
   /* text-align: left; */
   color: black;
-  border: 1px solid black;
+  /* border: 1px solid black; */
+
+  box-shadow: inset 0 0 0 1px black;
   border-radius: 25px;
 `;
 const ScroeBox = styled.div`
