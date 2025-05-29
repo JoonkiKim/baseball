@@ -71,6 +71,7 @@ const HALF_FO_H = FO_HEIGHT / 2;
 // const CSS_MARKER_H = "5rem";
 
 const TeamNameBox = styled.div`
+  box-sizing: border-box;
   width: 100%;
   height: 50%;
   /* background-color: #f5f5f5; */
