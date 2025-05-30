@@ -607,6 +607,43 @@ export default function Bracket() {
   const THIRD_LABEL_H = 18; // 원하는 높이(px)
   const THIRD_AWAY_X = 240; // markerPositions["THIRD_PLACE"].away[0]
   const THIRD_AWAY_Y = 160; // markerPositions["THIRD_PLACE"].away[1]
+
+  // Bracket() 안, JSX return 바로 ‘위’ 아무 곳에 넣어두면 됩니다.
+
+  /** QF → SF 로 매칭할 때 사용 (QF_1 승자를 SF_1에서 찾아 반환) */
+  function getTeamByQfWinner(qfPos: string, sfPos: string) {
+    const qf = findGame(qfPos);
+    const sf = findGame(sfPos);
+    if (!qf || !sf || qf.winnerTeamId == null) return null;
+
+    if (sf.homeTeam?.id === qf.winnerTeamId) return sf.homeTeam;
+    if (sf.awayTeam?.id === qf.winnerTeamId) return sf.awayTeam;
+
+    /* id 매칭이 안 되는 예외를 대비한 이름 비교 */
+    const winName =
+      qf.homeTeam?.id === qf.winnerTeamId
+        ? qf.homeTeam?.name
+        : qf.awayTeam?.name;
+    if (sf.homeTeam?.name === winName) return sf.homeTeam;
+    if (sf.awayTeam?.name === winName) return sf.awayTeam;
+
+    return null;
+  }
+
+  /** 특정 경기(pos)의 ‘승자’ team 객체 반환 */
+  function getWinnerTeam(pos: string) {
+    const g = findGame(pos);
+    if (!g || g.winnerTeamId == null) return null;
+    return g.homeTeam?.id === g.winnerTeamId ? g.homeTeam : g.awayTeam;
+  }
+
+  /** 특정 경기(pos)의 ‘패자’ team 객체 반환 */
+  function getLoserTeam(pos: string) {
+    const g = findGame(pos);
+    if (!g || g.winnerTeamId == null) return null;
+    return g.homeTeam?.id === g.winnerTeamId ? g.awayTeam : g.homeTeam;
+  }
+
   return (
     <BracketContainer>
       <LargeTitle>2025 총장배 토너먼트 대진표</LargeTitle>
@@ -762,7 +799,6 @@ export default function Bracket() {
               vectorEffect="non-scaling-stroke"
               strokeLinecap="square"
             />
-
             {/* 가로줄 */}
             <line
               id="20"
@@ -902,7 +938,6 @@ export default function Bracket() {
               vectorEffect="non-scaling-stroke"
               strokeLinecap="square"
             />
-
             {/* 상좌 */}
             <line
               id="32"
@@ -933,7 +968,6 @@ export default function Bracket() {
               vectorEffect="non-scaling-stroke"
               strokeLinecap="square"
             />
-
             {/* 하좌 */}
             <line
               id="34"
@@ -949,7 +983,6 @@ export default function Bracket() {
               vectorEffect="non-scaling-stroke"
               strokeLinecap="square"
             />
-
             {/* 하우 */}
             <line
               id="35"
@@ -965,7 +998,6 @@ export default function Bracket() {
               vectorEffect="non-scaling-stroke"
               strokeLinecap="square"
             />
-
             {/* 중상 */}
             <line
               id="36"
@@ -1038,7 +1070,6 @@ export default function Bracket() {
                 </foreignObject>
               );
             })}
-
             {/* 상 좌 1 */}
             {(() => {
               const g = findGame("QF_1");
@@ -1099,64 +1130,62 @@ export default function Bracket() {
                 />
               );
             })()}
-            {/* 상 중 좌 */}
+            {/* ─── SF_1  (좌=QF_1 승자, 우=QF_2 승자) ─── */}
             {(() => {
-              const g = findGame("SF_1");
+              const left = getTeamByQfWinner("QF_1", "SF_1");
+              const right = getTeamByQfWinner("QF_2", "SF_1");
+              const sf1 = findGame("SF_1");
+
               return (
-                <EndMarker
-                  x="36"
-                  y="99"
-                  label={labels.midTopLeft}
-                  score={labels.midTopLeftScore}
-                  isWinner={
-                    g.winnerTeamId !== null && g.winnerTeamId === g.awayTeam.id
-                  }
-                />
+                <>
+                  {left && (
+                    <EndMarker
+                      x="36"
+                      y="99"
+                      label={left.name}
+                      score={left.score != null ? String(left.score) : "-"}
+                      isWinner={sf1?.winnerTeamId === left.id}
+                    />
+                  )}
+                  {right && (
+                    <EndMarker
+                      x="196"
+                      y="99"
+                      label={right.name}
+                      score={right.score != null ? String(right.score) : "-"}
+                      isWinner={sf1?.winnerTeamId === right.id}
+                    />
+                  )}
+                </>
               );
             })()}
-            {/* 상 중 우 */}
+            {/* ─── SF_2  (좌=QF_3 승자, 우=QF_4 승자) ─── */}
             {(() => {
-              const g = findGame("SF_1");
+              const left = getTeamByQfWinner("QF_3", "SF_2");
+              const right = getTeamByQfWinner("QF_4", "SF_2");
+              const sf2 = findGame("SF_2");
+
               return (
-                <EndMarker
-                  x="196"
-                  y="99"
-                  label={labels.midTopRight}
-                  score={labels.midTopRightScore}
-                  isWinner={
-                    g.winnerTeamId !== null && g.winnerTeamId === g.homeTeam.id
-                  }
-                />
-              );
-            })()}
-            {/* 하 중 좌 */}
-            {(() => {
-              const g = findGame("SF_2");
-              return (
-                <EndMarkerTP
-                  x="36"
-                  y="297"
-                  label={labels.midBotLeft}
-                  score={labels.midBotLeftScore}
-                  isWinner={
-                    g.winnerTeamId !== null && g.winnerTeamId === g.awayTeam.id
-                  }
-                />
-              );
-            })()}
-            {/* 하 중 우 */}
-            {(() => {
-              const g = findGame("SF_2");
-              return (
-                <EndMarkerTP
-                  x="195"
-                  y="297"
-                  label={labels.midBotRight}
-                  score={labels.midBotRightScore}
-                  isWinner={
-                    g.winnerTeamId !== null && g.winnerTeamId === g.homeTeam.id
-                  }
-                />
+                <>
+                  {left && (
+                    <EndMarkerTP
+                      x="36"
+                      y="297"
+                      label={left.name}
+                      score={left.score != null ? String(left.score) : "-"}
+                      isWinner={sf2?.winnerTeamId === left.id}
+                    />
+                  )}
+                  {right && (
+                    <EndMarkerTP
+                      x="195"
+                      y="297"
+                      label={right.name}
+                      score={right.score != null ? String(right.score) : "-"}
+                      isWinner={sf2?.winnerTeamId === right.id}
+                    />
+                  )}
+                </>
               );
             })()}
             {/* 하 좌 1 */}
@@ -1219,77 +1248,90 @@ export default function Bracket() {
                 />
               );
             })()}
-            {/* 결승전 – HOME(위쪽) */}
-            {(() => {
-              const g = findGame("F");
-              return (
-                <React.Fragment>
-                  {/* EndMarker 본체 — 점수는 숨김 */}
-                  <EndMarker
-                    x={116.5}
-                    y={184}
-                    label={labels.finalLeft}
-                    score={
-                      <span style={{ visibility: "hidden" }}>
-                        {labels.finalLeftScore}
-                      </span>
-                    }
-                    isWinner={
-                      g.winnerTeamId !== null &&
-                      g.winnerTeamId === g.homeTeam.id
-                    }
-                  />
 
-                  {/* EndMarker 오른쪽에 보이는 점수 박스 */}
-                  <foreignObject
-                    x={116.5 + HALF_FO_W + 2}
-                    y={184 - HALF_FO_H}
-                    width={35}
-                    height={FO_HEIGHT}
-                  >
-                    <ScroeBoxF>
-                      <div>{labels.finalLeftScore}</div>
-                    </ScroeBoxF>
-                  </foreignObject>
-                </React.Fragment>
+            {(() => {
+              const finalGame = findGame("F"); // 결승 경기 (있을 수도, 없을 수도)
+              const topTeam = getWinnerTeam("SF_1"); // 위쪽 EndMarker용
+              console.log(topTeam);
+              const bottomTeam = getWinnerTeam("SF_2"); // 아래쪽 EndMarker용
+
+              /* 결승전 스코어를 팀 기준으로 뽑아주는 헬퍼 */
+              const scoreOf = (team) =>
+                !team
+                  ? "-"
+                  : finalGame
+                  ? finalGame.homeTeam?.id === team.id
+                    ? finalGame.homeTeam.score ?? "-"
+                    : finalGame.awayTeam?.id === team.id
+                    ? finalGame.awayTeam.score ?? "-"
+                    : team.score ?? "-"
+                  : team.score ?? "-";
+
+              return (
+                <>
+                  {/* 결승 – HOME(위쪽) : SF_1 승자 */}
+                  {topTeam && (
+                    <>
+                      {/* EndMarker 본체 — 점수는 숨김 */}
+                      <EndMarker
+                        x={116.5}
+                        y={184}
+                        label={topTeam.name}
+                        score={
+                          <span style={{ visibility: "hidden" }}>
+                            {scoreOf(topTeam)}
+                          </span>
+                        }
+                        isWinner={finalGame?.winnerTeamId === topTeam.id}
+                      />
+
+                      {/* EndMarker 오른쪽의 점수 박스 */}
+                      <foreignObject
+                        x={116.5 + HALF_FO_W + 2}
+                        y={184 - HALF_FO_H}
+                        width={35}
+                        height={FO_HEIGHT}
+                      >
+                        <ScroeBoxF>
+                          <div>{scoreOf(topTeam)}</div>
+                        </ScroeBoxF>
+                      </foreignObject>
+                    </>
+                  )}
+
+                  {/* 결승 – AWAY(아래쪽) : SF_2 승자 */}
+                  {bottomTeam && (
+                    <>
+                      {/* EndMarker 본체 — 점수는 숨김 */}
+                      <EndMarkerTP
+                        x={116.5}
+                        y={213}
+                        label={bottomTeam.name}
+                        score={
+                          <span style={{ visibility: "hidden" }}>
+                            {scoreOf(bottomTeam)}
+                          </span>
+                        }
+                        isWinner={finalGame?.winnerTeamId === bottomTeam.id}
+                      />
+
+                      {/* EndMarker 오른쪽의 점수 박스 */}
+                      <foreignObject
+                        x={116.5 + HALF_FO_W + 2}
+                        y={213}
+                        width={35}
+                        height={FO_HEIGHT}
+                      >
+                        <ScroeBoxF>
+                          <div>{scoreOf(bottomTeam)}</div>
+                        </ScroeBoxF>
+                      </foreignObject>
+                    </>
+                  )}
+                </>
               );
             })()}
 
-            {/* 결승전 – AWAY(아래쪽) */}
-            {(() => {
-              const g = findGame("F");
-              return (
-                <React.Fragment>
-                  {/* EndMarker 본체 — 점수는 숨김 */}
-                  <EndMarkerTP
-                    x={116.5}
-                    y={213}
-                    label={labels.finalRight}
-                    score={
-                      <span style={{ visibility: "hidden" }}>
-                        {labels.finalRightScore}
-                      </span>
-                    }
-                    isWinner={
-                      g.winnerTeamId !== null &&
-                      g.winnerTeamId === g.awayTeam.id
-                    }
-                  />
-
-                  {/* EndMarker 오른쪽에 보이는 점수 박스 */}
-                  <foreignObject
-                    x={116.5 + HALF_FO_W + 2}
-                    y={213}
-                    width={35}
-                    height={FO_HEIGHT}
-                  >
-                    <ScroeBoxF>
-                      <div>{labels.finalRightScore}</div>
-                    </ScroeBoxF>
-                  </foreignObject>
-                </React.Fragment>
-              );
-            })()}
             <foreignObject
               x={THIRD_AWAY_X - THIRD_LABEL_W / 2}
               y={THIRD_AWAY_Y - HALF_FO_H - THIRD_LABEL_H - 2} // EndMarker 위에 2px 간격
@@ -1311,34 +1353,37 @@ export default function Bracket() {
                 3,4위전
               </div>
             </foreignObject>
-
             {/* 3,4위전 */}
             {(() => {
-              const g = findGame("THIRD_PLACE");
+              const tp = findGame("THIRD_PLACE"); // 이미 존재하는 3·4위전 경기
+              const topTeam = tp ? tp.awayTeam : getLoserTeam("SF_1"); // 위쪽
+              const botTeam = tp ? tp.homeTeam : getLoserTeam("SF_2"); // 아래쪽
+
               return (
-                <EndMarker
-                  x={240}
-                  y={160}
-                  label={labels.ThirdTop}
-                  score={labels.ThirdTopScore}
-                  isWinner={
-                    g.winnerTeamId !== null && g.winnerTeamId === g.awayTeam.id
-                  }
-                />
-              );
-            })()}
-            {(() => {
-              const g = findGame("THIRD_PLACE");
-              return (
-                <EndMarkerTP
-                  x={240}
-                  y={230}
-                  label={labels.ThirdBot}
-                  score={labels.ThirdBotScore}
-                  isWinner={
-                    g.winnerTeamId !== null && g.winnerTeamId === g.homeTeam.id
-                  }
-                />
+                <>
+                  {topTeam && (
+                    <EndMarker
+                      x="240"
+                      y="160"
+                      label={topTeam.name}
+                      score={
+                        topTeam.score != null ? String(topTeam.score) : "-"
+                      }
+                      isWinner={false}
+                    />
+                  )}
+                  {botTeam && (
+                    <EndMarkerTP
+                      x="240"
+                      y="230"
+                      label={botTeam.name}
+                      score={
+                        botTeam.score != null ? String(botTeam.score) : "-"
+                      }
+                      isWinner={false}
+                    />
+                  )}
+                </>
               );
             })()}
           </g>
