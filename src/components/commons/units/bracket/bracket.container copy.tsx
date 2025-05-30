@@ -42,7 +42,7 @@
 //   font-family: "KBO-Dia-Gothic_bold";
 //   font-size: 23px;
 //   align-self: center;
-//   margin-bottom: 3.5vh;
+//   margin-bottom: 1vh;
 //   width: 340px;
 //   margin-top: 3.5vh;
 
@@ -61,8 +61,8 @@
 // // const MARKER_HEIGHT = 6;
 
 // // ─── foreignObject 크기 (SVG user units) ───────────────────
-// const FO_WIDTH = 65;
-// const FO_HEIGHT = 50;
+// const FO_WIDTH = 60;
+// const FO_HEIGHT = 40;
 // const HALF_FO_W = FO_WIDTH / 2;
 // const HALF_FO_H = FO_HEIGHT / 2;
 
@@ -71,19 +71,22 @@
 // // const CSS_MARKER_H = "5rem";
 
 // const TeamNameBox = styled.div`
+//   /* box-sizing: border-box; */
 //   width: 100%;
 //   height: 50%;
 //   /* background-color: #f5f5f5; */
 
 //   background-color: transparent;
 //   display: flex;
-//   font-size: 0.65rem;
+//   font-size: 0.62rem;
 //   flex-direction: row;
 //   align-items: center;
 //   justify-content: center;
 //   /* text-align: left; */
 //   color: black;
-//   border: 1px solid black;
+//   /* border: 1px solid black; */
+
+//   box-shadow: inset 0 0 0 1px black;
 //   border-radius: 25px;
 // `;
 // const ScroeBox = styled.div`
@@ -93,6 +96,22 @@
 //   background-color: transparent;
 //   /* border: 1px solid black; */
 //   padding-bottom: 5px;
+//   display: flex;
+//   color: black;
+//   font-size: 0.7rem;
+//   flex-direction: row;
+//   align-items: center;
+//   justify-content: center;
+//   /* text-align: center; */
+// `;
+
+// const ScroeBoxF = styled.div`
+//   width: 100%;
+//   height: 50%;
+//   /* background-color: #f5f5f5; */
+//   background-color: transparent;
+//   /* border: 1px solid black; */
+//   padding-right: 5px;
 //   display: flex;
 //   color: black;
 //   font-size: 0.7rem;
@@ -134,6 +153,8 @@
 // // ─── EndMarker 중앙 검정 직사각형 크기 ──────────────────────────
 // const RECT_WIDTH = 30;
 // const RECT_HEIGHT = 30;
+
+// /* 1) EndMarker – 이름이 없으면 바로 null 반환 */
 // function EndMarker({
 //   x,
 //   y,
@@ -147,6 +168,8 @@
 //   score?: React.ReactNode;
 //   isWinner?: boolean;
 // }) {
+//   if (label === "" || label === null || label === undefined) return null;
+
 //   const xNum = typeof x === "string" ? parseFloat(x) : x;
 //   const yNum = typeof y === "string" ? parseFloat(y) : y;
 
@@ -156,7 +179,6 @@
 //       y={yNum - HALF_FO_H}
 //       width={FO_WIDTH}
 //       height={FO_HEIGHT}
-//       // style={{ border: "1px solid black" }}
 //     >
 //       <TeamNameBox>
 //         <div>{label}</div>
@@ -168,6 +190,7 @@
 //   );
 // }
 
+// /* EndMarkerTP도 동일하게 첫 줄만 추가 */
 // function EndMarkerTP({
 //   x,
 //   y,
@@ -181,6 +204,8 @@
 //   score?: React.ReactNode;
 //   isWinner?: boolean;
 // }) {
+//   if (label === "" || label === null || label === undefined) return null;
+
 //   const xNum = typeof x === "string" ? parseFloat(x) : x;
 //   const yNum = typeof y === "string" ? parseFloat(y) : y;
 
@@ -190,7 +215,6 @@
 //       y={yNum - HALF_FO_H}
 //       width={FO_WIDTH}
 //       height={FO_HEIGHT}
-//       // style={{ border: "1px solid black" }}
 //     >
 //       <ScroeBoxNonePadding>
 //         <div style={{ color: isWinner ? "red" : "black" }}>{score}</div>
@@ -198,6 +222,88 @@
 //       <TeamNameBox>
 //         <div>{label}</div>
 //       </TeamNameBox>
+//     </foreignObject>
+//   );
+// }
+
+// const RowWrapper = styled.div`
+//   width: 100%;
+//   height: 100%;
+//   display: flex;
+//   flex-direction: row;
+// `;
+
+// function EndMarkerF({
+//   x,
+//   y,
+//   label,
+//   score,
+//   isWinner = false,
+// }: {
+//   x: number | string;
+//   y: number | string;
+//   label?: React.ReactNode;
+//   score?: React.ReactNode;
+//   isWinner?: boolean;
+// }) {
+//   if (label === "" || label === null || label === undefined) return null;
+
+//   const xNum = typeof x === "string" ? parseFloat(x) : x;
+//   const yNum = typeof y === "string" ? parseFloat(y) : y;
+
+//   return (
+//     <foreignObject
+//       x={xNum - HALF_FO_W}
+//       y={yNum - HALF_FO_H}
+//       width={FO_WIDTH}
+//       height={FO_HEIGHT}
+//     >
+//       <RowWrapper>
+//         <TeamNameBox>
+//           <div>{label}</div>
+//         </TeamNameBox>
+//         <ScroeBox>
+//           <div style={{ color: isWinner ? "red" : "black" }}>{score}</div>
+//         </ScroeBox>
+//       </RowWrapper>
+//     </foreignObject>
+//   );
+// }
+
+// /* EndMarkerTP도 동일하게 첫 줄만 추가 */
+// function EndMarkerTPF({
+//   x,
+//   y,
+//   label,
+//   score,
+//   isWinner = false,
+// }: {
+//   x: number | string;
+//   y: number | string;
+//   label?: React.ReactNode;
+//   score?: React.ReactNode;
+//   isWinner?: boolean;
+// }) {
+//   if (label === "" || label === null || label === undefined) return null;
+
+//   const xNum = typeof x === "string" ? parseFloat(x) : x;
+//   const yNum = typeof y === "string" ? parseFloat(y) : y;
+
+//   return (
+//     <foreignObject
+//       x={xNum - HALF_FO_W}
+//       y={yNum - HALF_FO_H}
+//       width={FO_WIDTH}
+//       height={FO_HEIGHT}
+//     >
+//       <RowWrapper>
+//         <ScroeBoxNonePadding>
+//           <div style={{ color: isWinner ? "red" : "black" }}>{score}</div>
+//         </ScroeBoxNonePadding>
+//         <TeamNameBox>
+//           <div>{label}</div>
+//         </TeamNameBox>
+//       </RowWrapper>
 //     </foreignObject>
 //   );
 // }
@@ -243,29 +349,62 @@
 //   // }
 
 //   // 하나라도 null이면 둘다 없애도록
+//   /* 2) makeMatchLabels – 이름이 둘 다 없으면 빈 문자열 반환(변경 없음) */
+//   // function makeMatchLabels(pos: string) {
+//   //   const g = findGame(pos);
+//   //   const away = g.awayTeam;
+//   //   const home = g.homeTeam;
+//   //   const hasBothNames =
+//   //     away.name != null &&
+//   //     away.name !== "" &&
+//   //     home.name != null &&
+//   //     home.name !== "";
+
+//   //   return {
+//   //     labelAway: hasBothNames ? away.name! : "",
+//   //     labelHome: hasBothNames ? home.name! : "",
+//   //     scoreAway: hasBothNames
+//   //       ? away.score != null
+//   //         ? String(away.score)
+//   //         : "-"
+//   //       : "",
+//   //     scoreHome: hasBothNames
+//   //       ? home.score != null
+//   //         ? String(home.score)
+//   //         : "-"
+//   //       : "",
+//   //   };
+//   // }
+
+//   // ─── makeMatchLabels 함수 수정 ────────────────────────
 //   function makeMatchLabels(pos: string) {
 //     const g = findGame(pos);
 //     const away = g.awayTeam;
 //     const home = g.homeTeam;
-//     const hasBothNames =
-//       away.name != null &&
-//       away.name !== "" &&
-//       home.name != null &&
-//       home.name !== "";
 
-//     return {
-//       labelAway: hasBothNames ? away.name! : "",
-//       labelHome: hasBothNames ? home.name! : "",
-//       scoreAway: hasBothNames
+//     // 이름 레이블 (기존 로직 유지)
+//     const awayName = away.name ?? "";
+//     const homeName = home.name ?? "";
+
+//     // 점수: winnerTeamId가 null 이면 "-" 고정, 아니면 실제 score 또는 "-"
+//     const scoreAway =
+//       g.winnerTeamId != null && awayName !== ""
 //         ? away.score != null
 //           ? String(away.score)
 //           : "-"
-//         : "",
-//       scoreHome: hasBothNames
+//         : "-";
+//     const scoreHome =
+//       g.winnerTeamId != null && homeName !== ""
 //         ? home.score != null
 //           ? String(home.score)
 //           : "-"
-//         : "",
+//         : "-";
+
+//     return {
+//       labelAway: awayName,
+//       labelHome: homeName,
+//       scoreAway,
+//       scoreHome,
 //     };
 //   }
 
@@ -367,50 +506,6 @@
 //     ThirdBot,
 //     ThirdBotScore,
 //   };
-
-//   // const labels = {
-//   //   topLeft1: findGame("QF_1").awayTeam.name ?? "-",
-//   //   topLeft1Score: findGame("QF_1").awayTeam.score ?? "-",
-//   //   topLeft2: findGame("QF_1").homeTeam.name ?? "-",
-//   //   topLeft2Score: findGame("QF_1").homeTeam.score ?? "-",
-
-//   //   topRight1: findGame("QF_2").awayTeam.name ?? "-",
-//   //   topRight1Score: findGame("QF_2").awayTeam.score ?? "-",
-//   //   topRight2: findGame("QF_2").homeTeam.name ?? "-",
-//   //   topRight2Score: findGame("QF_2").homeTeam.score ?? "-",
-
-//   //   midTopLeft: findGame("SF_1").awayTeam.name ?? "-",
-//   //   midTopLeftScore: findGame("SF_1").awayTeam.score ?? "-",
-//   //   midTopRight: findGame("SF_1").homeTeam.name ?? "-",
-//   //   midTopRightScore: findGame("SF_1").homeTeam.score ?? "-",
-
-//   //   midBotLeft: findGame("SF_2").awayTeam.name ?? "-",
-//   //   midBotLeftScore: findGame("SF_2").awayTeam.score ?? "-",
-//   //   midBotRight: findGame("SF_2").homeTeam.name ?? "-",
-//   //   midBotRightScore: findGame("SF_2").homeTeam.score ?? "-",
-
-//   //   botLeft1: findGame("QF_3").awayTeam.name ?? "-",
-//   //   botLeft1Score: findGame("QF_3").awayTeam.score ?? "-",
-//   //   botLeft2: findGame("QF_3").homeTeam.name ?? "-",
-//   //   botLeft2Score: findGame("QF_3").homeTeam.score ?? "-",
-
-//   //   botRight1: findGame("QF_4").awayTeam.name ?? "-",
-//   //   botRight1Score: findGame("QF_4").awayTeam.score ?? "-",
-//   //   botRight2: findGame("QF_4").homeTeam.name ?? "-",
-//   //   botRight2Score: findGame("QF_4").homeTeam.score ?? "-",
-
-//   //   finalLeft: findGame("F").awayTeam.name ?? "-",
-//   //   finalLeftScore: findGame("F").awayTeam.score ?? "-",
-//   //   finalRight: findGame("F").homeTeam.name ?? "-",
-//   //   finalRightScore: findGame("F").homeTeam.score ?? "-",
-
-//   //   ThirdTop: findGame("THIRD_PLACE").awayTeam.name ?? "-",
-//   //   ThirdTopScore: findGame("THIRD_PLACE").awayTeam.score ?? "-",
-//   //   ThirdBot: findGame("THIRD_PLACE").homeTeam.name ?? "-",
-//   //   ThirdBotScore: findGame("THIRD_PLACE").homeTeam.score ?? "-",
-//   // };
-
-//   // 브래킷 포지션별 마커 중심 좌표
 //   const markerPositions: Record<
 //     string,
 //     { away: [number, number]; home: [number, number] }
@@ -419,9 +514,10 @@
 //     QF_2: { away: [156, 0], home: [234, 0] },
 //     SF_1: { away: [36, 99], home: [196, 99] },
 //     SF_2: { away: [36, 297], home: [195, 297] },
-//     QF_3: { away: [1, 396], home: [75, 396] },
-//     QF_4: { away: [158, 396], home: [232, 396] },
-//     F: { away: [156.5, 198], home: [76.5, 198] },
+//     QF_3: { away: [1, 396], home: [77, 396] },
+//     QF_4: { away: [158, 396], home: [234, 396] },
+//     // F: { away: [156.5, 198], home: [76.5, 198] },
+//     F: { away: [116.5, 213], home: [116.5, 184] }, // ← home 좌표만 수정
 //     THIRD_PLACE: { away: [240, 160], home: [240, 230] },
 //   };
 //   const pairedLines: Record<string, string> = {
@@ -475,9 +571,9 @@
 //     "9": { start: [0, 0] },
 //     "10": { start: [195, 297] }, // matrix(0 -1 -1 0 195 297) 적용 결과
 //     "12": { start: [36, 297] }, // matrix(0 1 1 0 38 241)
-//     "13": { start: [232, 396] }, // matrix(0 -1 -1 0 232 396)
+//     "13": { start: [234, 396] }, // matrix(0 -1 -1 0 232 396)
 //     "15": { start: [158, 396] }, // matrix(0 1 1 0 158 340)
-//     "16": { start: [75, 396] }, // matrix(0 -1 -1 0 75 396)
+//     "16": { start: [77, 396] }, // matrix(0 -1 -1 0 75 396)
 //     "18": { start: [1, 396] }, // matrix(0 1 1 0 1 340)
 
 //     // 가로줄
@@ -507,7 +603,10 @@
 //     }
 //   });
 //   // ────────────────────────────────────────────────────────
-
+//   const THIRD_LABEL_W = 80; // 원하는 폭(px)
+//   const THIRD_LABEL_H = 18; // 원하는 높이(px)
+//   const THIRD_AWAY_X = 240; // markerPositions["THIRD_PLACE"].away[0]
+//   const THIRD_AWAY_Y = 160; // markerPositions["THIRD_PLACE"].away[1]
 //   return (
 //     <BracketContainer>
 //       <LargeTitle>2025 총장배 토너먼트 대진표</LargeTitle>
@@ -810,7 +909,7 @@
 //               x1="36"
 //               y1="57"
 //               x2="36"
-//               y2="72"
+//               y2="78"
 //               // transform="matrix(0 -1 -1 0 195 297)"
 //               stroke={
 //                 redLineIds.has("7") || redLineIds.has("9") ? "red" : lineColor
@@ -823,7 +922,7 @@
 //             <line
 //               id="33"
 //               x1="196"
-//               y1="72"
+//               y1="78"
 //               x2="196"
 //               y2="57"
 //               // transform="matrix(0 -1 -1 0 195 297)"
@@ -839,7 +938,7 @@
 //             <line
 //               id="34"
 //               x1="36"
-//               y1="324"
+//               y1="318"
 //               x2="36"
 //               y2="339"
 //               // transform="matrix(0 -1 -1 0 195 297)"
@@ -855,7 +954,7 @@
 //             <line
 //               id="35"
 //               x1="195"
-//               y1="324"
+//               y1="318"
 //               x2="195"
 //               y2="339"
 //               // transform="matrix(0 -1 -1 0 195 297)"
@@ -923,13 +1022,15 @@
 //                     style={{
 //                       width: "100%",
 //                       height: "100%",
-//                       fontSize: "0.8rem",
+//                       fontSize: "0.6rem",
 //                       display: "flex",
 //                       flexDirection: "row",
 //                       justifyContent: "center",
 //                       alignItems: "center",
 
-//                       // backgroundColor: "#bdbdbd",
+//                       backgroundColor: "transparent",
+
+//                       // backgroundColor: "red",
 //                     }}
 //                   >
 //                     vs
@@ -1032,7 +1133,7 @@
 //             {(() => {
 //               const g = findGame("SF_2");
 //               return (
-//                 <EndMarker
+//                 <EndMarkerTP
 //                   x="36"
 //                   y="297"
 //                   label={labels.midBotLeft}
@@ -1047,7 +1148,7 @@
 //             {(() => {
 //               const g = findGame("SF_2");
 //               return (
-//                 <EndMarker
+//                 <EndMarkerTP
 //                   x="195"
 //                   y="297"
 //                   label={labels.midBotRight}
@@ -1062,7 +1163,7 @@
 //             {(() => {
 //               const g = findGame("QF_3");
 //               return (
-//                 <EndMarker
+//                 <EndMarkerTP
 //                   x="1"
 //                   y="396"
 //                   label={labels.botLeft1}
@@ -1077,8 +1178,8 @@
 //             {(() => {
 //               const g = findGame("QF_3");
 //               return (
-//                 <EndMarker
-//                   x="75"
+//                 <EndMarkerTP
+//                   x="77"
 //                   y="396"
 //                   label={labels.botLeft2}
 //                   score={labels.botLeft2Score}
@@ -1092,7 +1193,7 @@
 //             {(() => {
 //               const g = findGame("QF_4");
 //               return (
-//                 <EndMarker
+//                 <EndMarkerTP
 //                   x="158"
 //                   y="396"
 //                   label={labels.botRight1}
@@ -1107,8 +1208,8 @@
 //             {(() => {
 //               const g = findGame("QF_4");
 //               return (
-//                 <EndMarker
-//                   x="232"
+//                 <EndMarkerTP
+//                   x="234"
 //                   y="396"
 //                   label={labels.botRight2}
 //                   score={labels.botRight2Score}
@@ -1118,35 +1219,98 @@
 //                 />
 //               );
 //             })()}
-//             {/* 결승전 */}
+//             {/* 결승전 – HOME(위쪽) */}
 //             {(() => {
 //               const g = findGame("F");
 //               return (
-//                 <EndMarker
-//                   x={76.5}
-//                   y={198}
-//                   label={labels.finalLeft}
-//                   score={labels.finalLeftScore}
-//                   isWinner={
-//                     g.winnerTeamId !== null && g.winnerTeamId === g.homeTeam.id
-//                   }
-//                 />
+//                 <React.Fragment>
+//                   {/* EndMarker 본체 — 점수는 숨김 */}
+//                   <EndMarker
+//                     x={116.5}
+//                     y={184}
+//                     label={labels.finalLeft}
+//                     score={
+//                       <span style={{ visibility: "hidden" }}>
+//                         {labels.finalLeftScore}
+//                       </span>
+//                     }
+//                     isWinner={
+//                       g.winnerTeamId !== null &&
+//                       g.winnerTeamId === g.homeTeam.id
+//                     }
+//                   />
+
+//                   {/* EndMarker 오른쪽에 보이는 점수 박스 */}
+//                   <foreignObject
+//                     x={116.5 + HALF_FO_W + 2}
+//                     y={184 - HALF_FO_H}
+//                     width={35}
+//                     height={FO_HEIGHT}
+//                   >
+//                     <ScroeBoxF>
+//                       <div>{labels.finalLeftScore}</div>
+//                     </ScroeBoxF>
+//                   </foreignObject>
+//                 </React.Fragment>
 //               );
 //             })()}
+
+//             {/* 결승전 – AWAY(아래쪽) */}
 //             {(() => {
 //               const g = findGame("F");
 //               return (
-//                 <EndMarker
-//                   x={156.5}
-//                   y={198}
-//                   label={labels.finalRight}
-//                   score={labels.finalRightScore}
-//                   isWinner={
-//                     g.winnerTeamId !== null && g.winnerTeamId === g.awayTeam.id
-//                   }
-//                 />
+//                 <React.Fragment>
+//                   {/* EndMarker 본체 — 점수는 숨김 */}
+//                   <EndMarkerTP
+//                     x={116.5}
+//                     y={213}
+//                     label={labels.finalRight}
+//                     score={
+//                       <span style={{ visibility: "hidden" }}>
+//                         {labels.finalRightScore}
+//                       </span>
+//                     }
+//                     isWinner={
+//                       g.winnerTeamId !== null &&
+//                       g.winnerTeamId === g.awayTeam.id
+//                     }
+//                   />
+
+//                   {/* EndMarker 오른쪽에 보이는 점수 박스 */}
+//                   <foreignObject
+//                     x={116.5 + HALF_FO_W + 2}
+//                     y={213}
+//                     width={35}
+//                     height={FO_HEIGHT}
+//                   >
+//                     <ScroeBoxF>
+//                       <div>{labels.finalRightScore}</div>
+//                     </ScroeBoxF>
+//                   </foreignObject>
+//                 </React.Fragment>
 //               );
 //             })()}
+//             <foreignObject
+//               x={THIRD_AWAY_X - THIRD_LABEL_W / 2}
+//               y={THIRD_AWAY_Y - HALF_FO_H - THIRD_LABEL_H - 2} // EndMarker 위에 2px 간격
+//               width={THIRD_LABEL_W}
+//               height={THIRD_LABEL_H}
+//             >
+//               <div
+//                 style={{
+//                   width: "100%",
+//                   height: "100%",
+//                   display: "flex",
+//                   justifyContent: "center",
+//                   alignItems: "center",
+//                   fontSize: "0.75rem",
+//                   // fontWeight: 500,
+//                   fontWeight: "bold",
+//                 }}
+//               >
+//                 3,4위전
+//               </div>
+//             </foreignObject>
 
 //             {/* 3,4위전 */}
 //             {(() => {
