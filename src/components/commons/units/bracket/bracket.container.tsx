@@ -1164,6 +1164,7 @@ export default function Bracket() {
               const left = getTeamByQfWinner("QF_3", "SF_2");
               const right = getTeamByQfWinner("QF_4", "SF_2");
               const sf2 = findGame("SF_2");
+              console.log("right", right);
 
               return (
                 <>
