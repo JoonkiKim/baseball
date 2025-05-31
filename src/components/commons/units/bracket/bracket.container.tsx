@@ -89,21 +89,6 @@ const TeamNameBox = styled.div`
   box-shadow: inset 0 0 0 1px black;
   border-radius: 25px;
 `;
-const ScroeBox = styled.div`
-  width: 100%;
-  height: 50%;
-  /* background-color: #f5f5f5; */
-  background-color: transparent;
-  /* border: 1px solid black; */
-  padding-bottom: 5px;
-  display: flex;
-  color: black;
-  font-size: 0.7rem;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  /* text-align: center; */
-`;
 
 const ScroeBoxF = styled.div`
   width: 100%;
@@ -120,6 +105,22 @@ const ScroeBoxF = styled.div`
   justify-content: center;
   /* text-align: center; */
 `;
+const ScroeBox = styled.div`
+  width: 100%;
+  height: 50%;
+  /* background-color: #f5f5f5; */
+  background-color: transparent;
+  /* border: 1px solid black; */
+  padding-top: 5px;
+  padding-bottom: 5px;
+  display: flex;
+  color: black;
+  font-size: 0.7rem;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  /* text-align: center; */
+`;
 
 const ScroeBoxNonePadding = styled.div`
   width: 100%;
@@ -127,6 +128,7 @@ const ScroeBoxNonePadding = styled.div`
   /* background-color: #f5f5f5; */
   background-color: transparent;
   /* border: 1px solid black; */
+  padding-bottom: 5px;
   padding-top: 5px;
   display: flex;
   color: black;
@@ -518,7 +520,7 @@ export default function Bracket() {
     QF_4: { away: [158, 396], home: [234, 396] },
     // F: { away: [156.5, 198], home: [76.5, 198] },
     F: { away: [116.5, 213], home: [116.5, 184] }, // ← home 좌표만 수정
-    THIRD_PLACE: { away: [240, 160], home: [240, 230] },
+    THIRD_PLACE: { away: [240, 165], home: [240, 225] },
   };
   const pairedLines: Record<string, string> = {
     "1": "20",
@@ -643,6 +645,30 @@ export default function Bracket() {
     if (!g || g.winnerTeamId == null) return null;
     return g.homeTeam?.id === g.winnerTeamId ? g.awayTeam : g.homeTeam;
   }
+  /** QF 우승자가 SF에서 어느 쪽(좌/우)에 들어갔는지 찾아줌 */
+  function getTeamInSfSide(sfPos: string, side: "left" | "right") {
+    const sf = findGame(sfPos);
+    if (!sf) return null;
+
+    // 좌·우 EndMarker 좌표가 고정돼 있으므로
+    // 좌측(x=36) ← QF_1 우승자, 우측(x=196) ← QF_2 우승자
+    const qfPos = side === "left" ? "QF_1" : "QF_2";
+    return getTeamByQfWinner(qfPos, sfPos); // 기존에 있던 헬퍼 그대로 재활용
+  }
+
+  const sf1 = findGame("SF_1");
+  const leftTeam = getTeamInSfSide("SF_1", "left"); // 좌측 EndMarker에 있는 팀
+  const rightTeam = getTeamInSfSide("SF_1", "right"); // 우측 EndMarker에 있는 팀
+
+  const sf1LeftWinner = !!leftTeam && sf1.winnerTeamId === leftTeam.id;
+  const sf1RightWinner = !!rightTeam && sf1.winnerTeamId === rightTeam.id;
+
+  const sf2 = findGame("SF_2");
+  const sf2LeftTeam = getTeamByQfWinner("QF_3", "SF_2"); // 좌측 EndMarker(36,297)에 온 팀
+  const sf2RightTeam = getTeamByQfWinner("QF_4", "SF_2"); // 우측 EndMarker(195,297)에 온 팀
+
+  const sf2LeftWinner = !!sf2LeftTeam && sf2.winnerTeamId === sf2LeftTeam.id;
+  const sf2RightWinner = !!sf2RightTeam && sf2.winnerTeamId === sf2RightTeam.id;
 
   return (
     <BracketContainer>
@@ -688,7 +714,8 @@ export default function Bracket() {
               y1="125"
               x2="196"
               y2="155"
-              stroke={redLineIds.has("4") ? "red" : lineColor}
+              // stroke={redLineIds.has("4") ? "red" : lineColor}
+              stroke={sf1RightWinner ? "red" : lineColor}
               strokeWidth="2"
               vectorEffect="non-scaling-stroke"
               strokeLinecap="square"
@@ -700,7 +727,8 @@ export default function Bracket() {
               x2="30"
               y2="-2"
               transform="matrix(0 -1 1 0 38 155)"
-              stroke={redLineIds.has("6") ? "red" : lineColor}
+              // stroke={redLineIds.has("6") ? "red" : lineColor}
+              stroke={sf1LeftWinner ? "red" : lineColor}
               strokeWidth="2"
               vectorEffect="non-scaling-stroke"
               strokeLinecap="square"
@@ -734,7 +762,8 @@ export default function Bracket() {
               x2="56"
               y2="0"
               transform="matrix(0 -1 -1 0 195 297)"
-              stroke={redLineIds.has("10") ? "red" : lineColor}
+              // stroke={redLineIds.has("10") ? "red" : lineColor}
+              stroke={sf2RightWinner ? "red" : lineColor}
               strokeWidth="2"
               vectorEffect="non-scaling-stroke"
               strokeLinecap="square"
@@ -746,7 +775,8 @@ export default function Bracket() {
               x2="30"
               y2="-2"
               transform="matrix(0 1 1 0 38 241)"
-              stroke={redLineIds.has("12") ? "red" : lineColor}
+              // stroke={redLineIds.has("12") ? "red" : lineColor}
+              stroke={sf2LeftWinner ? "red" : lineColor}
               strokeWidth="2"
               vectorEffect="non-scaling-stroke"
               strokeLinecap="square"
@@ -828,7 +858,8 @@ export default function Bracket() {
               y1="156"
               x2="116"
               y2="156"
-              stroke={redLineIds.has("22") ? "red" : lineColor}
+              // stroke={redLineIds.has("22") ? "red" : lineColor}
+              stroke={sf1RightWinner ? "red" : lineColor}
               strokeWidth="2"
               vectorEffect="non-scaling-stroke"
               strokeLinecap="square"
@@ -839,7 +870,8 @@ export default function Bracket() {
               y1="156"
               x2="36"
               y2="156"
-              stroke={redLineIds.has("23") ? "red" : lineColor}
+              // stroke={redLineIds.has("23") ? "red" : lineColor}
+              stroke={sf1LeftWinner ? "red" : lineColor}
               strokeWidth="2"
               vectorEffect="non-scaling-stroke"
               strokeLinecap="square"
@@ -921,7 +953,8 @@ export default function Bracket() {
               x2="78.5"
               y2="-2"
               transform="matrix(-1 0 0 1 195 242)"
-              stroke={redLineIds.has("30") ? "red" : lineColor}
+              // stroke={redLineIds.has("30") ? "red" : lineColor}
+              stroke={sf2RightWinner ? "red" : lineColor}
               strokeWidth="2"
               vectorEffect="non-scaling-stroke"
               strokeLinecap="square"
@@ -933,7 +966,8 @@ export default function Bracket() {
               x2="159"
               y2="-2"
               transform="matrix(-1 0 0 1 195 242)"
-              stroke={redLineIds.has("31") ? "red" : lineColor}
+              // stroke={redLineIds.has("31") ? "red" : lineColor}
+              stroke={sf2LeftWinner ? "red" : lineColor}
               strokeWidth="2"
               vectorEffect="non-scaling-stroke"
               strokeLinecap="square"
@@ -1164,7 +1198,6 @@ export default function Bracket() {
               const left = getTeamByQfWinner("QF_3", "SF_2");
               const right = getTeamByQfWinner("QF_4", "SF_2");
               const sf2 = findGame("SF_2");
-              console.log("right", right);
 
               return (
                 <>
@@ -1251,9 +1284,8 @@ export default function Bracket() {
             })()}
 
             {(() => {
-              const finalGame = findGame("F"); // 결승 경기 (있을 수도, 없을 수도)
+              const finalGame = findGame("F"); // 결승 경기
               const topTeam = getWinnerTeam("SF_1"); // 위쪽 EndMarker용
-              console.log(topTeam);
               const bottomTeam = getWinnerTeam("SF_2"); // 아래쪽 EndMarker용
 
               /* 결승전 스코어를 팀 기준으로 뽑아주는 헬퍼 */
@@ -1294,7 +1326,16 @@ export default function Bracket() {
                         height={FO_HEIGHT}
                       >
                         <ScroeBoxF>
-                          <div>{scoreOf(topTeam)}</div>
+                          <div
+                            style={{
+                              color:
+                                finalGame?.winnerTeamId === topTeam.id
+                                  ? "red"
+                                  : "black",
+                            }}
+                          >
+                            {scoreOf(topTeam)}
+                          </div>
                         </ScroeBoxF>
                       </foreignObject>
                     </>
@@ -1324,7 +1365,16 @@ export default function Bracket() {
                         height={FO_HEIGHT}
                       >
                         <ScroeBoxF>
-                          <div>{scoreOf(bottomTeam)}</div>
+                          <div
+                            style={{
+                              color:
+                                finalGame?.winnerTeamId === bottomTeam.id
+                                  ? "red"
+                                  : "black",
+                            }}
+                          >
+                            {scoreOf(bottomTeam)}
+                          </div>
                         </ScroeBoxF>
                       </foreignObject>
                     </>
@@ -1354,34 +1404,37 @@ export default function Bracket() {
                 3,4위전
               </div>
             </foreignObject>
+
             {/* 3,4위전 */}
             {(() => {
-              const tp = findGame("THIRD_PLACE"); // 이미 존재하는 3·4위전 경기
-              const topTeam = tp ? tp.awayTeam : getLoserTeam("SF_1"); // 위쪽
-              const botTeam = tp ? tp.homeTeam : getLoserTeam("SF_2"); // 아래쪽
+              const tp = findGame("THIRD_PLACE"); // 3·4위전 경기(있을 수도, 없을 수도)
+              const tpWinner = tp ? tp.winnerTeamId : null; // 승자 id, 없으면 null
+
+              const topTeam = tp ? tp.awayTeam : getLoserTeam("SF_1"); // 위쪽 EndMarker 팀
+              const botTeam = tp ? tp.homeTeam : getLoserTeam("SF_2"); // 아래쪽 EndMarker 팀
 
               return (
                 <>
                   {topTeam && (
                     <EndMarker
                       x="240"
-                      y="160"
+                      y="165"
                       label={topTeam.name}
                       score={
                         topTeam.score != null ? String(topTeam.score) : "-"
                       }
-                      isWinner={false}
+                      isWinner={tpWinner !== null && tpWinner === topTeam.id}
                     />
                   )}
                   {botTeam && (
                     <EndMarkerTP
                       x="240"
-                      y="230"
+                      y="228"
                       label={botTeam.name}
                       score={
                         botTeam.score != null ? String(botTeam.score) : "-"
                       }
-                      isWinner={false}
+                      isWinner={tpWinner !== null && tpWinner === botTeam.id}
                     />
                   )}
                 </>
