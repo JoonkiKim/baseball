@@ -1,12 +1,12 @@
-import MainCalendarPage from "../src/components/commons/units/mainCalendar.container";
+import EndPage from "../src/components/commons/units/endPage/endPage.container";
 
 export default function Home() {
   return (
     <>
       <div>
-        <MainCalendarPage />
-        {/* 
-        <PWAInstallButton /> */}
+        {/* <MainCalendarPage /> */}
+
+        <EndPage />
       </div>
     </>
   );

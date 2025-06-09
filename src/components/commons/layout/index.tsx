@@ -9,13 +9,13 @@ import LayoutHeaderNone from "./headerNone";
 const SHOW_NAV = [
   "/playerStats",
   "/ranking",
-  "/",
+  // "/",
   "/playerStats/playerStatsBatterDetail",
   "/playerStats/playerStatsPitcherDetail",
   "/refreeRegistration",
 ];
 
-// const HIDE_HEADER = ["/refreeRegistration"];
+const HIDE_HEADER = ["/"];
 
 interface ILayoutProps {
   children: JSX.Element;
@@ -27,12 +27,11 @@ export default function Layout(props: ILayoutProps): JSX.Element {
   console.log(router.asPath);
 
   const isShowNav = SHOW_NAV.includes(router.asPath);
-  // const isHideNav = HIDE_HEADER.includes(router.asPath);
-  //
+  const isHideHead = HIDE_HEADER.includes(router.asPath);
 
   return (
     <>
-      <LayoutHeader />
+      {!isHideHead && <LayoutHeader />}
       <div style={{ backgroundColor: "white" }}>{props.children}</div>
       {isShowNav && <LayoutNavigation />}
     </>
