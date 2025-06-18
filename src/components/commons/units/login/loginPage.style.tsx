@@ -9,7 +9,7 @@ const large =
 const xlarge = "@media only screen and (min-width: 1025px)";
 
 export const Container = styled.div`
-  width: 100%;
+  width: 100vw;
   /* height: 50rem; */
   max-width: 480px; /* 예시로 480px 제한 */
 
@@ -162,7 +162,7 @@ export const ErrorMessage = styled.div`
   color: red;
   font-size: 12px;
   /* width: 12px; */
-  width: 90vh;
+  width: 90%;
   height: 12px;
 `;
 

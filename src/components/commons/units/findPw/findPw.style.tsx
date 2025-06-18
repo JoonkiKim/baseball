@@ -10,7 +10,7 @@ const xlarge = "@media only screen and (min-width: 1025px)";
 
 export const Container = styled.div`
   width: 100%;
-  height: 100vh; /* 전체 화면 높이 */
+
   display: flex;
   flex-direction: column;
   margin-top: 20vh;
@@ -178,7 +178,7 @@ export const ErrorMessage = styled.div`
   color: red;
   font-size: 12px;
   /* width: 12px; */
-  width: 90vh;
+  width: 90%;
   height: 12px;
 `;
 
