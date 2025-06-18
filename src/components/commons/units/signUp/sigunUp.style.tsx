@@ -11,10 +11,9 @@ const xlarge = "@media only screen and (min-width: 1025px)";
 /** 페이지 전체를 감싸는 컨테이너 */
 export const Container = styled.div`
   width: 100%;
-  height: 100vh; /* 전체 화면 높이 */
   display: flex;
   flex-direction: column;
-  margin-top: 10vh;
+  margin-top: 18vh;
   /* justify-content: center; 수직 중앙 정렬 */
   align-items: center; /* 수평 중앙 정렬 */
   padding: 20px;
@@ -106,7 +105,7 @@ export const Input = styled.input`
 export const ErrorMessage = styled.div`
   color: red;
   font-size: 12px;
-  width: 90vh;
+  width: 90%;
   height: 12px;
   font-family: "KBO-Dia-Gothic_light";
 `;
