@@ -337,9 +337,9 @@ export const BraketText = styled.div`
   /* width: 15vw; */
   text-align: center;
   width: 13vw;
-  /* margin-bottom: 1vh; */
+
   padding-bottom: 1vh;
-  background-color: red;
+  /* background-color: red; */
 
   /* Small */
   @media only screen and (max-width: 480px) {
