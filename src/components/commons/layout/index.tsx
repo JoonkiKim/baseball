@@ -10,6 +10,7 @@ const SHOW_NAV = [
   "/playerStats",
   "/ranking",
   // "/",
+  "/mainCalendar",
   "/playerStats/playerStatsBatterDetail",
   "/playerStats/playerStatsPitcherDetail",
   "/refreeRegistration",
