@@ -10,6 +10,7 @@ const SHOW_NAV = [
   "/playerStats",
   "/ranking",
   // "/",
+  "/mainCalendar",
   "/playerStats/playerStatsBatterDetail",
   "/playerStats/playerStatsPitcherDetail",
   "/refreeRegistration",
@@ -32,6 +33,8 @@ export default function Layout(props: ILayoutProps): JSX.Element {
   return (
     <>
       {!isHideHead && <LayoutHeader />}
+
+      {/* <LayoutHeader /> */}
       <div style={{ backgroundColor: "white" }}>{props.children}</div>
       {isShowNav && <LayoutNavigation />}
     </>
