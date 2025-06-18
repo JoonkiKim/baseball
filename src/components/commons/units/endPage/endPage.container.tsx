@@ -74,7 +74,6 @@ const ActionButton = styled.button`
 `;
 
 export default function EndPage() {
-  console.log("대회종료");
   return (
     <>
       <GlobalStyles />
