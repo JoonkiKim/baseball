@@ -4,10 +4,9 @@ import Link from "next/link";
 // ─── 헤더 영역 (배경 + 날짜 영역 포함) ─────────────────────────────
 export const Background = styled.div`
   width: 100%;
-  background-color: #ffffff;
+  background-color: #0f0f70;
   position: fixed;
 
-  border-bottom: 1px solid black;
   top: 0;
   left: 0;
   z-index: 1000;
@@ -22,10 +21,6 @@ export const Background = styled.div`
 export const PageHeader = styled.div`
   /* margin-top: 20px; */
   text-align: center;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
   /* background-color: red; */
   /* 
   padding-top: 30px; */
@@ -48,30 +43,9 @@ export const PageHeader = styled.div`
   }
 `;
 
-export const SideBar = styled.div`
-  width: 1.5rem;
-  height: 1.5rem;
-  margin-left: 2rem;
-
-  /* 아이콘 정중앙 배치 */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  /* background-color: #000; */
-`;
-export const SideBarNone = styled.div`
-  width: 1.5rem;
-  height: 1.5rem;
-  /* background-color: red; */
-  margin-right: 2rem;
-  visibility: hidden;
-  pointer-events: none;
-`;
-
 export const PageTitle = styled.h1`
   font-weight: 600;
-  color: #0f0f70;
+  color: #ffffff;
   font-size: 35px;
   font-family: "KBO-Dia-Gothic_bold";
 
@@ -93,23 +67,13 @@ export const PageTitle = styled.h1`
   }
 `;
 
-export default function LayoutHeader() {
+export default function LayoutHeaderPre() {
   return (
     <Background>
       <PageHeader>
-        <SideBarNone />
         <Link href="/" passHref>
-          <PageTitle as="a">SNU BASEBALL</PageTitle>
+          <PageTitle as="a">2025 총장배 야구대회</PageTitle>
         </Link>
-        <SideBar>
-          <img
-            src="/images/profile.png" /* ✅ 이미지 경로 교체 */
-            width={24}
-            height={24}
-            alt="profile"
-            style={{ objectFit: "contain" }}
-          />
-        </SideBar>
       </PageHeader>
     </Background>
   );

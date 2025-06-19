@@ -11,17 +11,17 @@ const xlarge = "@media only screen and (min-width: 1025px)";
 export const Container = styled.div`
   width: 100vw;
   /* height: 50rem; */
-  max-width: 480px; /* 예시로 480px 제한 */
-
+  /* background-color: red; */
   display: flex;
   flex-direction: column;
-  margin-top: 20vh;
+  margin-top: 15vh;
   align-items: center; /* 수평 중앙 정렬 */
+  justify-content: center;
   padding: 20px;
 `;
 
 export const Title = styled.h1`
-  font-size: 24px;
+  font-size: 1.5rem; /* 24px → 1.5rem */
   margin-bottom: 40px;
   text-align: center;
   font-weight: bold;
@@ -31,6 +31,7 @@ export const Title = styled.h1`
 /* 폼 전체를 감싸는 컨테이너 */
 export const Form = styled.form`
   /* width: 100%; */
+  background-color: red;
   max-width: 480px;
   display: flex;
   flex-direction: column;
@@ -39,25 +40,16 @@ export const Form = styled.form`
 
 /* 라벨 */
 export const Label = styled.label`
-  font-size: 14px;
+  font-size: 1rem; /* 14px → 0.875rem */
   margin-bottom: 8px;
   /* background-color: red; */
-
-  ${small} {
-    font-size: 13px;
-  }
-  ${medium} {
-    font-size: 14px;
-  }
-  ${large}, ${xlarge} {
-    font-size: 15px;
-  }
 `;
 
 /* 각 입력 필드를 감싸는 Wrapper */
 export const FieldWrapper = styled.div`
   /* width: 100%; */
-  width: 30vh;
+  /* background-color: red; */
+  width: 70vw;
   margin-top: 20px;
   display: flex;
   flex-direction: column;
@@ -72,28 +64,18 @@ export const Input = styled.input`
   border: none;
   border-bottom: 1px solid #ccc;
 
-  padding: 8px 4px;
-  font-size: 14px;
+  padding: 8px 0px;
+  font-size: 0.875rem; /* 14px → 0.875rem */
   font-family: "KBO-Dia-Gothic_medium";
 
   &::placeholder {
     color: rgba(0, 0, 0, 0.3);
-    font-size: 14px;
+    font-size: 0.875rem; /* 14px → 0.875rem */
   }
 
   &:focus {
     outline: none;
     border-bottom: 1px solid #ccc;
-  }
-
-  ${small} {
-    font-size: 13px;
-  }
-  ${medium} {
-    font-size: 14px;
-  }
-  ${large}, ${xlarge} {
-    font-size: 15px;
   }
 `;
 
@@ -108,7 +90,7 @@ export const PasswordWrapper = styled.div`
 /* 비밀번호 표시/숨기기 토글 */
 export const PasswordToggle = styled.span`
   cursor: pointer;
-  font-size: 14px;
+  font-size: 0.875rem; /* 14px → 0.875rem */
   display: flex;
   flex-direction: row;
   justify-content: center;
@@ -134,7 +116,7 @@ export const LoginButton = styled.button`
   color: white;
   border: none;
   border-radius: 4px;
-  font-size: 16px;
+  font-size: 1rem; /* 16px → 1rem */
   font-family: "KBO-Dia-Gothic_medium";
   cursor: pointer;
 
@@ -160,7 +142,7 @@ export const LinkGroup = styled.div`
 
 export const ErrorMessage = styled.div`
   color: red;
-  font-size: 12px;
+  font-size: 0.75rem; /* 12px → 0.75rem */
   /* width: 12px; */
   width: 90%;
   height: 12px;
@@ -169,7 +151,7 @@ export const ErrorMessage = styled.div`
 export const MoveToSignUp = styled.div`
   /* margin-top: 20px; */
   width: 100%;
-  font-size: 12px;
+  font-size: 0.75rem; /* 12px → 0.75rem */
   margin-right: 10px;
   display: flex;
   flex-direction: row;
@@ -189,7 +171,7 @@ export const VerticalSeparator = styled.div`
 export const MoveToFindPw = styled.div`
   /* margin-top: 20px; */
   width: 100%;
-  font-size: 12px;
+  font-size: 0.75rem; /* 12px → 0.75rem */
   margin-left: 10px;
   display: flex;
   flex-direction: row;

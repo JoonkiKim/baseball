@@ -11,12 +11,15 @@ const SHOW_NAV = [
   "/ranking",
   // "/",
   "/mainCalendar",
+  "/login",
+  "/login/findPassword",
+  "/signUp",
   "/playerStats/playerStatsBatterDetail",
   "/playerStats/playerStatsPitcherDetail",
   "/refreeRegistration",
 ];
 
-const HIDE_HEADER = ["/"];
+const HIDE_HEADER = ["/", "/login", "/signUp", "/login/findPassword"];
 
 interface ILayoutProps {
   children: JSX.Element;
