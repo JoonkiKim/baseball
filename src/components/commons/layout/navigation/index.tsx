@@ -102,10 +102,10 @@ export default function LayoutNavigation() {
               <NavItem>선수기록</NavItem>
             </BottomNav>
           </Link>
-          <Link href="/refreeRegistration" passHref>
+          <Link href="/login" passHref>
             <BottomNav as="a">
-              <NavIcon src="/images/ref.png" />
-              <NavItem>심판등록</NavItem>
+              <NavIcon src="/images/Vector.png" />
+              <NavItem>설정</NavItem>
             </BottomNav>
           </Link>
         </BottomNavWrapper>
