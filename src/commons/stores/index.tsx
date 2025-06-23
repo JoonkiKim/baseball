@@ -3,6 +3,11 @@ import { string } from "yup";
 import { recoilPersist } from "recoil-persist";
 const { persistAtom } = recoilPersist();
 
+export const accessTokenState = atom<string | null>({
+  key: "accessTokenState",
+  default: null,
+});
+
 // 1. Auth 정보용 인터페이스 정의
 interface AuthInfo {
   role: string;
