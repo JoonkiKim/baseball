@@ -1,11 +1,17 @@
 // _app.tsx
 import { Global, css } from "@emotion/react";
-import { RecoilRoot } from "recoil";
+import { RecoilRoot, useSetRecoilState } from "recoil";
 import Layout from "../src/components/commons/layout";
 import "../styles/globals.css";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
+import { accessTokenState } from "../src/commons/stores";
+import {
+  registerAccessTokenSetter,
+  setAccessToken,
+} from "../src/commons/libraries/token";
+import API from "../src/commons/apis/api";
 
 function MyApp({ Component, pageProps }) {
   const router = useRouter();
@@ -20,7 +26,21 @@ function MyApp({ Component, pageProps }) {
       return () => window.removeEventListener("load", onLoad);
     }
   }, []);
+
   /* ---------------------------------------- */
+
+  // 1) Recoil atom setter 등록
+  const setToken = useSetRecoilState(accessTokenState);
+  useEffect(() => {
+    registerAccessTokenSetter(setToken);
+  }, [setToken]);
+
+  // 2) 초기 로드 시 refresh 호출 → atom에 저장
+  useEffect(() => {
+    API.post("/auth/refresh")
+      .then((res) => setAccessToken(res.data.accessToken))
+      .catch(() => router.push("/login"));
+  }, []);
 
   const globalStyles = css`
     @font-face {
