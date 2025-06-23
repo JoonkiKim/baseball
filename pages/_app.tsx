@@ -16,6 +16,7 @@ import API from "../src/commons/apis/api";
 function MyApp({ Component, pageProps }) {
   const router = useRouter();
   const isResultPage = router.pathname === "/result";
+  console.log("대회");
 
   /* --------- Service Worker 등록 --------- */
   useEffect(() => {
