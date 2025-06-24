@@ -8,7 +8,7 @@ import {
 
 const API = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
-  withCredentials: true, // refreshToken 쿠키 전송
+  withCredentials: false, // refreshToken 쿠키 전송
   headers: {
     "Content-Type": "application/json",
   },
@@ -23,7 +23,7 @@ API.interceptors.request.use(
       const isGet = method === "get";
       const isResultEndpoint = url.endsWith("/result");
       if (!(isGet && isResultEndpoint)) {
-        config.withCredentials = true;
+        config.withCredentials = false;
       }
     }
 
@@ -51,7 +51,7 @@ API.interceptors.response.use(
         const { data } = await axios.post(
           `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`,
           {},
-          { withCredentials: true }
+          { withCredentials: false }
         );
         setAccessToken(data.accessToken);
 
