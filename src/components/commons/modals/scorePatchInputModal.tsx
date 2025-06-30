@@ -13,7 +13,7 @@ import {
   ScoreButton,
   ScoreDisplay,
 } from "./modal.style";
-import API from "../../../commons/apis/apicopy";
+import API from "../../../commons/apis/api";
 import {
   LoadingIcon,
   LoadingOverlay,

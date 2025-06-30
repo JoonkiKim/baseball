@@ -1,3 +1,4 @@
+import { useCallback, useEffect, useState } from "react";
 import {
   PageWrapper,
   InfoRowWrapper,
@@ -8,6 +9,8 @@ import {
   Title,
 } from "./mypage.style";
 import Link from "next/link";
+import NickNamePutModal from "../../modals/nicknamePutModal";
+import API from "../../../../commons/apis/api";
 
 interface User {
   id: number;
@@ -18,12 +21,37 @@ interface User {
 
 export default function MypageComponent() {
   // 예시 사용자 데이터
-  const user: User = {
+  const userExample: User = {
     id: 1,
-    nickname: "관악산벌꿀오소리",
+    nickname: "예시입니다",
     photoUrl: "https://example.com/photo.jpg",
-    email: "keroro1967@snu.ac.kr",
+    email: "예시입니다",
   };
+  // 모달 열림 상태 관리
+  const [isAskModalOpen, setIsAskModalOpen] = useState<boolean>(false);
+  const [user, setUser] = useState<User | null>(userExample);
+  // 1) loadProfile을 useCallback으로 감싸기
+  const loadProfile = useCallback(async () => {
+    try {
+      // const res = await API.get<User>("/profile/me");
+      // setUser(res.data);
+      setUser(userExample);
+    } catch (err) {
+      console.error("프로필 로드 실패:", err);
+    }
+  }, []); // 빈 배열: 컴포넌트 마운트 시 한 번만 생성
+
+  // 2) 마운트 시, 그리고 loadProfile이 변경될 때 호출
+  useEffect(() => {
+    loadProfile();
+  }, [loadProfile]);
+
+  // 3) 로딩 처리가 필요하다면 아래와 같이 early return
+  if (!user.nickname) {
+    return <div></div>;
+  }
+
+  console.log(user);
 
   return (
     <>
@@ -31,7 +59,12 @@ export default function MypageComponent() {
       <PageWrapper>
         <InfoRowWrapper>
           <LabelWrapper>닉네임</LabelWrapper>
-          <ValueWrapper>{user.nickname}</ValueWrapper>
+          <ValueWrapper
+            onClick={() => setIsAskModalOpen(true)}
+            style={{ cursor: "pointer" }}
+          >
+            {user.nickname}
+          </ValueWrapper>
         </InfoRowWrapper>
 
         <InfoRowWrapper>
@@ -55,6 +88,14 @@ export default function MypageComponent() {
           <LabelWrapper>회원탈퇴</LabelWrapper>
         </ActionWrapper>
       </PageWrapper>
+      {/* 모달 조건부 렌더링 */}
+      {isAskModalOpen && (
+        <NickNamePutModal
+          setIsModalOpen={setIsAskModalOpen}
+          cellValue={user.nickname}
+          onSuccess={loadProfile}
+        />
+      )}
     </>
   );
 }
