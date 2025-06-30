@@ -29,7 +29,7 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/router";
 import ResultSubmitModal from "../../modals/submitModal/resultSubmitModal";
-import API from "../../../../commons/apis/api";
+import API from "../../../../commons/apis/apicopy";
 import ScorePatchModal from "../../modals/scorePatchModal";
 import { authMe, errorGlobal, gameId } from "../../../../commons/stores";
 import { useRecoilState } from "recoil";

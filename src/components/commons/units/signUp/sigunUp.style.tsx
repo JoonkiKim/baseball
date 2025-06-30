@@ -15,7 +15,7 @@ export const Container = styled.div`
   /* background-color: red; */
   display: flex;
   flex-direction: column;
-  margin-top: 10vh;
+  margin-top: 3vh;
   align-items: center; /* 수평 중앙 정렬 */
   justify-content: center;
   padding: 20px;
@@ -68,7 +68,7 @@ export const Input = styled.input`
   border: none;
   border-bottom: 1px solid #ccc;
 
-  padding: 8px 0px;
+  padding: 5px 0px;
   font-size: 0.875rem; /* 14px → 0.875rem */
   font-family: "KBO-Dia-Gothic_medium";
 
@@ -115,7 +115,7 @@ export const ToggleImage = styled.img`
 export const SignUpButton = styled.button`
   width: 100%;
   margin-top: 30px;
-  margin-bottom: 15vh;
+  margin-bottom: 10vh;
   height: 36px;
   background-color: #0f0f70; /* 포인트 컬러 */
   color: white;
@@ -147,9 +147,10 @@ export const LinkGroup = styled.div`
 
 export const ErrorMessage = styled.div`
   color: red;
-  font-size: 0.75rem; /* 12px → 0.75rem */
+  font-size: 0.6rem; /* 12px → 0.75rem */
   /* width: 12px; */
-  width: 90%;
+  margin-top: 3px;
+  width: 100%;
   height: 12px;
 `;
 

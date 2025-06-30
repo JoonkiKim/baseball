@@ -11,7 +11,7 @@ import {
   registerAccessTokenSetter,
   setAccessToken,
 } from "../src/commons/libraries/token";
-import API from "../src/commons/apis/api";
+import API from "../src/commons/apis/apicopy";
 
 function MyApp({ Component, pageProps }) {
   const router = useRouter();
@@ -30,18 +30,18 @@ function MyApp({ Component, pageProps }) {
 
   /* ---------------------------------------- */
 
-  // 1) Recoil atom setter 등록
-  const setToken = useSetRecoilState(accessTokenState);
-  useEffect(() => {
-    registerAccessTokenSetter(setToken);
-  }, [setToken]);
+  // // 1) Recoil atom setter 등록
+  // const setToken = useSetRecoilState(accessTokenState);
+  // useEffect(() => {
+  //   registerAccessTokenSetter(setToken);
+  // }, [setToken]);
 
-  // 2) 초기 로드 시 refresh 호출 → atom에 저장
-  useEffect(() => {
-    API.post("/auth/refresh")
-      .then((res) => setAccessToken(res.data.accessToken))
-      .catch(() => router.push("/login"));
-  }, []);
+  // // 2) 초기 로드 시 refresh 호출 → atom에 저장
+  // useEffect(() => {
+  //   API.post("/auth/refresh")
+  //     .then((res) => setAccessToken(res.data.accessToken))
+  //     .catch(() => router.push("/login"));
+  // }, []);
 
   const globalStyles = css`
     @font-face {

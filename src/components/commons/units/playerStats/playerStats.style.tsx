@@ -28,6 +28,8 @@ export const TableTitle = styled.div`
   font-size: 12px;
   font-family: "KBO-Dia-Gothic_bold";
   margin-bottom: 10px;
+
+  /* padding: 0 20px; */
 `;
 
 // 테이블을 감싸는 래퍼

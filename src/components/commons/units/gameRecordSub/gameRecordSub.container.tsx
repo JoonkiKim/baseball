@@ -34,7 +34,7 @@ import {
   AwayTeamPlayerListState,
   IHAPlayer,
 } from "../../../../commons/stores/index";
-import API from "../../../../commons/apis/api";
+import API from "../../../../commons/apis/apicopy";
 import SubPlayerSelectionModal from "../../modals/playerSubstituteModal";
 import {
   LoadingIcon,
@@ -47,6 +47,7 @@ import {
   ModalOverlay,
   ModalTitleSmaller,
 } from "../../modals/modal.style";
+import SubReturnModal from "../../modals/subReturnModal";
 
 // 선수 정보를 나타내는 인터페이스
 interface PlayerInfo {
@@ -354,6 +355,32 @@ export default function TeamRegistrationPageComponent() {
     console.log("Updated awayTeamPlayers:", awayTeamPlayers);
   }, [awayTeamPlayers]);
 
+  // 1) lineupPlayersData 기반으로 preObject를 미리 계산
+  const preObject = useMemo(() => {
+    if (!lineupPlayersData.length) return null;
+    return {
+      batters: lineupPlayersData
+        .filter((p: any) => p.battingOrder !== "P")
+        .map((p: any) => ({
+          battingOrder: p.battingOrder,
+          playerId: p.playerId,
+          position: p.position,
+        })),
+      pitcher: {
+        playerId:
+          lineupPlayersData.find((p: any) => p.battingOrder === "P")
+            ?.playerId ?? null,
+      },
+    };
+  }, [lineupPlayersData]);
+
+  // 2) 페이지 접속 시(또는 lineupPlayersData 갱신될 때) 콘솔에 찍기
+  useEffect(() => {
+    if (preObject) {
+      console.log("=== 초기 preObject ===", preObject);
+    }
+  }, [preObject]);
+
   // wcMap 계산 (lineupPlayersData & teamPlayersData)
   const wcMap = useMemo(() => {
     if (!lineupPlayersData.length || !teamPlayersData.length) return {};
@@ -593,6 +620,8 @@ export default function TeamRegistrationPageComponent() {
     );
   }, [players]);
 
+  const [isSubReturnModalOpen, setIsSubReturnModalOpen] = useState(false);
+
   // 교체완료 버튼 시
   const onSubmit = async (data: any) => {
     // 이미 제출 중이면 무시
@@ -722,6 +751,17 @@ export default function TeamRegistrationPageComponent() {
       },
     };
     console.log("Formatted Object:", JSON.stringify(formattedObject, null, 2));
+    console.log("Formatted Object:", formattedObject);
+
+    // ── 둘을 문자열로 비교 ──
+    const preJson = JSON.stringify(preObject);
+    const postJson = JSON.stringify(formattedObject);
+
+    if (preJson === postJson) {
+      setIsSubReturnModalOpen(true);
+      return;
+    }
+
     try {
       // 중복 제출 방지 시작
       setIsSubmitting(true);
@@ -888,6 +928,10 @@ export default function TeamRegistrationPageComponent() {
           </ControlButton>
         </ButtonWrapper>
       </form>
+      {/* SubReturnModal 렌더링 */}
+      {isSubReturnModalOpen && (
+        <SubReturnModal setIsOpen={setIsSubReturnModalOpen} />
+      )}
       {isModalOpen && <RecordStartModal setIsModalOpen={setIsModalOpen} />}
       {isPlayerSelectionModalOpen && (
         <SubPlayerSelectionModal

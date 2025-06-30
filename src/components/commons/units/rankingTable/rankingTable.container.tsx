@@ -7,7 +7,7 @@ import {
   RankingContainer,
 } from "./rankingTable.style";
 
-import API from "../../../../commons/apis/api"; // api.ts에서 axios 인스턴스 가져옴
+import API from "../../../../commons/apis/apicopy"; // api.ts에서 axios 인스턴스 가져옴
 import ErrorAlert from "../../../../commons/libraries/showErrorCode";
 
 export default function RankingTableComponent() {

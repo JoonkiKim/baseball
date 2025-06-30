@@ -1,7 +1,7 @@
 // components/Bracket.jsx
 import React, { useEffect } from "react";
 import styled from "@emotion/styled";
-import API from "../../../../commons/apis/api";
+import API from "../../../../commons/apis/apicopy";
 
 // ─── 컨테이너 ───────────────────────────────────────
 export const BracketContainer = styled.div`

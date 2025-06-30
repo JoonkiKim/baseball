@@ -16,7 +16,7 @@ import {
   ModalTitle,
   PlayerTable,
 } from "./SubteamRegistration.style";
-import API from "../../../../commons/apis/api";
+import API from "../../../../commons/apis/apicopy";
 import {
   LoadingIcon,
   LoadingOverlay,

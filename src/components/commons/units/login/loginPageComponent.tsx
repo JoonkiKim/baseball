@@ -19,6 +19,9 @@ import {
   VerticalSeparator,
 } from "./loginPage.style";
 import Link from "next/link";
+import API from "../../../../commons/apis/api";
+import { setAccessToken } from "../../../../commons/libraries/token";
+import { useRouter } from "next/router";
 
 // 폼에서 다룰 데이터 타입 정의
 interface LoginFormData {
@@ -40,6 +43,7 @@ const schema = yup.object().shape({
 });
 
 export default function LoginPageComponent() {
+  const router = useRouter();
   // react-hook-form 훅 사용, yup resolver 연결
   const {
     register,
@@ -57,11 +61,35 @@ export default function LoginPageComponent() {
     setShowPassword(!showPassword);
   };
 
-  // 폼 제출 핸들러
-  const onSubmit = (data: LoginFormData) => {
-    alert(`로그인 시도: \n이메일: ${data.email}\n비밀번호: ${data.password}`);
-  };
+  const onSubmit: SubmitHandler<LoginFormData> = async (data) => {
+    try {
+      console.log(data);
+      // 1) 로그인 요청
+      const response = await API.post(
+        "/auth/login", // 실제 로그인 엔드포인트로 변경
+        {
+          email: data.email,
+          password: data.password,
+        }
+      );
 
+      // 2) 응답에서 accessToken 꺼내기
+      const { accessToken } = response.data;
+      console.log(accessToken);
+
+      // 3) 메모리·Recoil에 동기화
+      setAccessToken(accessToken);
+
+      // 4) 로그인 성공 후 리다이렉트 등 처리
+      router.push("/mainCalendar");
+    } catch (error: any) {
+      // 에러 핸들링
+      alert(
+        error.response?.data?.message ||
+          "로그인 중 오류가 발생했습니다. 다시 시도해주세요."
+      );
+    }
+  };
   return (
     <Container>
       <Title>SNU BASEBALL</Title>
@@ -117,7 +145,7 @@ export default function LoginPageComponent() {
         </Link>
         <VerticalSeparator />
         <Link href="/login/findPassword" passHref>
-          <MoveToFindPw>비밀번호 찾기</MoveToFindPw>
+          <MoveToFindPw>비밀번호 재설정</MoveToFindPw>
         </Link>
       </LinkGroup>
     </Container>
