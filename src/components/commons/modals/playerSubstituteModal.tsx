@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import styled from "@emotion/styled";
 import { useRecoilState } from "recoil";
 import { useRouter } from "next/router";
-import API from "../../../commons/apis/apicopy";
+import API from "../../../commons/apis/api";
 import {
   HomeTeamPlayerListState,
   AwayTeamPlayerListState,

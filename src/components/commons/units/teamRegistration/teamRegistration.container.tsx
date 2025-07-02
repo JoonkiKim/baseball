@@ -34,7 +34,7 @@ import {
   gameId,
   lastRouteState,
 } from "../../../../commons/stores/index";
-import API from "../../../../commons/apis/apicopy";
+import API from "../../../../commons/apis/api";
 import {
   LoadingIcon,
   LoadingOverlay,

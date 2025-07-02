@@ -1,6 +1,6 @@
 // src/components/modals/etcModal.tsx
 import { useRouter } from "next/router";
-import API from "../../../commons/apis/apicopy";
+import API from "../../../commons/apis/api";
 import {
   ModalButton,
   ModalContainer,

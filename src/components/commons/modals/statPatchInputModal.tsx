@@ -9,7 +9,7 @@ import {
   ModalTitleSmall,
   StatPatchInput,
 } from "./modal.style";
-import API from "../../../commons/apis/apicopy";
+import API from "../../../commons/apis/api";
 import { useModalBack } from "../../../commons/hooks/useModalBack";
 import {
   LoadingIcon,

@@ -34,7 +34,7 @@ import {
   AwayTeamPlayerListState,
   IHAPlayer,
 } from "../../../../commons/stores/index";
-import API from "../../../../commons/apis/apicopy";
+import API from "../../../../commons/apis/api";
 import SubPlayerSelectionModal from "../../modals/playerSubstituteModal";
 import {
   LoadingIcon,

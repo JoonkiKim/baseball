@@ -1,5 +1,5 @@
 import { useRouter } from "next/router";
-import API from "../../../commons/apis/apicopy";
+import API from "../../../commons/apis/api";
 import {
   ModalButton,
   ModalContainer,
