@@ -9,18 +9,18 @@ import {
   ModalTitleSmall,
 } from "./modal.style";
 import API from "../../../commons/apis/api";
-import { useModalBack } from "../../../commons/hooks/useModalBack";
+
 import {
   LoadingIcon,
   LoadingOverlay,
 } from "../../../commons/libraries/loadingOverlay";
 
 interface IModalProps {
-  setIsGameEndModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsLogOutModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
   inningScore: number;
 }
 
-export default function GameOverModal(props: IModalProps) {
+export default function LogOutModal(props: IModalProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -29,31 +29,22 @@ export default function GameOverModal(props: IModalProps) {
     if (type === "예") {
       setIsSubmitting(true);
       try {
-        const requestBody = { runs: props.inningScore };
-        console.log("경기종료 요청 바디:", requestBody);
-        const response = await API.post(
-          `/games/${router.query.recordId}/results`,
-          requestBody
-        );
-        console.log(
-          `/games/${router.query.recordId}/results`,
-          "응답 상태:",
-          response.status
-        );
-        props.setIsGameEndModalOpen(false);
-        router.push(`/matches/${router.query.recordId}/result`);
+        await API.post(`/auth/logout`);
+
+        props.setIsLogOutModalOpen(false);
+        router.push(`/`);
       } finally {
         setIsSubmitting(false);
       }
     } else {
-      props.setIsGameEndModalOpen(false);
+      props.setIsLogOutModalOpen(false);
     }
   };
 
   return (
     <ModalOverlay>
       <ModalContainer>
-        <ModalTitleSmall>경기를 종료하시겠습니까?</ModalTitleSmall>
+        <ModalTitleSmall>로그아웃 하시겠습니까?</ModalTitleSmall>
         <ModalButton
           onClick={() => handleTypeSelect("예")}
           disabled={isSubmitting}

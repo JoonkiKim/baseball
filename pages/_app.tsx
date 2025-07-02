@@ -11,7 +11,7 @@ import {
   registerAccessTokenSetter,
   setAccessToken,
 } from "../src/commons/libraries/token";
-import API from "../src/commons/apis/apicopy";
+import API from "../src/commons/apis/api";
 
 function MyApp({ Component, pageProps }) {
   const router = useRouter();

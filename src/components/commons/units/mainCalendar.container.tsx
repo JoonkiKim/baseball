@@ -163,9 +163,9 @@ export default function MainCalendarPage() {
         //     games,
         //   };
         // });
-        const authRes = await API2.get(`/auth/me`);
-        setAuthInfo(authRes.data);
-        console.log("authInfo", authInfo);
+        // const authRes = await API2.get(`/auth/me`);
+        // setAuthInfo(authRes.data);
+        // console.log("authInfo", authInfo);
         // setAllMatchData(kstDays);
         setAllMatchData(res.data.days);
         console.log("allMatchData", allMatchData);

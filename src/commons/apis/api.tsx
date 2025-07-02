@@ -48,11 +48,7 @@ API.interceptors.response.use(
       originalReq._retry = true;
       try {
         // refreshToken 쿠키로 새 accessToken 요청
-        const { data } = await axios.post(
-          `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`,
-          {},
-          { withCredentials: false }
-        );
+        const { data } = await API.post(`/auth/refresh`);
         setAccessToken(data.accessToken);
 
         // 원래 요청 헤더에 새 토큰 세팅 후 재시도
