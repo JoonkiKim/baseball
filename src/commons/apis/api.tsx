@@ -8,7 +8,7 @@ import {
 
 const API = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
-  withCredentials: false, // refreshToken 쿠키 전송
+  withCredentials: true, // refreshToken 쿠키 전송
   headers: {
     "Content-Type": "application/json",
   },
