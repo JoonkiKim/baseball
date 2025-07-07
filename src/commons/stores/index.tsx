@@ -240,10 +240,10 @@ export interface HitterStat {
   "3B": number;
   HR: number;
   BB: number;
-  AVG: number;
-  OBP: number;
-  SLG: number;
-  OPS: number;
+  AVG: string;
+  OBP: string;
+  SLG: string;
+  OPS: string;
 }
 // 투수 기록 데이터 인터페이스
 export interface PitcherStat {

@@ -10,7 +10,7 @@ const xlarge = "@media only screen and (min-width: 1025px)";
 
 export const RankingContainer = styled.div`
   margin-top: 150px;
-  margin-bottom: 150px;
+  margin-bottom: 100px;
 `;
 
 // ▼ 기호의 크기를 조절하기 위한 컴포넌트
@@ -19,19 +19,29 @@ export const ArrowIcon = styled.span`
   margin-left: 2px;
 `;
 export const TableTitle = styled.div`
+  /* position: sticky; */
+  z-index: 10;
   font-size: 12px;
   font-family: "KBO-Dia-Gothic_bold";
+  margin: 0 auto 0;
   margin-bottom: 10px;
+
+  padding: 0 20px;
 `;
 
 // 테이블을 감싸는 래퍼
 export const TableWrapper = styled.div`
   width: 95%;
-  margin: 20px auto 30px;
-  padding: 0 20px;
+  margin: 0px auto 0px;
+  /* mar */
+  /* padding: 0 20px; */
   /* 열이 많을 경우 가로 스크롤을 보여주기 위해 추가 */
   overflow-x: auto;
+  /* overflow-y: auto; */
+  flex: 1;
+  overflow-y: auto;
 
+  max-height: calc(100vh - 280px);
   ${small} {
     padding: 0 10px;
   }
@@ -46,18 +56,22 @@ export const TableWrapper = styled.div`
 export const RankingTable = styled.table`
   /* 기존 width: 100% 대신, 내용이 많아질 때 확장되도록 max-content 적용 */
   width: max-content;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
 
   thead {
     tr {
       th {
+        position: sticky;
+        top: 0;
+        background: #fff; /* header 배경색: 내용이 스크롤될 때 가려지지 않도록 */
+        z-index: 10; /* 적절히 높게 설정 */
         font-family: "KBO-Dia-Gothic_medium";
-        /* font-weight: 600; */
-        color: #000000;
+        color: #000;
         padding: 12px;
         text-align: center;
-        border-bottom: 1px solid #000000;
-        border-top: 1px solid #000000;
+        border-bottom: 1px solid #000;
+        border-top: 1px solid #000;
 
         ${small} {
           font-size: 12px;

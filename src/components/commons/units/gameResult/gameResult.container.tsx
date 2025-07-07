@@ -99,19 +99,19 @@ export default function FinalGameRecordPage() {
     }
   }, [recordId]); // 필요하다면 router.query 등 의존성 추가
 
-  useEffect(() => {
-    if (!router.isReady) return;
-    (async () => {
-      try {
-        const authRes = await API2.get("/auth/me");
-        setAuthInfo(authRes.data);
-        console.log("Fetched auth info:", authRes.data);
-      } catch (err) {
-        setError(err);
-        console.error("Failed to fetch auth info:", err);
-      }
-    })();
-  }, [router.isReady]);
+  // useEffect(() => {
+  //   if (!router.isReady) return;
+  //   (async () => {
+  //     try {
+  //       const authRes = await API2.get("/auth/me");
+  //       setAuthInfo(authRes.data);
+  //       console.log("Fetched auth info:", authRes.data);
+  //     } catch (err) {
+  //       setError(err);
+  //       console.error("Failed to fetch auth info:", err);
+  //     }
+  //   })();
+  // }, [router.isReady]);
   // console.log(authInfo);
 
   // const currentGameId = typeof recordId === "string" ? Number(recordId) : null;

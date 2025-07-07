@@ -155,19 +155,19 @@ export default function RefereeRegisterPage() {
   };
 
   const [authInfo, setAuthInfo] = useRecoilState(authMe);
-  useEffect(() => {
-    const fetchAuthInfo = async () => {
-      try {
-        const authRes = await API2.get("/auth/me");
-        setAuthInfo(authRes.data);
-        console.log("authRes.data", authRes.data);
-      } catch (error) {
-        setError(error);
-        console.error("Failed to fetch auth info:", error);
-      }
-    };
-    fetchAuthInfo();
-  }, []);
+  // useEffect(() => {
+  //   const fetchAuthInfo = async () => {
+  //     try {
+  //       const authRes = await API2.get("/auth/me");
+  //       setAuthInfo(authRes.data);
+  //       console.log("authRes.data", authRes.data);
+  //     } catch (error) {
+  //       setError(error);
+  //       console.error("Failed to fetch auth info:", error);
+  //     }
+  //   };
+  //   fetchAuthInfo();
+  // }, []);
 
   console.log("authRes.data", authInfo);
   if (authInfo.role === "UMPIRE") {

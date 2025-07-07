@@ -18,7 +18,7 @@
 //       const isGet = method === "get";
 //       const isResultEndpoint = url.endsWith("/result");
 //       if (!(isGet && isResultEndpoint)) {
-//         config.withCredentials = true;
+//         config.withCredentials = false;
 //       }
 //     }
 
@@ -27,4 +27,4 @@
 //   (error) => Promise.reject(error)
 // );
 
-// export default APIpre;
+// export default API;

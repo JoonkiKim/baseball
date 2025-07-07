@@ -10,12 +10,11 @@ const xlarge = "@media only screen and (min-width: 1025px)";
 
 export const Container = styled.div`
   width: 100vw;
-
-  /* height: 100vh; */
+  /* height: 50rem; */
   /* background-color: red; */
   display: flex;
   flex-direction: column;
-  margin-top: 3vh;
+  margin-top: 15vh;
   align-items: center; /* 수평 중앙 정렬 */
   justify-content: center;
   padding: 20px;
@@ -32,13 +31,10 @@ export const Title = styled.h1`
 /* 폼 전체를 감싸는 컨테이너 */
 export const Form = styled.form`
   /* width: 100%; */
-  /* background-color: red; */
+  background-color: red;
   max-width: 480px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
-
   gap: 16px; /* 요소 간의 간격 */
 `;
 
@@ -54,7 +50,7 @@ export const FieldWrapper = styled.div`
   /* width: 100%; */
   /* background-color: red; */
   width: 70vw;
-  margin-top: 0.6rem;
+  margin-top: 20px;
   display: flex;
   flex-direction: column;
   /* border-bottom: 1px solid #e8e8e8; */
@@ -63,91 +59,24 @@ export const FieldWrapper = styled.div`
 //   color: rgba(0, 0, 0, 0.3);
 
 /* 기본 인풋 스타일 */
-export const Input = styled.input<{ $completed?: boolean }>`
+export const Input = styled.input`
   width: 100%;
-  /* margin-top: 5px;
-  margin-bottom: 5px; */
   border: none;
   border-bottom: 1px solid #ccc;
-  /* padding: 8px 4px; */
-  padding-top: 4px;
-  padding-bottom: 4px;
-  /* padding-left: 4px; */
-  font-size: 14px;
+
+  padding: 8px 0px;
+  font-size: 0.875rem; /* 14px → 0.875rem */
   font-family: "KBO-Dia-Gothic_medium";
 
-  &[id="verificationCode"] {
-    border: none;
-    border-bottom: none;
-  }
   &::placeholder {
     color: rgba(0, 0, 0, 0.3);
     font-size: 0.875rem; /* 14px → 0.875rem */
   }
 
-  &[id="verificationCode"]:disabled {
-    /* background-color: rgba(0, 0, 0, 0.1); */
-    color: transparent; /* 입력된 텍스트를 보이지 않게 */
-    caret-color: transparent; /* 커서 색도 숨기기 */
-  }
-
-  &:focus {
-    outline: none;
-    /* border-bottom: 1px solid #ccc; */
-  }
-  /* 비활성화 상태 스타일 */
-  &:disabled {
-    /* verificationToken 이전에는 gray, 이후($completed)에는 투명 */
-    background-color: ${({ $completed }) =>
-      $completed ? "transparent" : "#e8e8e8"};
-    cursor: not-allowed;
-  }
-`;
-
-export const EmailInput = styled.input<{ $noBottom?: boolean }>`
-  width: 100%;
-  /* margin-top: 5px;
-  margin-bottom: 5px; */
-  border: none;
-  border-bottom: 1px solid #ccc;
-  /* padding: 8px 4px; */
-  padding-top: 4px;
-  padding-bottom: 4px;
-  /* padding-left: 4px; */
-  font-size: 14px;
-  font-family: "KBO-Dia-Gothic_medium";
-  border-bottom: ${({ $noBottom }) => ($noBottom ? "none" : "1px solid #ccc")};
-
-  &:disabled {
-    /* background-color: rgba(0, 0, 0, 0.1); */
-    cursor: not-allowed;
-  }
-  &::placeholder {
-    color: rgba(0, 0, 0, 0.3);
-    font-size: 14px;
-  }
-
   &:focus {
     outline: none;
     border-bottom: 1px solid #ccc;
-    border-bottom: ${({ $noBottom }) =>
-      $noBottom ? "none" : "1px solid #ccc"};
   }
-`;
-
-export const EmailButton = styled.button<{ $completed?: boolean }>`
-  /* background-color: red; */
-  background-color: transparent;
-  font-family: "KBO-Dia-Gothic_bold";
-  font-size: 9px;
-  width: 25vw;
-  color: ${({ $completed }) => ($completed ? "#0f0f70" : "black")};
-
-  border: 1px solid #bdbdbd;
-  /* border-radius: 4px; */
-  /* max-height: 25px; */
-  margin-top: 3px;
-  margin-bottom: 3px;
 `;
 
 /* 비밀번호 영역 (비밀번호 표시/숨기기 버튼 포함) */
@@ -179,10 +108,9 @@ export const ToggleImage = styled.img`
 `;
 
 /* 로그인 버튼 */
-export const SignUpButton = styled.button`
+export const LoginButton = styled.button`
   width: 100%;
   margin-top: 30px;
-  margin-bottom: 10vh;
   height: 36px;
   background-color: #0f0f70; /* 포인트 컬러 */
   color: white;
@@ -214,10 +142,9 @@ export const LinkGroup = styled.div`
 
 export const ErrorMessage = styled.div`
   color: red;
-  font-size: 0.6rem; /* 12px → 0.75rem */
+  font-size: 0.75rem; /* 12px → 0.75rem */
   /* width: 12px; */
-  margin-top: 3px;
-  width: 100%;
+  width: 90%;
   height: 12px;
 `;
 
@@ -233,13 +160,31 @@ export const MoveToSignUp = styled.div`
 
   /* background-color: red; */
 `;
-export const WrapperForEmail = styled.div<{ $disabled?: boolean }>`
+
+export const VerticalSeparator = styled.div`
+  width: 1px;
+  height: 20px;
+  background-color: #ccc; /* 회색 */
+  margin: 0 10px;
+`;
+
+export const MoveToFindPw = styled.div`
+  /* margin-top: 20px; */
   width: 100%;
+  font-size: 0.75rem; /* 12px → 0.75rem */
+  margin-left: 10px;
   display: flex;
   flex-direction: row;
-  border-bottom: 1px solid #ccc;
+  align-items: center;
+  justify-content: left;
+  /* justify-content: ; */
+  /* background-color: red; */
+`;
 
-  /* verificationToken이 있을 때 배경색 적용 */
-  background-color: ${({ $disabled }) =>
-    $disabled ? "#e8e8e8" : "transparent"};
+export const SubLabel = styled.label`
+  font-size: 0.8125rem;
+  margin-bottom: 30px;
+
+  font-family: "KBO-Dia-Gothic_light";
+  /* background-color: red; */
 `;

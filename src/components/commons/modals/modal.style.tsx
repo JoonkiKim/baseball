@@ -171,7 +171,7 @@ export const InningScoreContainer = styled.div`
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  width: 100%;
+  width: 80%;
   height: calc((100vh - 120px) * 0.15);
   /* border-bottom: 1px solid #ccc; */
   text-align: center;
@@ -214,6 +214,14 @@ export const ScoreDisplay = styled.div`
 export const StatPatchInput = styled.input`
   width: 10vw;
   text-align: center;
+  border: none;
+  border-bottom: 1px solid #bdbdbd;
+`;
+
+export const NickNamePatchInput = styled.input`
+  width: 6vw;
+  text-align: center;
+  font-family: "KBO-Dia-Gothic_light";
   border: none;
   border-bottom: 1px solid #bdbdbd;
 `;

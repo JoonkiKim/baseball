@@ -10,7 +10,7 @@ const xlarge = "@media only screen and (min-width: 1025px)";
 
 export const RankingContainer = styled.div`
   margin-top: 150px;
-  margin-bottom: 150px;
+  margin-bottom: 100px;
 `;
 
 // ▼ 기호의 크기를 조절하기 위한 컴포넌트
@@ -19,18 +19,26 @@ export const ArrowIcon = styled.span`
   margin-left: 2px;
 `;
 export const TableTitle = styled.div`
+  z-index: 10;
   font-size: 12px;
   font-family: "KBO-Dia-Gothic_bold";
+  margin: 0 auto 0;
   margin-bottom: 10px;
+
+  padding: 0 20px;
 `;
 
 // 테이블을 감싸는 래퍼
 export const TableWrapper = styled.div`
   width: 95%;
-  margin: 20px auto 30px;
-  padding: 0 20px;
+  margin: 0px auto 0px;
+  /* padding: 0 20px; */
   /* 열이 많을 경우 가로 스크롤을 보여주기 위해 추가 */
   overflow-x: auto;
+
+  flex: 1;
+  overflow-y: auto;
+  max-height: calc(100vh - 280px);
 
   ${small} {
     padding: 0 10px;
@@ -43,74 +51,19 @@ export const TableWrapper = styled.div`
   }
 `;
 
-export const RankingTable = styled.table`
-  /* 기존 width: 100% 대신, 내용이 많아질 때 확장되도록 max-content 적용 */
-  width: max-content;
-  border-collapse: collapse;
-
-  thead {
-    tr {
-      th {
-        font-family: "KBO-Dia-Gothic_medium";
-        /* font-weight: 600; */
-        color: #000000;
-        padding: 12px;
-        text-align: left;
-        border-bottom: 1px solid #000000;
-        border-top: 1px solid #000000;
-
-        ${small} {
-          font-size: 12px;
-          padding: 8px;
-        }
-        ${medium} {
-          font-size: 14px;
-        }
-        ${large}, ${xlarge} {
-          font-size: 16px;
-        }
-      }
-    }
-  }
-
-  tbody {
-    tr {
-      border-bottom: 1px solid #e8e8e8;
-
-      &:last-of-type {
-        border-bottom: none; /* 마지막 행에는 경계선 제거 */
-      }
-
-      td {
-        font-family: "KBO-Dia-Gothic_medium";
-        /* font-weight: 400; */
-        color: #000;
-        text-align: left;
-        padding: 12px;
-
-        ${small} {
-          font-size: 12px;
-          padding: 8px;
-        }
-        ${medium} {
-          font-size: 14px;
-        }
-        ${large}, ${xlarge} {
-          font-size: 16px;
-        }
-      }
-    }
-  }
-`;
-
 // 테이블 스타일
 export const RankingTableP = styled.table`
   width: 100%;
-  border-collapse: collapse;
+  /* width: max-content; */
+  border-collapse: separate;
+  border-spacing: 0;
 
   thead {
     tr {
       th {
+        position: sticky;
+        top: 0;
+        background: #fff;
         font-family: "KBO-Dia-Gothic_medium";
         /* font-weight: 600; */
         color: #000000;

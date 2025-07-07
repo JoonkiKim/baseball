@@ -8,7 +8,7 @@ import {
 
 const API = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
-  withCredentials: true, // refreshToken 쿠키 전송
+  withCredentials: false, // refreshToken 쿠키 전송
   headers: {
     "Content-Type": "application/json",
   },
@@ -23,7 +23,7 @@ API.interceptors.request.use(
       const isGet = method === "get";
       const isResultEndpoint = url.endsWith("/result");
       if (!(isGet && isResultEndpoint)) {
-        config.withCredentials = true;
+        config.withCredentials = false;
       }
     }
 
@@ -48,11 +48,7 @@ API.interceptors.response.use(
       originalReq._retry = true;
       try {
         // refreshToken 쿠키로 새 accessToken 요청
-        const { data } = await axios.post(
-          `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`,
-          {},
-          { withCredentials: true }
-        );
+        const { data } = await API.post(`/auth/refresh`);
         setAccessToken(data.accessToken);
 
         // 원래 요청 헤더에 새 토큰 세팅 후 재시도

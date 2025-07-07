@@ -9,9 +9,8 @@ import {
   Input,
   Label,
   LoginButton,
-  SubLabel,
   Title,
-} from "./findPw.style";
+} from "./findPwReset.style";
 import API from "../../../../commons/apis/api";
 import {
   LoadingIcon,
@@ -20,18 +19,21 @@ import {
 
 // 폼에서 다룰 데이터 타입 정의
 interface LoginFormData {
-  email: string;
+  newPw: string;
 }
+
+// 영문, 숫자 포함 8~20자 정규식
+const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,20}$/;
 
 // yup을 사용한 유효성 검증 스키마 정의
 const schema = yup.object().shape({
-  email: yup
+  newPw: yup
     .string()
-    .email("유효한 이메일 형식이 아닙니다.")
-    .required("이메일을 입력하세요"),
+    .required("새로운 비밀번호를 입력하세요")
+    .matches(passwordRegex, "영문과 숫자를 포함한 8~20자를 입력하세요"),
 });
 
-export default function FindPwPageComponent() {
+export default function ResetPwPageComponent() {
   // react-hook-form 훅 사용, yup resolver 연결
   const {
     register,
@@ -41,30 +43,23 @@ export default function FindPwPageComponent() {
     resolver: yupResolver(schema),
   });
 
-  // 비밀번호 표시/숨기기 상태
-  const [showPassword, setShowPassword] = useState(false);
+  const token = "예시 토큰";
 
-  // 비밀번호 표시/숨기기 토글
-  const handleTogglePassword = () => {
-    setShowPassword(!showPassword);
-  };
   const [isSubmitting, setIsSubmitting] = useState(false);
-
   // 폼 제출 핸들러
   const onSubmit = async (data: LoginFormData) => {
     if (isSubmitting) return; // 이미 제출 중이면 무시
     setIsSubmitting(true);
-
     try {
-      await API.post("/auth/password/request-reset", {
-        email: data.email,
+      await API.post("/auth/password/reset", {
+        token,
+        newPassword: data.newPw,
       });
-      alert("비밀번호 재설정 링크가 전송되었습니다.");
+      alert("비밀번호가 성공적으로 변경되었습니다.");
     } catch (error: any) {
       console.error(error);
       alert(
-        error.response?.data?.message ||
-          "비밀번호 재설정 요청 중 오류가 발생했습니다."
+        error.response?.data?.message || "비밀번호 변경 중 오류가 발생했습니다."
       );
     } finally {
       setIsSubmitting(false);
@@ -72,26 +67,24 @@ export default function FindPwPageComponent() {
   };
   return (
     <Container>
-      <Title>비밀번호 재설정</Title>
+      <Title>비밀번호 변경</Title>
       <form onSubmit={handleSubmit(onSubmit)}>
-        {/* 이메일 주소 입력 */}
         <FieldWrapper>
-          <Label htmlFor="email">이메일을 입력하세요(@snu.ac.kr)</Label>
-          <SubLabel>입력된 이메일로 비밀번호 재설정 링크가 전송됩니다</SubLabel>
+          <Label>새로운 비밀번호를 입력하세요</Label>
+
           <Input
-            id="email"
-            type="email"
-            placeholder="@snu.ac.kr"
-            {...register("email")}
+            id="newPw"
+            placeholder="영문, 숫자가 포함된 8~20자 입력"
+            {...register("newPw")}
           />
-          {errors.email ? (
-            <ErrorMessage>{errors.email.message}</ErrorMessage>
+          {errors.newPw ? (
+            <ErrorMessage>{errors.newPw.message}</ErrorMessage>
           ) : (
             <ErrorMessage></ErrorMessage>
           )}
         </FieldWrapper>
 
-        <LoginButton type="submit">링크 전송하기</LoginButton>
+        <LoginButton type="submit">비밀번호 변경하기</LoginButton>
       </form>
       <LoadingOverlay visible={isSubmitting}>
         <LoadingIcon spin fontSize={48} />
