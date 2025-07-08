@@ -23,6 +23,7 @@ const SHOW_NAV = [
 
 const HIDE_HEADER = [
   "/",
+  "/matches/[recordId]/records",
   "/login",
   "/signUp",
   "/login/findPassword",
@@ -37,11 +38,13 @@ interface ILayoutProps {
 
 export default function Layout(props: ILayoutProps): JSX.Element {
   const router = useRouter();
+  const { asPath } = useRouter();
 
   console.log(router.asPath);
 
   const isShowNav = SHOW_NAV.includes(router.asPath);
-  const isHideHead = HIDE_HEADER.includes(router.asPath);
+  const isHideHead =
+    HIDE_HEADER.includes(asPath) || asPath.includes("/records");
 
   return (
     <>
