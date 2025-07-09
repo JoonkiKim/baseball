@@ -43,6 +43,12 @@ import {
   DiamondSvg,
   NameBadge,
   NameText,
+  PlayersRow,
+  PlayerBox,
+  OrderBadge,
+  PlayerWrapper,
+  PlayerPosition,
+  PlayerInfo,
 } from "./gameRecord-v2.style";
 import HitModal from "../../modals/hitModal";
 import OutModal from "../../modals/outModal";
@@ -332,7 +338,7 @@ export default function GameRecordPageV2() {
   console.log("isHomeAttack", isHomeAttack);
 
   // -------------------- 드래그앤드롭 ------------------------//
-
+  // 드래그 앤 드롭 관련
   // 베이스 아이디 목록
   const baseIds = [
     "first-base",
@@ -341,7 +347,8 @@ export default function GameRecordPageV2() {
     "home-base",
   ] as const;
   type BaseId = (typeof baseIds)[number];
-  // 각 베이스에 대응할 ref와 dnd-kit setNodeRef 훅을 모아두기
+
+  // 베이스 <polygon> ref 저장
   const baseRefs = useRef<Record<BaseId, SVGPolygonElement | null>>({
     "first-base": null,
     "second-base": null,
@@ -353,162 +360,171 @@ export default function GameRecordPageV2() {
     return acc;
   }, {} as Record<BaseId, (el: HTMLElement | null) => void>);
 
-  // 드롭 상태
-  // 2) 드롭된 badge 위치 상태
-  // 어느 베이스에 드롭됐는지 and 그 좌표
-  const [droppedBase, setDroppedBase] = useState<BaseId | null>(null);
-  const [dropPos, setDropPos] = useState<{ x: number; y: number } | null>(null);
-  const [droppedToFirst, setDroppedToFirst] = useState(false);
-  // 1루 droppable ref
-  // 1) 그대로 HTMLElement 기반으로 droppable 생성
-  const polygonRef = useRef<SVGPolygonElement>(null);
-  const { setNodeRef: setDroppableNodeRef } = useDroppable({
-    id: "first-base",
-  });
+  // wrapper ref (배지·베이스 좌표 계산용)
+  const wrapperRef = useRef<HTMLDivElement>(null);
 
-  // 2) SVGPolygonElement 를 받아서 HTMLElement 로 강제 캐스팅하는 콜백을 하나 더 만듭니다.
-  const setFirstBaseRef = (el: SVGPolygonElement | null) => {
-    setDroppableNodeRef(el as unknown as HTMLElement);
-    polygonRef.current = el;
-  };
+  // 배지 설정
+  interface BadgeConfig {
+    id: string;
+    label: string;
+    initialLeft: string; // e.g. '55%'
+    initialTop: string; // e.g. '85%'
+  }
+  const badgeConfigs: BadgeConfig[] = [
+    { id: "badge-1", label: "전소면", initialLeft: "55%", initialTop: "85%" },
+    { id: "badge-2", label: "송성문", initialLeft: "80%", initialTop: "75%" },
+    { id: "badge-3", label: "이정후", initialLeft: "80%", initialTop: "85%" },
+    { id: "badge-4", label: "박병호", initialLeft: "80%", initialTop: "95%" },
+  ];
 
-  // 3) 드래그 종료 시 처리
+  // 배지별 스냅 정보 관리
+  type SnapInfo = { base: BaseId; pos: { x: number; y: number } };
+  // 1) 초기 스냅 상태를 미리 저장해 두고…
+  const initialBadgeSnaps = badgeConfigs.reduce((acc, cfg) => {
+    acc[cfg.id] = null;
+    return acc;
+  }, {} as Record<string, SnapInfo | null>);
 
-  // ① 사용할 센서 정의
+  // 2) useState 초기값에 사용
+  const [badgeSnaps, setBadgeSnaps] =
+    useState<Record<string, SnapInfo | null>>(initialBadgeSnaps);
+
+  console.log("badgeSnaps", badgeSnaps);
+
+  // 2) badgeSnaps 상태가 바뀔 때마다 각 베이스가 채워졌는지 체크하는 useEffect
+  useEffect(() => {
+    // badgeSnaps: Record<badgeId, { base: BaseId; pos: { x, y } } | null>
+    const occupancy: Record<BaseId, boolean> = baseIds.reduce((acc, base) => {
+      // badgeSnaps 중에 baseId === base 인 항목이 하나라도 있으면 true
+      acc[base] = Object.values(badgeSnaps).some((snap) => snap?.base === base);
+      return acc;
+    }, {} as Record<BaseId, boolean>);
+
+    console.log("Base occupancy:", occupancy);
+    // 예: { "first-base": true, "second-base": false, ... }
+  }, [badgeSnaps]);
+  // 센서 정의
   const sensors = useSensors(useSensor(PointerSensor), useSensor(TouchSensor));
 
-  // 드롭 로직
-  // 배지 (collisionRect)에 폴리곤 중앙이 들어왔는지 판정하는 함수 추가
-  function rectContainsPoint(
-    rect: { left: number; top: number; width: number; height: number },
-    x: number,
-    y: number
-  ) {
-    return (
-      x >= rect.left &&
-      x <= rect.left + rect.width &&
-      y >= rect.top &&
-      y <= rect.top + rect.height
-    );
-  }
+  // 드래그 종료 시 스냅 처리
+  function handleDragEnd(event: DragEndEvent) {
+    console.log("🔔 handleDragEnd fired for:", event.active.id);
+    const badgeId = event.active.id as string;
 
-  // 4) 커스텀 collisionDetection 정의 (_collisionDetection={…}로 교체)
-  const centerInsideBadge: CollisionDetection = ({ collisionRect }) => {
-    if (!collisionRect || !polygonRef.current) {
-      return [];
+    const wrapEl = wrapperRef.current;
+    if (!wrapEl) return;
+
+    // 마지막으로 스냅된 베이스
+    const prevSnap = badgeSnaps[badgeId];
+    const prevBase = prevSnap?.base ?? null;
+    const prevPos = prevSnap?.pos ?? null;
+
+    let landedOn: BaseId | null = null;
+    let landedPos: { x: number; y: number } | null = null;
+    console.log(`🔔 [${badgeId}] handleDragEnd 시작`);
+
+    // 각 베이스 폴리곤 중앙을 검사
+    for (const baseId of baseIds) {
+      const poly = baseRefs.current[baseId];
+      if (!poly) continue;
+
+      const polyBB = poly.getBoundingClientRect();
+      const cx = polyBB.left + polyBB.width / 2;
+      const cy = polyBB.top + polyBB.height / 2;
+
+      // 배지를 드래그 중인 엘리먼트의 bounding box
+      const draggableEl = badgeRefs.current[badgeId];
+      // (혹은 ref 콜백으로 따로 저장해 두어도 무방)
+      if (!draggableEl) continue; // querySelector 대체
+      const badgeBB = draggableEl.getBoundingClientRect();
+      console.log("badgeRefs.current", badgeRefs.current[badgeId]);
+      // (c) 조건 검사
+      const isInside =
+        cx >= badgeBB.left &&
+        cx <= badgeBB.left + badgeBB.width &&
+        cy >= badgeBB.top &&
+        cy <= badgeBB.top + badgeBB.height;
+
+      console.log(
+        `  [${baseId}] center=(${cx.toFixed(1)},${cy.toFixed(1)})`,
+        `badgeBox=[${badgeBB.left.toFixed(1)},${badgeBB.top.toFixed(1)}…]`,
+        `inside=${isInside}`
+      );
+
+      if (isInside) {
+        const wrapBB = wrapEl.getBoundingClientRect();
+        landedOn = baseId;
+        landedPos = { x: cx - wrapBB.left, y: cy - wrapBB.top };
+        console.log(
+          `  → candidate! landedOn=${landedOn}`,
+          `landedPos=`,
+          landedPos
+        );
+        break;
+      }
     }
 
-    const polyBBox = polygonRef.current.getBoundingClientRect();
-    const centerX = polyBBox.left + polyBBox.width / 2;
-    const centerY = polyBBox.top + polyBBox.height / 2;
+    console.log(
+      `🔔 [${badgeId}] final landedOn=${landedOn}`,
+      `landedPos=`,
+      landedPos
+    );
+    // 허용된 이동 순서
+    const nextMap: Record<BaseId, BaseId> = {
+      "first-base": "second-base",
+      "second-base": "third-base",
+      "third-base": "home-base",
+      "home-base": "home-base",
+    };
+    const allowed = prevBase === null ? "first-base" : nextMap[prevBase];
 
-    return rectContainsPoint(collisionRect, centerX, centerY)
-      ? [{ id: "first-base" }]
-      : [];
-  };
+    // 다른 배지가 이미 차지했는지 검사
+    const isOccupied = Object.entries(badgeSnaps).some(
+      ([otherId, snap]) => otherId !== badgeId && snap?.base === landedOn
+    );
 
-  // ────────────────────────
-  // 1) badge에도 ref 걸기
-  const badgeRef = useRef<HTMLElement>(null);
-
-  // function DraggableBadge() {
-  //   const { attributes, listeners, setNodeRef, transform } = useDraggable({
-  //     id: "badge",
-  //   });
-
-  //   // setNodeRef 와 badgeRef 를 동시에 연결하기 위한 callback
-  //   const combinedRef = (el: HTMLElement | null) => {
-  //     setNodeRef(el);
-  //     badgeRef.current = el;
-  //   };
-
-  //   console.log("droppedToFirst", droppedToFirst);
-  //   // 드롭된 상태라면 1루 중앙으로 고정
-  //   if (droppedToFirst && dropPos) {
-  //     // transform이 있으면 drag 중이니, drag 오프셋을 center 스냅 좌표에 더하고
-  //     const translateX = transform ? transform.x : 0;
-  //     const translateY = transform ? transform.y : 0;
-
-  //     return (
-  //       <NameBadge
-  //         ref={combinedRef}
-  //         style={{
-  //           position: "absolute",
-  //           left: `${dropPos.x}px`,
-  //           top: `${dropPos.y}px`,
-  //           transform: `translate(calc(-50% + ${translateX}px), calc(-50% + ${translateY}px))`,
-  //         }}
-  //         {...attributes} // 여전히 a11y 속성 붙이고
-  //         {...listeners}
-  //       >
-  //         이주형
-  //       </NameBadge>
-  //     );
-  //   }
-
-  //   // 드롭 전: 드래그 가능한 배지
-  //   const style = transform
-  //     ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)` }
-  //     : {};
-
-  //   return (
-  //     <NameBadge
-  //       ref={combinedRef} // ← 여기!
-  //       style={style}
-  //       {...attributes}
-  //       {...listeners}
-  //     >
-  //       이주형
-  //     </NameBadge>
-  //   );
-  // }
-
-  // function handleDragEnd(event: DragEndEvent) {
-  //   // badge와 폴리곤, 그리고 GraphicWrapper 참조가 모두 있어야 진행
-  //   if (!badgeRef.current || !polygonRef.current || !wrapperRef.current) return;
-
-  //   // 1) 뷰포트 기준 1루 폴리곤의 바운딩 박스 가져오기
-  //   const polyBBox = polygonRef.current.getBoundingClientRect();
-  //   // 2) 폴리곤 사각형의 중앙 좌표 계산 (뷰포트 기준)
-  //   const centerX = polyBBox.left + polyBBox.width / 2;
-  //   const centerY = polyBBox.top + polyBBox.height / 2;
-
-  //   // 3) 뷰포트 기준 GraphicWrapper의 바운딩 박스 가져오기
-  //   const wrapBBox = wrapperRef.current.getBoundingClientRect();
-  //   // 4) 뷰포트 좌표를 wrapper 내부 좌표로 변환
-  //   const localX = centerX - wrapBBox.left;
-  //   const localY = centerY - wrapBBox.top;
-
-  //   // 5) badge의 현재 위치(rect) 가져와서 판정
-  //   const badgeBBox = badgeRef.current.getBoundingClientRect();
-  //   const inside =
-  //     centerX >= badgeBBox.left &&
-  //     centerX <= badgeBBox.left + badgeBBox.width &&
-  //     centerY >= badgeBBox.top &&
-  //     centerY <= badgeBBox.top + badgeBBox.height;
-
-  //   console.log("폴리곤 중앙이 배지 안에 있나?", inside);
-  //   console.log("뷰포트 기준 중앙:", { x: centerX, y: centerY });
-  //   console.log("wrapper 내부 기준 중앙:", { x: localX, y: localY });
-
-  //   if (inside) {
-  //     // 드롭 성공 시, wrapper-local 좌표를 상태에 저장
-  //     setDropPos({ x: localX, y: localY });
-  //     setDroppedToFirst(true);
-  //   }
-  // }
-
-  function DraggableBadge() {
-    const { attributes, listeners, setNodeRef, transform } = useDraggable({
-      id: "badge",
+    setBadgeSnaps((prev) => {
+      const next = { ...prev };
+      if (landedOn === allowed && landedPos && !isOccupied) {
+        // 성공 스냅
+        next[badgeId] = { base: landedOn, pos: landedPos };
+      } else {
+        // 리버트 또는 초기화
+        next[badgeId] = prevPos ? { base: prevBase!, pos: prevPos } : null;
+      }
+      return next;
     });
+  }
+  const badgeRefs = useRef<Record<string, HTMLElement | null>>({});
+  // DraggableBadge 컴포넌트
+  function DraggableBadge({
+    id,
+    label,
+    initialLeft,
+    initialTop,
+    snapInfo,
+  }: {
+    id: string;
+    label: string;
+    initialLeft: string;
+    initialTop: string;
+    snapInfo: SnapInfo | null;
+  }) {
+    const { attributes, listeners, setNodeRef, transform } = useDraggable({
+      id,
+    });
+    if (snapInfo) {
+      console.log(`🔔 [${id}] snapInfo:`, snapInfo);
+    }
     const combinedRef = (el: HTMLElement | null) => {
       setNodeRef(el);
-      badgeRef.current = el;
+      badgeRefs.current[id] = el;
     };
 
-    // 드롭된 베이스가 있으면 스냅
-    if (droppedBase && dropPos) {
+    // CSS position & transform 결정
+    if (snapInfo) {
+      const { pos } = snapInfo;
+      console.log("pos", pos);
       const offsetX = transform?.x ?? 0;
       const offsetY = transform?.y ?? 0;
       return (
@@ -516,74 +532,40 @@ export default function GameRecordPageV2() {
           ref={combinedRef}
           style={{
             position: "absolute",
-            left: `${dropPos.x}px`,
-            top: `${dropPos.y}px`,
-            transform: `translate(calc(-50% + ${offsetX}px), calc(-50% + ${offsetY}px))`,
+            left: `${pos.x}px`,
+            top: `${pos.y}px`,
+            transform: transform
+              ? `translate(calc(-50% + ${offsetX}px), calc(-50% + ${offsetY}px))`
+              : "translate(-50%, -50%)",
           }}
           {...attributes}
           {...listeners}
         >
-          이주형
+          {label}
         </NameBadge>
       );
     }
 
-    // 아직 드롭 전
-    const style = transform
-      ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)` }
-      : {};
-
+    const offsetX = transform?.x ?? 0;
+    const offsetY = transform?.y ?? 0;
     return (
-      <NameBadge ref={combinedRef} style={style} {...attributes} {...listeners}>
-        이주형
+      <NameBadge
+        ref={combinedRef}
+        style={{
+          position: "absolute",
+          left: initialLeft,
+          top: initialTop,
+          transform: transform
+            ? `translate3d(${offsetX}px, ${offsetY}px, 0)`
+            : undefined,
+        }}
+        {...attributes}
+        {...listeners}
+      >
+        {label}
       </NameBadge>
     );
   }
-
-  function handleDragEnd(event: DragEndEvent) {
-    if (!badgeRef.current || !wrapperRef.current) return;
-
-    // 뷰포트 기준 badge 영역
-    const badgeBBox = badgeRef.current.getBoundingClientRect();
-
-    // 각 베이스 중앙을 순회하며 판정
-    for (const id of baseIds) {
-      const poly = baseRefs.current[id];
-      if (!poly) continue;
-
-      const polyBBox = poly.getBoundingClientRect();
-      const centerX = polyBBox.left + polyBBox.width / 2;
-      const centerY = polyBBox.top + polyBBox.height / 2;
-
-      // 중앙점이 배지 영역 안에 들어오면 해당 베이스로 드롭 인정
-      if (
-        centerX >= badgeBBox.left &&
-        centerX <= badgeBBox.left + badgeBBox.width &&
-        centerY >= badgeBBox.top &&
-        centerY <= badgeBBox.top + badgeBBox.height
-      ) {
-        // wrapper-local 좌표 변환
-        const wrapBBox = wrapperRef.current.getBoundingClientRect();
-        const localX = centerX - wrapBBox.left;
-        const localY = centerY - wrapBBox.top;
-
-        setDroppedBase(id);
-        setDropPos({ x: localX, y: localY });
-        return;
-      }
-    }
-
-    // 어느 베이스에도 안 들어오면 초기화
-    setDroppedBase(null);
-    setDropPos(null);
-  }
-
-  useEffect(() => {
-    if (droppedToFirst && dropPos) {
-      console.log("🔔 스냅된 배지 최종 위치:", dropPos);
-    }
-  }, [droppedToFirst, dropPos]);
-  const wrapperRef = useRef<HTMLDivElement>(null);
   return (
     <GameRecordContainer>
       <ScoreBoardWrapper>
@@ -626,7 +608,7 @@ export default function GameRecordPageV2() {
             onClick={() => setIsChangeModalOpen(true)}
             disabled={isSubmitting}
           >
-            공수교대
+            이닝의 재구성
           </ControlButton>
           <ControlButton onClick={() => setIsGameEndModalOpen(true)}>
             경기종료
@@ -637,7 +619,7 @@ export default function GameRecordPageV2() {
       <DndContext
         sensors={sensors}
         onDragEnd={handleDragEnd}
-        collisionDetection={centerInsideBadge}
+        // collisionDetection={centerInsideBadge}
       >
         <GraphicWrapper ref={wrapperRef}>
           <OutCount>
@@ -650,6 +632,7 @@ export default function GameRecordPageV2() {
             {/* 1루 */}
             <polygon
               className="inner"
+              id="1st"
               ref={(el) => {
                 droppableSetters["first-base"](el as any);
                 baseRefs.current["first-base"] = el;
@@ -659,6 +642,7 @@ export default function GameRecordPageV2() {
             {/* 2루 */}
             <polygon
               className="inner"
+              id="2nd"
               ref={(el) => {
                 droppableSetters["second-base"](el as any);
                 baseRefs.current["second-base"] = el;
@@ -668,6 +652,7 @@ export default function GameRecordPageV2() {
             {/* 3루 */}
             <polygon
               className="inner"
+              id="3rd"
               ref={(el) => {
                 droppableSetters["third-base"](el as any);
                 baseRefs.current["third-base"] = el;
@@ -677,6 +662,7 @@ export default function GameRecordPageV2() {
             {/* 홈 */}
             <polygon
               className="inner"
+              id="Home"
               ref={(el) => {
                 droppableSetters["home-base"](el as any);
                 baseRefs.current["home-base"] = el;
@@ -687,11 +673,39 @@ export default function GameRecordPageV2() {
 
           {/* NameBadge */}
           {/* 4) 드롭 후 스냅 or 드래그 상태에 따라 렌더 */}
-
-          <DraggableBadge />
-          <ResetDot style={{ left: "76vw", top: "2vh" }} />
+          {badgeConfigs.map((cfg) => (
+            <DraggableBadge
+              key={cfg.id}
+              id={cfg.id}
+              label={cfg.label}
+              initialLeft={cfg.initialLeft}
+              initialTop={cfg.initialTop}
+              snapInfo={badgeSnaps[cfg.id]}
+            />
+          ))}
+          <ResetDot
+            style={{ left: "76vw", top: "2vh" }}
+            onClick={() => {
+              setBadgeSnaps(initialBadgeSnaps);
+            }}
+          />
         </GraphicWrapper>
       </DndContext>
+      <PlayersRow>
+        <PlayerBox>
+          <OrderBadge>{batter.battingOrder}번</OrderBadge>
+          <PlayerWrapper>
+            <PlayerPosition>{batter.position}</PlayerPosition>
+            <PlayerInfo>{batter.playerName}</PlayerInfo>
+          </PlayerWrapper>
+        </PlayerBox>
+        <PlayerBox>
+          <PlayerWrapper>
+            <PlayerPosition>P</PlayerPosition>
+            <PlayerInfo>{pitcher.playerName}</PlayerInfo>
+          </PlayerWrapper>
+        </PlayerBox>
+      </PlayersRow>
 
       <RecordActionsRow>
         <RecordActionButton onClick={() => handleRecordAction("안타")}>

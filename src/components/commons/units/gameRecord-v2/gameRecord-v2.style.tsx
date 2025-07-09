@@ -11,7 +11,7 @@ const xlarge = "@media only screen and (min-width: 1025px)";
 export const GameRecordContainer = styled.div`
   width: 100%;
   /* max-width: 768px; */
-  /* margin-top: 120px; */
+  /* margin-top: 3vh; */
   background-color: rgba(0, 0, 0, 0.05);
   display: flex;
   flex-direction: column;
@@ -20,10 +20,11 @@ export const GameRecordContainer = styled.div`
 `;
 
 export const ScoreBoardWrapper = styled.div`
-  width: calc((100% - 2px));
+  width: 90%;
   /* margin-top: 2vh; */
-  margin-top: calc((100vh - 120px) * 0.01);
+
   height: calc((100vh - 120px) * 0.2);
+  margin-top: 3vh;
   background-color: #ffffff;
   display: flex;
   flex-direction: column;
@@ -226,9 +227,12 @@ export const ScoreDisplay = styled.div`
 
 export const PlayersRow = styled.div`
   display: flex;
-  width: 100%;
-  height: calc((100vh - 120px) * 0.32);
+  width: 90%;
+  height: 10vh;
   border-bottom: 1px solid #ccc;
+  background-color: #ffffff;
+  border-radius: 2vh;
+  margin-top: 2vh;
 `;
 
 export const PlayerBox = styled.div`
@@ -241,6 +245,7 @@ export const PlayerBox = styled.div`
   justify-content: center;
   align-items: center;
   position: relative; /* OrderBadge를 절대 위치로 배치하기 위해 필요 */
+  /* background-color: red; */
   &:last-child {
     border-right: none;
   }
@@ -413,7 +418,7 @@ export const GraphicWrapper = styled.div`
   background: #2c660d;
   border-radius: 2vh;
   /* overflow: hidden; */
-  margin: 2vh 0; /* ControlButtonsRow와 RecordActionsRow 사이 여백 */
+  margin: 3vh 0; /* ControlButtonsRow와 RecordActionsRow 사이 여백 */
 `;
 
 export const FullImage = styled.img`
@@ -427,8 +432,8 @@ export const FullImage = styled.img`
 
 export const OutCount = styled.div`
   position: absolute;
-  left: 2vw;
-  bottom: 5vh;
+  left: 4vw;
+  bottom: 2vh;
   display: flex;
   gap: 1vw;
   align-items: center;
@@ -499,11 +504,12 @@ export const NameBadge = styled.div`
   background: #ffffff;
   border: 0.05vh solid var(--snu-blue);
   border-radius: 50px;
+
   padding: 1vh 1vw;
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 2vh;
+  height: 3vh;
   white-space: nowrap;
   touch-action: none; /* 터치 동작(스크롤/줌) 비활성화 */
   pointer-events: all; /* 이벤트 확실히 받도록 */
