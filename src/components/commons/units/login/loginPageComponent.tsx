@@ -10,6 +10,7 @@ import {
   Label,
   LinkGroup,
   LoginButton,
+  LogoImage,
   MoveToFindPw,
   MoveToSignUp,
   PasswordToggle,
@@ -93,6 +94,9 @@ export default function LoginPageComponent() {
   return (
     <Container>
       <Title>SNU BASEBALL</Title>
+
+      <LogoImage src="/images/main-logo.png" alt="SNU Baseball 메인 로고" />
+
       <form onSubmit={handleSubmit(onSubmit)}>
         {/* 이메일 주소 입력 */}
         <FieldWrapper>

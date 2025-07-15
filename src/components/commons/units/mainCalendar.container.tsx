@@ -68,6 +68,8 @@ interface Game {
   inningHalf?: string;
   gameId?: number; // gameId로 변경 (예: 1001, 1002, 1003 등)
   isForfeit: boolean;
+  canRecord?: boolean;
+  canSubmitLineup?: { home: boolean; away: boolean };
 }
 const LOCAL_KEY = "calendarSelectedDate";
 
@@ -273,6 +275,7 @@ export default function MainCalendarPage() {
   const [lastRoute, setLastRoute] = useRecoilState(lastRouteState);
 
   // console.log("lastRoute", lastRoute);
+
   return (
     <Container>
       <DaysOfWeekContainer>
@@ -363,13 +366,26 @@ export default function MainCalendarPage() {
                 match.homeTeam.name != null && match.awayTeam.name != null
             )
             .map((match, index) => {
-              const canRecord =
-                authInfo.role === "UMPIRE" &&
-                Array.isArray(authInfo.gameIds) &&
-                authInfo.gameIds.includes(match.gameId!);
+              const apiCanRecord = match.canRecord ?? false;
+              const apiCanSubmit = match.canSubmitLineup ?? {
+                home: false,
+                away: false,
+              };
+
+              const showRecordButton =
+                match.status === "SCHEDULED"
+                  ? apiCanRecord || apiCanSubmit.home || apiCanSubmit.away
+                  : match.status === "FINALIZED" || match.status === "EDITING";
 
               const team1Score = match.homeTeam.score;
               const team2Score = match.awayTeam.score;
+
+              const buttonLabel =
+                match.status === "SCHEDULED" &&
+                !apiCanRecord &&
+                (apiCanSubmit.home || apiCanSubmit.away)
+                  ? "라인업제출"
+                  : "경기기록";
 
               let displayHomeScore: number | string | null = team1Score;
               let displayAwayScore: number | string | null = team2Score;
@@ -477,9 +493,7 @@ export default function MainCalendarPage() {
                       </TeamScore>
                     </Team>
                   </TeamsContainer>
-                  {canRecord ||
-                  match.status === "FINALIZED" ||
-                  match.status === "EDITING" ? (
+                  {showRecordButton ? (
                     <RecordButton
                       onClick={() => {
                         /* ① recoil-persist(로컬스토리지)에서 마지막 경로 가져오기 */
@@ -530,24 +544,35 @@ export default function MainCalendarPage() {
                           match.status === "FINALIZED" ||
                           match.status === "EDITING"
                         ) {
+                          // 종료된 경기 결과 보기
                           route = `/matches/${match.gameId}/result`;
-                        } else if (match.status === "SCHEDULED") {
-                          /* ­이전 방문 경로(persistedRoute)에 현재 gameId가 포함돼 있으면 그곳으로,
-         아니면 기본 homeTeamRegistration 으로   */
-                          route =
-                            persistedRoute &&
-                            persistedRoute.includes(String(match.gameId))
-                              ? persistedRoute
-                              : `/matches/${match.gameId}/homeTeamRegistration`;
                         } else if (match.status === "IN_PROGRESS") {
+                          // 진행 중 경기 기록 입력
                           route = `/matches/${match.gameId}/records`;
+                        } else if (match.status === "SCHEDULED") {
+                          // 예정 경기: 라벨이 "라인업제출"일 때
+                          if (
+                            !apiCanRecord &&
+                            (apiCanSubmit.home || apiCanSubmit.away)
+                          ) {
+                            route = apiCanSubmit.home
+                              ? `/matches/${match.gameId}/homeTeamRegistration`
+                              : `/matches/${match.gameId}/awayTeamRegistration`;
+                          } else {
+                            // 예정 경기이지만 실제 기록(스코어) 작성 권한이 있는 경우
+                            route =
+                              persistedRoute &&
+                              persistedRoute.includes(String(match.gameId))
+                                ? persistedRoute
+                                : `/matches/${match.gameId}/homeTeamRegistration`;
+                          }
                         }
 
                         /* ⑤ 최종 라우팅 */
                         router.push(route);
                       }}
                     >
-                      경기기록
+                      {buttonLabel}
                     </RecordButton>
                   ) : (
                     <RecordButtonPlaceholder />

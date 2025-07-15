@@ -1,23 +1,24 @@
 import { useRouter } from "next/router";
-import API from "../../../commons/apis/api";
+import API from "../../../../commons/apis/api";
 import {
   ModalButton,
   ModalContainer,
   ModalOverlay,
   ModalTitle,
-} from "./modal.style";
+} from "../modal.style";
 import { useState } from "react";
-import { useModalBack } from "../../../commons/hooks/useModalBack";
+import { useModalBack } from "../../../../commons/hooks/useModalBack";
 import {
   LoadingIcon,
   LoadingOverlay,
-} from "../../../commons/libraries/loadingOverlay";
-import ErrorAlert from "../../../commons/libraries/showErrorCode";
+} from "../../../../commons/libraries/loadingOverlay";
+import ErrorAlert from "../../../../commons/libraries/showErrorCode";
 
 interface IModalProps {
   setIsOutModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
   playerId: number;
   onSuccess?: () => Promise<void>;
+  onTypeSelect?: () => void;
 }
 
 export default function OutModal(props: IModalProps) {
@@ -28,7 +29,7 @@ export default function OutModal(props: IModalProps) {
   const router = useRouter();
   const mapping: { [key: string]: string } = {
     삼진: "SO",
-    "그 외 아웃": "O",
+    희생번트: "SB",
     희생플라이: "SF",
   };
 
@@ -38,19 +39,19 @@ export default function OutModal(props: IModalProps) {
     setIsSubmitting(true);
 
     try {
-      const endpoint = `/games/${router.query.recordId}/plate-appearance`;
-      const requestBody = { result: mapping[Type] };
-      const res = await API.post(
-        endpoint,
-        requestBody
-        //   , {
-        //   withCredentials: true,
-        // }
-      );
+      // const endpoint = `/games/${router.query.recordId}/plate-appearance`;
+      // const requestBody = { result: mapping[Type] };
+      // const res = await API.post(
+      //   endpoint,
+      //   requestBody
+      //   //   , {
+      //   //   withCredentials: true,
+      //   // }
+      // );
 
       // 성공 메시지
 
-      console.log(endpoint, requestBody, res.data);
+      // console.log(endpoint, requestBody, res.data);
 
       // 부모 onSuccess 콜백 실행
       if (props.onSuccess) {
@@ -68,6 +69,7 @@ export default function OutModal(props: IModalProps) {
       setIsSubmitting(false);
       // ② 모달 닫기
       props.setIsOutModalOpen(false);
+      props.onTypeSelect?.();
     }
   };
   return (
@@ -87,10 +89,10 @@ export default function OutModal(props: IModalProps) {
           희생플라이
         </ModalButton>
         <ModalButton
-          onClick={() => handleTypeSelect("그 외 아웃")}
+          onClick={() => handleTypeSelect("희생번트")}
           disabled={isSubmitting}
         >
-          그 외 아웃
+          희생번트
         </ModalButton>
       </ModalContainer>
       <LoadingOverlay visible={isSubmitting}>

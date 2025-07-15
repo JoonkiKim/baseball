@@ -1,10 +1,10 @@
-import GameRecordPageComponent from "../../../../src/components/commons/units/gameRecord/gameRecord.container";
+import GameRecordPageV2 from "../../../../src/components/commons/units/gameRecord-v2/gameRecord-v2.container";
 
 export default function Record() {
   return (
     <>
       <div>
-        <GameRecordPageComponent />
+        <GameRecordPageV2 />
       </div>
     </>
   );

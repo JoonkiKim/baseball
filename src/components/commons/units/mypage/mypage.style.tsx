@@ -3,7 +3,7 @@ import styled from "@emotion/styled";
 
 export const Title = styled.h1`
   font-size: 1.5rem; /* 24px → 1.5rem */
-  margin-top: 5vh;
+  margin-top: 15vh;
   text-align: center;
   font-weight: bold;
   font-family: "KBO-Dia-Gothic_bold";
@@ -12,7 +12,7 @@ export const Title = styled.h1`
 // 메인 페이지 감싸는 Wrapper
 export const PageWrapper = styled.div`
   width: 95%;
-  margin-top: 15vh;
+  margin-top: 10vh;
   max-width: 480px;
   /* margin: 0 auto; */
   padding: 16px;

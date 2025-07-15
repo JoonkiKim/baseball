@@ -1,0 +1,638 @@
+import styled from "@emotion/styled";
+import { Switch } from "antd";
+const small = "@media only screen and (max-width: 480px)";
+const medium =
+  "@media only screen and (min-width: 481px) and (max-width: 768px)";
+const large =
+  "@media only screen and (min-width: 769px) and (max-width: 1024px)";
+const xlarge = "@media only screen and (min-width: 1025px)";
+
+// 메인 컨테이너
+export const GameRecordContainer = styled.div`
+  width: 100%;
+  max-width: 100vw;
+  /* margin-top: 3vh; */
+  background-color: rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+`;
+
+export const ScoreBoardWrapper = styled.div`
+  width: 90%;
+  /* margin-top: 2vh; */
+
+  height: calc((100vh - 120px) * 0.2);
+  margin-top: 3vh;
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid black;
+  border-radius: 10px;
+  margin-bottom: 3vh;
+`;
+
+/** ─────────────────────────────────────────────────────────
+ *  1) 상단 이닝 헤더 (총 12열: 이닝(1~9) + R + H)
+ * ───────────────────────────────────────────────────────── */
+export const InningHeader = styled.div`
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  width: 100%;
+  height: 33%;
+  align-items: center;
+  border-bottom: 1px solid #ccc;
+  /* background-color: red; */
+`;
+
+export const InningCell = styled.div`
+  text-align: center;
+  /* padding-top: 1vh; */
+  /* background-color: red; */
+  /* padding-bottom: 1vh; */
+  font-weight: 600;
+  ${small} {
+    font-size: 15px;
+  }
+  ${medium} {
+    font-size: 20px;
+  }
+  ${large}, ${xlarge} {
+    font-size: 20px;
+  }
+`;
+
+/** ─────────────────────────────────────────────────────────
+ *  2) 팀 이름과 점수를 한 행으로 구성 (총 12열)
+ *     첫 번째 열: 팀 이름 (별도 스타일)
+ *     나머지 11열: 이닝별 점수 (팀 점수 셀)
+ * ───────────────────────────────────────────────────────── */
+export const TeamRow = styled.div`
+  display: grid;
+  grid-template-columns: repeat(10, 1fr); /* 12개의 동일한 너비 */
+  width: 100%;
+  align-items: center;
+  /* border-bottom: 1px solid #ccc; */
+  /* background-color: aqua; */
+  height: 33%;
+`;
+
+export const TeamNameCell = styled.div`
+  text-align: center;
+  padding: 1vh 0;
+  font-weight: 500;
+  font-family: "KBO-Dia-Gothic_medium";
+  font-style: normal;
+
+  ${small} {
+    font-size: 10px;
+  }
+  ${medium} {
+    font-size: 12px;
+  }
+  ${large}, ${xlarge} {
+    font-size: 14px;
+  }
+`;
+
+export const TeamScoreCell = styled.div`
+  text-align: center;
+  font-family: "KBO-Dia-Gothic_light";
+  padding: 1vh 0;
+  font-weight: 400;
+  ${small} {
+    font-size: 15px;
+  }
+  ${medium} {
+    font-size: 20px;
+  }
+  ${large}, ${xlarge} {
+    font-size: 20px;
+  }
+`;
+
+/** ─────────────────────────────────────────────────────────
+ *  3) 공수교대 / 경기종료 버튼 섹션
+ * ───────────────────────────────────────────────────────── */
+export const ControlButtonsRow = styled.div`
+  width: 100%;
+  height: 7vh;
+  margin-top: 1.5vh;
+  margin-bottom: 1.5vh;
+  /* border-bottom: 1px solid #ccc; */
+
+  /* padding: 1vh 0; */
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  /* padding-top: 1vh; */
+  /* background-color: aqua; */
+`;
+
+export const ControlButtonsWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-end; /* 요소들을 아래쪽 정렬 */
+  width: 90%;
+  /* background-color: red; */
+  /* padding-top: 2vh; */
+`;
+
+export const ControlButton = styled.button`
+  background-color: #000000;
+  width: 26vw;
+  height: 5vh;
+  border: 1px solid #999;
+  font-family: "KBO-Dia-Gothic_bold";
+  font-weight: bold;
+  font-size: 0.813rem;
+  color: #ffffff;
+  cursor: pointer;
+  border-radius: 20px;
+`;
+
+/** ─────────────────────────────────────────────────────────
+ *  4) 이번 이닝 득점 섹션
+ * ───────────────────────────────────────────────────────── */
+export const InningScoreContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: calc((100vh - 120px) * 0.2);
+  border-bottom: 1px solid #ccc;
+  text-align: center;
+  padding-top: 4vh;
+  padding-bottom: 4vh;
+`;
+
+export const InningScoreTitle = styled.div`
+  /* margin-bottom: 8px; */
+  font-family: "KBO-Dia-Gothic_bold";
+  font-weight: 500;
+  ${small} {
+    font-size: 20px;
+  }
+  ${medium} {
+    font-size: 23px;
+  }
+  ${large}, ${xlarge} {
+    font-size: 24px;
+  }
+`;
+
+export const InningScoreControls = styled.div`
+  display: inline-flex;
+  /* background-color: red; */
+  align-items: center;
+  gap: 16px;
+`;
+
+export const ScoreButton = styled.button`
+  background-color: #000000;
+  border: none;
+  color: #ffffff;
+  border-radius: 4px;
+  font-size: 16px;
+  font-family: "KBO-Dia-Gothic_bold";
+  font-weight: 500;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+
+  ${small} {
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+  }
+`;
+
+export const ScoreDisplay = styled.div`
+  font-size: 48px;
+  min-width: 24px;
+  text-align: center;
+  font-family: "KBO-Dia-Gothic_light";
+
+  ${small} {
+    font-size: 48px;
+  }
+`;
+
+/** ─────────────────────────────────────────────────────────
+ *  5) 현재 타자 / 투수 정보 섹션
+ * ───────────────────────────────────────────────────────── */
+
+export const PlayersRow = styled.div`
+  display: flex;
+  width: 90%;
+  height: 20vh;
+  border-bottom: 1px solid #ccc;
+  background-color: #ffffff;
+  border-radius: 2vh;
+  margin-top: 3.5vh;
+`;
+
+export const PlayerBox = styled.div`
+  flex: 1;
+  border-right: 1px solid #ccc;
+  padding: 1rem;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative; /* OrderBadge를 절대 위치로 배치하기 위해 필요 */
+  /* background-color: red; */
+  &:last-child {
+    border-right: none;
+  }
+`;
+
+export const PlayerChangeButton = styled.button`
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: #000;
+  width: 16vw;
+  height: 4vh;
+
+  color: #fff;
+  border: none;
+  font-family: "KBO-Dia-Gothic_bold";
+  font-size: 12px;
+  /* padding: 6px 12px; */
+  cursor: pointer;
+`;
+
+export const PlayerWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+  width: 100%;
+  height: 60%;
+`;
+
+export const PlayerPosition = styled.div`
+  font-family: "KBO-Dia-Gothic_light";
+  color: rgba(0, 0, 0, 0.5);
+  ${small} {
+    font-size: 20px;
+  }
+  ${medium} {
+    font-size: 24px;
+  }
+  ${large}, ${xlarge} {
+    font-size: 26px;
+  }
+`;
+
+export const PlayerInfo = styled.div`
+  font-weight: 500;
+  line-height: 1.4;
+  ${small} {
+    font-size: 32px;
+  }
+  ${medium} {
+    font-size: 35px;
+  }
+  ${large}, ${xlarge} {
+    font-size: 36px;
+  }
+`;
+
+interface PlayerExWrapperProps {
+  count: number;
+}
+
+export const PlayerExWrapper = styled.div<PlayerExWrapperProps>`
+  display: flex;
+  flex-direction: row;
+  justify-content: ${({ count }) => (count === 1 ? "center" : "space-between")};
+  width: 15vh;
+`;
+
+export const EliteBox = styled.div`
+  width: 50px;
+  height: 20px;
+  background-color: #ff0004;
+  font-family: "KBO-Dia-Gothic_light";
+  color: #ffffff;
+  border-radius: 35px;
+  text-align: center;
+`;
+
+export const WildCardBox = styled.div`
+  width: 50px;
+  height: 20px;
+  background-color: #f3a231;
+  font-family: "KBO-Dia-Gothic_light";
+  color: #ffffff;
+  border-radius: 35px;
+  text-align: center;
+`;
+
+export const WildCardBoxNone = styled.div`
+  width: 50px;
+  height: 20px;
+  background-color: transparent;
+  font-family: "KBO-Dia-Gothic_light";
+
+  text-align: center;
+`;
+
+/** ─────────────────────────────────────────────────────────
+ *  6) 하단 기록 입력 버튼 섹션
+ * ───────────────────────────────────────────────────────── */
+export const RecordActionsRow = styled.div`
+  display: grid;
+  width: 100%;
+  height: 10vh;
+  grid-template-columns: repeat(4, 1fr);
+  margin-top: auto;
+`;
+
+export const RecordActionButton = styled.button`
+  /* 기본적으로 모든 테두리 제거 */
+  border: none;
+  background-color: #0f0f70;
+  font-family: "KBO-Dia-Gothic_bold";
+  font-weight: bold;
+  font-size: 20px;
+  color: #ffffff;
+
+  /* 마지막 버튼이 아닌 경우(1, 2, 3번째)에만 오른쪽 테두리 추가 */
+  &:not(:last-child) {
+    border-right: 1px solid white;
+  }
+
+  ${small} {
+    font-size: 20px;
+  }
+  ${medium} {
+    font-size: 24px;
+  }
+  ${large}, ${xlarge} {
+    font-size: 25px;
+  }
+`;
+
+/** ─────────────────────────────────────────────────────────
+ *  추가: 선수교체 버튼과 order값을 정렬하기 위한 flex 컨테이너
+ * ───────────────────────────────────────────────────────── */
+
+/** ─────────────────────────────────────────────────────────
+ *  추가: 선수 순번(Order)을 표시하기 위한 스타일 태그
+ * ───────────────────────────────────────────────────────── */
+// OrderBadge를 PlayerBox의 우상단에 딱 붙게 설정
+export const OrderBadge = styled.div`
+  position: absolute;
+  top: 0;
+  right: 0;
+  /* background: #fff; */
+  /* border: 1px solid #ccc; */
+  /* border-radius: 50%; */
+  width: 7vh;
+  height: 24px;
+  margin-top: 10px;
+  /* margin-right: 5px; */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-family: "KBO-Dia-Gothic_medium";
+`;
+
+/** ─────────────────────────────────────────────────────────
+ *  v2경기기록 관련
+ * ───────────────────────────────────────────────────────── */
+
+export const GraphicWrapper = styled.div<{ outside?: boolean }>`
+  position: relative;
+  overflow: visible;
+  width: 90%;
+  height: 40vh;
+  /* background-color: red; */
+
+  background: ${(p) => (p.outside ? "red" : "#2c660d")};
+  border-radius: 2vh;
+  /* margin: 3vh 0; */
+`;
+export const FullImage = styled.img`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+`;
+
+export const OutCount = styled.div`
+  position: absolute;
+  left: 4vw;
+  bottom: 2vh;
+  display: flex;
+  gap: 1vw;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+  border-radius: 5vh;
+  padding: 0.5vh 1vw;
+  height: 2.5vh;
+`;
+
+export const Ellipse = styled.div<{ active?: boolean }>`
+  width: 1.5vh;
+  height: 1.5vh;
+  border-radius: 50%;
+  background: ${(p) => (p.active ? "#fb0000" : "#707070")};
+`;
+
+export const OverlaySvg = styled.svg`
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 50%;
+  height: auto;
+  overflow: visible;
+  background-color: blue;
+`;
+
+export const DiamondSvg = styled.svg`
+  position: absolute;
+  left: 50%;
+  top: 55%;
+  transform: translate(-50%, -50%);
+  width: 60%;
+  height: auto;
+  overflow: visible;
+  fill: green;
+  /* background-color: red; */
+
+  /* 기존 inner 기본 스타일 */
+  & .inner {
+    fill: #ffffff;
+    stroke: #000000;
+    stroke-width: 0.2;
+  }
+
+  /* 여기에 highlight 스타일 추가 */
+  & .inner.highlight {
+    fill: blue;
+    transition: fill 0.2s ease;
+  }
+`;
+export const Rotator = styled(OverlaySvg)`
+  width: 4vw;
+  height: 4vw;
+  left: auto;
+  right: 5vw;
+  top: 2vh;
+`;
+
+export const ResetDot = styled.div`
+  position: absolute;
+  width: 2.5rem;
+  height: 2.5rem;
+  background-image: url("/images/reset.png");
+  background-size: 150% auto;
+  background-repeat: no-repeat;
+  background-position: center;
+  cursor: pointer;
+`;
+export const NameBadge = styled.div`
+  position: absolute;
+  left: 50%;
+  top: 85%;
+  transform: translate(0, -50%);
+  background: #ffffff;
+  border: 0.05vh solid var(--snu-blue);
+  border-radius: 50px;
+  padding: 1vh 1vw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 3vh;
+  white-space: nowrap;
+  touch-action: none; /* 터치 동작(스크롤/줌) 비활성화 */
+  pointer-events: all; /* 이벤트 확실히 받도록 */
+  user-select: none; /* 드래그 중 텍스트 선택 방지 */
+`;
+
+export const NameText = styled.div`
+  color: #000000;
+  font-family: var(--player-font-family);
+  font-size: var(--player-font-size);
+  font-weight: var(--player-font-weight);
+`;
+
+// -------- 이닝의 재구성 -------------
+
+export const ReconstructionWrapper = styled.div`
+  width: 44vw;
+  height: 5vh;
+  /* border: 1px solid #999; */
+  font-family: "KBO-Dia-Gothic_medium";
+  /* font-weight: bold; */
+  font-size: 0.813rem;
+  color: #ffffff;
+  box-shadow: 0px 21px 6px rgba(0, 0, 0, 0),
+    //
+    0px 14px 5px rgba(0, 0, 0, 0),
+    //
+    0px 8px 5px rgba(0, 0, 0, 0.02),
+    //
+    0px 3px 3px rgba(0, 0, 0, 0.03),
+    //
+    0px 1px 2px rgba(0, 0, 0, 0.03);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: row;
+  /* justify-content: center; */
+  align-items: center;
+`;
+
+export const ReconstructionTitle = styled.div`
+  width: 27.5vw;
+  height: 4vh;
+  /* border: 1px solid #999; */
+  font-family: "KBO-Dia-Gothic_bold";
+  font-weight: bold;
+  font-size: 0.813rem;
+  color: black;
+  /* background-color: red; */
+  cursor: pointer;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+`;
+
+export const ReconstructionButtonWrapper = styled.div`
+  width: 16.5vw;
+  height: 4vh;
+  /* border: 1px solid #999; */
+  font-family: "KBO-Dia-Gothic_bold";
+  font-weight: bold;
+  font-size: 0.813rem;
+  /* background-color: blue; */
+  cursor: pointer;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+`;
+
+// export const ReconstructionSwitch = styled(Switch)`
+//   /* 필요하다면 여기에 커스텀 스타일 추가 */
+//   width: 4vw;
+//   height: 3vh;
+//   .ant-switch-handle {
+//     top: 50% !important;
+//     transform: translateY(-50%) !important;
+//   }
+// `;
+
+export const ReconstructionSwitch = styled(Switch)`
+  /* 1) 트랙 너비 조정 (높이는 이미 custom 됐으니 필요 없다면 생략) */
+  && {
+    background-color: #bdbdbd !important;
+    width: 11vw !important; /* 원하는 가로 길이 */
+    min-width: 11vw !important;
+    height: 3.3vh !important;
+  }
+  /* ON 상태의 트랙 색 */
+  &.ant-switch-checked {
+    background-color: #4caf50 !important; /* 원하는 ON 트랙 색 */
+  }
+
+  /* 2) 내부 여백: 패딩만큼 핸들이 옆으로 빠지지 않도록 margin 설정 */
+  .ant-switch-inner {
+    margin: 2px; /* trackPadding 만큼 */
+  }
+
+  /* 3) 핸들 크기 & 중앙 정렬 & 움직일 때 애니메이션 제거 */
+  .ant-switch-handle {
+    width: 18px !important; /* handleSize */
+    height: 18px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    left: 5px !important;
+    /* transition: none !important; */
+  }
+
+  /* Checked 상태에서 핸들 위치 재계산 */
+  &.ant-switch-checked .ant-switch-handle {
+    left: calc(100% - 5px - 18px) !important;
+    /* 100% 트랙 너비에서 padding(2px)과 핸들 너비(18px)만큼 뺀 위치 */
+  }
+`;

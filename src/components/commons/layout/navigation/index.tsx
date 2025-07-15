@@ -104,7 +104,7 @@ export default function LayoutNavigation() {
           </Link>
           <Link href="/login" passHref>
             <BottomNav as="a">
-              <NavIcon src="/images/Vector.png" />
+              <NavIcon src="/images/profile.png" />
               <NavItem>설정</NavItem>
             </BottomNav>
           </Link>

@@ -32,9 +32,9 @@ import {
   RecordActionButton,
   ScoreBoardWrapper,
 } from "./gameRecord.style";
-import HitModal from "../../modals/hitModal";
-import OutModal from "../../modals/outModal";
-import EtcModal from "../../modals/etcModal";
+import HitModal from "../../modals/recordModal/hitModal";
+import OutModal from "../../modals/recordModal/outModal";
+import EtcModal from "../../modals/recordModal/etcModal";
 import DefenseChangeModal from "../../modals/defenseChange";
 import GameOverModal from "../../modals/gameOverModal";
 import ScorePatchModal from "../../modals/scorePatchModal";
