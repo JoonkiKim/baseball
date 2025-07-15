@@ -14,7 +14,8 @@ export const GameRecordContainer = styled.div<{ reconstructMode: boolean }>`
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-height: 100vh;
+  /* min-height: 100vh; */
+  height: calc(var(--vh) * 100);
   background-color: ${({ reconstructMode }) =>
     reconstructMode ? "#b8b8b8" : "rgba(0, 0, 0, 0.05)"};
 `;
@@ -144,7 +145,7 @@ export const ControlButtonsWrapper = styled.div`
 
 export const ControlButton = styled.button`
   background-color: #000000;
-  width: 26vw;
+  width: 23vw;
   height: 5vh;
   border: 1px solid #999;
   font-family: "KBO-Dia-Gothic_medium";
@@ -510,24 +511,63 @@ export const FullImage = styled.img`
 `;
 
 export const OutCount = styled.div`
-  position: absolute;
-  left: 4vw;
-  bottom: 2vh;
+  width: 4.5vh;
+  height: 1.6vh;
   display: flex;
-  gap: 1vw;
+  /* gap: 1vw; */
+  flex-direction: row;
   align-items: center;
-  justify-content: center;
+  justify-content: space-evenly;
   background: #000;
-  border-radius: 5vh;
-  padding: 0.5vh 1vw;
-  height: 2.5vh;
+  border-radius: 50px;
+
+  /* padding: 0.5vh 1vw; */
+`;
+
+export const SideWrapper = styled.div`
+  position: absolute;
+  left: 85%;
+  top: 77%;
+  width: 5vh;
+  /* height: 20vh; */
+  /* background-color: red; */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 `;
 
 export const Ellipse = styled.div<{ active?: boolean }>`
-  width: 1.5vh;
-  height: 1.5vh;
+  width: 1vh;
+  height: 1vh;
+  align-self: center;
   border-radius: 50%;
   background: ${(p) => (p.active ? "#fb0000" : "#707070")};
+`;
+
+export const OnDeckWrapper = styled.div`
+  margin-top: 1vh;
+  /* position: absolute; */
+  width: 4.5vh;
+  /* dynamic height로 바꿔주면 내용에 맞게 늘어납니다 */
+  height: 5vh;
+  z-index: 80;
+  font-family: "KBO-Dia-Gothic_light";
+  /* font-weight: bold; */
+  font-size: 0.5rem;
+  background-color: black;
+  color: #f2f2f7;
+  border-radius: 5px;
+  /* margin-top: 0.4rem; */
+  display: flex;
+  flex-direction: column;
+  /* 위아래 간격을 0.3rem씩 주기 */
+  gap: 0.3rem;
+  /* 항목들이 위쪽부터 시작하도록 */
+  justify-content: center;
+  align-items: center;
+
+  /* 위아래 여백도 추가하고 싶으면 padding 활용 */
+  padding: 0.3rem 0;
 `;
 
 export const OverlaySvg = styled.svg`
@@ -596,16 +636,18 @@ export const NameBadge = styled.div`
   position: absolute;
   z-index: 999;
   left: 50%;
+  font-size: 0.8rem;
   top: 85%;
   transform: translate(0, -50%);
   background: #ffffff;
-  border: 0.05vh solid var(--snu-blue);
+
   border-radius: 50px;
   padding: 1vh 1vw;
   display: flex;
   align-items: center;
   justify-content: center;
   height: 3vh;
+  width: 12vw;
   white-space: nowrap;
   touch-action: none; /* 터치 동작(스크롤/줌) 비활성화 */
   pointer-events: all; /* 이벤트 확실히 받도록 */
@@ -639,7 +681,7 @@ export const ReconstructionWrapper = styled.div`
     0px 3px 3px rgba(0, 0, 0, 0.03),
     //
     0px 1px 2px rgba(0, 0, 0, 0.03);
-  border-radius: 12px;
+  border-radius: 18px;
   display: flex;
   flex-direction: row;
   /* justify-content: center; */
@@ -656,7 +698,7 @@ export const ReconstructionTitle = styled.div`
   color: black;
   /* background-color: red; */
   cursor: pointer;
-  border-radius: 12px;
+  border-radius: 18px;
   display: flex;
   flex-direction: row;
   justify-content: center;
@@ -714,23 +756,6 @@ export const ReconstructionSwitch = styled(Switch)`
   }
 `;
 
-export const OnDeckWrapper = styled.div`
-  position: absolute;
-  width: 6vh;
-  height: 6vh;
-  /* border: 1px solid #999; */
-  font-family: "KBO-Dia-Gothic_medium";
-  font-weight: bold;
-  font-size: 0.813rem;
-  background-color: gray;
-
-  border-radius: 12px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  /* align-items: center; */
-`;
-
 export const OutZoneWrapper = styled.div`
   position: absolute;
   /* 부모의 가운데(가로·세로) */
@@ -782,4 +807,58 @@ export const HomePlateOverlay = styled.svg`
   height: auto;
   z-index: 10; /* 맨 위로 */
   pointer-events: none; /* 드래그등 이벤트 투명화 */
+`;
+
+// 좌상단 스코어보드
+export const LeftSideWrapper = styled.div`
+  position: absolute;
+  left: 5%;
+  top: 5%;
+  width: 7vh;
+  z-index: 100;
+  /* height: 20vh; */
+  /* background-color: red; */
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+`;
+
+export const InningBoard = styled.div`
+  width: 1.6vh;
+  height: 4.5vh;
+  display: flex;
+  /* gap: 1vw; */
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-evenly;
+  background: #000;
+  border-radius: 10px;
+
+  /* padding: 0.5vh 1vw; */
+`;
+
+export const LittleScoreBoardWrapper = styled.div`
+  /* margin-top: 1vh; */
+  /* position: absolute; */
+  width: 5vh;
+  height: 4.5vh;
+  z-index: 80;
+  font-family: "KBO-Dia-Gothic_light";
+  /* font-weight: bold; */
+  font-size: 0.5rem;
+  background-color: black;
+  color: #f2f2f7;
+  border-radius: 8px;
+  /* margin-top: 0.4rem; */
+  display: flex;
+  flex-direction: column;
+  /* 위아래 간격을 0.3rem씩 주기 */
+  gap: 0.3rem;
+  /* 항목들이 위쪽부터 시작하도록 */
+  justify-content: center;
+  align-items: center;
+
+  /* 위아래 여백도 추가하고 싶으면 padding 활용 */
+  /* padding: 0.3rem 0; */
 `;
