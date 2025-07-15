@@ -71,6 +71,10 @@ import {
   LineWrapper,
   HomePlateOverlay,
   HomeBaseWrapper,
+  SideWrapper,
+  LeftSideWrapper,
+  InningBoard,
+  LittleScoreBoardWrapper,
 } from "./gameRecord-v2.style";
 import HitModal from "../../modals/recordModal/hitModal";
 import OutModal from "../../modals/recordModal/outModal";
@@ -649,7 +653,7 @@ export default function GameRecordPageV2() {
       id: "black-badge-4",
       label: "류지혁",
       initialLeft: "70%",
-      initialTop: "35%",
+      initialTop: "40%",
       sportPosition: "2B",
     },
     {
@@ -663,28 +667,28 @@ export default function GameRecordPageV2() {
       id: "black-badge-6",
       label: "이재현",
       initialLeft: "30%",
-      initialTop: "35%",
+      initialTop: "40%",
       sportPosition: "SS",
     },
     {
       id: "black-badge-7",
       label: "구자욱",
       initialLeft: "20%",
-      initialTop: "20%",
+      initialTop: "25%",
       sportPosition: "LF",
     },
     {
       id: "black-badge-8",
       label: "김지찬",
       initialLeft: "50%",
-      initialTop: "10%",
+      initialTop: "15%",
       sportPosition: "CF",
     },
     {
       id: "black-badge-9",
       label: "김성윤",
       initialLeft: "80%",
-      initialTop: "20%",
+      initialTop: "25%",
       sportPosition: "RF",
     },
   ]);
@@ -762,6 +766,7 @@ export default function GameRecordPageV2() {
           background: "#000",
           color: "#fff",
           cursor: "grab",
+          border: "1px soild #fff",
         }}
       >
         {cfg.label}
@@ -1323,7 +1328,7 @@ export default function GameRecordPageV2() {
   // 이미지 프리로드
   useEffect(() => {
     const img = new Image();
-    img.src = "/images/home-base-blue-2.png";
+    img.src = "/images/home-base-white-1.png";
     // (옵션) 로드 완료 콜백
     img.onload = () => {
       console.log("home-base-blue-2.png preloaded!");
@@ -1416,11 +1421,7 @@ export default function GameRecordPageV2() {
           <Ground outside={isOutside} />
           <OutZoneWrapper ref={outZoneRef}></OutZoneWrapper>
           <CustomBoundaryWrapper ref={customBoundsRef}></CustomBoundaryWrapper>
-          <OutCount>
-            {outs.map((isActive, idx) => (
-              <Ellipse key={idx} active={isActive} />
-            ))}
-          </OutCount>
+
           <DiamondSvg
             viewBox="0 0 110 110"
             ref={(el) => {
@@ -1483,19 +1484,28 @@ export default function GameRecordPageV2() {
               points="55,97 61.5,103.5 55,110 48.5,103.5"
             />
           </DiamondSvg>
-
-          <OnDeckWrapper style={{ left: "80%", top: "80%" }}>
-            {onDeckPlayers.length > 0 ? (
-              onDeckPlayers.map((p) => (
-                <div key={p.playerId}>
-                  {p.battingOrder} {p.playerName}
-                </div>
-              ))
-            ) : (
-              <div>대기타석입니다</div>
-            )}
-          </OnDeckWrapper>
-
+          <SideWrapper>
+            <OutCount>
+              {outs.map((isActive, idx) => (
+                <Ellipse key={idx} active={isActive} />
+              ))}
+            </OutCount>
+            <OnDeckWrapper>
+              {onDeckPlayers.length > 0 ? (
+                onDeckPlayers.map((p) => (
+                  <div key={p.playerId}>
+                    {p.battingOrder} {p.playerName}
+                  </div>
+                ))
+              ) : (
+                <div>대기타석입니다</div>
+              )}
+            </OnDeckWrapper>
+          </SideWrapper>
+          <LeftSideWrapper>
+            <InningBoard></InningBoard>
+            <LittleScoreBoardWrapper></LittleScoreBoardWrapper>
+          </LeftSideWrapper>
           <ResetDot
             style={{ left: "75vw", top: "2vh" }}
             onClick={() => {
