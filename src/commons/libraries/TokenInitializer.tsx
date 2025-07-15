@@ -32,7 +32,7 @@ export default function TokenInitializer() {
         // 리프레시 실패하면 로그인 페이지로
         router.push("/login");
       });
-  }, [router]);
+  }, []);
 
   return null;
 }
