@@ -266,7 +266,7 @@ export default function SignUpPage() {
             </WrapperForEmail>
 
             {errors.verificationCode ? (
-              <ErrorMessage>{errors.verificationCode.message}</ErrorMessage>
+              <ErrorMessage>{`이메일 인증번호를 입력해주세요`}</ErrorMessage>
             ) : (
               <ErrorMessage />
             )}

@@ -240,6 +240,5 @@ export const WrapperForEmail = styled.div<{ $disabled?: boolean }>`
   border-bottom: 1px solid #ccc;
 
   /* verificationToken이 있을 때 배경색 적용 */
-  background-color: ${({ $disabled }) =>
-    $disabled ? "#e8e8e8" : "transparent"};
+  background-color: transparent;
 `;

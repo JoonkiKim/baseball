@@ -54,43 +54,133 @@ function MyApp({ Component, pageProps }) {
     return () => window.removeEventListener("resize", setVh);
   }, []);
 
-  const globalStyles = css`
+  // const globalStyles = css`
+  //   @font-face {
+  //     font-family: "KBO Dia Gothic";
+  //     src: url("/fonts/KBO-Dia-Gothic_medium.woff") format("woff");
+  //     font-weight: normal;
+  //     font-style: normal;
+  //   }
+  //   * {
+  //     margin: 0;
+  //     padding: 0;
+  //     box-sizing: border-box;
+  //   }
+
+  //   html,
+  //   body,
+  //   #__next {
+  //     font-family: "KBO-Dia-Gothic_medium";
+  //     background-color: ${isResultPage ? "#f2f2f2" : "#ffffff"};
+  //     margin: 0;
+  //     padding: 0;
+  //     /* height: 100vh; */
+  //     /* height: calc(100% - 140px); */
+  //   }
+
+  //   /* 2) RootWebArea가 부모 높이(=100%)를 상속하도록 */
+  //   .RootWebArea {
+  //     /* height: 100%; */
+  //     /* 또는 flex 레이아웃이라면 flex: 1; */
+  //   }
+
+  //   html,
+  //   body,
+  //   #__next,
+  //   .RootWebArea {
+  //     /* height: 100%; */
+  //     margin: 0;
+  //     padding: 0;
+  //   }
+  // `;
+
+  const pretendardStyles = css`
+    /* Thin (100) */
     @font-face {
-      font-family: "KBO Dia Gothic";
-      src: url("/fonts/KBO-Dia-Gothic_medium.woff") format("woff");
-      font-weight: normal;
+      font-family: "Pretendard";
+      src: url("/fonts/Pretendard-Thin.otf") format("opentype");
+      font-weight: 100;
       font-style: normal;
-    }
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+      font-display: swap;
     }
 
+    /* ExtraLight (200) */
+    @font-face {
+      font-family: "Pretendard";
+      src: url("/fonts/Pretendard-ExtraLight.otf") format("opentype");
+      font-weight: 200;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    /* Light (300) */
+    @font-face {
+      font-family: "Pretendard";
+      src: url("/fonts/Pretendard-Light.otf") format("opentype");
+      font-weight: 300;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    /* Regular (400) */
+    @font-face {
+      font-family: "Pretendard";
+      src: url("/fonts/Pretendard-Regular.otf") format("opentype");
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    /* Medium (500) */
+    @font-face {
+      font-family: "Pretendard";
+      src: url("/fonts/Pretendard-Medium.otf") format("opentype");
+      font-weight: 500;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    /* SemiBold (600) */
+    @font-face {
+      font-family: "Pretendard";
+      src: url("/fonts/Pretendard-SemiBold.otf") format("opentype");
+      font-weight: 600;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    /* Bold (700) */
+    @font-face {
+      font-family: "Pretendard";
+      src: url("/fonts/Pretendard-Bold.otf") format("opentype");
+      font-weight: 700;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    /* ExtraBold (800) */
+    @font-face {
+      font-family: "Pretendard";
+      src: url("/fonts/Pretendard-ExtraBold.otf") format("opentype");
+      font-weight: 800;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    /* Black (900) */
+    @font-face {
+      font-family: "Pretendard";
+      src: url("/fonts/Pretendard-Black.otf") format("opentype");
+      font-weight: 900;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    /* 전역 기본 폰트 지정 */
     html,
     body,
     #__next {
-      font-family: "KBO-Dia-Gothic_medium";
-      background-color: ${isResultPage ? "#f2f2f2" : "#ffffff"};
-      margin: 0;
-      padding: 0;
-      /* height: 100vh; */
-      /* height: calc(100% - 140px); */
-    }
-
-    /* 2) RootWebArea가 부모 높이(=100%)를 상속하도록 */
-    .RootWebArea {
-      /* height: 100%; */
-      /* 또는 flex 레이아웃이라면 flex: 1; */
-    }
-
-    html,
-    body,
-    #__next,
-    .RootWebArea {
-      /* height: 100%; */
-      margin: 0;
-      padding: 0;
+      font-family: "Pretendard", sans-serif;
     }
   `;
 
@@ -102,7 +192,7 @@ function MyApp({ Component, pageProps }) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/icons/ball.png" />
       </Head>
-      <Global styles={globalStyles} />
+      <Global styles={pretendardStyles} />
       <RecoilRoot>
         <TokenInitializer />
         <Layout>

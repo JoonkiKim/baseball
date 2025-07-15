@@ -516,6 +516,9 @@ export const NameBadge = styled.div`
   border: 0.05vh solid var(--snu-blue);
   border-radius: 50px;
   padding: 1vh 1vw;
+  font-family: "Pretendard", sans-serif;
+  font-weight: 600;
+
   display: flex;
   align-items: center;
   justify-content: center;
