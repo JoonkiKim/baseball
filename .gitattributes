@@ -1,3 +1,4 @@
 .env              merge=ours
 src/commons/apis/api.tsx   merge=ours
 src/commons/apis/api2.tsx  merge=ours
+src/commons/libraries/TokenInitializer.tsx  merge=ours
