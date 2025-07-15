@@ -5,6 +5,7 @@ let inMemoryAccessToken: string | null = null;
 let recoilSetter: SetterOrUpdater<string | null> | null = null;
 
 /** _app.tsx에서 useSetRecoilState를 한 번만 전달하세요 */
+//  Recoil과 인메모리 캐시를 “이어 주는” 연결 고리
 export function registerAccessTokenSetter(
   setter: SetterOrUpdater<string | null>
 ) {

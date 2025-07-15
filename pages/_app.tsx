@@ -36,12 +36,12 @@ function MyApp({ Component, pageProps }) {
   //   registerAccessTokenSetter(setToken);
   // }, [setToken]);
 
-  // // 2) 초기 로드 시 refresh 호출 → atom에 저장
-  // useEffect(() => {
-  //   API.post("/auth/refresh")
-  //     .then((res) => setAccessToken(res.data.accessToken))
-  //     .catch(() => router.push("/login"));
-  // }, []);
+  // // // 2) 초기 로드 시 refresh 호출 → atom에 저장
+  // // useEffect(() => {
+  // //   API.post("/auth/refresh")
+  // //     .then((res) => setAccessToken(res.data.accessToken))
+  // //     .catch(() => router.push("/login"));
+  // // }, []);
 
   const globalStyles = css`
     @font-face {
