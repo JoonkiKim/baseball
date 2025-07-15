@@ -16,6 +16,7 @@ import {
   LoadingIcon,
   LoadingOverlay,
 } from "../../../../commons/libraries/loadingOverlay";
+import { useRouter } from "next/router";
 
 // 폼에서 다룰 데이터 타입 정의
 interface LoginFormData {
@@ -42,6 +43,7 @@ export default function ResetPwPageComponent() {
   } = useForm({
     resolver: yupResolver(schema),
   });
+  const router = useRouter();
 
   const token = "예시 토큰";
 
@@ -56,6 +58,7 @@ export default function ResetPwPageComponent() {
         newPassword: data.newPw,
       });
       alert("비밀번호가 성공적으로 변경되었습니다.");
+      router.push("/mainCalendar");
     } catch (error: any) {
       console.error(error);
       alert(

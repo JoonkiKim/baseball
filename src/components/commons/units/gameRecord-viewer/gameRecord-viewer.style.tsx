@@ -8,15 +8,15 @@ const large =
 const xlarge = "@media only screen and (min-width: 1025px)";
 
 // 메인 컨테이너
-export const GameRecordContainer = styled.div<{ reconstructMode: boolean }>`
+export const GameRecordContainer = styled.div`
   width: 100%;
   max-width: 100vw;
+  /* margin-top: 3vh; */
+  background-color: rgba(0, 0, 0, 0.05);
   display: flex;
   flex-direction: column;
   align-items: center;
   min-height: 100vh;
-  background-color: ${({ reconstructMode }) =>
-    reconstructMode ? "#b8b8b8" : "rgba(0, 0, 0, 0.05)"};
 `;
 
 export const ScoreBoardWrapper = styled.div`
@@ -32,6 +32,7 @@ export const ScoreBoardWrapper = styled.div`
   align-items: center;
   border: 1px solid black;
   border-radius: 10px;
+  margin-bottom: 3vh;
 `;
 
 /** ─────────────────────────────────────────────────────────
@@ -147,9 +148,9 @@ export const ControlButton = styled.button`
   width: 26vw;
   height: 5vh;
   border: 1px solid #999;
-  font-family: "KBO-Dia-Gothic_medium";
-  /* font-weight: bold; */
-  font-size: 1rem;
+  font-family: "KBO-Dia-Gothic_bold";
+  font-weight: bold;
+  font-size: 0.813rem;
   color: #ffffff;
   cursor: pointer;
   border-radius: 20px;
@@ -230,7 +231,7 @@ export const ScoreDisplay = styled.div`
 export const PlayersRow = styled.div`
   display: flex;
   width: 90%;
-  height: 12vh;
+  height: 20vh;
   border-bottom: 1px solid #ccc;
   background-color: #ffffff;
   border-radius: 2vh;
@@ -466,7 +467,6 @@ export const OverlaySvg = styled.svg`
 
 export const DiamondSvg = styled.svg`
   position: absolute;
-  z-index: 0;
   left: 50%;
   top: 55%;
   transform: translate(-50%, -50%);
@@ -509,7 +509,6 @@ export const ResetDot = styled.div`
 `;
 export const NameBadge = styled.div`
   position: absolute;
-  z-index: 1;
   left: 50%;
   top: 85%;
   transform: translate(0, -50%);
@@ -543,7 +542,6 @@ export const ReconstructionWrapper = styled.div`
   font-family: "KBO-Dia-Gothic_medium";
   /* font-weight: bold; */
   font-size: 0.813rem;
-  background-color: #ffffff;
   color: #ffffff;
   box-shadow: 0px 21px 6px rgba(0, 0, 0, 0),
     //
@@ -594,17 +592,27 @@ export const ReconstructionButtonWrapper = styled.div`
   align-items: center;
 `;
 
+// export const ReconstructionSwitch = styled(Switch)`
+//   /* 필요하다면 여기에 커스텀 스타일 추가 */
+//   width: 4vw;
+//   height: 3vh;
+//   .ant-switch-handle {
+//     top: 50% !important;
+//     transform: translateY(-50%) !important;
+//   }
+// `;
+
 export const ReconstructionSwitch = styled(Switch)`
   /* 1) 트랙 너비 조정 (높이는 이미 custom 됐으니 필요 없다면 생략) */
   && {
-    background-color: #e5e5ea !important;
+    background-color: #bdbdbd !important;
     width: 11vw !important; /* 원하는 가로 길이 */
     min-width: 11vw !important;
     height: 3.3vh !important;
   }
   /* ON 상태의 트랙 색 */
   &.ant-switch-checked {
-    background-color: #0f0f70 !important; /* 원하는 ON 트랙 색 */
+    background-color: #4caf50 !important; /* 원하는 ON 트랙 색 */
   }
 
   /* 2) 내부 여백: 패딩만큼 핸들이 옆으로 빠지지 않도록 margin 설정 */
@@ -627,62 +635,4 @@ export const ReconstructionSwitch = styled(Switch)`
     left: calc(100% - 5px - 18px) !important;
     /* 100% 트랙 너비에서 padding(2px)과 핸들 너비(18px)만큼 뺀 위치 */
   }
-`;
-
-export const OnDeckWrapper = styled.div`
-  position: absolute;
-  width: 6vh;
-  height: 6vh;
-  /* border: 1px solid #999; */
-  font-family: "KBO-Dia-Gothic_medium";
-  font-weight: bold;
-  font-size: 0.813rem;
-  background-color: gray;
-
-  border-radius: 12px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  /* align-items: center; */
-`;
-
-export const OutZoneWrapper = styled.div`
-  position: absolute;
-  /* 부모의 가운데(가로·세로) */
-  top: 50%;
-  left: 50%;
-
-  width: 80%;
-  height: 80%;
-  /* 자신의 크기의 절반만큼 당겨서 진짜 중앙에 위치 */
-  transform: translate(-50%, -50%);
-  opacity: 0.5;
-  /* background-color: red; */
-  border-radius: 12px;
-
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  z-index: 1;
-  pointer-events: none;
-`;
-
-export const CustomBoundaryWrapper = styled.div`
-  position: absolute;
-  /* 부모의 가운데(가로·세로) */
-  top: 50%;
-  left: 50%;
-
-  width: 101%; // 약간의 점만 넘기면 되니까 1%만 넘겨보기
-  height: 100%;
-  /* 자신의 크기의 절반만큼 당겨서 진짜 중앙에 위치 */
-  transform: translate(-45%, -45%);
-  opacity: 0.5;
-  background-color: transparent;
-  /* background-color: red; */
-  border-radius: 12px;
-
-  z-index: 1;
-  pointer-events: none;
 `;

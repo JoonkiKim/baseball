@@ -60,6 +60,10 @@ export default function MypageComponent() {
       <Title>내 정보</Title>
       <PageWrapper>
         <InfoRowWrapper>
+          <LabelWrapper>이메일</LabelWrapper>
+          <EmailWrapper>{user.email}</EmailWrapper>
+        </InfoRowWrapper>
+        <InfoRowWrapper>
           <LabelWrapper>닉네임</LabelWrapper>
           <ValueWrapper
             onClick={() => setIsAskModalOpen(true)}
@@ -67,11 +71,6 @@ export default function MypageComponent() {
           >
             {user.nickname}
           </ValueWrapper>
-        </InfoRowWrapper>
-
-        <InfoRowWrapper>
-          <LabelWrapper>이메일</LabelWrapper>
-          <EmailWrapper>{user.email}</EmailWrapper>
         </InfoRowWrapper>
 
         <ActionWrapper>

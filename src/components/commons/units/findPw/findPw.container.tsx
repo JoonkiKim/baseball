@@ -17,6 +17,7 @@ import {
   LoadingIcon,
   LoadingOverlay,
 } from "../../../../commons/libraries/loadingOverlay";
+import { useRouter } from "next/router";
 
 // 폼에서 다룰 데이터 타입 정의
 interface LoginFormData {
@@ -42,14 +43,14 @@ export default function FindPwPageComponent() {
   });
 
   // 비밀번호 표시/숨기기 상태
-  const [showPassword, setShowPassword] = useState(false);
+  // const [showPassword, setShowPassword] = useState(false);
 
-  // 비밀번호 표시/숨기기 토글
-  const handleTogglePassword = () => {
-    setShowPassword(!showPassword);
-  };
+  // // 비밀번호 표시/숨기기 토글
+  // const handleTogglePassword = () => {
+  //   setShowPassword(!showPassword);
+  // };
   const [isSubmitting, setIsSubmitting] = useState(false);
-
+  const router = useRouter();
   // 폼 제출 핸들러
   const onSubmit = async (data: LoginFormData) => {
     if (isSubmitting) return; // 이미 제출 중이면 무시
@@ -60,6 +61,7 @@ export default function FindPwPageComponent() {
         email: data.email,
       });
       alert("비밀번호 재설정 링크가 전송되었습니다.");
+      router.push("/mainCalendar");
     } catch (error: any) {
       console.error(error);
       alert(

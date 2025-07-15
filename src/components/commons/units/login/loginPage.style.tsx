@@ -14,7 +14,7 @@ export const Container = styled.div`
   /* background-color: red; */
   display: flex;
   flex-direction: column;
-  margin-top: 15vh;
+  margin-top: 10vh;
   align-items: center; /* 수평 중앙 정렬 */
   justify-content: center;
   padding: 20px;
@@ -179,4 +179,11 @@ export const MoveToFindPw = styled.div`
   justify-content: left;
   /* justify-content: ; */
   /* background-color: red; */
+`;
+
+export const LogoImage = styled.img`
+  display: block;
+  width: 40vw; /* 원하는 너비로 조정 */
+  height: auto;
+  margin: 0 auto 2rem; /* 위아래 간격 조정 */
 `;

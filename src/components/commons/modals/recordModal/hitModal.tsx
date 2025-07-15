@@ -1,23 +1,24 @@
 // src/components/modals/hitModal.tsx
 import { useRouter } from "next/router";
-import API from "../../../commons/apis/api";
+import API from "../../../../commons/apis/api";
 import {
   ModalButton,
   ModalContainer,
   ModalOverlay,
   ModalTitle,
-} from "./modal.style";
+} from "./../modal.style";
 import { useState } from "react";
 import {
   LoadingIcon,
   LoadingOverlay,
-} from "../../../commons/libraries/loadingOverlay";
-import ErrorAlert from "../../../commons/libraries/showErrorCode";
+} from "../../../../commons/libraries/loadingOverlay";
+import ErrorAlert from "../../../../commons/libraries/showErrorCode";
 
 interface IModalProps {
   setIsHitModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
   playerId: number;
   onSuccess?: () => Promise<void>;
+  onTypeSelect?: () => void;
 }
 
 const mapping: Record<string, string> = {
@@ -37,20 +38,19 @@ export default function HitModal(props: IModalProps) {
     setIsSubmitting(true);
 
     try {
-      const endpoint = `/games/${router.query.recordId}/plate-appearance`;
-      const res = await API.post(
-        endpoint,
-        { result: mapping[Type] }
-        // ,
-        // { withCredentials: true }
-      );
-      console.log({ result: mapping[Type] });
-      // POST 성공 시 부모 onSuccess 콜백 실행
+      // [배포 시 다시 켜기]
+      // const endpoint = `/games/${router.query.recordId}/plate-appearance`;
+      // const res = await API.post(
+      //   endpoint,
+      //   { result: mapping[Type] }
+      //   // ,
+      //   // { withCredentials: true }
+      // );
+      // console.log({ result: mapping[Type] });
 
       if (props.onSuccess) await props.onSuccess();
-      // props.setIsHitModalOpen(false);
-      // alert(`기록 전송 완료\n${Type}`);
-      console.log(res.data);
+
+      // console.log(res.data);
     } catch (error) {
       console.error("안타 기록 전송 오류:", error);
       // alert("안타 기록 전송 오류");
@@ -60,6 +60,8 @@ export default function HitModal(props: IModalProps) {
       setIsSubmitting(false);
       // ② 모달 닫기
       props.setIsHitModalOpen(false);
+      // ③ 그라운드 기록 모달 열기
+      props.onTypeSelect?.();
     }
   };
 

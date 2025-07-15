@@ -7,16 +7,44 @@ const large =
   "@media only screen and (min-width: 769px) and (max-width: 1024px)";
 const xlarge = "@media only screen and (min-width: 1025px)";
 
+export const ModalOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5); /* 어두운 반투명 배경 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+`;
+
+export const ModalContainer = styled.div`
+  background-color: #fff;
+  position: relative;
+  /* margin-top: 20px; */
+  width: 90%;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 101;
+`;
+
 // 메인 컨테이너
-export const GameRecordContainer = styled.div<{ reconstructMode: boolean }>`
+export const GameRecordContainer = styled.div`
   width: 100%;
   max-width: 100vw;
+  /* margin-top: 3vh; */
+  background-color: rgba(0, 0, 0, 0.05);
   display: flex;
   flex-direction: column;
   align-items: center;
   min-height: 100vh;
-  background-color: ${({ reconstructMode }) =>
-    reconstructMode ? "#b8b8b8" : "rgba(0, 0, 0, 0.05)"};
 `;
 
 export const ScoreBoardWrapper = styled.div`
@@ -147,9 +175,9 @@ export const ControlButton = styled.button`
   width: 26vw;
   height: 5vh;
   border: 1px solid #999;
-  font-family: "KBO-Dia-Gothic_medium";
-  /* font-weight: bold; */
-  font-size: 1rem;
+  font-family: "KBO-Dia-Gothic_bold";
+  font-weight: bold;
+  font-size: 0.813rem;
   color: #ffffff;
   cursor: pointer;
   border-radius: 20px;
@@ -415,9 +443,8 @@ export const OrderBadge = styled.div`
 export const GraphicWrapper = styled.div<{ outside?: boolean }>`
   position: relative;
   overflow: visible;
-  width: 90%;
-  height: 40vh;
-  /* background-color: red; */
+  width: 98%;
+  height: 50vh;
 
   background: ${(p) => (p.outside ? "red" : "#2c660d")};
   border-radius: 2vh;
@@ -466,7 +493,6 @@ export const OverlaySvg = styled.svg`
 
 export const DiamondSvg = styled.svg`
   position: absolute;
-  z-index: 0;
   left: 50%;
   top: 55%;
   transform: translate(-50%, -50%);
@@ -509,7 +535,6 @@ export const ResetDot = styled.div`
 `;
 export const NameBadge = styled.div`
   position: absolute;
-  z-index: 1;
   left: 50%;
   top: 85%;
   transform: translate(0, -50%);
@@ -539,12 +564,12 @@ export const NameText = styled.div`
 export const ReconstructionWrapper = styled.div`
   width: 44vw;
   height: 5vh;
-  /* border: 1px solid #999; */
+  margin-top: 1vh;
+  margin-left: 1vh; // 단위 통일을 위해 꼭 vh로 할것
   font-family: "KBO-Dia-Gothic_medium";
   /* font-weight: bold; */
   font-size: 0.813rem;
   background-color: #ffffff;
-  color: #ffffff;
   box-shadow: 0px 21px 6px rgba(0, 0, 0, 0),
     //
     0px 14px 5px rgba(0, 0, 0, 0),
@@ -597,14 +622,14 @@ export const ReconstructionButtonWrapper = styled.div`
 export const ReconstructionSwitch = styled(Switch)`
   /* 1) 트랙 너비 조정 (높이는 이미 custom 됐으니 필요 없다면 생략) */
   && {
-    background-color: #e5e5ea !important;
+    background-color: #bdbdbd !important;
     width: 11vw !important; /* 원하는 가로 길이 */
     min-width: 11vw !important;
     height: 3.3vh !important;
   }
   /* ON 상태의 트랙 색 */
   &.ant-switch-checked {
-    background-color: #0f0f70 !important; /* 원하는 ON 트랙 색 */
+    background-color: #4caf50 !important; /* 원하는 ON 트랙 색 */
   }
 
   /* 2) 내부 여백: 패딩만큼 핸들이 옆으로 빠지지 않도록 margin 설정 */
@@ -629,53 +654,131 @@ export const ReconstructionSwitch = styled(Switch)`
   }
 `;
 
-export const OnDeckWrapper = styled.div`
-  position: absolute;
-  width: 6vh;
-  height: 6vh;
+export const ModalBottomWrapper = styled.div`
+  width: 100%;
+  height: 5vh;
+  margin-top: 2vh;
   /* border: 1px solid #999; */
+  /* background-color: red; */
   font-family: "KBO-Dia-Gothic_medium";
-  font-weight: bold;
+  /* font-weight: bold; */
   font-size: 0.813rem;
-  background-color: gray;
+  color: #ffffff;
 
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+`;
+
+export const ModalBottomRunnerWrapper = styled.div`
+  width: 44vw;
+  height: 5vh;
+
+  font-family: "KBO-Dia-Gothic_medium";
+  /* font-weight: bold; */
+  font-size: 0.813rem;
+  background-color: #ffffff;
+  box-shadow: 0px 21px 6px rgba(0, 0, 0, 0),
+    //
+    0px 14px 5px rgba(0, 0, 0, 0),
+    //
+    0px 8px 5px rgba(0, 0, 0, 0.02),
+    //
+    0px 3px 3px rgba(0, 0, 0, 0.03),
+    //
+    0px 1px 2px rgba(0, 0, 0, 0.03);
   border-radius: 12px;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  /* justify-content: center; */
+  align-items: center;
+`;
+
+export const ModalBottomRedoUndoWrapper = styled.div`
+  width: 30vw;
+  /* background-color: red; */
+  margin-left: auto;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+  align-items: center;
+`;
+
+// Redo 아이콘용
+export const RedoIcon = styled.div`
+  margin-top: 1vh;
+  width: 2rem;
+  height: 2rem;
+  background-image: url("/images/redo2.png");
+  background-repeat: no-repeat;
+  background-position: center center; /* ← 축을 둘 다 지정 */
+  background-size: contain;
+  cursor: pointer;
+`;
+
+// Undo 아이콘용
+export const UndoIcon = styled.div`
+  margin-top: 1vh;
+  /* padding-top: 1vh; */
+  /* background-color: red; */
+  width: 2rem;
+  height: 2rem;
+  background-image: url("/images/undo2.png");
+  background-repeat: no-repeat;
+  background-position: center center; /* ← 축을 둘 다 지정 */
+  background-size: contain;
+
+  cursor: pointer;
+`;
+
+export const ModalBottomRunnerTitle = styled.div`
+  width: 27.5vw;
+  height: 4vh;
+  /* border: 1px solid #999; */
+  font-family: "KBO-Dia-Gothic_bold";
+  font-weight: bold;
+  font-size: 0.813rem;
+  color: black;
+  /* background-color: red; */
+  cursor: pointer;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: row;
   justify-content: center;
-  /* align-items: center; */
+  align-items: center;
 `;
 
 export const OutZoneWrapper = styled.div`
-  position: absolute;
+  position: fixed;
   /* 부모의 가운데(가로·세로) */
-  top: 50%;
+  top: 45%;
   left: 50%;
 
-  width: 80%;
-  height: 80%;
+  width: 60%;
+  height: 40%;
   /* 자신의 크기의 절반만큼 당겨서 진짜 중앙에 위치 */
   transform: translate(-50%, -50%);
   opacity: 0.5;
-  /* background-color: red; */
+  /* background-color: blue; */
   border-radius: 12px;
 
   display: flex;
   justify-content: center;
   align-items: center;
 
-  z-index: 1;
+  z-index: 103;
   pointer-events: none;
 `;
 
 export const CustomBoundaryWrapper = styled.div`
-  position: absolute;
+  position: fixed;
   /* 부모의 가운데(가로·세로) */
-  top: 50%;
+  top: 45%;
   left: 50%;
 
-  width: 101%; // 약간의 점만 넘기면 되니까 1%만 넘겨보기
-  height: 100%;
+  width: 85%; // 약간의 점만 넘기면 되니까 1%만 넘겨보기
+  height: 50%;
   /* 자신의 크기의 절반만큼 당겨서 진짜 중앙에 위치 */
   transform: translate(-45%, -45%);
   opacity: 0.5;
@@ -683,6 +786,6 @@ export const CustomBoundaryWrapper = styled.div`
   /* background-color: red; */
   border-radius: 12px;
 
-  z-index: 1;
+  z-index: 104;
   pointer-events: none;
 `;

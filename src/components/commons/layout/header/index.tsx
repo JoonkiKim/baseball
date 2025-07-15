@@ -97,19 +97,11 @@ export default function LayoutHeader() {
   return (
     <Background>
       <PageHeader>
-        <SideBarNone />
+        {/* <SideBarNone /> */}
         <Link href="/" passHref>
           <PageTitle as="a">SNU BASEBALL</PageTitle>
         </Link>
-        <SideBar>
-          <img
-            src="/images/profile.png" /* ✅ 이미지 경로 교체 */
-            width={24}
-            height={24}
-            alt="profile"
-            style={{ objectFit: "contain" }}
-          />
-        </SideBar>
+        {/* <SideBar></SideBar> */}
       </PageHeader>
     </Background>
   );
