@@ -8,7 +8,7 @@ import {
 
 const API = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
-  withCredentials: true, // refreshToken 쿠키 전송
+  withCredentials: false, // refreshToken 쿠키 전송
   headers: {
     "Content-Type": "application/json",
   },
@@ -38,30 +38,66 @@ API.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+// API.interceptors.response.use(
+//   (res) => res,
+//   async (
+//     error: AxiosError & { config?: AxiosRequestConfig & { _retry?: boolean } }
+//   ) => {
+//     const originalReq = error.config!;
+//     if (error.response?.status === 401 && !originalReq._retry) {
+//       originalReq._retry = true;
+//       try {
+//         // refreshToken 쿠키로 새 accessToken 요청
+//         const { data } = await API.post(`/auth/refresh`);
+//         setAccessToken(data.accessToken);
+
+//         // 원래 요청 헤더에 새 토큰 세팅 후 재시도
+//         if (originalReq.headers) {
+//           originalReq.headers.Authorization = `Bearer ${data.accessToken}`;
+//         }
+//         return API(originalReq);
+//       } catch {
+//         // 리프레시 실패 시 토큰 초기화 & 로그인 페이지로 이동
+//         clearAccessToken();
+//         window.location.href = "/login";
+//       }
+//     }
+//     return Promise.reject(error);
+//   }
+// );
+
 API.interceptors.response.use(
   (res) => res,
   async (
     error: AxiosError & { config?: AxiosRequestConfig & { _retry?: boolean } }
   ) => {
     const originalReq = error.config!;
+    const url = originalReq.url ?? "";
+
+    // ── 1) "auth/refresh" 요청 실패 시에는 재시도 로직을 건너뛰고 곧바로 로그인으로 ──
+    if (url.endsWith("/auth/refresh")) {
+      clearAccessToken();
+      window.location.href = "/login";
+      return Promise.reject(error);
+    }
+
+    // ── 2) 그 외 401 에러에 대해서만 한 번 재시도 ──
     if (error.response?.status === 401 && !originalReq._retry) {
       originalReq._retry = true;
       try {
-        // refreshToken 쿠키로 새 accessToken 요청
-        const { data } = await API.post(`/auth/refresh`);
+        const { data } = await API.post("/auth/refresh");
         setAccessToken(data.accessToken);
 
-        // 원래 요청 헤더에 새 토큰 세팅 후 재시도
         if (originalReq.headers) {
           originalReq.headers.Authorization = `Bearer ${data.accessToken}`;
         }
         return API(originalReq);
       } catch {
-        // 리프레시 실패 시 토큰 초기화 & 로그인 페이지로 이동
         clearAccessToken();
         window.location.href = "/login";
       }
     }
+
     return Promise.reject(error);
   }
 );
