@@ -412,17 +412,94 @@ export const OrderBadge = styled.div`
  *  v2경기기록 관련
  * ───────────────────────────────────────────────────────── */
 
-export const GraphicWrapper = styled.div<{ outside?: boolean }>`
+export const GraphicWrapper = styled.div`
   position: relative;
   overflow: visible;
   width: 90%;
   height: 40vh;
   /* background-color: red; */
+  z-index: 0;
+  /* ─── 배경 이미지 전체 덮기 ─── */
+  background-image: url("/images/ground-without-home.png");
+  background-size: cover; /* 컨테이너에 꽉 채우기 */
+  background-position: center; /* 가운데를 기준으로 하기 */
+  background-repeat: no-repeat; /* 반복하지 않기 */
 
-  background: ${(p) => (p.outside ? "red" : "#2c660d")};
   border-radius: 2vh;
   /* margin: 3vh 0; */
 `;
+
+export const HomeWrapper = styled.div`
+  /* position: relative;
+  overflow: visible;
+  width: 90%;
+  height: 40vh; */
+  position: absolute; /* ② 절대 위치로 변경 */
+  inset: 0;
+  /* background-color: red; */
+  z-index: 5;
+  /* ─── 배경 이미지 전체 덮기 ─── */
+  background-image: url("/images/home.png");
+  background-size: cover; /* 컨테이너에 꽉 채우기 */
+  background-position: center; /* 가운데를 기준으로 하기 */
+  background-repeat: no-repeat; /* 반복하지 않기 */
+
+  border-radius: 2vh;
+  /* margin: 3vh 0; */
+`;
+
+export const LineWrapper = styled.div`
+  /* position: relative;
+  overflow: visible;
+  width: 90%;
+  height: 40vh; */
+  position: absolute; /* ② 절대 위치로 변경 */
+  inset: 0;
+  /* background-color: red; */
+  z-index: 7;
+  /* ─── 배경 이미지 전체 덮기 ─── */
+  background-image: url("/images/line.png");
+  background-size: cover; /* 컨테이너에 꽉 채우기 */
+  background-position: center; /* 가운데를 기준으로 하기 */
+  background-repeat: no-repeat; /* 반복하지 않기 */
+
+  border-radius: 2vh;
+  /* margin: 3vh 0; */
+`;
+
+export const HomeBaseWrapper = styled.div<{ active: boolean }>`
+  position: absolute;
+  inset: 0;
+  z-index: 13;
+
+  /* 배경색을 흰/파랑으로 토글 */
+  background-color: ${({ active }) =>
+    active ? "blue" /* 기본 흰색 png 보여줄 땐 투명 */ : "white"};
+
+  /* mask 에 흰색 png 파일의 알파 채널을 씁니다 */
+  mask-image: url("/images/home-base-white-1.png");
+  mask-size: cover;
+  mask-position: center;
+  mask-repeat: no-repeat;
+
+  /* 사파리(webkit) 지원을 위해 */
+  -webkit-mask-image: url("/images/home-base-white-1.png");
+  -webkit-mask-size: cover;
+  -webkit-mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+`;
+
+export const Ground = styled.div<{ outside?: boolean }>`
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  height: 100%;
+  background: ${(p) => (p.outside ? "red" : "transparent")};
+
+  border-radius: 2vh;
+  /* margin: 3vh 0; */
+`;
+
 export const FullImage = styled.img`
   position: absolute;
   top: 0;
@@ -466,21 +543,26 @@ export const OverlaySvg = styled.svg`
 
 export const DiamondSvg = styled.svg`
   position: absolute;
-  z-index: 0;
+  z-index: 1;
   left: 50%;
-  top: 55%;
+  top: 56%;
   transform: translate(-50%, -50%);
-  width: 60%;
+  width: 47%;
   height: auto;
   overflow: visible;
-  fill: green;
+  fill: transparent;
+  background-image: url("/images/diamond.png");
+  background-size: cover; /* 컨테이너에 꽉 채우기 */
+  background-position: center; /* 가운데를 기준으로 하기 */
+  background-repeat: no-repeat; /* 반복하지 않기 */
+
+  /* border: 1px solid black; */
   /* background-color: red; */
 
   /* 기존 inner 기본 스타일 */
   & .inner {
     fill: #ffffff;
-    stroke: #000000;
-    stroke-width: 0.2;
+    stroke: none;
   }
 
   /* 여기에 highlight 스타일 추가 */
@@ -506,10 +588,13 @@ export const ResetDot = styled.div`
   background-repeat: no-repeat;
   background-position: center;
   cursor: pointer;
+
+  z-index: 90; /* ★ 여기를 높게 주면 다른 요소보다 위에 올라옵니다 */
+  pointer-events: auto;
 `;
 export const NameBadge = styled.div`
   position: absolute;
-  z-index: 1;
+  z-index: 999;
   left: 50%;
   top: 85%;
   transform: translate(0, -50%);
@@ -649,16 +734,16 @@ export const OnDeckWrapper = styled.div`
 export const OutZoneWrapper = styled.div`
   position: absolute;
   /* 부모의 가운데(가로·세로) */
-  top: 50%;
+  top: 55%;
   left: 50%;
 
   width: 80%;
-  height: 80%;
+  aspect-ratio: 1 / 1; /* 항상 정사각형 비율 유지 */
   /* 자신의 크기의 절반만큼 당겨서 진짜 중앙에 위치 */
   transform: translate(-50%, -50%);
   opacity: 0.5;
   /* background-color: red; */
-  border-radius: 12px;
+  border-radius: 50%; /* 완전한 원 */
 
   display: flex;
   justify-content: center;
@@ -685,4 +770,16 @@ export const CustomBoundaryWrapper = styled.div`
 
   z-index: 1;
   pointer-events: none;
+`;
+
+export const HomePlateOverlay = styled.svg`
+  position: absolute;
+  left: 50%;
+  top: 80%;
+  border: none;
+  transform: translate(-50%, -50%);
+  width: 5%;
+  height: auto;
+  z-index: 10; /* 맨 위로 */
+  pointer-events: none; /* 드래그등 이벤트 투명화 */
 `;

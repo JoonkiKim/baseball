@@ -66,6 +66,11 @@ import {
   OnDeckWrapper,
   OutZoneWrapper,
   CustomBoundaryWrapper,
+  Ground,
+  HomeWrapper,
+  LineWrapper,
+  HomePlateOverlay,
+  HomeBaseWrapper,
 } from "./gameRecord-v2.style";
 import HitModal from "../../modals/recordModal/hitModal";
 import OutModal from "../../modals/recordModal/outModal";
@@ -586,7 +591,7 @@ export default function GameRecordPageV2() {
 
   // wrapper ref (배지·베이스 좌표 계산용)
   const wrapperRef = useRef<HTMLDivElement>(null);
-
+  // const wrapperRef = useRef<SVGSVGElement | null>(null);
   // 배지 설정
   interface BadgeConfig {
     id: string;
@@ -963,6 +968,12 @@ export default function GameRecordPageV2() {
           poly.classList.add("highlight");
           setTimeout(() => poly.classList.remove("highlight"), 1000);
 
+          // ★ 홈베이스일 때 백그라운드 변경
+          if (baseId === "home-base") {
+            setIsHomeBaseActive(true);
+            setTimeout(() => setIsHomeBaseActive(false), 1000);
+          }
+
           // ── 통과 기록은 아직 지나가지 않은 경우에만 ──
           if (order > maxReachedRef.current[badgeId]) {
             passedBasesRef.current[badgeId][baseId] = true;
@@ -1306,6 +1317,19 @@ export default function GameRecordPageV2() {
     }
   };
 
+  // 홈베이스 색칠
+
+  const [isHomeBaseActive, setIsHomeBaseActive] = useState(false);
+  // 이미지 프리로드
+  useEffect(() => {
+    const img = new Image();
+    img.src = "/images/home-base-blue-2.png";
+    // (옵션) 로드 완료 콜백
+    img.onload = () => {
+      console.log("home-base-blue-2.png preloaded!");
+    };
+  }, []);
+
   return (
     <GameRecordContainer reconstructMode={isReconstructMode}>
       <ScoreBoardWrapper>
@@ -1379,10 +1403,19 @@ export default function GameRecordPageV2() {
         onDragEnd={onAnyDragEnd}
       >
         <GraphicWrapper
+          // as="svg"
           ref={wrapperRef}
-          outside={isOutside}
-          style={{ position: "relative" }}
+          // viewBox="0 0 110 110"
+          // preserveAspectRatio="xMidYMid meet"
+
+          // outside={isOutside}
         >
+          <HomeWrapper />
+          <LineWrapper />
+          <HomeBaseWrapper active={isHomeBaseActive} />
+          <Ground outside={isOutside} />
+          <OutZoneWrapper ref={outZoneRef}></OutZoneWrapper>
+          <CustomBoundaryWrapper ref={customBoundsRef}></CustomBoundaryWrapper>
           <OutCount>
             {outs.map((isActive, idx) => (
               <Ellipse key={idx} active={isActive} />
@@ -1398,6 +1431,7 @@ export default function GameRecordPageV2() {
             <polygon
               id="ground"
               points="55,0 110,55 55,110 0,55"
+              // style={{ border: "1px solid black" }}
               ref={(el) => {
                 diamondPolyRef.current = el;
                 // groundRef.current = el;
@@ -1411,6 +1445,7 @@ export default function GameRecordPageV2() {
             <polygon
               className="inner"
               id="1st"
+              // transform="translate(-5, 10)"
               ref={(el) => {
                 droppableSetters["first-base"](el as any);
                 baseRefs.current["first-base"] = el;
@@ -1464,6 +1499,7 @@ export default function GameRecordPageV2() {
           <ResetDot
             style={{ left: "75vw", top: "2vh" }}
             onClick={() => {
+              console.log("클릭됨");
               // 1) 스냅 위치와 보이기 상태 초기화
               setBadgeSnaps(initialBadgeSnaps);
               setActiveBadges(badgeConfigs.map((cfg) => cfg.id));
@@ -1502,8 +1538,6 @@ export default function GameRecordPageV2() {
                 snapInfo={badgeSnaps[cfg.id]}
               />
             ))}
-          <OutZoneWrapper ref={outZoneRef}></OutZoneWrapper>
-          <CustomBoundaryWrapper ref={customBoundsRef}></CustomBoundaryWrapper>
         </GraphicWrapper>
       </DndContext>
       <PlayersRow>
