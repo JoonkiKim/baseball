@@ -12,6 +12,7 @@ import {
   setAccessToken,
 } from "../src/commons/libraries/token";
 import API from "../src/commons/apis/api";
+import TokenInitializer from "../src/commons/libraries/TokenInitializer";
 
 function MyApp({ Component, pageProps }) {
   const router = useRouter();
@@ -37,11 +38,11 @@ function MyApp({ Component, pageProps }) {
   }, [setToken]);
 
   // 2) 초기 로드 시 refresh 호출 → atom에 저장
-  useEffect(() => {
-    API.post("/auth/refresh")
-      .then((res) => setAccessToken(res.data.accessToken))
-      .catch(() => router.push("/login"));
-  }, []);
+  // useEffect(() => {
+  //   API.post("/auth/refresh")
+  //     .then((res) => setAccessToken(res.data.accessToken))
+  //     .catch(() => router.push("/login"));
+  // }, []);
 
   useEffect(() => {
     const setVh = () => {
@@ -103,6 +104,7 @@ function MyApp({ Component, pageProps }) {
       </Head>
       <Global styles={globalStyles} />
       <RecoilRoot>
+        <TokenInitializer />
         <Layout>
           <Component {...pageProps} />
         </Layout>

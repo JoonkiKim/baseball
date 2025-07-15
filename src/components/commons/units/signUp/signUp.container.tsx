@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -23,7 +23,7 @@ import {
   LoadingIcon,
   LoadingOverlay,
 } from "../../../../commons/libraries/loadingOverlay";
-import ErrorAlert from "../../../../commons/libraries/showErrorCode";
+
 import { setAccessToken } from "../../../../commons/libraries/token";
 import { useRouter } from "next/router";
 
@@ -190,7 +190,7 @@ export default function SignUpPage() {
       setError(error);
       const errorCode = error?.response?.data?.errorCode;
       console.error("회원가입 오류:", error, "errorCode:", errorCode);
-      ErrorAlert(errorCode); // 혹은 alert(errorCode)
+      // ErrorAlert(errorCode); // 혹은 alert(errorCode)
     } finally {
       setIsSubmitting(false);
     }

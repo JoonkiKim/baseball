@@ -1,5 +1,3 @@
-import React from "react";
-
 import { useRouter } from "next/router";
 import LayoutHeader from "./header";
 import LayoutNavigation from "./navigation";
