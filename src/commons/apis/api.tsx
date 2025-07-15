@@ -17,7 +17,16 @@ let hasRefreshed = false;
 
 API.interceptors.request.use(
   (config) => {
-    // ... (기존 request interceptor 코드 그대로)
+    // ── 1) games 관련 withCredentials 로직 유지 ──
+    const method = config.method?.toLowerCase();
+    const url = config.url ?? "";
+    if (url.includes("/games")) {
+      const isGet = method === "get";
+      const isResultEndpoint = url.endsWith("/result");
+      if (!(isGet && isResultEndpoint)) {
+        config.withCredentials = false;
+      }
+    }
     const token = getAccessToken();
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
