@@ -38,34 +38,6 @@ API.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// API.interceptors.response.use(
-//   (res) => res,
-//   async (
-//     error: AxiosError & { config?: AxiosRequestConfig & { _retry?: boolean } }
-//   ) => {
-//     const originalReq = error.config!;
-//     if (error.response?.status === 401 && !originalReq._retry) {
-//       originalReq._retry = true;
-//       try {
-//         // refreshToken 쿠키로 새 accessToken 요청
-//         const { data } = await API.post(`/auth/refresh`);
-//         setAccessToken(data.accessToken);
-
-//         // 원래 요청 헤더에 새 토큰 세팅 후 재시도
-//         if (originalReq.headers) {
-//           originalReq.headers.Authorization = `Bearer ${data.accessToken}`;
-//         }
-//         return API(originalReq);
-//       } catch {
-//         // 리프레시 실패 시 토큰 초기화 & 로그인 페이지로 이동
-//         clearAccessToken();
-//         window.location.href = "/login";
-//       }
-//     }
-//     return Promise.reject(error);
-//   }
-// );
-
 API.interceptors.response.use(
   (res) => res,
   async (
