@@ -8,7 +8,7 @@ import {
 
 const API = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
-  withCredentials: false,
+  withCredentials: true,
   headers: { "Content-Type": "application/json" },
 });
 
