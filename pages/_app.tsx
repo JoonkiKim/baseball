@@ -31,19 +31,6 @@ function MyApp({ Component, pageProps }) {
 
   /* ---------------------------------------- */
 
-  // 1) Recoil atom setter 등록
-  const setToken = useSetRecoilState(accessTokenState);
-  useEffect(() => {
-    registerAccessTokenSetter(setToken);
-  }, [setToken]);
-
-  // 2) 초기 로드 시 refresh 호출 → atom에 저장
-  // useEffect(() => {
-  //   API.post("/auth/refresh")
-  //     .then((res) => setAccessToken(res.data.accessToken))
-  //     .catch(() => router.push("/login"));
-  // }, []);
-
   useEffect(() => {
     const setVh = () => {
       const vh = window.innerHeight * 0.01;
@@ -53,46 +40,6 @@ function MyApp({ Component, pageProps }) {
     window.addEventListener("resize", setVh);
     return () => window.removeEventListener("resize", setVh);
   }, []);
-
-  // const globalStyles = css`
-  //   @font-face {
-  //     font-family: "KBO Dia Gothic";
-  //     src: url("/fonts/KBO-Dia-Gothic_medium.woff") format("woff");
-  //     font-weight: normal;
-  //     font-style: normal;
-  //   }
-  //   * {
-  //     margin: 0;
-  //     padding: 0;
-  //     box-sizing: border-box;
-  //   }
-
-  //   html,
-  //   body,
-  //   #__next {
-  //     font-family: "KBO-Dia-Gothic_medium";
-  //     background-color: ${isResultPage ? "#f2f2f2" : "#ffffff"};
-  //     margin: 0;
-  //     padding: 0;
-  //     /* height: 100vh; */
-  //     /* height: calc(100% - 140px); */
-  //   }
-
-  //   /* 2) RootWebArea가 부모 높이(=100%)를 상속하도록 */
-  //   .RootWebArea {
-  //     /* height: 100%; */
-  //     /* 또는 flex 레이아웃이라면 flex: 1; */
-  //   }
-
-  //   html,
-  //   body,
-  //   #__next,
-  //   .RootWebArea {
-  //     /* height: 100%; */
-  //     margin: 0;
-  //     padding: 0;
-  //   }
-  // `;
 
   const pretendardStyles = css`
     /* Thin (100) */

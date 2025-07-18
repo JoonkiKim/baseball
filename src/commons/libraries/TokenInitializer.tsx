@@ -12,7 +12,7 @@ import {
 export default function TokenInitializer() {
   const setToken = useSetRecoilState(accessTokenState);
   const router = useRouter();
-  console.log("토큰 테스트");
+  console.log("토큰이 안된 상태");
 
   // ① RecoilRoot 안에서만 registerAccessTokenSetter를 호출
   useEffect(() => {

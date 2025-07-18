@@ -47,7 +47,7 @@ API.interceptors.response.use(
     // ── 1) 리프레시 엔드포인트 자체는 재시도하지 않고 로그인으로 ──
     if (url.endsWith("/auth/refresh")) {
       clearAccessToken();
-      window.location.href = "/login";
+      // window.location.href = "/login";
       return Promise.reject(error);
     }
 
