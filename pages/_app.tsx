@@ -17,7 +17,7 @@ import TokenInitializer from "../src/commons/libraries/TokenInitializer";
 function MyApp({ Component, pageProps }) {
   const router = useRouter();
   const isResultPage = router.pathname === "/result";
-  console.log("대회");
+  console.log("분기 합침 테스트");
 
   /* --------- Service Worker 등록 --------- */
   useEffect(() => {
