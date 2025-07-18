@@ -181,7 +181,6 @@ export default function MainCalendarPage() {
 
     fetchMatches();
   }, [fromDate, toDate, router]);
-  console.log(authInfo);
 
   console.log("allMatchData", allMatchData);
   useEffect(() => {

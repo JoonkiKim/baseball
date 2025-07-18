@@ -62,35 +62,73 @@ export default function LoginPageComponent() {
     setShowPassword(!showPassword);
   };
 
+  // const onSubmit: SubmitHandler<LoginFormData> = async (data) => {
+  //   try {
+  //     console.log(data);
+  //     // 1) 로그인 요청
+  //     const response = await API.post(
+  //       "/auth/login", // 실제 로그인 엔드포인트로 변경
+  //       {
+  //         email: data.email,
+  //         password: data.password,
+  //       }
+  //     );
+
+  //     // 2) 응답에서 accessToken 꺼내기
+  //     const { accessToken } = response.data;
+  //     console.log(accessToken);
+
+  //     // 3) 메모리·Recoil에 동기화
+  //     setAccessToken(accessToken);
+  //     alert("로그인 성공!");
+  //     // 4) 로그인 성공 후 리다이렉트 등 처리
+  //     await router.push("/mainCalendar");
+  //   } catch (error: any) {
+  //     // 에러 핸들링
+  //     alert(
+  //       error.response?.data?.message ||
+  //         "로그인 중 오류가 발생했습니다. 다시 시도해주세요."
+  //     );
+  //   }
+  // };
+
   const onSubmit: SubmitHandler<LoginFormData> = async (data) => {
     try {
-      console.log(data);
-      // 1) 로그인 요청
-      const response = await API.post(
-        "/auth/login", // 실제 로그인 엔드포인트로 변경
-        {
-          email: data.email,
-          password: data.password,
-        }
-      );
-
-      // 2) 응답에서 accessToken 꺼내기
+      const response = await API.post("/auth/login", {
+        email: data.email,
+        password: data.password,
+      });
       const { accessToken } = response.data;
-      console.log(accessToken);
+      console.log("받은 토큰:", accessToken);
 
-      // 3) 메모리·Recoil에 동기화
-      setAccessToken(accessToken);
+      // 1) setAccessToken만 따로 감싸서 에러 확인
+      try {
+        setAccessToken(accessToken);
+        console.log("setAccessToken 성공");
+      } catch (e) {
+        console.error("setAccessToken에서 에러!", e);
+        throw e; // 다시 던져서 상위 catch로
+      }
 
-      // 4) 로그인 성공 후 리다이렉트 등 처리
-      router.push("/mainCalendar");
+      // 2) router.push만 따로 감싸서 에러 확인
+      try {
+        await router.push("/mainCalendar");
+        console.log("router.push 완료");
+      } catch (e) {
+        console.error("router.push에서 에러!", e);
+        throw e;
+      }
+
+      alert("로그인 성공!");
     } catch (error: any) {
-      // 에러 핸들링
+      console.error("전체 onSubmit에서 잡힌 에러:", error);
       alert(
         error.response?.data?.message ||
           "로그인 중 오류가 발생했습니다. 다시 시도해주세요."
       );
     }
   };
+
   return (
     <Container>
       <Title>SNU BASEBALL</Title>

@@ -242,3 +242,9 @@ export const WrapperForEmail = styled.div<{ $disabled?: boolean }>`
   /* verificationToken이 있을 때 배경색 적용 */
   background-color: transparent;
 `;
+
+export const SuggestionMessage = styled.div`
+  color: #f90; /* 눈에 띄는 주황색 */
+  font-size: 0.875rem; /* 에러 메시지보단 살짝 작게 */
+  margin-top: 0.25rem;
+`;

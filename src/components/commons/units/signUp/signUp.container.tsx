@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
+import ShowAlert from "../../../../commons/libraries/showAlertModal";
 import * as yup from "yup";
 import {
   Container,
@@ -17,13 +18,14 @@ import {
   WrapperForEmail,
   EmailInput,
   EmailButton,
+  SuggestionMessage,
 } from "./sigunUp.style";
 import API from "../../../../commons/apis/api";
 import {
   LoadingIcon,
   LoadingOverlay,
 } from "../../../../commons/libraries/loadingOverlay";
-
+import Mailcheck from "mailcheck";
 import { setAccessToken } from "../../../../commons/libraries/token";
 import { useRouter } from "next/router";
 
@@ -54,13 +56,10 @@ const schema = yup.object().shape({
     .required("비밀번호 확인은 필수 입력 항목입니다."),
   nickname: yup
     .string()
-    .notRequired() // 필수가 아님
-    .test("len", "닉네임은 2자 이상 10자 이내로 입력해야 합니다.", (value) => {
-      // 빈값(undefinded, null, '')이면 통과
-      if (!value) return true;
-      // 값이 있을 때만 2~10자 검사
-      return value.length >= 2 && value.length <= 10;
-    }),
+    .required("닉네임은 필수 입력 항목입니다.")
+    .min(2, "닉네임은 최소 2자 이상이어야 합니다.")
+    .max(8, "닉네임은 최대 8자까지 입력 가능합니다.")
+    .matches(/^\S*$/, "닉네임에는 공백을 사용할 수 없습니다."),
 });
 
 export default function SignUpPage() {
@@ -73,7 +72,31 @@ export default function SignUpPage() {
   } = useForm({
     resolver: yupResolver(schema),
   });
+  const [suggestion, setSuggestion] = useState<string | null>(null);
+
+  // EmailInput onBlur 시 호출될 함수
+  const checkEmailDomain = () => {
+    const email = getValues("email").trim();
+    if (!email.includes("@")) return;
+
+    Mailcheck.run({
+      email,
+      // domains를 안 넘기면 기본 내장 리스트를 사용합니다.
+      suggested: (s) => {
+        setSuggestion(`“${s.full}” 도메인을 사용해 보시는 건 어떨까요?`);
+      },
+      empty: () => {
+        // 제안이 없으면 초기화
+        setSuggestion(null);
+      },
+    });
+  };
+
   const router = useRouter();
+  const [alertInfo, setAlertInfo] = useState<{
+    message: string;
+    success?: boolean;
+  } | null>(null);
   const [error, setError] = useState(null);
   // react-hook-form 훅 사용, yup resolver 연결
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -82,18 +105,25 @@ export default function SignUpPage() {
   const [isVerificationSent, setIsVerificationSent] = useState(false);
   const [verificationToken, setVerificationToken] = useState("");
 
-  // useEffect(() => {
-  //   const original = window.alert;
-  //   window.alert = (msg: string) => {
-  //     // ErrorAlert 가 기대하는 형태로 error 객체를 만들어 넣습니다
-  //     setError({ response: { data: { errorCode: msg } } });
-  //   };
+  // 2) window.alert() 을 ShowAlert 로 대체
+  useEffect(() => {
+    const orig = window.alert;
+    window.alert = (msg: string) => {
+      if (isMounted.current) {
+        setAlertInfo({ message: msg });
+      }
+    };
+    return () => {
+      window.alert = orig;
+    };
+  }, []);
 
-  //   return () => {
-  //     window.alert = original;
-  //   };
-  // }, []);
-
+  const isMounted = useRef(true);
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
   // ① 인증번호 발송 버튼 클릭 시 실행되는 함수
   const handleSendVerification = async () => {
     if (isSubmitting) return;
@@ -125,6 +155,8 @@ export default function SignUpPage() {
       console.error(error, "errorCode:", errorCode);
       console.error("이메일 인증번호 발송 오류:", error);
     } finally {
+      // 컴포넌트가 아직 마운트된 상태에서만 상태 갱신
+
       setIsSubmitting(false);
     }
   };
@@ -188,21 +220,36 @@ export default function SignUpPage() {
       setAccessToken(accessToken);
       console.log("동기화된 accessToken:", accessToken);
       console.log("💾 signup 응답 받음, 이제 푸시!");
-      await router.push("/mainCalendar");
+
       console.log("➡️ router.push 완료");
-      alert("회원가입이 완료되었습니다!");
+      // 성공 메시지를 띄우기만 하고, navigation은 모달 닫을 때
+      if (isMounted.current) {
+        setAlertInfo({ message: "회원가입이 완료되었습니다!", success: true });
+      }
     } catch (error) {
-      setError(error);
-      const errorCode = error?.response?.data?.errorCode;
-      console.error("회원가입 오류:", error, "errorCode:", errorCode);
+      if (isMounted.current) {
+        setError(error);
+        setAlertInfo({ message: "회원가입 중 오류가 발생했습니다." });
+      }
       // ErrorAlert(errorCode); // 혹은 alert(errorCode)
     } finally {
-      setIsSubmitting(false);
+      if (isMounted.current) setIsSubmitting(false);
     }
   };
 
   return (
     <>
+      {/* 1) 메시지/오류 모두 이 모달에서 띄우고… */}
+      <ShowAlert
+        error={alertInfo || error}
+        onClose={() => {
+          // 2) 모달의 확인 버튼을 누르면, success일 때만 이동
+          if (alertInfo?.success) {
+            router.push("/mainCalendar");
+          }
+          setAlertInfo(null);
+        }}
+      />
       <Container>
         <Title>회원가입</Title>
 
@@ -217,6 +264,7 @@ export default function SignUpPage() {
                 type="email"
                 placeholder="@snu.ac.kr"
                 {...register("email")}
+                onBlur={checkEmailDomain}
                 $noBottom
                 disabled={!!verificationToken}
               />
@@ -241,6 +289,13 @@ export default function SignUpPage() {
                 ? "" // 토큰이 있으면 빈 문자열
                 : "학교 계정이 없을 시 선수 명단 제출 시 사용한 이메일을 입력하세요"}
             </ErrorMessage>
+            {/* 3) Mailcheck 제안 메시지 */}
+            {suggestion && (
+              <SuggestionMessage>
+                {suggestion}
+                {/* 예: “user@gmails.com → user@gmail.com 을 사용해 보세요” */}
+              </SuggestionMessage>
+            )}
           </FieldWrapper>
 
           {/* 인증번호 입력 */}
@@ -316,7 +371,7 @@ export default function SignUpPage() {
             <Input
               id="nickname"
               type="text"
-              placeholder="입력하지 않을 시 자동 생성됩니다"
+              placeholder="2~8자 입력"
               {...register("nickname")}
             />
             {errors.nickname ? (
