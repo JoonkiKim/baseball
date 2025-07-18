@@ -155,6 +155,7 @@ export default function SignUpPage() {
       alert("인증이 완료되었습니다!");
     } catch (error) {
       setError(error);
+      alert("인증번호가 틀렸습니다");
       const errorCode = error?.response?.data?.errorCode; // 에러코드 추출
       console.error(error, "errorCode:", errorCode);
       console.error("이메일 인증번호 발송 오류:", error);
@@ -166,6 +167,7 @@ export default function SignUpPage() {
   console.log(verificationToken);
   // 폼 제출 핸들러
   const onSubmit: SubmitHandler<SignUpFormData> = async (data) => {
+    console.log("🔥 onSubmit 시작", data);
     if (isSubmitting) return;
     setIsSubmitting(true);
     try {
@@ -180,12 +182,15 @@ export default function SignUpPage() {
       const res = await API.post("/auth/signup", payload);
       console.log(payload);
       console.log("signup response:", res.data);
-      alert("회원가입이 완료되었습니다!");
+
       // ── 여기에 토큰 동기화 추가 ──
       const { accessToken } = res.data;
       setAccessToken(accessToken);
       console.log("동기화된 accessToken:", accessToken);
-      router.push("/mainCalendar");
+      console.log("💾 signup 응답 받음, 이제 푸시!");
+      await router.push("/mainCalendar");
+      console.log("➡️ router.push 완료");
+      alert("회원가입이 완료되었습니다!");
     } catch (error) {
       setError(error);
       const errorCode = error?.response?.data?.errorCode;

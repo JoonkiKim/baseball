@@ -20,21 +20,6 @@ export const ModalOverlay = styled.div`
   z-index: 100;
 `;
 
-export const ModalContainer = styled.div`
-  background-color: #fff;
-  position: relative;
-  /* margin-top: 20px; */
-  width: 90%;
-  padding: 20px;
-  border-radius: 8px;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  z-index: 101;
-`;
-
 // 메인 컨테이너
 export const GameRecordContainer = styled.div`
   width: 100%;
@@ -440,14 +425,42 @@ export const OrderBadge = styled.div`
  *  v2경기기록 관련
  * ───────────────────────────────────────────────────────── */
 
+interface ModalContainerProps {
+  reconstructMode?: boolean;
+}
+
+export const ModalContainer = styled.div<ModalContainerProps>`
+  background-color: ${({ reconstructMode }) =>
+    reconstructMode ? "#B8B8B8" : "#FFFFFF"};
+  position: relative;
+  /* margin-top: 20px; */
+  width: 90%;
+  height: 60vh;
+  /* padding: 20px; */
+  padding-left: 1vw;
+  padding-right: 1vw;
+  border-radius: 1rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-evenly;
+
+  z-index: 101;
+`;
+
 export const GraphicWrapper = styled.div<{ outside?: boolean }>`
   position: relative;
   overflow: visible;
-  width: 98%;
-  height: 50vh;
-
-  background: ${(p) => (p.outside ? "red" : "#2c660d")};
+  width: 90%;
+  height: 35vh;
+  background-image: url("/images/ground-without-home.png");
+  background-size: cover; /* 컨테이너에 꽉 채우기 */
+  background-position: center; /* 가운데를 기준으로 하기 */
+  background-repeat: no-repeat;
+  /* background: ${(p) => (p.outside ? "red" : "#2c660d")}; */
   border-radius: 2vh;
+  z-index: 30;
   /* margin: 3vh 0; */
 `;
 export const FullImage = styled.img`
@@ -493,20 +506,26 @@ export const OverlaySvg = styled.svg`
 
 export const DiamondSvg = styled.svg`
   position: absolute;
+  z-index: 1;
   left: 50%;
-  top: 55%;
+  top: 53%;
   transform: translate(-50%, -50%);
-  width: 60%;
+  width: 53%;
   height: auto;
   overflow: visible;
-  fill: green;
+  fill: transparent;
+  background-image: url("/images/diamond.png");
+  background-size: cover; /* 컨테이너에 꽉 채우기 */
+  background-position: center; /* 가운데를 기준으로 하기 */
+  background-repeat: no-repeat; /* 반복하지 않기 */
+
+  /* border: 1px solid black; */
   /* background-color: red; */
 
   /* 기존 inner 기본 스타일 */
   & .inner {
     fill: #ffffff;
-    stroke: #000000;
-    stroke-width: 0.2;
+    stroke: none;
   }
 
   /* 여기에 highlight 스타일 추가 */
@@ -532,20 +551,26 @@ export const ResetDot = styled.div`
   background-repeat: no-repeat;
   background-position: center;
   cursor: pointer;
+  z-index: 80;
 `;
 export const NameBadge = styled.div`
   position: absolute;
+  font-family: "Pretendard";
+  font-weight: 600;
+  z-index: 999;
   left: 50%;
+  font-size: 0.8rem;
   top: 85%;
   transform: translate(0, -50%);
   background: #ffffff;
-  border: 0.05vh solid var(--snu-blue);
+  border: 0.3px solid black;
   border-radius: 50px;
   padding: 1vh 1vw;
   display: flex;
   align-items: center;
   justify-content: center;
   height: 3vh;
+  width: 13vw;
   white-space: nowrap;
   touch-action: none; /* 터치 동작(스크롤/줌) 비활성화 */
   pointer-events: all; /* 이벤트 확실히 받도록 */
@@ -562,23 +587,24 @@ export const NameText = styled.div`
 // -------- 이닝의 재구성 -------------
 
 export const ReconstructionWrapper = styled.div`
-  width: 44vw;
-  height: 5vh;
-  margin-top: 1vh;
-  margin-left: 1vh; // 단위 통일을 위해 꼭 vh로 할것
-  font-family: "KBO-Dia-Gothic_medium";
+  width: 36vw;
+  height: 4.5vh;
+  /* margin-top: 1vh; */
+  /* margin-left: 1vh;  */
+  // 단위 통일을 위해 꼭 vh로 할것
+
   /* font-weight: bold; */
   font-size: 0.813rem;
   background-color: #ffffff;
-  box-shadow: 0px 21px 6px rgba(0, 0, 0, 0),
+  box-shadow: 0px 76px 21px rgba(0, 0, 0, 0),
     //
-    0px 14px 5px rgba(0, 0, 0, 0),
+    0px 49px 20px rgba(0, 0, 0, 0.01),
     //
-    0px 8px 5px rgba(0, 0, 0, 0.02),
+    0px 27px 16px rgba(0, 0, 0, 0.03),
     //
-    0px 3px 3px rgba(0, 0, 0, 0.03),
+    0px 12px 12px rgba(0, 0, 0, 0.04),
     //
-    0px 1px 2px rgba(0, 0, 0, 0.03);
+    0px 3px 7px rgba(0, 0, 0, 0.05);
   border-radius: 12px;
   display: flex;
   flex-direction: row;
@@ -590,8 +616,7 @@ export const ReconstructionTitle = styled.div`
   width: 27.5vw;
   height: 4vh;
   /* border: 1px solid #999; */
-  font-family: "KBO-Dia-Gothic_bold";
-  font-weight: bold;
+
   font-size: 0.813rem;
   color: black;
   /* background-color: red; */
@@ -607,8 +632,7 @@ export const ReconstructionButtonWrapper = styled.div`
   width: 16.5vw;
   height: 4vh;
   /* border: 1px solid #999; */
-  font-family: "KBO-Dia-Gothic_bold";
-  font-weight: bold;
+
   font-size: 0.813rem;
   /* background-color: blue; */
   cursor: pointer;
@@ -618,18 +642,17 @@ export const ReconstructionButtonWrapper = styled.div`
   justify-content: center;
   align-items: center;
 `;
-
 export const ReconstructionSwitch = styled(Switch)`
   /* 1) 트랙 너비 조정 (높이는 이미 custom 됐으니 필요 없다면 생략) */
   && {
-    background-color: #bdbdbd !important;
+    background-color: #e5e5ea !important;
     width: 11vw !important; /* 원하는 가로 길이 */
     min-width: 11vw !important;
-    height: 3.3vh !important;
+    height: 2.8vh !important;
   }
   /* ON 상태의 트랙 색 */
   &.ant-switch-checked {
-    background-color: #4caf50 !important; /* 원하는 ON 트랙 색 */
+    background-color: #0f0f70 !important; /* 원하는 ON 트랙 색 */
   }
 
   /* 2) 내부 여백: 패딩만큼 핸들이 옆으로 빠지지 않도록 margin 설정 */
@@ -639,8 +662,8 @@ export const ReconstructionSwitch = styled(Switch)`
 
   /* 3) 핸들 크기 & 중앙 정렬 & 움직일 때 애니메이션 제거 */
   .ant-switch-handle {
-    width: 18px !important; /* handleSize */
-    height: 18px !important;
+    width: 1rem !important; /* handleSize */
+    height: 1rem !important;
     top: 50% !important;
     transform: translateY(-50%) !important;
     left: 5px !important;
@@ -655,16 +678,17 @@ export const ReconstructionSwitch = styled(Switch)`
 `;
 
 export const ModalBottomWrapper = styled.div`
-  width: 100%;
+  width: 90%;
   height: 5vh;
-  margin-top: 2vh;
+  /* margin-top: 2vh; */
   /* border: 1px solid #999; */
   /* background-color: red; */
-  font-family: "KBO-Dia-Gothic_medium";
+
   /* font-weight: bold; */
   font-size: 0.813rem;
   color: #ffffff;
-
+  font-family: "Pretendard";
+  font-weight: 500;
   display: flex;
   flex-direction: row;
   justify-content: space-around;
@@ -672,26 +696,25 @@ export const ModalBottomWrapper = styled.div`
 `;
 
 export const ModalBottomRunnerWrapper = styled.div`
-  width: 44vw;
-  height: 5vh;
+  width: 36vw;
+  height: 4.5vh;
 
-  font-family: "KBO-Dia-Gothic_medium";
   /* font-weight: bold; */
   font-size: 0.813rem;
   background-color: #ffffff;
-  box-shadow: 0px 21px 6px rgba(0, 0, 0, 0),
+  box-shadow: 0px 76px 21px rgba(0, 0, 0, 0),
     //
-    0px 14px 5px rgba(0, 0, 0, 0),
+    0px 49px 20px rgba(0, 0, 0, 0.01),
     //
-    0px 8px 5px rgba(0, 0, 0, 0.02),
+    0px 27px 16px rgba(0, 0, 0, 0.03),
     //
-    0px 3px 3px rgba(0, 0, 0, 0.03),
+    0px 12px 12px rgba(0, 0, 0, 0.04),
     //
-    0px 1px 2px rgba(0, 0, 0, 0.03);
+    0px 3px 7px rgba(0, 0, 0, 0.05);
   border-radius: 12px;
   display: flex;
   flex-direction: row;
-  /* justify-content: center; */
+  justify-content: space-evenly;
   align-items: center;
 `;
 
@@ -733,11 +756,10 @@ export const UndoIcon = styled.div`
 `;
 
 export const ModalBottomRunnerTitle = styled.div`
-  width: 27.5vw;
+  /* width: 27.5vw; */
   height: 4vh;
   /* border: 1px solid #999; */
-  font-family: "KBO-Dia-Gothic_bold";
-  font-weight: bold;
+
   font-size: 0.813rem;
   color: black;
   /* background-color: red; */
@@ -788,4 +810,111 @@ export const CustomBoundaryWrapper = styled.div`
 
   z-index: 104;
   pointer-events: none;
+`;
+
+export const HomeWrapper = styled.div`
+  /* position: relative;
+  overflow: visible;
+  width: 90%;
+  height: 40vh; */
+  position: absolute; /* ② 절대 위치로 변경 */
+  inset: 0;
+  /* background-color: red; */
+  z-index: 5;
+  /* ─── 배경 이미지 전체 덮기 ─── */
+  background-image: url("/images/home.png");
+  background-size: cover; /* 컨테이너에 꽉 채우기 */
+  background-position: center; /* 가운데를 기준으로 하기 */
+  background-repeat: no-repeat; /* 반복하지 않기 */
+
+  border-radius: 2vh;
+  /* margin: 3vh 0; */
+`;
+
+export const LineWrapper = styled.div`
+  /* position: relative;
+  overflow: visible;
+  width: 90%;
+  height: 40vh; */
+  position: absolute; /* ② 절대 위치로 변경 */
+  inset: 0;
+  /* background-color: red; */
+  z-index: 7;
+  /* ─── 배경 이미지 전체 덮기 ─── */
+  background-image: url("/images/line.png");
+  background-size: cover; /* 컨테이너에 꽉 채우기 */
+  background-position: center; /* 가운데를 기준으로 하기 */
+  background-repeat: no-repeat; /* 반복하지 않기 */
+
+  border-radius: 2vh;
+  /* margin: 3vh 0; */
+`;
+
+export const HomeBaseWrapper = styled.div<{ active: boolean }>`
+  position: absolute;
+  inset: 0;
+  z-index: 990;
+
+  /* 배경색을 흰/파랑으로 토글 */
+  background-color: ${({ active }) =>
+    active ? "blue" /* 기본 흰색 png 보여줄 땐 투명 */ : "white"};
+
+  /* mask 에 흰색 png 파일의 알파 채널을 씁니다 */
+  mask-image: url("/images/home-base-white-1.png");
+  mask-size: cover;
+  mask-position: center;
+  mask-repeat: no-repeat;
+
+  /* 사파리(webkit) 지원을 위해 */
+  -webkit-mask-image: url("/images/home-base-white-1.png");
+  -webkit-mask-size: cover;
+  -webkit-mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+`;
+
+export const Ground = styled.div<{ outside?: boolean }>`
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  height: 100%;
+
+  /* only paint red outside the circle at 50% 55% of 40% radius */
+  background: ${(p) => (p.outside ? "red" : "transparent")};
+  opacity: 30%;
+  /* mask‐out that central circle */
+  mask-image: radial-gradient(
+    circle at 50% 55%,
+    /* center of your OutZoneWrapper */ transparent 40%,
+    /* inside the circle: transparent (cut‑out) */ black 40%
+      /* outside: opaque => show the bg */
+  );
+  mask-mode: alpha;
+
+  /* for Safari: */
+  -webkit-mask-image: radial-gradient(
+    circle at 50% 50%,
+    transparent 55%,
+    black 40%
+  );
+  -webkit-mask-mode: alpha;
+
+  border-radius: 2vh;
+`;
+
+export const CancelButton = styled.button`
+  width: 3vh;
+  height: 3vh;
+  border: none;
+  background-color: red;
+`;
+
+export const CancelButtonWrapper = styled.div`
+  width: 90%;
+  margin-top: 1vh;
+  /* height: 3vh; */
+  border: none;
+  /* background-color: red; */
+  display: flex;
+  flex-direction: row;
+  align-items: center;
 `;

@@ -11,12 +11,12 @@ const xlarge = "@media only screen and (min-width: 1025px)";
 export const GameRecordContainer = styled.div`
   width: 100%;
   max-width: 100vw;
-  /* margin-top: 3vh; */
-  background-color: rgba(0, 0, 0, 0.05);
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-height: 100vh;
+  /* min-height: 100vh; */
+  height: calc(var(--vh) * 100);
+  background-color: "#f2f2f7";
 `;
 
 export const ScoreBoardWrapper = styled.div`
@@ -30,9 +30,17 @@ export const ScoreBoardWrapper = styled.div`
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  border: 1px solid black;
+  /* border: 1px solid black; */
   border-radius: 10px;
-  margin-bottom: 3vh;
+  box-shadow: 0px 21px 6px rgba(0, 0, 0, 0),
+    //
+    0px 14px 5px rgba(0, 0, 0, 0),
+    //
+    0px 8px 5px rgba(0, 0, 0, 0.02),
+    //
+    0px 3px 3px rgba(0, 0, 0, 0.03),
+    //
+    0px 1px 2px rgba(0, 0, 0, 0.03);
 `;
 
 /** ─────────────────────────────────────────────────────────
@@ -40,11 +48,33 @@ export const ScoreBoardWrapper = styled.div`
  * ───────────────────────────────────────────────────────── */
 export const InningHeader = styled.div`
   display: grid;
-  grid-template-columns: repeat(10, 1fr);
+  grid-template-columns: 15vw repeat(9, 1fr);
   width: 100%;
   height: 33%;
+  justify-content: center;
   align-items: center;
-  border-bottom: 1px solid #ccc;
+  /* border-bottom: 1px solid #ccc; */
+  /* 모든 셀에 보더 붙이고, 아래 끝에 정렬 */
+
+  margin-top: 1vh;
+  > * {
+    /* margin-bottom: 1vh; */
+
+    padding-bottom: 1vh;
+    border-bottom: 1px solid #ccc;
+  }
+
+  /* 첫 번째 셀만 보더 제거 */
+  > *:first-child {
+    border-bottom: none;
+  }
+
+  > *:nth-child(9),
+  > *:nth-child(10) {
+    color: red;
+  }
+  /* margin-right: 1vh; */
+  padding-right: 1vh;
   /* background-color: red; */
 `;
 
@@ -53,16 +83,9 @@ export const InningCell = styled.div`
   /* padding-top: 1vh; */
   /* background-color: red; */
   /* padding-bottom: 1vh; */
-  font-weight: 600;
-  ${small} {
-    font-size: 15px;
-  }
-  ${medium} {
-    font-size: 20px;
-  }
-  ${large}, ${xlarge} {
-    font-size: 20px;
-  }
+  font-family: "Pretendard";
+  font-weight: 700;
+  font-size: 1.125rem;
 `;
 
 /** ─────────────────────────────────────────────────────────
@@ -72,46 +95,37 @@ export const InningCell = styled.div`
  * ───────────────────────────────────────────────────────── */
 export const TeamRow = styled.div`
   display: grid;
-  grid-template-columns: repeat(10, 1fr); /* 12개의 동일한 너비 */
+  grid-template-columns: 15vw repeat(9, 1fr); /* 12개의 동일한 너비 */
+
   width: 100%;
   align-items: center;
   /* border-bottom: 1px solid #ccc; */
   /* background-color: aqua; */
   height: 33%;
+  > *:nth-child(9),
+  > *:nth-child(10) {
+    color: red;
+    font-weight: 700;
+  }
+  padding-right: 1vh;
 `;
 
 export const TeamNameCell = styled.div`
   text-align: center;
-  padding: 1vh 0;
+  /* padding: 1vh 0; */
   font-weight: 500;
-  font-family: "KBO-Dia-Gothic_medium";
-  font-style: normal;
-
-  ${small} {
-    font-size: 10px;
-  }
-  ${medium} {
-    font-size: 12px;
-  }
-  ${large}, ${xlarge} {
-    font-size: 14px;
-  }
+  font-family: "Pretendard";
+  font-size: 0.8125rem;
+  font-weight: 700;
+  /* background-color: red; */
+  padding-left: 2.5vw;
+  padding-right: 1vw;
 `;
 
 export const TeamScoreCell = styled.div`
   text-align: center;
-  font-family: "KBO-Dia-Gothic_light";
-  padding: 1vh 0;
+  font-family: "Pretendard";
   font-weight: 400;
-  ${small} {
-    font-size: 15px;
-  }
-  ${medium} {
-    font-size: 20px;
-  }
-  ${large}, ${xlarge} {
-    font-size: 20px;
-  }
 `;
 
 /** ─────────────────────────────────────────────────────────
@@ -145,15 +159,40 @@ export const ControlButtonsWrapper = styled.div`
 
 export const ControlButton = styled.button`
   background-color: #000000;
-  width: 26vw;
-  height: 5vh;
+  width: 19vw;
+  height: 4.8vh;
   border: 1px solid #999;
-  font-family: "KBO-Dia-Gothic_bold";
-  font-weight: bold;
+  font-family: "Pretendard";
+  font-weight: 700;
   font-size: 0.813rem;
   color: #ffffff;
   cursor: pointer;
   border-radius: 20px;
+`;
+
+export const ControlButtonWhite = styled.button`
+  width: 19vw;
+  height: 4.8vh;
+  font-size: 0.813rem;
+  border: none;
+  background-color: #ffffff;
+  color: #000000;
+  font-family: "Pretendard";
+  font-weight: 700;
+  box-shadow: 0px 21px 6px rgba(0, 0, 0, 0),
+    //
+    0px 14px 5px rgba(0, 0, 0, 0),
+    //
+    0px 8px 5px rgba(0, 0, 0, 0.02),
+    //
+    0px 3px 3px rgba(0, 0, 0, 0.03),
+    //
+    0px 1px 2px rgba(0, 0, 0, 0.03);
+  border-radius: 18px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
 `;
 
 /** ─────────────────────────────────────────────────────────
@@ -231,43 +270,73 @@ export const ScoreDisplay = styled.div`
 export const PlayersRow = styled.div`
   display: flex;
   width: 90%;
-  height: 20vh;
+  height: 12vh;
   border-bottom: 1px solid #ccc;
   background-color: #ffffff;
   border-radius: 2vh;
   margin-top: 3.5vh;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  /* background-color: red; */
 `;
 
 export const PlayerBox = styled.div`
-  flex: 1;
-  border-right: 1px solid #ccc;
-  padding: 1rem;
-  box-sizing: border-box;
+  /* flex: 1; */
+  /* border-right: 1px solid #ccc; */
+  /* padding: 1rem; */
+  /* box-sizing: border-box; */
   display: flex;
+  height: 100%;
   flex-direction: column;
-  justify-content: center;
+  justify-content: space-evenly;
   align-items: center;
-  position: relative; /* OrderBadge를 절대 위치로 배치하기 위해 필요 */
+
   /* background-color: red; */
-  &:last-child {
-    border-right: none;
-  }
 `;
 
 export const PlayerChangeButton = styled.button`
-  position: absolute;
-  top: 0;
-  left: 0;
   background-color: #000;
-  width: 16vw;
-  height: 4vh;
-
+  width: 17vw;
+  height: 3vh;
+  border-radius: 25px;
   color: #fff;
   border: none;
-  font-family: "KBO-Dia-Gothic_bold";
-  font-size: 12px;
+  font-family: "Pretendard";
+  font-weight: 500;
+  text-align: center;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  font-size: 0.75rem;
   /* padding: 6px 12px; */
   cursor: pointer;
+`;
+export const LeftArrow = styled.div`
+  width: 13vw; /* 화살표 크기 */
+  height: 100%;
+  background-image: url("/images/L.png");
+  /* background-color: red; */
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+`;
+
+export const RightArrow = styled.div`
+  width: 13vw; /* 화살표 크기 */
+  height: 100%;
+  background-image: url("/images/R.png");
+  /* background-color: red; */
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+`;
+
+export const VsText = styled.div`
+  font-family: "Pretendard";
+  font-weight: 600;
 `;
 
 export const PlayerWrapper = styled.div`
@@ -276,35 +345,31 @@ export const PlayerWrapper = styled.div`
   align-items: center;
   justify-content: space-around;
   width: 100%;
-  height: 60%;
+  height: 80%;
 `;
 
 export const PlayerPosition = styled.div`
-  font-family: "KBO-Dia-Gothic_light";
+  display: inline-flex;
+  align-items: center;
+  font-family: "Pretendard";
+  font-weight: 500;
+  font-size: 0.625rem;
   color: rgba(0, 0, 0, 0.5);
-  ${small} {
-    font-size: 20px;
-  }
-  ${medium} {
-    font-size: 24px;
-  }
-  ${large}, ${xlarge} {
-    font-size: 26px;
-  }
+`;
+
+export const Dot = styled.span`
+  display: inline-block;
+  width: 2px; /* 점 크기 */
+  height: 2px;
+  margin: 0 0.21rem; /* 좌우 간격 */
+  background-color: currentColor; /* 텍스트 컬러와 동일하게 */
+  border-radius: 50%;
 `;
 
 export const PlayerInfo = styled.div`
-  font-weight: 500;
-  line-height: 1.4;
-  ${small} {
-    font-size: 32px;
-  }
-  ${medium} {
-    font-size: 35px;
-  }
-  ${large}, ${xlarge} {
-    font-size: 36px;
-  }
+  font-family: "Pretendard";
+  font-weight: 700;
+  font-size: 1.3125rem;
 `;
 
 interface PlayerExWrapperProps {
@@ -392,16 +457,9 @@ export const RecordActionButton = styled.button`
  * ───────────────────────────────────────────────────────── */
 // OrderBadge를 PlayerBox의 우상단에 딱 붙게 설정
 export const OrderBadge = styled.div`
-  position: absolute;
-  top: 0;
-  right: 0;
-  /* background: #fff; */
-  /* border: 1px solid #ccc; */
-  /* border-radius: 50%; */
   width: 7vh;
   height: 24px;
   margin-top: 10px;
-  /* margin-right: 5px; */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -413,17 +471,111 @@ export const OrderBadge = styled.div`
  *  v2경기기록 관련
  * ───────────────────────────────────────────────────────── */
 
-export const GraphicWrapper = styled.div<{ outside?: boolean }>`
+export const GraphicWrapper = styled.div`
   position: relative;
   overflow: visible;
   width: 90%;
   height: 40vh;
   /* background-color: red; */
+  z-index: 0;
+  /* ─── 배경 이미지 전체 덮기 ─── */
+  background-image: url("/images/ground-without-home.png");
+  background-size: cover; /* 컨테이너에 꽉 채우기 */
+  background-position: center; /* 가운데를 기준으로 하기 */
+  background-repeat: no-repeat; /* 반복하지 않기 */
 
-  background: ${(p) => (p.outside ? "red" : "#2c660d")};
   border-radius: 2vh;
   /* margin: 3vh 0; */
 `;
+
+export const HomeWrapper = styled.div`
+  /* position: relative;
+  overflow: visible;
+  width: 90%;
+  height: 40vh; */
+  position: absolute; /* ② 절대 위치로 변경 */
+  inset: 0;
+  /* background-color: red; */
+  z-index: 5;
+  /* ─── 배경 이미지 전체 덮기 ─── */
+  background-image: url("/images/home.png");
+  background-size: cover; /* 컨테이너에 꽉 채우기 */
+  background-position: center; /* 가운데를 기준으로 하기 */
+  background-repeat: no-repeat; /* 반복하지 않기 */
+
+  border-radius: 2vh;
+  /* margin: 3vh 0; */
+`;
+
+export const LineWrapper = styled.div`
+  /* position: relative;
+  overflow: visible;
+  width: 90%;
+  height: 40vh; */
+  position: absolute; /* ② 절대 위치로 변경 */
+  inset: 0;
+  /* background-color: red; */
+  z-index: 7;
+  /* ─── 배경 이미지 전체 덮기 ─── */
+  background-image: url("/images/line.png");
+  background-size: cover; /* 컨테이너에 꽉 채우기 */
+  background-position: center; /* 가운데를 기준으로 하기 */
+  background-repeat: no-repeat; /* 반복하지 않기 */
+
+  border-radius: 2vh;
+  /* margin: 3vh 0; */
+`;
+
+export const HomeBaseWrapper = styled.div`
+  position: absolute;
+  inset: 0;
+  z-index: 80;
+
+  /* 배경색을 흰/파랑으로 토글 */
+  background-color: #ffffff;
+
+  /* mask 에 흰색 png 파일의 알파 채널을 씁니다 */
+  mask-image: url("/images/home-base-white-1.png");
+  mask-size: cover;
+  mask-position: center;
+  mask-repeat: no-repeat;
+
+  /* 사파리(webkit) 지원을 위해 */
+  -webkit-mask-image: url("/images/home-base-white-1.png");
+  -webkit-mask-size: cover;
+  -webkit-mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+`;
+
+export const Ground = styled.div<{ outside?: boolean }>`
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  height: 100%;
+
+  /* only paint red outside the circle at 50% 55% of 40% radius */
+  background: ${(p) => (p.outside ? "red" : "transparent")};
+  opacity: 30%;
+  /* mask‐out that central circle */
+  mask-image: radial-gradient(
+    circle at 50% 55%,
+    /* center of your OutZoneWrapper */ transparent 40%,
+    /* inside the circle: transparent (cut‑out) */ black 40%
+      /* outside: opaque => show the bg */
+  );
+  mask-mode: alpha;
+
+  /* for Safari: */
+  -webkit-mask-image: radial-gradient(
+    circle at 50% 50%,
+    transparent 55%,
+    black 40%
+  );
+  -webkit-mask-mode: alpha;
+
+  border-radius: 2vh;
+`;
+
 export const FullImage = styled.img`
   position: absolute;
   top: 0;
@@ -434,24 +586,64 @@ export const FullImage = styled.img`
 `;
 
 export const OutCount = styled.div`
-  position: absolute;
-  left: 4vw;
-  bottom: 2vh;
+  width: 5vh;
+  height: 2vh;
   display: flex;
-  gap: 1vw;
+  /* gap: 1vw; */
+  flex-direction: row;
   align-items: center;
-  justify-content: center;
+  justify-content: space-evenly;
   background: #000;
-  border-radius: 5vh;
-  padding: 0.5vh 1vw;
-  height: 2.5vh;
+  border-radius: 50px;
+
+  /* padding: 0.5vh 1vw; */
+`;
+
+export const SideWrapper = styled.div`
+  position: absolute;
+  left: 84%;
+  top: 75%;
+  width: 5vh;
+  /* height: 20vh; */
+  /* background-color: red; */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 `;
 
 export const Ellipse = styled.div<{ active?: boolean }>`
-  width: 1.5vh;
-  height: 1.5vh;
+  width: 1vh;
+  height: 1vh;
+  align-self: center;
   border-radius: 50%;
   background: ${(p) => (p.active ? "#fb0000" : "#707070")};
+`;
+
+export const OnDeckWrapper = styled.div`
+  margin-top: 0.5vh;
+  /* position: absolute; */
+  width: 5vh;
+  /* dynamic height로 바꿔주면 내용에 맞게 늘어납니다 */
+  height: 5.5vh;
+  z-index: 80;
+  font-family: "Pretendard";
+  font-weight: 400;
+  /* font-weight: bold; */
+  font-size: 0.5rem;
+  background-color: black;
+  color: #f2f2f7;
+  border-radius: 5px;
+  /* margin-top: 0.4rem; */
+  display: flex;
+  flex-direction: column;
+  /* 위아래 간격을 0.3rem씩 주기 */
+  /* gap: 0.22rem; */
+  /* 항목들이 위쪽부터 시작하도록 */
+  justify-content: space-evenly;
+  align-items: center;
+
+  /* 위아래 여백도 추가하고 싶으면 padding 활용 */
+  /* padding: 0.3rem 0; */
 `;
 
 export const OverlaySvg = styled.svg`
@@ -467,20 +659,26 @@ export const OverlaySvg = styled.svg`
 
 export const DiamondSvg = styled.svg`
   position: absolute;
+  z-index: 1;
   left: 50%;
-  top: 55%;
+  top: 56%;
   transform: translate(-50%, -50%);
-  width: 60%;
+  width: 47%;
   height: auto;
   overflow: visible;
-  fill: green;
+  fill: transparent;
+  background-image: url("/images/diamond.png");
+  background-size: cover; /* 컨테이너에 꽉 채우기 */
+  background-position: center; /* 가운데를 기준으로 하기 */
+  background-repeat: no-repeat; /* 반복하지 않기 */
+
+  /* border: 1px solid black; */
   /* background-color: red; */
 
   /* 기존 inner 기본 스타일 */
   & .inner {
     fill: #ffffff;
-    stroke: #000000;
-    stroke-width: 0.2;
+    stroke: none;
   }
 
   /* 여기에 highlight 스타일 추가 */
@@ -506,23 +704,28 @@ export const ResetDot = styled.div`
   background-repeat: no-repeat;
   background-position: center;
   cursor: pointer;
+
+  z-index: 90; /* ★ 여기를 높게 주면 다른 요소보다 위에 올라옵니다 */
+  pointer-events: auto;
 `;
 export const NameBadge = styled.div`
   position: absolute;
+  font-family: "Pretendard";
+  font-weight: 600;
+  z-index: 999;
   left: 50%;
+  font-size: 0.8rem;
   top: 85%;
   transform: translate(0, -50%);
   background: #ffffff;
-  border: 0.05vh solid var(--snu-blue);
+  border: 0.3px solid black;
   border-radius: 50px;
   padding: 1vh 1vw;
-  font-family: "Pretendard", sans-serif;
-  font-weight: 600;
-
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 3vh;
+  height: 2.6vh;
+  width: 13vw;
   white-space: nowrap;
   touch-action: none; /* 터치 동작(스크롤/줌) 비활성화 */
   pointer-events: all; /* 이벤트 확실히 받도록 */
@@ -540,11 +743,12 @@ export const NameText = styled.div`
 
 export const ReconstructionWrapper = styled.div`
   width: 44vw;
-  height: 5vh;
+  height: 4.8vh;
   /* border: 1px solid #999; */
   font-family: "KBO-Dia-Gothic_medium";
   /* font-weight: bold; */
   font-size: 0.813rem;
+  background-color: #ffffff;
   color: #ffffff;
   box-shadow: 0px 21px 6px rgba(0, 0, 0, 0),
     //
@@ -555,7 +759,7 @@ export const ReconstructionWrapper = styled.div`
     0px 3px 3px rgba(0, 0, 0, 0.03),
     //
     0px 1px 2px rgba(0, 0, 0, 0.03);
-  border-radius: 12px;
+  border-radius: 18px;
   display: flex;
   flex-direction: row;
   /* justify-content: center; */
@@ -566,13 +770,13 @@ export const ReconstructionTitle = styled.div`
   width: 27.5vw;
   height: 4vh;
   /* border: 1px solid #999; */
-  font-family: "KBO-Dia-Gothic_bold";
-  font-weight: bold;
+  font-family: "Pretendard";
+  font-weight: 700;
   font-size: 0.813rem;
   color: black;
   /* background-color: red; */
   cursor: pointer;
-  border-radius: 12px;
+  border-radius: 18px;
   display: flex;
   flex-direction: row;
   justify-content: center;
@@ -595,27 +799,17 @@ export const ReconstructionButtonWrapper = styled.div`
   align-items: center;
 `;
 
-// export const ReconstructionSwitch = styled(Switch)`
-//   /* 필요하다면 여기에 커스텀 스타일 추가 */
-//   width: 4vw;
-//   height: 3vh;
-//   .ant-switch-handle {
-//     top: 50% !important;
-//     transform: translateY(-50%) !important;
-//   }
-// `;
-
 export const ReconstructionSwitch = styled(Switch)`
   /* 1) 트랙 너비 조정 (높이는 이미 custom 됐으니 필요 없다면 생략) */
   && {
-    background-color: #bdbdbd !important;
+    background-color: #e5e5ea !important;
     width: 11vw !important; /* 원하는 가로 길이 */
     min-width: 11vw !important;
-    height: 3.3vh !important;
+    height: 2.8vh !important;
   }
   /* ON 상태의 트랙 색 */
   &.ant-switch-checked {
-    background-color: #4caf50 !important; /* 원하는 ON 트랙 색 */
+    background-color: #0f0f70 !important; /* 원하는 ON 트랙 색 */
   }
 
   /* 2) 내부 여백: 패딩만큼 핸들이 옆으로 빠지지 않도록 margin 설정 */
@@ -625,8 +819,8 @@ export const ReconstructionSwitch = styled(Switch)`
 
   /* 3) 핸들 크기 & 중앙 정렬 & 움직일 때 애니메이션 제거 */
   .ant-switch-handle {
-    width: 18px !important; /* handleSize */
-    height: 18px !important;
+    width: 1rem !important; /* handleSize */
+    height: 1rem !important;
     top: 50% !important;
     transform: translateY(-50%) !important;
     left: 5px !important;
@@ -638,4 +832,185 @@ export const ReconstructionSwitch = styled(Switch)`
     left: calc(100% - 5px - 18px) !important;
     /* 100% 트랙 너비에서 padding(2px)과 핸들 너비(18px)만큼 뺀 위치 */
   }
+`;
+
+export const OutZoneWrapper = styled.div`
+  position: absolute;
+  /* 부모의 가운데(가로·세로) */
+  top: 50%;
+  left: 50%;
+
+  width: 70%;
+  aspect-ratio: 1 / 1; /* 항상 정사각형 비율 유지 */
+  /* 자신의 크기의 절반만큼 당겨서 진짜 중앙에 위치 */
+  transform: translate(-50%, -50%);
+  opacity: 0.5;
+  /* background-color: red; */
+  border-radius: 50%; /* 완전한 원 */
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  z-index: 1;
+  pointer-events: none;
+`;
+
+export const CustomBoundaryWrapper = styled.div`
+  position: absolute;
+  /* 부모의 가운데(가로·세로) */
+  top: 50%;
+  left: 50%;
+
+  width: 101%; // 약간의 점만 넘기면 되니까 1%만 넘겨보기
+  height: 100%;
+  /* 자신의 크기의 절반만큼 당겨서 진짜 중앙에 위치 */
+  transform: translate(-45%, -45%);
+  opacity: 0.5;
+  background-color: transparent;
+  /* background-color: red; */
+  border-radius: 12px;
+
+  z-index: 1;
+  pointer-events: none;
+`;
+
+export const HomePlateOverlay = styled.svg`
+  position: absolute;
+  left: 50%;
+  top: 80%;
+  border: none;
+  transform: translate(-50%, -50%);
+  width: 5%;
+  height: auto;
+  z-index: 10; /* 맨 위로 */
+  pointer-events: none; /* 드래그등 이벤트 투명화 */
+`;
+
+// 좌상단 스코어보드
+export const LeftSideWrapper = styled.div`
+  position: absolute;
+  left: 5%;
+  top: 5%;
+  width: 7.5vh;
+  z-index: 100;
+  /* height: 5vh; */
+  /* background-color: red; */
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+`;
+
+export const InningBoard = styled.div`
+  width: 1.6vh;
+  height: 4.5vh;
+  display: flex;
+  /* gap: 1vw; */
+  flex-direction: column;
+  align-items: center;
+  /* text-align */
+  justify-content: space-evenly;
+  background: #000;
+  border-radius: 10px;
+  color: white;
+
+  /* padding: 0.5vh 1vw; */
+`;
+
+export const InningNumber = styled.div`
+  font-family: "Pretendard";
+  font-weight: 700;
+  font-size: 0.56rem;
+  /* padding: 0.5vh 1vw; */
+`;
+
+export const LittleScoreBoardWrapper = styled.div`
+  /* margin-top: 1vh; */
+  /* position: absolute; */
+  width: 5.5vh;
+  height: 4.5vh;
+  z-index: 80;
+  /* font-weight: bold; */
+
+  background-color: black;
+  color: #f2f2f7;
+  border-radius: 8px;
+  /* margin-top: 0.4rem; */
+  display: flex;
+  flex-direction: column;
+
+  /* 위아래 간격을 0.3rem씩 주기 */
+  /* gap: 0.3rem; */
+  /* 항목들이 위쪽부터 시작하도록 */
+  justify-content: space-evenly;
+  /* align-items: center; */
+
+  /* 위아래 여백도 추가하고 싶으면 padding 활용 */
+  /* padding: 0.3rem 0; */
+`;
+
+export const AwayTeamWrapper = styled.div`
+  font-family: "Pretendard";
+  font-weight: 700;
+  font-size: 0.5rem;
+  display: flex;
+  flex-direction: row;
+
+  justify-content: center;
+  /* align-items: center; */
+  /* padding: 0.5vh 1vw; */
+`;
+
+export const AwayTeamName = styled.div`
+  font-family: "Pretendard";
+  /* background-color: red; */
+  font-weight: 600;
+  font-size: 0.5rem;
+  text-align: center;
+  /* padding: 0.5vh 1vw; */
+  width: 60%;
+  /* background-color: red; */
+`;
+
+export const AwayTeamScore = styled.div`
+  font-family: "Pretendard";
+  font-weight: 700;
+  font-size: 0.5rem;
+  width: 20%;
+  text-align: center;
+  /* background-color: red; */
+  /* padding: 0.5vh 1vw; */
+`;
+
+export const HomeTeamWrapper = styled.div`
+  font-family: "Pretendard";
+  font-weight: 700;
+  font-size: 0.5rem;
+  display: flex;
+  flex-direction: row;
+
+  justify-content: center;
+  /* padding: 0.5vh 1vw; */
+`;
+
+export const HomeTeamName = styled.div`
+  font-family: "Pretendard";
+  /* background-color: red; */
+  font-weight: 600;
+  font-size: 0.5rem;
+  text-align: center;
+  /* padding: 0.5vh 1vw; */
+  width: 60%;
+  /* background-color: red; */
+`;
+
+export const HomeTeamScore = styled.div`
+  font-family: "Pretendard";
+  font-weight: 700;
+  font-size: 0.5rem;
+  width: 20%;
+  text-align: center;
+  /* background-color: red; */
+  /* padding: 0.5vh 1vw; */
 `;

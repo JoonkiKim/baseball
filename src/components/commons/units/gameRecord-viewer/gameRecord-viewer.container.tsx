@@ -17,6 +17,23 @@ import {
   DiamondSvg,
   NameBadge,
   PlayersRow,
+  HomeWrapper,
+  LineWrapper,
+  HomeBaseWrapper,
+  Ground,
+  OutZoneWrapper,
+  CustomBoundaryWrapper,
+  SideWrapper,
+  LeftSideWrapper,
+  InningBoard,
+  InningNumber,
+  LittleScoreBoardWrapper,
+  AwayTeamWrapper,
+  AwayTeamName,
+  AwayTeamScore,
+  HomeTeamWrapper,
+  HomeTeamName,
+  HomeTeamScore,
 } from "./gameRecord-viewer.style";
 
 import {
@@ -344,7 +361,7 @@ export default function GameRecordPageViewer() {
     initialTop: string; // e.g. '85%'
   }
   const badgeConfigs: BadgeConfig[] = [
-    { id: "badge-1", label: "이정후", initialLeft: "55%", initialTop: "85%" },
+    { id: "badge-1", label: "이정후", initialLeft: "43%", initialTop: "80%" },
     // { id: "badge-2", label: "송성문", initialLeft: "80%", initialTop: "75%" },
     // { id: "badge-3", label: "김하성", initialLeft: "80%", initialTop: "85%" },
     // { id: "badge-4", label: "박병호", initialLeft: "80%", initialTop: "95%" },
@@ -379,7 +396,7 @@ export default function GameRecordPageViewer() {
       id: "black-badge-2",
       label: "강민호",
       initialLeft: "50%",
-      initialTop: "95%",
+      initialTop: "93%",
       sportPosition: "C",
     },
     {
@@ -393,7 +410,7 @@ export default function GameRecordPageViewer() {
       id: "black-badge-4",
       label: "류지혁",
       initialLeft: "70%",
-      initialTop: "35%",
+      initialTop: "40%",
       sportPosition: "2B",
     },
     {
@@ -407,28 +424,28 @@ export default function GameRecordPageViewer() {
       id: "black-badge-6",
       label: "이재현",
       initialLeft: "30%",
-      initialTop: "35%",
+      initialTop: "40%",
       sportPosition: "SS",
     },
     {
       id: "black-badge-7",
       label: "구자욱",
       initialLeft: "20%",
-      initialTop: "20%",
+      initialTop: "25%",
       sportPosition: "LF",
     },
     {
       id: "black-badge-8",
       label: "김지찬",
       initialLeft: "50%",
-      initialTop: "10%",
+      initialTop: "15%",
       sportPosition: "CF",
     },
     {
       id: "black-badge-9",
       label: "김성윤",
       initialLeft: "80%",
-      initialTop: "20%",
+      initialTop: "25%",
       sportPosition: "RF",
     },
   ]);
@@ -453,9 +470,10 @@ export default function GameRecordPageViewer() {
     cfg: BlackBadgeConfig;
     pos: { x: number; y: number };
   }) {
-    const { attributes, listeners, setNodeRef, transform } = useDraggable({
-      id: cfg.id,
-    });
+    const { attributes, listeners, setNodeRef, transform, isDragging } =
+      useDraggable({
+        id: cfg.id,
+      });
 
     // dnd-kit nodeRef + our ref 동시 설정
     const combinedRef = (el: HTMLElement | null) => {
@@ -473,12 +491,13 @@ export default function GameRecordPageViewer() {
         {...listeners}
         style={{
           position: "absolute",
-          left: `calc(${cfg.initialLeft} + ${dx}px)`,
-          top: `calc(${cfg.initialTop}  + ${dy}px)`,
-          /* 수직 가운데 정렬만 유지 */
-          transform: `translate(-50%, -50%)`,
-          background: "#000",
+          left: cfg.initialLeft,
+          top: cfg.initialTop,
+
+          transform: `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`,
+          background: "#000000",
           color: "#fff",
+          border: "0.3px solid #ffffff",
           cursor: "grab",
         }}
       >
@@ -644,15 +663,18 @@ export default function GameRecordPageViewer() {
       </ScoreBoardWrapper>
 
       <GraphicWrapper
+        // as="svg"
         ref={wrapperRef}
-        outside={isOutside}
-        style={{ position: "relative" }}
+        // viewBox="0 0 110 110"
+        // preserveAspectRatio="xMidYMid meet"
+
+        // outside={isOutside}
       >
-        <OutCount>
-          {outs.map((isActive, idx) => (
-            <Ellipse key={idx} active={isActive} />
-          ))}
-        </OutCount>
+        <HomeWrapper />
+        <LineWrapper />
+        <HomeBaseWrapper />
+        <Ground />
+
         <DiamondSvg
           viewBox="0 0 110 110"
           ref={(el) => {
@@ -663,6 +685,7 @@ export default function GameRecordPageViewer() {
           <polygon
             id="ground"
             points="55,0 110,55 55,110 0,55"
+            // style={{ border: "1px solid black" }}
             ref={(el) => {
               diamondPolyRef.current = el;
               // groundRef.current = el;
@@ -676,6 +699,7 @@ export default function GameRecordPageViewer() {
           <polygon
             className="inner"
             id="1st"
+            // transform="translate(-5, 10)"
             ref={(el) => {
               droppableSetters["first-base"](el as any);
               baseRefs.current["first-base"] = el;
@@ -714,6 +738,48 @@ export default function GameRecordPageViewer() {
           />
         </DiamondSvg>
 
+        <SideWrapper>
+          <OutCount>
+            {outs.map((isActive, idx) => (
+              <Ellipse key={idx} active={isActive} />
+            ))}
+          </OutCount>
+          <OnDeckWrapper>
+            {onDeckPlayers.length > 0 ? (
+              onDeckPlayers.map((p) => (
+                <div key={p.playerId}>
+                  {p.battingOrder} {p.playerName}
+                </div>
+              ))
+            ) : (
+              <div>대기타석입니다</div>
+            )}
+          </OnDeckWrapper>
+        </SideWrapper>
+        <LeftSideWrapper>
+          <InningBoard>
+            <InningNumber>7</InningNumber>
+          </InningBoard>
+          <LittleScoreBoardWrapper>
+            <AwayTeamWrapper>
+              <AwayTeamName> {teamAName.slice(0, 3)}</AwayTeamName>
+              <AwayTeamScore>
+                {teamAScores.length >= 2
+                  ? teamAScores[teamAScores.length - 2]
+                  : ""}
+              </AwayTeamScore>
+            </AwayTeamWrapper>
+            <HomeTeamWrapper>
+              <HomeTeamName>{teamBName.slice(0, 3)}</HomeTeamName>
+              <HomeTeamScore>
+                {teamBScores.length >= 2
+                  ? teamBScores[teamBScores.length - 2]
+                  : ""}
+              </HomeTeamScore>
+            </HomeTeamWrapper>
+          </LittleScoreBoardWrapper>
+        </LeftSideWrapper>
+
         {blackBadgeConfigs.map((cfg) => (
           <BlackDraggableBadge
             key={cfg.id}
@@ -736,17 +802,6 @@ export default function GameRecordPageViewer() {
               snapInfo={badgeSnaps[cfg.id]}
             />
           ))}
-        <OnDeckWrapper style={{ left: "80%", top: "80%" }}>
-          {onDeckPlayers.length > 0 ? (
-            onDeckPlayers.map((p) => (
-              <div key={p.playerId}>
-                {p.battingOrder} {p.playerName}
-              </div>
-            ))
-          ) : (
-            <div>대기타석입니다</div>
-          )}
-        </OnDeckWrapper>
       </GraphicWrapper>
 
       <PlayersRow></PlayersRow>
