@@ -41,7 +41,7 @@ export const BottomNavWrapper = styled.div`
 `;
 
 export const BottomNav = styled.div`
-  background: #ffffff;
+  background: #f2f2f7;
   display: flex;
   flex-direction: column;
   justify-content: center;

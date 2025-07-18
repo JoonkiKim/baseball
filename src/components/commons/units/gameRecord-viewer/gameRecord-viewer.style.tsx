@@ -16,7 +16,7 @@ export const GameRecordContainer = styled.div`
   align-items: center;
   /* min-height: 100vh; */
   height: calc(var(--vh) * 100);
-  background-color: "#f2f2f7";
+  background-color: #f2f2f7;
 `;
 
 export const ScoreBoardWrapper = styled.div`
@@ -25,6 +25,7 @@ export const ScoreBoardWrapper = styled.div`
 
   height: calc((100vh - 120px) * 0.2);
   margin-top: 3vh;
+  margin-bottom: 1vh;
   background-color: #ffffff;
   display: flex;
   flex-direction: column;
@@ -270,31 +271,264 @@ export const ScoreDisplay = styled.div`
 export const PlayersRow = styled.div`
   display: flex;
   width: 90%;
-  height: 12vh;
+  height: 25vh;
   border-bottom: 1px solid #ccc;
   background-color: #ffffff;
   border-radius: 2vh;
-  margin-top: 3.5vh;
-  display: flex;
+  margin-top: 1vh;
   flex-direction: row;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
-  /* background-color: red; */
+  padding: 2vh;
 `;
 
-export const PlayerBox = styled.div`
-  /* flex: 1; */
-  /* border-right: 1px solid #ccc; */
-  /* padding: 1rem; */
-  /* box-sizing: border-box; */
+export const BatterPlayerBox = styled.div`
+  width: 60%;
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  background-color: red;
+`;
+
+export const BatterPlayerSingleBox = styled.div`
+  width: 100%;
+  display: flex;
+  height: 30%;
+  background-color: green;
+`;
+
+// ── 그룹 컨테이너 ──
+export const BatterGroup = styled.div`
+  box-sizing: border-box;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column; /* stack each row vertically */
+  justify-content: flex-start;
+  align-items: flex-start; /* or center, depending on how you want the rows aligned */
+  width: 55.73vw; /* ≈ 209px @ 375px-wide reference */
+  height: 16.13vh; /* ≈ 131px @ 812px-tall reference */
+  overflow: hidden;
+`;
+
+export const BatterRow = styled.div`
+  display: flex;
+  flex-direction: row; /* lay out circle / who / today horizontally */
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%; /* fill the full width of the group */
+  padding: 0 0.27vw; /* ≈ 1px left/right padding @ 375px base */
+  gap: 1.87vw; /* ≈ 7px gap between items */
+  /* height will auto-size to its children; remove absolute sizing */
+`;
+
+export const OrderCircle = styled.div`
+  color: #000;
+  text-align: center;
+  font-family: Pretendard-SemiBold, sans-serif;
+  font-size: 0.625rem; /* 10px */
+  font-weight: 600;
+  width: 1.6vw; /* 6px */
+  height: 4.56vh; /* 37px */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+export const WhoContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.53vw;
+  align-items: center;
+  justify-content: center;
+  width: 13.6vw; /* 51px */
+  height: 4.56vh; /* 37px */
+`;
+
+export const PlayerName = styled.div`
+  color: #000;
+  text-align: center;
+  font-family: Pretendard-Bold, sans-serif;
+  font-size: 1rem; /* 16px */
+  font-weight: 700;
+  width: 12vw; /* 45px */
+  height: 2.09vh; /* 17px */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+export const AvgFrame = styled.div`
+  border-radius: 0.62vh; /* 5px */
+  flex-shrink: 0;
+  width: 100%;
+  height: 0.86vh; /* 7px */
+  overflow: hidden;
+  position: relative;
+`;
+
+export const AvgText = styled.div`
+  text-align: center;
+  font-family: Pretendard-SemiBold, sans-serif;
+  font-size: 0.5rem; /* 8px */
+  font-weight: 600;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  gap: 0.53vw;
+  align-items: center;
+  justify-content: center;
+`;
+
+export const AvgLabel = styled.span`
+  color: #000;
+`;
+export const AvgValue = styled.span`
+  color: var(--blue-1, #007aff);
+`;
+
+// ── 오늘 성적 ──
+export const TodayContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  gap: 2.13vw;
+  align-items: center;
+  justify-content: center;
+  height: 4.56vh; /* 37px */
+`;
+
+export const TodayFrame = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.53vw;
+  align-items: center;
+  justify-content: center;
+  width: 3.47vw; /* 13px */
+`;
+
+export const TodayLabel = styled.div`
+  color: #000;
+  font-family: Pretendard-SemiBold, sans-serif;
+  font-size: 0.5rem; /* 8px */
+  font-weight: 600;
+`;
+
+export const TodayValue = styled(TodayLabel)``;
+
+// ── 피처 영역 ──
+export const PitcherPlayerBox = styled.div`
+  width: 40%;
   display: flex;
   height: 100%;
   flex-direction: column;
   justify-content: space-evenly;
   align-items: center;
-
-  /* background-color: red; */
+  background-color: red;
 `;
+
+export const PitcherGroup = styled.div`
+  box-sizing: border-box;
+  padding: 0 0.27vw 0 1.07vw;
+  display: flex;
+  flex-direction: column;
+  gap: 4.53vh; /* 17px */
+  align-items: center;
+  justify-content: flex-start;
+  width: 24.27vw; /* 91px */
+  height: 16.13vh; /* 131px */
+  position: relative;
+  overflow: hidden;
+`;
+
+export const PitcherWho = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1.33vw; /* 5px */
+  align-items: center;
+  justify-content: center;
+  width: 21.87vw; /* 82px */
+  height: 4.8vh; /* 39px */
+`;
+
+export const PitcherName = styled.div`
+  color: #000;
+  text-align: center;
+  font-family: Pretendard-Bold, sans-serif;
+  font-size: 1rem; /* 16px */
+  font-weight: 700;
+  width: 12vw; /* 45px */
+  height: 2.09vh; /* 17px */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+export const PitcherToday = styled.div`
+  display: flex;
+  flex-direction: row;
+  gap: 0.53vw;
+  align-items: center;
+  justify-content: center;
+  width: 20.8vw; /* 78px */
+`;
+
+export const StatFrame = styled.div`
+  border-radius: 0.62vh; /* 5px */
+  flex: 1;
+  height: 0.86vh; /* 7px */
+  position: relative;
+  overflow: hidden;
+`;
+
+export const StatText = styled.div`
+  text-align: center;
+  font-family: Pretendard-SemiBold, sans-serif;
+  font-size: 0.5rem; /* 8px */
+  font-weight: 600;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  gap: 0.53vw;
+  align-items: center;
+  justify-content: center;
+`;
+
+export const StatLabel = styled.span`
+  color: #000;
+`;
+export const StatValue = styled.span`
+  color: var(--blue-1, #007aff);
+`;
+
+export const PitcherStatsGrid = styled.div`
+  padding: 0 0.8vw;
+  display: grid;
+  gap: 2.13vw;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, auto);
+`;
+
+export const StatCell = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.53vw;
+  align-items: center;
+  justify-content: center;
+`;
+
+export const StatName = styled.div`
+  color: #000;
+  font-family: Pretendard-SemiBold, sans-serif;
+  font-size: 0.5rem;
+  font-weight: 600;
+`;
+
+export const StatNumber = styled(StatName)``;
 
 export const PlayerChangeButton = styled.button`
   background-color: #000;
@@ -475,7 +709,7 @@ export const GraphicWrapper = styled.div`
   position: relative;
   overflow: visible;
   width: 90%;
-  height: 40vh;
+  height: 42vh;
   /* background-color: red; */
   z-index: 0;
   /* ─── 배경 이미지 전체 덮기 ─── */

@@ -34,6 +34,34 @@ import {
   HomeTeamWrapper,
   HomeTeamName,
   HomeTeamScore,
+  BatterPlayerBox,
+  PitcherPlayerBox,
+  BatterPlayerSingleBox,
+  BatterGroup,
+  BatterRow,
+  OrderCircle,
+  WhoContainer,
+  PlayerName,
+  AvgFrame,
+  AvgText,
+  AvgLabel,
+  AvgValue,
+  TodayContainer,
+  TodayFrame,
+  TodayLabel,
+  TodayValue,
+  PitcherGroup,
+  PitcherWho,
+  PitcherName,
+  PitcherToday,
+  StatFrame,
+  StatText,
+  StatLabel,
+  StatValue,
+  PitcherStatsGrid,
+  StatCell,
+  StatName,
+  StatNumber,
 } from "./gameRecord-viewer.style";
 
 import {
@@ -632,9 +660,8 @@ export default function GameRecordPageViewer() {
     );
   }
 
-  // --이닝의 재구성--//
-
-  // 그라운드 내 직선 움직임 //
+  // 하단 중계화면
+  const lineup = (isHomeAttack ? homeExample : awayExample).batters.slice(0, 3);
 
   return (
     <GameRecordContainer>
@@ -804,7 +831,92 @@ export default function GameRecordPageViewer() {
           ))}
       </GraphicWrapper>
 
-      <PlayersRow></PlayersRow>
+      <PlayersRow>
+        <BatterPlayerBox>
+          {lineup.map((b) => (
+            <BatterPlayerSingleBox key={b.playerId}>
+              <BatterGroup>
+                <BatterRow>
+                  <OrderCircle>{b.battingOrder}</OrderCircle>
+
+                  <WhoContainer>
+                    <PlayerName>{b.playerName}</PlayerName>
+                    <AvgFrame>
+                      <AvgText>
+                        <AvgLabel>타율</AvgLabel>
+                        {/* 나중에 b.avg로 교체 */}
+                        <AvgValue>0.000</AvgValue>
+                      </AvgText>
+                    </AvgFrame>
+                  </WhoContainer>
+
+                  <TodayContainer>
+                    <TodayFrame>
+                      <TodayLabel>타석</TodayLabel>
+                      {/* 나중에 b.stats.pa로 교체 */}
+                      <TodayValue>0</TodayValue>
+                    </TodayFrame>
+                    <TodayFrame>
+                      <TodayLabel>타수</TodayLabel>
+                      <TodayValue>0</TodayValue>
+                    </TodayFrame>
+                    <TodayFrame>
+                      <TodayLabel>안타</TodayLabel>
+                      <TodayValue>0</TodayValue>
+                    </TodayFrame>
+                    <TodayFrame>
+                      <TodayLabel>득점</TodayLabel>
+                      <TodayValue>0</TodayValue>
+                    </TodayFrame>
+                    <TodayFrame>
+                      <TodayLabel>타점</TodayLabel>
+                      <TodayValue>0</TodayValue>
+                    </TodayFrame>
+                  </TodayContainer>
+                </BatterRow>
+              </BatterGroup>
+            </BatterPlayerSingleBox>
+          ))}
+        </BatterPlayerBox>
+        <PitcherPlayerBox>
+          <PitcherGroup>
+            <PitcherWho>
+              <PitcherName>{homeExample.pitcher.playerName}</PitcherName>
+              <PitcherToday>
+                <StatFrame>
+                  <StatText>
+                    <StatLabel>투구수</StatLabel>
+                    <StatValue>45</StatValue>
+                    {/* 나중에 actual 값 */}
+                  </StatText>
+                </StatFrame>
+                <StatFrame>
+                  <StatText>
+                    <StatLabel>ERA</StatLabel>
+                    <StatValue>1.21</StatValue>
+                  </StatText>
+                </StatFrame>
+              </PitcherToday>
+            </PitcherWho>
+
+            <PitcherStatsGrid>
+              {[
+                { name: "볼넷", value: 2 },
+                { name: "이닝", value: 2 },
+                { name: "실점", value: 2 },
+                { name: "자책", value: 2 },
+                { name: "삼진", value: 2 },
+                { name: "WHIP", value: 2 },
+              ].map((s, i) => (
+                <StatCell key={i}>
+                  <StatName>{s.name}</StatName>
+                  <StatNumber>{s.value}</StatNumber>
+                </StatCell>
+              ))}
+            </PitcherStatsGrid>
+          </PitcherGroup>
+        </PitcherPlayerBox>
+      </PlayersRow>
 
       <LoadingOverlay visible={isSubmitting}>
         <LoadingIcon spin fontSize={48} />

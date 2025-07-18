@@ -15,9 +15,10 @@ export const GameRecordContainer = styled.div<{ reconstructMode: boolean }>`
   flex-direction: column;
   align-items: center;
   /* min-height: 100vh; */
+
   height: calc(var(--vh) * 100);
   background-color: ${({ reconstructMode }) =>
-    reconstructMode ? "#f2f2f7" : "rgba(0, 0, 0, 0.05)"};
+    reconstructMode ? "#B8B8B8" : "#f2f2f7"};
 `;
 
 export const ScoreBoardWrapper = styled.div`
@@ -26,6 +27,7 @@ export const ScoreBoardWrapper = styled.div`
 
   height: calc((100vh - 120px) * 0.2);
   margin-top: 3vh;
+
   background-color: #ffffff;
   display: flex;
   flex-direction: column;
@@ -58,6 +60,7 @@ export const InningHeader = styled.div`
   /* 모든 셀에 보더 붙이고, 아래 끝에 정렬 */
 
   margin-top: 1vh;
+
   > * {
     /* margin-bottom: 1vh; */
 
