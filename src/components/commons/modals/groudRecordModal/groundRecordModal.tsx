@@ -22,10 +22,16 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import {
+  CancelButton,
+  CancelButtonWrapper,
   CustomBoundaryWrapper,
   DiamondSvg,
   Ellipse,
   GraphicWrapper,
+  Ground,
+  HomeBaseWrapper,
+  HomeWrapper,
+  LineWrapper,
   ModalBottomRedoUndoWrapper,
   ModalBottomRunnerTitle,
   ModalBottomRunnerWrapper,
@@ -50,8 +56,10 @@ import {
   CaretLeftOutlined,
   CaretRightFilled,
   CaretRightOutlined,
+  CloseOutlined,
 } from "@ant-design/icons";
 import { Divider } from "antd";
+import { RoundCloseOutlined } from "../../../../commons/libraries/cancelButton";
 
 interface IModalProps {
   setIsGroundRecordModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -99,7 +107,7 @@ export default function GroundRecordModal(props: IModalProps) {
     initialTop: string; // e.g. '85%'
   }
   const badgeConfigs: BadgeConfig[] = [
-    { id: "badge-1", label: "이정후", initialLeft: "55%", initialTop: "85%" },
+    { id: "badge-1", label: "이정후", initialLeft: "41.5%", initialTop: "80%" },
     { id: "badge-2", label: "송성문", initialLeft: "80%", initialTop: "75%" },
     { id: "badge-3", label: "김하성", initialLeft: "80%", initialTop: "85%" },
     { id: "badge-4", label: "박병호", initialLeft: "80%", initialTop: "95%" },
@@ -265,6 +273,12 @@ export default function GroundRecordModal(props: IModalProps) {
           // ── 여기서 무조건 하이라이트 ──
           poly.classList.add("highlight");
           setTimeout(() => poly.classList.remove("highlight"), 1000);
+
+          // ★ 홈베이스일 때 백그라운드 변경
+          if (baseId === "home-base") {
+            setIsHomeBaseActive(true);
+            setTimeout(() => setIsHomeBaseActive(false), 1000);
+          }
 
           // ── 통과 기록은 아직 지나가지 않은 경우에만 ──
           if (order > maxReachedRef.current[badgeId]) {
@@ -485,10 +499,15 @@ export default function GroundRecordModal(props: IModalProps) {
     // TODO: Undo 로직
   };
 
-  // 확인하기 눌렀을 때 실행될 함수
-  const handleSubmit = () => {
+  const handleClose = () => {
     // 모달 닫기
     props.setIsGroundRecordModalOpen(false);
+  };
+
+  // 확인하기 눌렀을 때 실행될 함수
+  const handleSubmit = () => {
+    // // 모달 닫기
+    // props.setIsGroundRecordModalOpen(false);
   };
 
   // 커스텀경계
@@ -553,9 +572,14 @@ export default function GroundRecordModal(props: IModalProps) {
     }
   };
 
+  const [isHomeBaseActive, setIsHomeBaseActive] = useState(false);
+
   return (
     <ModalOverlay>
-      <ModalContainer onClick={(e) => e.stopPropagation()}>
+      <ModalContainer
+        onClick={(e) => e.stopPropagation()}
+        reconstructMode={isReconstructMode}
+      >
         <DndContext
           id="game-record-dnd" // ← 여기에 고정된 string ID를 넣어줍니다
           sensors={sensors}
@@ -569,16 +593,27 @@ export default function GroundRecordModal(props: IModalProps) {
           onDragMove={(e) => handleDragEvent(e, false)} // 드래그 중
           onDragEnd={(e) => handleDragEvent(e, true)} // 드래그 끝
         >
-          <GraphicWrapper
-            ref={wrapperRef}
-            outside={isOutside}
-            style={{ position: "relative" }}
-          >
-            <OutCount>
-              {outs.map((isActive, idx) => (
-                <Ellipse key={idx} active={isActive} />
-              ))}
-            </OutCount>
+          <CancelButtonWrapper>
+            {" "}
+            <button
+              onClick={handleClose}
+              style={{
+                all: "unset",
+                cursor: "pointer",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <RoundCloseOutlined
+                width="3vh"
+                height="3vh"
+                style={{ fontSize: 24 }}
+              />
+            </button>
+          </CancelButtonWrapper>
+
+          <ModalBottomWrapper>
             <ReconstructionWrapper>
               <ReconstructionTitle>이닝의 재구성</ReconstructionTitle>
               <ReconstructionButtonWrapper>
@@ -594,6 +629,32 @@ export default function GroundRecordModal(props: IModalProps) {
                 />
               </ReconstructionButtonWrapper>
             </ReconstructionWrapper>
+
+            <ModalBottomRunnerWrapper>
+              <RedoIcon onClick={handleRedo} />
+              <ModalBottomRunnerTitle>주자</ModalBottomRunnerTitle>
+              <UndoIcon onClick={handleUndo} />
+            </ModalBottomRunnerWrapper>
+          </ModalBottomWrapper>
+          <GraphicWrapper
+            ref={wrapperRef}
+            outside={isOutside}
+            style={{ position: "relative" }}
+          >
+            <HomeWrapper />
+            <LineWrapper />
+            <HomeBaseWrapper active={isHomeBaseActive} />
+            <Ground outside={isOutside} />
+            <OutZoneWrapper ref={outZoneRef}></OutZoneWrapper>
+            <CustomBoundaryWrapper
+              ref={customBoundsRef}
+            ></CustomBoundaryWrapper>
+            {/* <OutCount>
+              {outs.map((isActive, idx) => (
+                <Ellipse key={idx} active={isActive} />
+              ))}
+            </OutCount> */}
+
             <DiamondSvg
               viewBox="0 0 110 110"
               ref={(el) => {
@@ -694,18 +755,8 @@ export default function GroundRecordModal(props: IModalProps) {
               ref={customBoundsRef}
             ></CustomBoundaryWrapper>
           </GraphicWrapper>
-        </DndContext>
-        <ModalBottomWrapper>
-          <ModalBottomRunnerWrapper>
-            <ModalBottomRunnerTitle>주자</ModalBottomRunnerTitle>
-            <ModalBottomRedoUndoWrapper>
-              <RedoIcon onClick={handleRedo} />
-              <Divider type="vertical" style={{ height: "3vh" }} />
-              <UndoIcon onClick={handleUndo} />
-            </ModalBottomRedoUndoWrapper>
-          </ModalBottomRunnerWrapper>
           <ControlButton onClick={handleSubmit}>확인하기</ControlButton>
-        </ModalBottomWrapper>
+        </DndContext>
       </ModalContainer>
       <LoadingOverlay visible={isSubmitting}>
         <LoadingIcon spin fontSize={48} />

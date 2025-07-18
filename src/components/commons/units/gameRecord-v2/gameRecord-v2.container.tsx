@@ -75,6 +75,18 @@ import {
   LeftSideWrapper,
   InningBoard,
   LittleScoreBoardWrapper,
+  ControlButtonWhite,
+  VsText,
+  LeftArrow,
+  RightArrow,
+  Dot,
+  InningNumber,
+  AwayTeamName,
+  HomeTeamName,
+  AwayTeamWrapper,
+  HomeTeamWrapper,
+  AwayTeamScore,
+  HomeTeamScore,
 } from "./gameRecord-v2.style";
 import HitModal from "../../modals/recordModal/hitModal";
 import OutModal from "../../modals/recordModal/outModal";
@@ -138,39 +150,6 @@ export default function GameRecordPageV2() {
     isWc: false,
     position: "P",
   });
-  const [batterPlayerId, setBatterPlayerId] = useState(0);
-
-  // Recoil 상태들
-  const [homeBatterNumber, setHomeBatterNumber] = useRecoilState(
-    homeBatterNumberState
-  );
-  const [awayBatterNumber, setAwayBatterNumber] = useRecoilState(
-    awayBatterNumberState
-  );
-  const [isSubstitutionSwapped, setIsSubstitutionSwapped] = useRecoilState(
-    substitutionSwappedState
-  );
-
-  // 로딩 상태
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  // attack 쿼리 동기화를 위한 state
-  const [attackVal, setAttackVal] = useState("");
-
-  // 예시 데이터 객체
-  const exampleScores = {
-    scoreboard: [
-      { inning: 1, inningHalf: "TOP", runs: 1 },
-      { inning: 1, inningHalf: "BOT", runs: 1 },
-      { inning: 2, inningHalf: "TOP", runs: 2 },
-      { inning: 2, inningHalf: "BOT", runs: 1 },
-      { inning: 3, inningHalf: "TOP", runs: 2 },
-      // … 3~7 이닝까지 필요하면 추가
-    ],
-    teamSummary: {
-      away: { runs: 3, hits: 5 },
-      home: { runs: 1, hits: 4 },
-    },
-  };
 
   // 대기타석 표시용 라인업
   const awayExample = {
@@ -319,9 +298,66 @@ export default function GameRecordPageV2() {
     },
   };
 
-  // 대기타석
   const isHomeAttack = router.query.attack === "home";
   const lineupExample = isHomeAttack ? homeExample : awayExample;
+  // ── 0) 예시로 batter/pitcher 세팅 ──
+  useEffect(() => {
+    if (!lineupExample) return;
+
+    // 첫 번째 타자 예시
+    const firstBatter = lineupExample.batters[0]!;
+    setBatter({
+      battingOrder: firstBatter.battingOrder,
+      playerId: firstBatter.playerId,
+      playerName: firstBatter.playerName,
+      isElite: !firstBatter.isWC,
+      isWc: firstBatter.isWC,
+      position: firstBatter.position,
+    });
+
+    // 투수 예시
+    const exP = lineupExample.pitcher;
+    setPitcher({
+      battingOrder: 0, // 투수니까 굳이 order 필요 없으면 0
+      playerId: exP.playerId,
+      playerName: exP.playerName,
+      isElite: !exP.isWC,
+      isWc: exP.isWC,
+      position: "P",
+    });
+  }, []);
+
+  const [batterPlayerId, setBatterPlayerId] = useState(0);
+
+  // Recoil 상태들
+
+  const [isSubstitutionSwapped, setIsSubstitutionSwapped] = useRecoilState(
+    substitutionSwappedState
+  );
+
+  // 로딩 상태
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  // attack 쿼리 동기화를 위한 state
+  const [attackVal, setAttackVal] = useState("");
+
+  // 예시 데이터 객체
+  const exampleScores = {
+    scoreboard: [
+      { inning: 1, inningHalf: "TOP", runs: 1 },
+      { inning: 1, inningHalf: "BOT", runs: 1 },
+      { inning: 2, inningHalf: "TOP", runs: 2 },
+      { inning: 2, inningHalf: "BOT", runs: 1 },
+      { inning: 3, inningHalf: "TOP", runs: 2 },
+      // … 3~7 이닝까지 필요하면 추가
+    ],
+    teamSummary: {
+      away: { runs: 3, hits: 5 },
+      home: { runs: 1, hits: 4 },
+    },
+  };
+
+  // 대기타석
+
   const onDeckPlayers = lineupExample.batters.filter((b) =>
     [1, 2, 3].includes(b.battingOrder)
   );
@@ -604,7 +640,7 @@ export default function GameRecordPageV2() {
     initialTop: string; // e.g. '85%'
   }
   const badgeConfigs: BadgeConfig[] = [
-    { id: "badge-1", label: "이정후", initialLeft: "55%", initialTop: "85%" },
+    { id: "badge-1", label: "이정후", initialLeft: "43%", initialTop: "80%" },
     { id: "badge-2", label: "송성문", initialLeft: "20%", initialTop: "75%" },
     { id: "badge-3", label: "김하성", initialLeft: "20%", initialTop: "85%" },
     { id: "badge-4", label: "박병호", initialLeft: "20%", initialTop: "95%" },
@@ -639,7 +675,7 @@ export default function GameRecordPageV2() {
       id: "black-badge-2",
       label: "강민호",
       initialLeft: "50%",
-      initialTop: "95%",
+      initialTop: "93%",
       sportPosition: "C",
     },
     {
@@ -758,15 +794,12 @@ export default function GameRecordPageV2() {
           position: "absolute",
           left: cfg.initialLeft,
           top: cfg.initialTop,
-          // 드래그 중에는 0% 기준, 그 외에는 –50% 기준으로 센터 정렬
-          // transform: isDragging
-          //   ? `translate(calc(0% + ${dx}px), calc(0% + ${dy}px))`
-          //   : `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`,
+
           transform: `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`,
-          background: "#000",
+          background: "#000000",
           color: "#fff",
+          border: "0.3px solid #ffffff",
           cursor: "grab",
-          border: "1px soild #fff",
         }}
       >
         {cfg.label}
@@ -1331,7 +1364,7 @@ export default function GameRecordPageV2() {
     img.src = "/images/home-base-white-1.png";
     // (옵션) 로드 완료 콜백
     img.onload = () => {
-      console.log("home-base-blue-2.png preloaded!");
+      console.log("/images/home-base-white-1.png preloaded!");
     };
   }, []);
 
@@ -1388,6 +1421,7 @@ export default function GameRecordPageV2() {
               />
             </ReconstructionButtonWrapper>
           </ReconstructionWrapper>
+          <ControlButtonWhite>임시저장</ControlButtonWhite>
           <ControlButton onClick={() => setIsGameEndModalOpen(true)}>
             경기종료
           </ControlButton>
@@ -1503,8 +1537,27 @@ export default function GameRecordPageV2() {
             </OnDeckWrapper>
           </SideWrapper>
           <LeftSideWrapper>
-            <InningBoard></InningBoard>
-            <LittleScoreBoardWrapper></LittleScoreBoardWrapper>
+            <InningBoard>
+              <InningNumber>7</InningNumber>
+            </InningBoard>
+            <LittleScoreBoardWrapper>
+              <AwayTeamWrapper>
+                <AwayTeamName> {teamAName.slice(0, 3)}</AwayTeamName>
+                <AwayTeamScore>
+                  {teamAScores.length >= 2
+                    ? teamAScores[teamAScores.length - 2]
+                    : ""}
+                </AwayTeamScore>
+              </AwayTeamWrapper>
+              <HomeTeamWrapper>
+                <HomeTeamName>{teamBName.slice(0, 3)}</HomeTeamName>
+                <HomeTeamScore>
+                  {teamBScores.length >= 2
+                    ? teamBScores[teamBScores.length - 2]
+                    : ""}
+                </HomeTeamScore>
+              </HomeTeamWrapper>
+            </LittleScoreBoardWrapper>
           </LeftSideWrapper>
           <ResetDot
             style={{ left: "75vw", top: "2vh" }}
@@ -1551,39 +1604,39 @@ export default function GameRecordPageV2() {
         </GraphicWrapper>
       </DndContext>
       <PlayersRow>
+        <LeftArrow />
         <PlayerBox>
-          <PlayerChangeButton onClick={() => handleSubstitution(isHomeAttack)}>
-            선수교체
-          </PlayerChangeButton>
-          <OrderBadge>{batter.battingOrder}번</OrderBadge>
           <PlayerWrapper>
-            <PlayerPosition>{batter.position}</PlayerPosition>
-            <PlayerInfo>{batter.playerName}</PlayerInfo>
-            <PlayerExWrapper
-              count={(batter.isElite ? 1 : 0) + (batter.isWc ? 1 : 0)}
-            >
-              {batter.isElite && <EliteBox>선출</EliteBox>}
-              {batter.isWc && <WildCardBox>WC</WildCardBox>}
-              {!batter.isElite && !batter.isWc && <WildCardBoxNone />}
-            </PlayerExWrapper>
-          </PlayerWrapper>
-        </PlayerBox>
-        <PlayerBox>
-          <PlayerChangeButton onClick={() => handleSubstitution(!isHomeAttack)}>
-            선수교체
-          </PlayerChangeButton>
-          <PlayerWrapper>
-            <PlayerPosition>P</PlayerPosition>
+            <PlayerPosition>
+              투수
+              <Dot />
+              {isHomeAttack ? "AWAY" : "HOME"}
+            </PlayerPosition>
             <PlayerInfo>{pitcher.playerName}</PlayerInfo>
-            <PlayerExWrapper
-              count={(pitcher.isElite ? 1 : 0) + (pitcher.isWc ? 1 : 0)}
+            <PlayerChangeButton
+              onClick={() => handleSubstitution(!isHomeAttack)}
             >
-              {pitcher.isElite && <EliteBox>선출</EliteBox>}
-              {pitcher.isWc && <WildCardBox>WC</WildCardBox>}
-              {!pitcher.isElite && !pitcher.isWc && <WildCardBoxNone />}
-            </PlayerExWrapper>
+              선수교체
+            </PlayerChangeButton>
           </PlayerWrapper>
         </PlayerBox>
+        <VsText>VS</VsText>
+        <PlayerBox>
+          <PlayerWrapper>
+            <PlayerPosition>
+              {batter.battingOrder}번타자
+              <Dot />
+              {isHomeAttack ? "HOME" : "AWAY"}
+            </PlayerPosition>
+            <PlayerInfo>{batter.playerName}</PlayerInfo>
+            <PlayerChangeButton
+              onClick={() => handleSubstitution(isHomeAttack)}
+            >
+              선수교체
+            </PlayerChangeButton>
+          </PlayerWrapper>
+        </PlayerBox>
+        <RightArrow />
       </PlayersRow>
 
       <RecordActionsRow>

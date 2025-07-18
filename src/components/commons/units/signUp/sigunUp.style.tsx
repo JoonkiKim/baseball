@@ -87,7 +87,7 @@ export const Input = styled.input<{ $completed?: boolean }>`
 
   &[id="verificationCode"]:disabled {
     /* background-color: rgba(0, 0, 0, 0.1); */
-    color: transparent; /* 입력된 텍스트를 보이지 않게 */
+    color: black; /* 입력된 텍스트를 보이지 않게 */
     caret-color: transparent; /* 커서 색도 숨기기 */
   }
 

@@ -21,7 +21,7 @@ export const ModalContainer = styled.div`
   /* margin-top: 20px; */
   width: 80%;
   padding: 20px;
-  border-radius: 8px;
+  border-radius: 1rem;
   text-align: center;
   display: flex;
   flex-direction: column;

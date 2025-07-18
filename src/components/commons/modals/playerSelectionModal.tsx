@@ -74,16 +74,16 @@ export const ButtonContainer = styled.div`
 `;
 
 export const ControlButton = styled.button`
-  background-color: #000;
-  width: 26vw;
-  height: 4.5vh;
+  background-color: #0f0f70;
+  width: 90%;
+  height: 6vh;
   border: 1px solid #999;
   font-family: "KBO-Dia-Gothic_bold";
   font-weight: bold;
   font-size: 12px;
   color: #fff;
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: 2vh;
 `;
 
 interface IPlayerSelectionModalProps {
