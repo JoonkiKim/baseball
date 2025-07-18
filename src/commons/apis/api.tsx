@@ -8,11 +8,13 @@ import {
 
 const API = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
-  withCredentials: false, // refreshToken 쿠키 전송
-  headers: {
-    "Content-Type": "application/json",
-  },
+  withCredentials: false,
+  headers: { "Content-Type": "application/json" },
 });
+
+console.log("분기 합침 테스트");
+// ── 전역 플래그: refresh를 한 번이라도 했는지 ──
+let hasRefreshed = false;
 
 API.interceptors.request.use(
   (config) => {
