@@ -283,32 +283,41 @@ export const PlayersRow = styled.div`
 `;
 
 export const BatterPlayerBox = styled.div`
-  width: 60%;
+  width: 70%;
   display: flex;
-  height: 100%;
+  height: 90%;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: space-evenly;
   align-items: center;
-  background-color: red;
 `;
 
 export const BatterPlayerSingleBox = styled.div`
   width: 100%;
   display: flex;
-  height: 30%;
-  background-color: green;
+  height: 35%;
+  /* background-color: red; */
+
+  /* flex-direction: row;
+  align-items: center; */
+`;
+export const Divider = styled.div`
+  width: 90%;
+  height: 0.3px;
+  background-color: #2c333b;
+  opacity: 0.3;
+  /* margin: 8px 0; */
 `;
 
 // ── 그룹 컨테이너 ──
 export const BatterGroup = styled.div`
   box-sizing: border-box;
-  flex-shrink: 0;
+  /* flex-shrink: 0; */
   display: flex;
   flex-direction: column; /* stack each row vertically */
-  justify-content: flex-start;
-  align-items: flex-start; /* or center, depending on how you want the rows aligned */
-  width: 55.73vw; /* ≈ 209px @ 375px-wide reference */
-  height: 16.13vh; /* ≈ 131px @ 812px-tall reference */
+  justify-content: center;
+  align-items: center; /* or center, depending on how you want the rows aligned */
+  width: 100%; /* ≈ 209px @ 375px-wide reference */
+  height: 100%; /* ≈ 131px @ 812px-tall reference */
   overflow: hidden;
 `;
 
@@ -316,19 +325,21 @@ export const BatterRow = styled.div`
   display: flex;
   flex-direction: row; /* lay out circle / who / today horizontally */
   align-items: center;
-  justify-content: flex-start;
-  width: 100%; /* fill the full width of the group */
+  justify-content: space-between;
+  width: 85%; /* fill the full width of the group */
   padding: 0 0.27vw; /* ≈ 1px left/right padding @ 375px base */
   gap: 1.87vw; /* ≈ 7px gap between items */
   /* height will auto-size to its children; remove absolute sizing */
+  /* background-color: green; */
 `;
 
 export const OrderCircle = styled.div`
   color: #000;
   text-align: center;
-  font-family: Pretendard-SemiBold, sans-serif;
-  font-size: 0.625rem; /* 10px */
+  font-family: "Pretendard";
   font-weight: 600;
+  font-size: 0.625rem; /* 10px */
+
   width: 1.6vw; /* 6px */
   height: 4.56vh; /* 37px */
   display: flex;
@@ -339,79 +350,131 @@ export const OrderCircle = styled.div`
 export const WhoContainer = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 0.53vw;
-  align-items: center;
-  justify-content: center;
+  /* gap: 0.53vw; */
+  align-items: flex-start;
+  justify-content: space-evenly;
   width: 13.6vw; /* 51px */
-  height: 4.56vh; /* 37px */
+  height: 3.5vh; /* 37px */
+
+  /* background-color: red; */
+`;
+
+export const NameResultContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  /* gap: 0.53vw; */
+  align-items: center;
+  justify-content: space-between;
+  width: 18vw; /* 51px */
+  margin-bottom: 0.5vh;
+  /* background-color: green; */
 `;
 
 export const PlayerName = styled.div`
   color: #000;
-  text-align: center;
-  font-family: Pretendard-Bold, sans-serif;
+  /* text-align: center; */
+  font-family: "Pretendard";
+
   font-size: 1rem; /* 16px */
   font-weight: 700;
-  width: 12vw; /* 45px */
+  width: 13vw; /* 45px */
   height: 2.09vh; /* 17px */
+
   display: flex;
+  flex-direction: row;
   align-items: center;
+  justify-content: flex-start;
+`;
+
+export const ResultBox = styled.div<{ isOut?: boolean }>`
+  width: 7vw;
+  height: 1.6vh;
+  background-color: ${({ isOut }) => (isOut ? "red" : "#007AFF")};
+  font-family: "Pretendard";
+  font-size: 0.5rem; /* 8px */
+  font-weight: 700;
+  color: #ffffff;
+  border-radius: 3.125rem;
+  text-align: center;
+
+  display: flex;
   justify-content: center;
+  align-items: center;
 `;
 
 export const AvgFrame = styled.div`
-  border-radius: 0.62vh; /* 5px */
-  flex-shrink: 0;
-  width: 100%;
+  /* flex-shrink: 0; */
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 18vw;
   height: 0.86vh; /* 7px */
-  overflow: hidden;
-  position: relative;
+  overflow: visible;
+  /* position: relative; */
+  /* background-color: red; */
 `;
 
 export const AvgText = styled.div`
   text-align: center;
-  font-family: Pretendard-SemiBold, sans-serif;
+  font-family: "Pretendard";
   font-size: 0.5rem; /* 8px */
   font-weight: 600;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+
   display: flex;
-  gap: 0.53vw;
+
   align-items: center;
-  justify-content: center;
+  /* justify-content: space-evenly; */
+`;
+
+export const BattingOrderLabel = styled.div`
+  color: #2c333b;
+  opacity: 50%;
+  text-align: center;
+  font-family: "Pretendard";
+  font-size: 0.5rem; /* 8px */
+  font-weight: 600;
+
+  display: flex;
+
+  align-items: center;
+  /* justify-content: space-evenly; */
 `;
 
 export const AvgLabel = styled.span`
   color: #000;
 `;
 export const AvgValue = styled.span`
-  color: var(--blue-1, #007aff);
+  color: var(--blue-1, #000);
 `;
 
 // ── 오늘 성적 ──
 export const TodayContainer = styled.div`
   display: flex;
+  width: 60%;
   flex-direction: row;
-  gap: 2.13vw;
+  /* gap: 2.13vw; */
   align-items: center;
-  justify-content: center;
+  /* align-self: flex-end; */
+  justify-content: space-evenly;
   height: 4.56vh; /* 37px */
 `;
 
 export const TodayFrame = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 0.53vw;
+  /* gap: 0.53vw; */
+  height: 80%;
   align-items: center;
-  justify-content: center;
-  width: 3.47vw; /* 13px */
+  justify-content: space-evenly;
+  width: 20%; /* 13px */
+  /* height: auto; */
+  /* background-color: red; */
 `;
 
 export const TodayLabel = styled.div`
   color: #000;
-  font-family: Pretendard-SemiBold, sans-serif;
+  font-family: "Pretendard";
   font-size: 0.5rem; /* 8px */
   font-weight: 600;
 `;
@@ -420,43 +483,46 @@ export const TodayValue = styled(TodayLabel)``;
 
 // ── 피처 영역 ──
 export const PitcherPlayerBox = styled.div`
-  width: 40%;
+  width: 30%;
   display: flex;
-  height: 100%;
+  height: 75%;
   flex-direction: column;
-  justify-content: space-evenly;
+  justify-content: flex-start;
   align-items: center;
-  background-color: red;
+  /* background-color: red; */
 `;
 
 export const PitcherGroup = styled.div`
-  box-sizing: border-box;
-  padding: 0 0.27vw 0 1.07vw;
+  /* box-sizing: border-box; */
+  /* padding: 0 0.27vw 0 1.07vw; */
   display: flex;
   flex-direction: column;
-  gap: 4.53vh; /* 17px */
+
   align-items: center;
   justify-content: flex-start;
   width: 24.27vw; /* 91px */
-  height: 16.13vh; /* 131px */
-  position: relative;
-  overflow: hidden;
+  height: 16vh; /* 131px */
+  /* position: relative; */
+  /* overflow: hidden; */
+  /* background-color: red; */
 `;
 
 export const PitcherWho = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 1.33vw; /* 5px */
+
   align-items: center;
-  justify-content: center;
+  justify-content: space-evenly;
   width: 21.87vw; /* 82px */
-  height: 4.8vh; /* 39px */
+  height: 4vh; /* 39px */
+  margin-bottom: 2.1vh;
+  /* background-color: green; */
 `;
 
 export const PitcherName = styled.div`
   color: #000;
   text-align: center;
-  font-family: Pretendard-Bold, sans-serif;
+  font-family: "Pretendard";
   font-size: 1rem; /* 16px */
   font-weight: 700;
   width: 12vw; /* 45px */
@@ -469,33 +535,47 @@ export const PitcherName = styled.div`
 export const PitcherToday = styled.div`
   display: flex;
   flex-direction: row;
-  gap: 0.53vw;
+
   align-items: center;
-  justify-content: center;
-  width: 20.8vw; /* 78px */
+  justify-content: space-evenly;
+  width: 20vw; /* 78px */
+  /* background-color: red; */
 `;
 
 export const StatFrame = styled.div`
-  border-radius: 0.62vh; /* 5px */
-  flex: 1;
-  height: 0.86vh; /* 7px */
-  position: relative;
-  overflow: hidden;
+  margin-top: 0.5vh;
+  width: 6vw;
+  height: 1.5vh; /* 7px */
+  /* display: flex;
+  flex-direction: row; */
+  /* background-color: red; */
+  /* justify-content: space-between; */
+  /* align-items: center; */
+`;
+
+export const StatFrame2 = styled.div`
+  margin-top: 0.5vh;
+  width: 8.5vw;
+  height: 1.5vh; /* 7px */
+  /* display: flex;
+  flex-direction: row; */
+  /* background-color: red; */
+  /* justify-content: space-between; */
+  /* align-items: center; */
+
+  /* background-color: red; */
 `;
 
 export const StatText = styled.div`
   text-align: center;
-  font-family: Pretendard-SemiBold, sans-serif;
+  font-family: "Pretendard";
   font-size: 0.5rem; /* 8px */
   font-weight: 600;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  /* background-color: red; */
   display: flex;
-  gap: 0.53vw;
+  flex-direction: row;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
 `;
 
 export const StatLabel = styled.span`
@@ -506,11 +586,12 @@ export const StatValue = styled.span`
 `;
 
 export const PitcherStatsGrid = styled.div`
-  padding: 0 0.8vw;
+  /* margin-top: 0.5vh; */
   display: grid;
-  gap: 2.13vw;
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat(2, auto);
+  gap: 4vw;
+  grid-template-columns: repeat(2, 1fr);
+  grid-auto-rows: minmax(4vh, auto);
+  /* background-color: aqua; */
 `;
 
 export const StatCell = styled.div`
@@ -523,7 +604,7 @@ export const StatCell = styled.div`
 
 export const StatName = styled.div`
   color: #000;
-  font-family: Pretendard-SemiBold, sans-serif;
+  font-family: "Pretendard";
   font-size: 0.5rem;
   font-weight: 600;
 `;
