@@ -937,7 +937,8 @@ export const InningBoard = styled.div`
 export const InningNumber = styled.div`
   font-family: "Pretendard";
   font-weight: 700;
-  font-size: 0.56rem;
+  font-size: 0.6rem;
+  /* background-color: red; */
   /* padding: 0.5vh 1vw; */
 `;
 

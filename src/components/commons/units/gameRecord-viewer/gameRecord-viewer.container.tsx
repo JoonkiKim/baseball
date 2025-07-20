@@ -1,8 +1,9 @@
 // src/components/pages/GameRecordPage.jsx
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, Fragment } from "react";
 import { useDraggable, useDroppable } from "@dnd-kit/core";
 import { useRouter } from "next/router";
 import API from "../../../../commons/apis/api";
+
 import {
   GameRecordContainer,
   InningHeader,
@@ -62,6 +63,11 @@ import {
   StatCell,
   StatName,
   StatNumber,
+  Divider,
+  BattingOrderLabel,
+  StatFrame2,
+  ResultBox,
+  NameResultContainer,
 } from "./gameRecord-viewer.style";
 
 import {
@@ -70,6 +76,8 @@ import {
 } from "../../../../commons/libraries/loadingOverlay";
 import ErrorAlert from "../../../../commons/libraries/showErrorCode";
 import { OnDeckWrapper } from "../gameRecord-v2/gameRecord-v2.style";
+import { ArrowUp } from "../../../../commons/libraries/arrow";
+import ArrowDown from "../../../../commons/libraries/arrowDown";
 
 export default function GameRecordPageViewer() {
   const [error, setError] = useState(null);
@@ -206,21 +214,21 @@ export default function GameRecordPageViewer() {
       {
         battingOrder: 1,
         playerId: 121,
-        playerName: "박민재",
+        playerName: "송성문",
         position: "CF",
         isWC: false,
       },
       {
         battingOrder: 2,
         playerId: 122,
-        playerName: "박용준",
+        playerName: "임지열",
         position: "LF",
         isWC: false,
       },
       {
         battingOrder: 3,
         playerId: 123,
-        playerName: "박지호",
+        playerName: "이주형",
         position: "RF",
         isWC: true,
       },
@@ -785,7 +793,9 @@ export default function GameRecordPageViewer() {
         </SideWrapper>
         <LeftSideWrapper>
           <InningBoard>
+            <ArrowUp color={!isHomeAttack ? "red" : "#B8B8B8"} />
             <InningNumber>7</InningNumber>
+            <ArrowDown color={isHomeAttack ? "red" : "#B8B8B8"} />
           </InningBoard>
           <LittleScoreBoardWrapper>
             <AwayTeamWrapper>
@@ -833,80 +843,86 @@ export default function GameRecordPageViewer() {
 
       <PlayersRow>
         <BatterPlayerBox>
-          {lineup.map((b) => (
-            <BatterPlayerSingleBox key={b.playerId}>
-              <BatterGroup>
-                <BatterRow>
-                  <OrderCircle>{b.battingOrder}</OrderCircle>
+          {lineup.reverse().map((b, idx, arr) => (
+            <Fragment key={b.playerId}>
+              <BatterPlayerSingleBox>
+                <BatterGroup>
+                  <BatterRow>
+                    <WhoContainer>
+                      <NameResultContainer>
+                        <PlayerName>{b.playerName}</PlayerName>
+                        {idx !== 0 && <ResultBox isOut={true}>아웃</ResultBox>}
+                      </NameResultContainer>
+                      <AvgFrame>
+                        <BattingOrderLabel>
+                          {b.battingOrder}번타자
+                        </BattingOrderLabel>
+                        <AvgText>
+                          <AvgLabel>타율</AvgLabel>
+                          {/* 나중에 b.avg로 교체 */}
+                          <AvgValue>0.000</AvgValue>
+                        </AvgText>
+                      </AvgFrame>
+                    </WhoContainer>
 
-                  <WhoContainer>
-                    <PlayerName>{b.playerName}</PlayerName>
-                    <AvgFrame>
-                      <AvgText>
-                        <AvgLabel>타율</AvgLabel>
-                        {/* 나중에 b.avg로 교체 */}
-                        <AvgValue>0.000</AvgValue>
-                      </AvgText>
-                    </AvgFrame>
-                  </WhoContainer>
-
-                  <TodayContainer>
-                    <TodayFrame>
-                      <TodayLabel>타석</TodayLabel>
-                      {/* 나중에 b.stats.pa로 교체 */}
-                      <TodayValue>0</TodayValue>
-                    </TodayFrame>
-                    <TodayFrame>
-                      <TodayLabel>타수</TodayLabel>
-                      <TodayValue>0</TodayValue>
-                    </TodayFrame>
-                    <TodayFrame>
-                      <TodayLabel>안타</TodayLabel>
-                      <TodayValue>0</TodayValue>
-                    </TodayFrame>
-                    <TodayFrame>
-                      <TodayLabel>득점</TodayLabel>
-                      <TodayValue>0</TodayValue>
-                    </TodayFrame>
-                    <TodayFrame>
-                      <TodayLabel>타점</TodayLabel>
-                      <TodayValue>0</TodayValue>
-                    </TodayFrame>
-                  </TodayContainer>
-                </BatterRow>
-              </BatterGroup>
-            </BatterPlayerSingleBox>
+                    <TodayContainer>
+                      <TodayFrame>
+                        <TodayLabel>타석</TodayLabel>
+                        {/* 나중에 b.stats.pa로 교체 */}
+                        <TodayValue>0</TodayValue>
+                      </TodayFrame>
+                      <TodayFrame>
+                        <TodayLabel>타수</TodayLabel>
+                        <TodayValue>0</TodayValue>
+                      </TodayFrame>
+                      <TodayFrame>
+                        <TodayLabel>안타</TodayLabel>
+                        <TodayValue>0</TodayValue>
+                      </TodayFrame>
+                      <TodayFrame>
+                        <TodayLabel>득점</TodayLabel>
+                        <TodayValue>0</TodayValue>
+                      </TodayFrame>
+                      <TodayFrame>
+                        <TodayLabel>타점</TodayLabel>
+                        <TodayValue>0</TodayValue>
+                      </TodayFrame>
+                    </TodayContainer>
+                  </BatterRow>
+                </BatterGroup>
+              </BatterPlayerSingleBox>
+              {/* 마지막 아이템 뒤에는 Divider 넣지 않음 */}
+              {idx < arr.length - 1 && <Divider />}
+            </Fragment>
           ))}
         </BatterPlayerBox>
         <PitcherPlayerBox>
           <PitcherGroup>
             <PitcherWho>
-              <PitcherName>{homeExample.pitcher.playerName}</PitcherName>
+              <PitcherName>{awayExample.pitcher.playerName}</PitcherName>
               <PitcherToday>
                 <StatFrame>
                   <StatText>
-                    <StatLabel>투구수</StatLabel>
-                    <StatValue>45</StatValue>
-                    {/* 나중에 actual 값 */}
+                    <StatLabel>실점</StatLabel>
+                    <StatValue>2</StatValue>
                   </StatText>
                 </StatFrame>
-                <StatFrame>
+                <StatFrame2>
                   <StatText>
                     <StatLabel>ERA</StatLabel>
                     <StatValue>1.21</StatValue>
                   </StatText>
-                </StatFrame>
+                </StatFrame2>
               </PitcherToday>
             </PitcherWho>
 
             <PitcherStatsGrid>
               {[
-                { name: "볼넷", value: 2 },
                 { name: "이닝", value: 2 },
-                { name: "실점", value: 2 },
+
                 { name: "자책", value: 2 },
                 { name: "삼진", value: 2 },
-                { name: "WHIP", value: 2 },
+                { name: "볼넷", value: 2 },
               ].map((s, i) => (
                 <StatCell key={i}>
                   <StatName>{s.name}</StatName>

@@ -2,7 +2,7 @@ import { useRouter } from "next/router";
 import LayoutHeader from "./header";
 import LayoutNavigation from "./navigation";
 import LayoutHeaderNone from "./headerNone";
-
+import styled from "@emotion/styled";
 // 여기서만 보여주게 하자
 const SHOW_NAV = [
   "/playerStats",
@@ -35,6 +35,15 @@ const HIDE_HEADER = [
 interface ILayoutProps {
   children: JSX.Element;
 }
+
+// 화면 전체를 감싸는 컨테이너
+// const Container = styled.div`
+//   /* width: 100%; */
+//   max-width: 480px; /* 원하시는 모바일 최대 너비(px 단위) */
+//   margin: 0 auto; /* 큰 화면일 때 중앙 정렬 */
+//   box-sizing: border-box;
+//   padding: 0 16px; /* 양쪽에 약간 여백을 줄 수도 있습니다 */
+// `;
 
 export default function Layout(props: ILayoutProps): JSX.Element {
   const router = useRouter();
