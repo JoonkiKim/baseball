@@ -12,7 +12,7 @@ const API = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
-console.log("분기 합침 테스트");
+// console.log("분기 합침 테스트");
 // ── 전역 플래그: refresh를 한 번이라도 했는지 ──
 let hasRefreshed = false;
 

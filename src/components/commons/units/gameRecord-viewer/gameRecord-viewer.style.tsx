@@ -214,7 +214,7 @@ export const InningScoreContainer = styled.div`
 
 export const InningScoreTitle = styled.div`
   /* margin-bottom: 8px; */
-  font-family: "KBO-Dia-Gothic_bold";
+  /* font-family: "KBO-Dia-Gothic_bold"; */
   font-weight: 500;
   ${small} {
     font-size: 20px;
@@ -240,7 +240,7 @@ export const ScoreButton = styled.button`
   color: #ffffff;
   border-radius: 4px;
   font-size: 16px;
-  font-family: "KBO-Dia-Gothic_bold";
+  /* font-family: "KBO-Dia-Gothic_bold"; */
   font-weight: 500;
   width: 40px;
   height: 40px;
@@ -257,7 +257,7 @@ export const ScoreDisplay = styled.div`
   font-size: 48px;
   min-width: 24px;
   text-align: center;
-  font-family: "KBO-Dia-Gothic_light";
+  /* font-family: "KBO-Dia-Gothic_light"; */
 
   ${small} {
     font-size: 48px;
@@ -702,7 +702,7 @@ export const EliteBox = styled.div`
   width: 50px;
   height: 20px;
   background-color: #ff0004;
-  font-family: "KBO-Dia-Gothic_light";
+  /* font-family: "KBO-Dia-Gothic_light"; */
   color: #ffffff;
   border-radius: 35px;
   text-align: center;
@@ -712,7 +712,7 @@ export const WildCardBox = styled.div`
   width: 50px;
   height: 20px;
   background-color: #f3a231;
-  font-family: "KBO-Dia-Gothic_light";
+  /* font-family: "KBO-Dia-Gothic_light"; */
   color: #ffffff;
   border-radius: 35px;
   text-align: center;
@@ -722,7 +722,7 @@ export const WildCardBoxNone = styled.div`
   width: 50px;
   height: 20px;
   background-color: transparent;
-  font-family: "KBO-Dia-Gothic_light";
+  /* font-family: "KBO-Dia-Gothic_light"; */
 
   text-align: center;
 `;
@@ -742,7 +742,7 @@ export const RecordActionButton = styled.button`
   /* 기본적으로 모든 테두리 제거 */
   border: none;
   background-color: #0f0f70;
-  font-family: "KBO-Dia-Gothic_bold";
+  /* font-family: "KBO-Dia-Gothic_bold"; */
   font-weight: bold;
   font-size: 20px;
   color: #ffffff;
@@ -779,7 +779,7 @@ export const OrderBadge = styled.div`
   align-items: center;
   justify-content: center;
   font-size: 24px;
-  font-family: "KBO-Dia-Gothic_medium";
+  /* font-family: "KBO-Dia-Gothic_medium"; */
 `;
 
 /** ─────────────────────────────────────────────────────────
@@ -1060,7 +1060,7 @@ export const ReconstructionWrapper = styled.div`
   width: 44vw;
   height: 4.8vh;
   /* border: 1px solid #999; */
-  font-family: "KBO-Dia-Gothic_medium";
+  /* font-family: "KBO-Dia-Gothic_medium"; */
   /* font-weight: bold; */
   font-size: 0.813rem;
   background-color: #ffffff;
@@ -1102,7 +1102,7 @@ export const ReconstructionButtonWrapper = styled.div`
   width: 16.5vw;
   height: 4vh;
   /* border: 1px solid #999; */
-  font-family: "KBO-Dia-Gothic_bold";
+  /* font-family: "KBO-Dia-Gothic_bold"; */
   font-weight: bold;
   font-size: 0.813rem;
   /* background-color: blue; */

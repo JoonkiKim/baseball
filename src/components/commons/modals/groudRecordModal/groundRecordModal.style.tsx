@@ -551,11 +551,13 @@ export const ResetDot = styled.div`
   background-repeat: no-repeat;
   background-position: center;
   cursor: pointer;
-  z-index: 80;
+  z-index: 9999;
 `;
 export const NameBadge = styled.div`
   position: absolute;
+  contain: paint;
   font-family: "Pretendard";
+  will-change: transform;
   font-weight: 600;
   z-index: 999;
   left: 50%;
@@ -569,7 +571,7 @@ export const NameBadge = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 3vh;
+  height: 2.6vh;
   width: 13vw;
   white-space: nowrap;
   touch-action: none; /* 터치 동작(스크롤/줌) 비활성화 */
