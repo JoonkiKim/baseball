@@ -45,20 +45,10 @@ import {
   ReconstructionSwitch,
   ReconstructionTitle,
   ReconstructionWrapper,
-  RedoIcon,
   ResetDot,
-  UndoIcon,
 } from "./groundRecordModal.style";
 import { restrictToParentElement } from "@dnd-kit/modifiers";
 import { ControlButton } from "../playerSelectionModal";
-import {
-  CaretLeftFilled,
-  CaretLeftOutlined,
-  CaretRightFilled,
-  CaretRightOutlined,
-  CloseOutlined,
-} from "@ant-design/icons";
-import { Divider } from "antd";
 import { RoundCloseOutlined } from "../../../../commons/libraries/cancelButton";
 import LeftPolygon from "../../../../commons/libraries/leftPolygon";
 import RightPolygon from "../../../../commons/libraries/rightPolygon";
@@ -152,7 +142,7 @@ export default function GroundRecordModal(props: IModalProps) {
     }, {} as Record<string, number>)
   );
 
-  const sensors = useSensors(useSensor(PointerSensor), useSensor(TouchSensor));
+  const sensors = useSensors(useSensor(PointerSensor));
   const badgeRefs = useRef<Record<string, HTMLElement | null>>({});
   const [activeBadges, setActiveBadges] = useState(
     badgeConfigs.map((cfg) => cfg.id)

@@ -922,7 +922,7 @@ export default function GameRecordPageV2() {
     // 예: { "first-base": true, "second-base": false, ... }
   }, [badgeSnaps]);
   // 센서 정의
-  const sensors = useSensors(useSensor(PointerSensor), useSensor(TouchSensor));
+  const sensors = useSensors(useSensor(PointerSensor));
 
   const badgeRefs = useRef<Record<string, HTMLElement | null>>({});
   const [activeBadges, setActiveBadges] = useState(
