@@ -25,7 +25,7 @@ import {
   LoadingIcon,
   LoadingOverlay,
 } from "../../../../commons/libraries/loadingOverlay";
-import Mailcheck from "mailcheck";
+
 import { setAccessToken } from "../../../../commons/libraries/token";
 import { useRouter } from "next/router";
 
@@ -75,22 +75,22 @@ export default function SignUpPage() {
   const [suggestion, setSuggestion] = useState<string | null>(null);
 
   // EmailInput onBlur 시 호출될 함수
-  const checkEmailDomain = () => {
-    const email = getValues("email").trim();
-    if (!email.includes("@")) return;
+  // const checkEmailDomain = () => {
+  //   const email = getValues("email").trim();
+  //   if (!email.includes("@")) return;
 
-    Mailcheck.run({
-      email,
-      // domains를 안 넘기면 기본 내장 리스트를 사용합니다.
-      suggested: (s) => {
-        setSuggestion(`“${s.full}” 도메인을 사용해 보시는 건 어떨까요?`);
-      },
-      empty: () => {
-        // 제안이 없으면 초기화
-        setSuggestion(null);
-      },
-    });
-  };
+  //   Mailcheck.run({
+  //     email,
+  //     // domains를 안 넘기면 기본 내장 리스트를 사용합니다.
+  //     suggested: (s) => {
+  //       setSuggestion(`“${s.full}” 도메인을 사용해 보시는 건 어떨까요?`);
+  //     },
+  //     empty: () => {
+  //       // 제안이 없으면 초기화
+  //       setSuggestion(null);
+  //     },
+  //   });
+  // };
 
   const router = useRouter();
   const [alertInfo, setAlertInfo] = useState<{
@@ -264,7 +264,6 @@ export default function SignUpPage() {
                 type="email"
                 placeholder="@snu.ac.kr"
                 {...register("email")}
-                onBlur={checkEmailDomain}
                 $noBottom
                 disabled={!!verificationToken}
               />
