@@ -202,70 +202,6 @@ export const ControlButtonWhite = styled.button`
 /** ─────────────────────────────────────────────────────────
  *  4) 이번 이닝 득점 섹션
  * ───────────────────────────────────────────────────────── */
-export const InningScoreContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  height: calc((100vh - 120px) * 0.2);
-  border-bottom: 1px solid #ccc;
-  text-align: center;
-  padding-top: 4vh;
-  padding-bottom: 4vh;
-`;
-
-export const InningScoreTitle = styled.div`
-  /* margin-bottom: 8px; */
-  font-family: "KBO-Dia-Gothic_bold";
-  font-weight: 500;
-  ${small} {
-    font-size: 20px;
-  }
-  ${medium} {
-    font-size: 23px;
-  }
-  ${large}, ${xlarge} {
-    font-size: 24px;
-  }
-`;
-
-export const InningScoreControls = styled.div`
-  display: inline-flex;
-  /* background-color: red; */
-  align-items: center;
-  gap: 16px;
-`;
-
-export const ScoreButton = styled.button`
-  background-color: #000000;
-  border: none;
-  color: #ffffff;
-  border-radius: 4px;
-  font-size: 16px;
-  font-family: "KBO-Dia-Gothic_bold";
-  font-weight: 500;
-  width: 40px;
-  height: 40px;
-  cursor: pointer;
-
-  ${small} {
-    width: 32px;
-    height: 32px;
-    font-size: 16px;
-  }
-`;
-
-export const ScoreDisplay = styled.div`
-  font-size: 48px;
-  min-width: 24px;
-  text-align: center;
-  font-family: "KBO-Dia-Gothic_light";
-
-  ${small} {
-    font-size: 48px;
-  }
-`;
 
 /** ─────────────────────────────────────────────────────────
  *  5) 현재 타자 / 투수 정보 섹션
@@ -281,7 +217,7 @@ export const PlayersRow = styled.div`
   margin-top: 3.5vh;
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
+  justify-content: space-around;
   align-items: center;
   /* background-color: red; */
 `;
@@ -391,7 +327,7 @@ export const EliteBox = styled.div`
   width: 50px;
   height: 20px;
   background-color: #ff0004;
-  font-family: "KBO-Dia-Gothic_light";
+  /* font-family: "KBO-Dia-Gothic_light"; */
   color: #ffffff;
   border-radius: 35px;
   text-align: center;
@@ -401,7 +337,7 @@ export const WildCardBox = styled.div`
   width: 50px;
   height: 20px;
   background-color: #f3a231;
-  font-family: "KBO-Dia-Gothic_light";
+  /* font-family: "KBO-Dia-Gothic_light"; */
   color: #ffffff;
   border-radius: 35px;
   text-align: center;
@@ -411,7 +347,7 @@ export const WildCardBoxNone = styled.div`
   width: 50px;
   height: 20px;
   background-color: transparent;
-  font-family: "KBO-Dia-Gothic_light";
+  /* font-family: "KBO-Dia-Gothic_light"; */
 
   text-align: center;
 `;
@@ -431,7 +367,7 @@ export const RecordActionButton = styled.button`
   /* 기본적으로 모든 테두리 제거 */
   border: none;
   background-color: #0f0f70;
-  font-family: "KBO-Dia-Gothic_bold";
+  /* font-family: "KBO-Dia-Gothic_bold"; */
   font-weight: bold;
   font-size: 20px;
   color: #ffffff;
@@ -468,7 +404,7 @@ export const OrderBadge = styled.div`
   align-items: center;
   justify-content: center;
   font-size: 24px;
-  font-family: "KBO-Dia-Gothic_medium";
+  /* font-family: "KBO-Dia-Gothic_medium"; */
 `;
 
 /** ─────────────────────────────────────────────────────────
@@ -726,13 +662,22 @@ export const ResetDot = styled.div`
 `;
 export const NameBadge = styled.div`
   position: absolute;
+  /* ① badge 안에서만 repaint 발생 */
+  will-change: transform;
   font-family: "Pretendard";
   font-weight: 600;
   z-index: 999;
   left: 50%;
   font-size: 0.8rem;
   top: 85%;
-  transform: translate(0, -50%);
+  /* transform: translate(0, -50%); */
+
+  /* ① 드래그 오프셋용 CSS 변수 */
+  --tx: 0px;
+  --ty: 0px;
+  /* ② 센터링 + CSS 변수 기반 오프셋 */
+  transform: translate(-50%, -50%) translate3d(var(--tx), var(--ty), 0);
+
   background: #ffffff;
   border: 0.3px solid black;
   border-radius: 50px;
@@ -761,7 +706,7 @@ export const ReconstructionWrapper = styled.div`
   width: 44vw;
   height: 4.8vh;
   /* border: 1px solid #999; */
-  font-family: "KBO-Dia-Gothic_medium";
+  /* font-family: "KBO-Dia-Gothic_medium"; */
   /* font-weight: bold; */
   font-size: 0.813rem;
   background-color: #ffffff;
@@ -803,7 +748,7 @@ export const ReconstructionButtonWrapper = styled.div`
   width: 16.5vw;
   height: 4vh;
   /* border: 1px solid #999; */
-  font-family: "KBO-Dia-Gothic_bold";
+  /* font-family: "KBO-Dia-Gothic_bold"; */
   font-weight: bold;
   font-size: 0.813rem;
   /* background-color: blue; */
@@ -821,7 +766,7 @@ export const ReconstructionSwitch = styled(Switch)`
     background-color: #e5e5ea !important;
     width: 11vw !important; /* 원하는 가로 길이 */
     min-width: 11vw !important;
-    height: 2.8vh !important;
+    height: 3vh !important;
   }
   /* ON 상태의 트랙 색 */
   &.ant-switch-checked {
@@ -835,8 +780,8 @@ export const ReconstructionSwitch = styled(Switch)`
 
   /* 3) 핸들 크기 & 중앙 정렬 & 움직일 때 애니메이션 제거 */
   .ant-switch-handle {
-    width: 1rem !important; /* handleSize */
-    height: 1rem !important;
+    width: 4vw !important; /* handleSize */
+    height: 4vw !important;
     top: 50% !important;
     transform: translateY(-50%) !important;
     left: 5px !important;
@@ -845,7 +790,7 @@ export const ReconstructionSwitch = styled(Switch)`
 
   /* Checked 상태에서 핸들 위치 재계산 */
   &.ant-switch-checked .ant-switch-handle {
-    left: calc(100% - 5px - 18px) !important;
+    left: calc(100% - 5px - 4vw) !important;
     /* 100% 트랙 너비에서 padding(2px)과 핸들 너비(18px)만큼 뺀 위치 */
   }
 `;

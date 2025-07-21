@@ -6,6 +6,7 @@ import {
   useRef,
   useMemo,
   useLayoutEffect,
+  memo,
 } from "react";
 import {
   DndContext,
@@ -116,8 +117,9 @@ import {
 import GroundRecordModal from "../../modals/groudRecordModal/groundRecordModal";
 import { ArrowUp } from "../../../../commons/libraries/arrow";
 import ArrowDown from "../../../../commons/libraries/arrowDown";
-import Image from "next/image";
 import { badgeConfigs } from "./gameRecord.variables";
+import RightPolygon from "../../../../commons/libraries/rightPolygon";
+import LeftPolygon from "../../../../commons/libraries/leftPolygon";
 
 export default function GameRecordPageV2() {
   const [error, setError] = useState(null);
@@ -409,7 +411,7 @@ export default function GameRecordPageV2() {
       setAttackVal(newAttack);
       return newAttack;
     } catch (err) {
-      console.error("이닝 점수 로드 실패:", err);
+      // console.error("이닝 점수 로드 실패:", err);
       setError(err);
     }
   }, [router.query.recordId, attackVal]);
@@ -426,11 +428,10 @@ export default function GameRecordPageV2() {
         //   // { withCredentials: true }
         // );
         // setBatter(res.data);
-
         // setBatterPlayerId(res.data.playerId);
-        console.log("타자 응답도착");
+        // console.log("타자 응답도착");
       } catch (err) {
-        console.error("타자 로드 실패:", err);
+        // console.error("타자 로드 실패:", err);
         setError(err);
       }
     },
@@ -449,10 +450,9 @@ export default function GameRecordPageV2() {
         //   // { withCredentials: true }
         // );
         // setPitcher(res.data);
-
-        console.log("투수 응답도착");
+        // console.log("투수 응답도착");
       } catch (err) {
-        console.error("투수 로드 실패:", err);
+        // console.error("투수 로드 실패:", err);
         setError(err);
       }
     },
@@ -469,7 +469,7 @@ export default function GameRecordPageV2() {
         setTeamAName(awayTeam.name);
         setTeamBName(homeTeam.name);
       } catch {
-        console.error("selectedMatch 파싱 실패");
+        // console.error("selectedMatch 파싱 실패");
       }
     }
     fetchInningScores();
@@ -519,7 +519,7 @@ export default function GameRecordPageV2() {
           setIsGroundRecordModalOpen(true);
           // alert("볼넷/사구 기록 전송 완료");
         } catch (e) {
-          console.error("볼넷/사구 오류:", e);
+          // console.error("볼넷/사구 오류:", e);
           setError(e);
           // alert("볼넷/사구 오류");
         } finally {
@@ -557,7 +557,7 @@ export default function GameRecordPageV2() {
       // await API.post(`/games/${recordId}/scores`, { runs: thisInningScore }),
       // { withCredentials: true };
       // 2) 사용자 알림 (확인 클릭 후 다음 단계)
-      console.log({ runs: thisInningScore });
+      // console.log({ runs: thisInningScore });
 
       // 3) 로컬 state 리셋
       setIsSubstitutionSwapped((prev) => !prev);
@@ -610,7 +610,7 @@ export default function GameRecordPageV2() {
     };
   }, []);
 
-  console.log("isHomeAttack", isHomeAttack);
+  // console.log("isHomeAttack", isHomeAttack);
 
   // -------------------- 드래그앤드롭 ------------------------//
   // 드래그 앤 드롭 관련
@@ -862,7 +862,7 @@ export default function GameRecordPageV2() {
     }));
   }
 
-  console.log("blackBadgeConfigs", blackBadgeConfigs);
+  // console.log("blackBadgeConfigs", blackBadgeConfigs);
 
   const diamondSvgRef = useRef<SVGSVGElement | null>(null);
   const diamondPolyRef = useRef<SVGPolygonElement | null>(null);
@@ -907,7 +907,7 @@ export default function GameRecordPageV2() {
   const [badgeSnaps, setBadgeSnaps] =
     useState<Record<string, SnapInfo | null>>(initialBadgeSnaps);
 
-  console.log("badgeSnaps", badgeSnaps);
+  // console.log("badgeSnaps", badgeSnaps);
 
   // 2) badgeSnaps 상태가 바뀔 때마다 각 베이스가 채워졌는지 체크하는 useEffect
   useEffect(() => {
@@ -918,7 +918,7 @@ export default function GameRecordPageV2() {
       return acc;
     }, {} as Record<BaseId, boolean>);
 
-    console.log("Base occupancy:", occupancy);
+    // console.log("Base occupancy:", occupancy);
     // 예: { "first-base": true, "second-base": false, ... }
   }, [badgeSnaps]);
   // 센서 정의
@@ -1144,6 +1144,76 @@ export default function GameRecordPageV2() {
   }
 
   // DraggableBadge 컴포넌트
+  // function DraggableBadge({
+  //   id,
+  //   label,
+  //   initialLeft,
+  //   initialTop,
+  //   snapInfo,
+  // }: {
+  //   id: string;
+  //   label: string;
+  //   initialLeft: string;
+  //   initialTop: string;
+  //   snapInfo: SnapInfo | null;
+  // }) {
+  //   const { attributes, listeners, setNodeRef, transform } = useDraggable({
+  //     id,
+  //   });
+  //   if (snapInfo) {
+  //     // console.log(`🔔 [${id}] snapInfo:`, snapInfo);
+  //   }
+  //   const combinedRef = (el: HTMLElement | null) => {
+  //     setNodeRef(el);
+  //     badgeRefs.current[id] = el;
+  //   };
+
+  //   // CSS position & transform 결정
+  //   if (snapInfo) {
+  //     const { pos } = snapInfo;
+  //     // console.log("pos", pos);
+  //     const offsetX = transform?.x ?? 0;
+  //     const offsetY = transform?.y ?? 0;
+  //     return (
+  //       <NameBadge
+  //         ref={combinedRef}
+  //         style={{
+  //           position: "absolute",
+  //           left: `${pos.x}px`,
+  //           top: `${pos.y}px`,
+  //           transform: transform
+  //             ? `translate(calc(-50% + ${offsetX}px), calc(-50% + ${offsetY}px))`
+  //             : "translate(-50%, -50%)",
+  //         }}
+  //         {...attributes}
+  //         {...listeners}
+  //       >
+  //         {label}
+  //       </NameBadge>
+  //     );
+  //   }
+
+  //   const offsetX = transform?.x ?? 0;
+  //   const offsetY = transform?.y ?? 0;
+  //   return (
+  //     <NameBadge
+  //       ref={combinedRef}
+  //       style={{
+  //         position: "absolute",
+  //         left: initialLeft,
+  //         top: initialTop,
+  //         transform: transform
+  //           ? `translate3d(${offsetX}px, ${offsetY}px, 0)`
+  //           : undefined,
+  //       }}
+  //       {...attributes}
+  //       {...listeners}
+  //     >
+  //       {label}
+  //     </NameBadge>
+  //   );
+  // }
+
   function DraggableBadge({
     id,
     label,
@@ -1157,57 +1227,26 @@ export default function GameRecordPageV2() {
     initialTop: string;
     snapInfo: SnapInfo | null;
   }) {
-    const { attributes, listeners, setNodeRef, transform, isDragging } =
-      useDraggable({
-        id,
-      });
-    if (snapInfo) {
-      console.log(`🔔 [${id}] snapInfo:`, snapInfo);
-    }
+    const { attributes, listeners, setNodeRef } = useDraggable({
+      id,
+    });
     const combinedRef = (el: HTMLElement | null) => {
       setNodeRef(el);
       badgeRefs.current[id] = el;
     };
-    const baseLeft = snapInfo ? `${snapInfo.pos.x}px` : initialLeft;
-    const baseTop = snapInfo ? `${snapInfo.pos.y}px` : initialTop;
 
-    // CSS position & transform 결정
-    if (snapInfo) {
-      const { pos } = snapInfo;
-      console.log("pos", pos);
-      const offsetX = transform?.x ?? 0;
-      const offsetY = transform?.y ?? 0;
-      return (
-        <NameBadge
-          ref={combinedRef}
-          style={{
-            position: "absolute",
-            left: `${pos.x}px`,
-            top: `${pos.y}px`,
-            transform: transform
-              ? `translate(calc(-50% + ${offsetX}px), calc(-50% + ${offsetY}px))`
-              : "translate(-50%, -50%)",
-          }}
-          {...attributes}
-          {...listeners}
-        >
-          {label}
-        </NameBadge>
-      );
-    }
-
-    const offsetX = transform?.x ?? 0;
-    const offsetY = transform?.y ?? 0;
+    // const left = snapInfo ? `${snapInfo.pos.x}px` : initialLeft;
+    // const top = snapInfo ? `${snapInfo.pos.y}px` : initialTop;
+    const left = snapInfo ? `${snapInfo.pos.x}px` : initialLeft;
+    const top = snapInfo ? `${snapInfo.pos.y}px` : initialTop;
     return (
       <NameBadge
+        id={id} /* onAnyDragMove 에서 찾기 위해 id 필요 */
         ref={combinedRef}
         style={{
           position: "absolute",
-          left: initialLeft,
-          top: initialTop,
-          transform: transform
-            ? `translate3d(${offsetX}px, ${offsetY}px, 0)`
-            : undefined,
+          left,
+          top,
         }}
         {...attributes}
         {...listeners}
@@ -1216,8 +1255,6 @@ export default function GameRecordPageV2() {
       </NameBadge>
     );
   }
-
-  // 흰 배지용 기존 로직을 handleWhiteDragEvent로 이름만 바꿔두고 재사용
   function handleWhiteDragEvent(
     event: DragOverEvent | DragEndEvent,
     isEnd: boolean
@@ -1228,19 +1265,46 @@ export default function GameRecordPageV2() {
    * onAnyDragMove: 드래그 무브 이벤트를 requestAnimationFrame 으로 묶어서
    *                초당 최대 60번(16ms)으로 throttle
    */
+  // function onAnyDragMove(e: DragOverEvent) {
+  //   const id = e.active.id.toString();
+  //   // 검정 배지는 별도 처리 없으므로 바로 리턴
+  //   if (id.startsWith("black-badge")) return;
+
+  //   // 이전에 예약된 프레임이 있으면 취소
+  //   if (rafIdRef.current != null) {
+  //     cancelAnimationFrame(rafIdRef.current);
+  //   }
+
+  //   // 새로운 프레임 예약: 한 프레임 당 한 번만 handleDragEvent 실행
+  //   rafIdRef.current = requestAnimationFrame(() => {
+  //     handleWhiteDragEvent(e, false);
+  //     rafIdRef.current = null;
+  //   });
+  // }
+
   function onAnyDragMove(e: DragOverEvent) {
     const id = e.active.id.toString();
-    // 검정 배지는 별도 처리 없으므로 바로 리턴
     if (id.startsWith("black-badge")) return;
 
-    // 이전에 예약된 프레임이 있으면 취소
     if (rafIdRef.current != null) {
       cancelAnimationFrame(rafIdRef.current);
     }
 
-    // 새로운 프레임 예약: 한 프레임 당 한 번만 handleDragEvent 실행
     rafIdRef.current = requestAnimationFrame(() => {
+      // 기존 통과(highlight) 로직은 그대로 실행
       handleWhiteDragEvent(e, false);
+
+      // ① badge DOM 찾기
+      const badge = document.getElementById(id);
+      if (badge) {
+        // ② 누적 오프셋 읽기
+
+        const { x, y } = e.delta as { x: number; y: number };
+        // ③ CSS 변수만 갱신
+        badge.style.setProperty("--tx", `${x}px`);
+        badge.style.setProperty("--ty", `${y}px`);
+      }
+
       rafIdRef.current = null;
     });
   }
@@ -1548,7 +1612,7 @@ export default function GameRecordPageV2() {
           <ResetDot
             style={{ left: "75vw", top: "2vh" }}
             onClick={() => {
-              console.log("클릭됨");
+              // console.log("클릭됨");
               // 1) 스냅 위치와 보이기 상태 초기화
               setBadgeSnaps(initialBadgeSnaps);
               setActiveBadges(badgeConfigs.map((cfg) => cfg.id));
@@ -1590,7 +1654,7 @@ export default function GameRecordPageV2() {
         </GraphicWrapper>
       </DndContext>
       <PlayersRow>
-        <LeftArrow />
+        <LeftPolygon />
         <PlayerBox>
           <PlayerWrapper>
             <PlayerPosition>
@@ -1622,7 +1686,7 @@ export default function GameRecordPageV2() {
             </PlayerChangeButton>
           </PlayerWrapper>
         </PlayerBox>
-        <RightArrow />
+        <RightPolygon />
       </PlayersRow>
 
       <RecordActionsRow>

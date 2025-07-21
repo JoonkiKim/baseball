@@ -1,4 +1,4 @@
-// src/components/modals/hitModal.tsx
+// src/components/modals/groundRecordModal.tsx
 import { useRouter } from "next/router";
 import API from "../../../../commons/apis/api";
 
@@ -60,6 +60,8 @@ import {
 } from "@ant-design/icons";
 import { Divider } from "antd";
 import { RoundCloseOutlined } from "../../../../commons/libraries/cancelButton";
+import LeftPolygon from "../../../../commons/libraries/leftPolygon";
+import RightPolygon from "../../../../commons/libraries/rightPolygon";
 
 interface IModalProps {
   setIsGroundRecordModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -177,11 +179,260 @@ export default function GroundRecordModal(props: IModalProps) {
       return acc;
     }, {} as Record<BaseId, boolean>);
 
-    console.log("Base occupancy:", occupancy);
+    // console.log("Base occupancy:", occupancy);
     // 예: { "first-base": true, "second-base": false, ... }
   }, [badgeSnaps]);
 
+  // 이전 outside 값을 저장할 ref
+  const prevOutsideRef = useRef<boolean>(false);
+  // ── 베이스 중심 좌표 캐싱용 ref (이미 적용하셨다면 생략) ──
+  const baseCentersRef = useRef<Record<BaseId, { x: number; y: number }>>(
+    {} as Record<BaseId, { x: number; y: number }>
+  );
+  // ── 마운트 시·리사이즈 시에만 베이스 중심 계산 ──
+  useEffect(() => {
+    const updateCenters = () => {
+      baseIds.forEach((baseId) => {
+        const poly = baseRefs.current[baseId];
+        if (!poly) return;
+        const rect = poly.getBoundingClientRect();
+        baseCentersRef.current[baseId] = {
+          x: rect.left + rect.width / 2,
+          y: rect.top + rect.height / 2,
+        }; // ← 변경: 여기서 한 번만 계산해서 저장
+      });
+    };
+    updateCenters(); // ← 변경
+    window.addEventListener("resize", updateCenters); // ← 변경
+    return () => {
+      window.removeEventListener("resize", updateCenters); // ← 변경
+    };
+  }, []);
   // 2) 실제 구현부 (합집합 타입 + 플래그)
+  // function handleDragEvent(
+  //   event: DragOverEvent | DragEndEvent,
+  //   isEnd: boolean
+  // ) {
+  //   // ── 드래그 중 다이아몬드 밖으로 나갔는지 검사 ──
+  //   const badgeId = event.active.id as string;
+  //   const badgeEl = badgeRefs.current[event.active.id as string];
+  //   const draggableEl = badgeRefs.current[badgeId];
+
+  //   /** ── OutZone 실시간 검사: 드래그 중 and 드래그 종료 시 배경색 토글 ── **/
+  //   if (draggableEl && outZoneRef.current) {
+  //     const badgeBB = draggableEl.getBoundingClientRect();
+  //     const cx = badgeBB.left + badgeBB.width / 2;
+  //     const cy = badgeBB.top + badgeBB.height / 2;
+  //     const zoneBB = outZoneRef.current.getBoundingClientRect();
+  //     const outside =
+  //       cx < zoneBB.left ||
+  //       cx > zoneBB.right ||
+  //       cy < zoneBB.top ||
+  //       cy > zoneBB.bottom;
+  //     setIsOutside(outside);
+  //   }
+  //   /** ── OutZone 검사: 드래그 종료 시 영역 밖이면 배지 & 기록 삭제 ── **/
+  //   if (draggableEl && outZoneRef.current && isEnd) {
+  //     const badgeBB = draggableEl.getBoundingClientRect();
+  //     const cx = badgeBB.left + badgeBB.width / 2;
+  //     const cy = badgeBB.top + badgeBB.height / 2;
+  //     const zoneBB = outZoneRef.current.getBoundingClientRect();
+
+  //     if (
+  //       cx < zoneBB.left ||
+  //       cx > zoneBB.right ||
+  //       cy < zoneBB.top ||
+  //       cy > zoneBB.bottom
+  //     ) {
+  //       // 화면에서 배지 제거
+  //       setActiveBadges((prev) => prev.filter((id) => id !== badgeId));
+  //       // 스냅 정보 초기화
+  //       setBadgeSnaps((prev) => ({ ...prev, [badgeId]: null }));
+  //       // 베이스 통과 기록 초기화
+  //       baseIds.forEach((base) => {
+  //         passedBasesRef.current[badgeId][base] = false;
+  //       });
+  //       lastPassedRef.current[badgeId] = null;
+  //       maxReachedRef.current[badgeId] = 0;
+  //       // 배경색 초기화
+  //       setIsOutside(false);
+  //       return;
+  //     }
+  //   }
+
+  //   // ── 드래그 놓으면 항상 복귀 ──
+  //   if (isEnd) {
+  //     setIsOutside(false);
+  //   }
+
+  //   const wrapEl = wrapperRef.current;
+  //   if (!wrapEl) return;
+
+  //   // --- 1) onDragOver: 새 베이스 통과만 기록 (뒤로는 못 가도록) ---
+  //   if (!isEnd) {
+  //     const draggableEl = badgeRefs.current[badgeId];
+  //     if (!draggableEl) return;
+  //     const badgeBB = draggableEl.getBoundingClientRect();
+
+  //     for (const baseId of baseIds) {
+  //       const order = baseOrder[baseId];
+
+  //       const idx = baseIds.indexOf(baseId);
+  //       if (idx > 0) {
+  //         const prevBase = baseIds[idx - 1];
+  //         if (!passedBasesRef.current[badgeId][prevBase]) {
+  //           continue;
+  //         }
+  //       }
+
+  //       const poly = baseRefs.current[baseId];
+  //       // if (!poly) continue;
+  //       // const polyBB = poly.getBoundingClientRect();
+  //       // const cx = polyBB.left + polyBB.width / 2;
+  //       // const cy = polyBB.top + polyBB.height / 2;
+  //       const center = baseCentersRef.current[baseId];
+  //       if (!center) continue;
+  //       const { x: cx, y: cy } = center;
+  //       if (
+  //         cx >= badgeBB.left &&
+  //         cx <= badgeBB.right &&
+  //         cy >= badgeBB.top &&
+  //         cy <= badgeBB.bottom
+  //       ) {
+  //         // ── 여기서 무조건 하이라이트 ──
+  //         poly.classList.add("highlight");
+  //         setTimeout(() => poly.classList.remove("highlight"), 1000);
+
+  //         // ★ 홈베이스일 때 백그라운드 변경
+  //         if (baseId === "home-base") {
+  //           setIsHomeBaseActive(true);
+  //           setTimeout(() => setIsHomeBaseActive(false), 1000);
+  //         }
+
+  //         // ── 통과 기록은 아직 지나가지 않은 경우에만 ──
+  //         if (order > maxReachedRef.current[badgeId]) {
+  //           passedBasesRef.current[badgeId][baseId] = true;
+  //           lastPassedRef.current[badgeId] = baseId;
+  //           maxReachedRef.current[badgeId] = order;
+  //         }
+  //         break;
+  //       }
+  //     }
+  //     return;
+  //   }
+
+  //   // --- 2) onDragEnd: 드롭 위치 우선, 없으면 lastPassedRef 기준 스냅 ---
+  //   console.log("🔔 handleDragEnd for:", badgeId);
+
+  //   // 2-1) 드롭된 베이스 판별
+  //   let dropBase: BaseId | null = null;
+  //   let dropPos: { x: number; y: number } | null = null;
+
+  //   if (draggableEl) {
+  //     const badgeBB = draggableEl.getBoundingClientRect();
+  //     for (const baseId of baseIds) {
+  //       const poly = baseRefs.current[baseId];
+  //       if (!poly) continue;
+  //       const center = baseCentersRef.current[baseId];
+  //       if (!center) continue;
+  //       const { x: cx, y: cy } = center;
+  //       if (
+  //         cx >= badgeBB.left &&
+  //         cx <= badgeBB.right &&
+  //         cy >= badgeBB.top &&
+  //         cy <= badgeBB.bottom
+  //       ) {
+  //         dropBase = baseId;
+  //         const wrapBB = wrapEl.getBoundingClientRect();
+  //         dropPos = {
+  //           x: cx - wrapBB.left,
+  //           y: cy - wrapBB.top,
+  //         };
+  //         break;
+  //       }
+  //     }
+  //   }
+  //   // const badgeEl = badgeRefs.current[badgeId];
+  //   if (!badgeEl) return;
+  //   const badgeBB = badgeEl.getBoundingClientRect();
+  //   // 화면(screen) 상의 중심 좌표
+  //   const cx = badgeBB.left + badgeBB.width / 2;
+  //   const cy = badgeBB.top + badgeBB.height / 2;
+  //   const svg = diamondSvgRef.current!;
+  //   const pt = svg.createSVGPoint();
+  //   pt.x = cx;
+  //   pt.y = cy;
+  //   // getScreenCTM() 역행렬로 변환
+  //   // const svgP = pt.matrixTransform(svg.getScreenCTM()!.inverse());
+  //   // 외곽 다이아몬드 폴리곤 참조
+  //   // const poly = diamondPolyRef.current!;
+  //   // const isInsideDiamond = poly.isPointInFill(svgP);
+  //   // if (!isInsideDiamond) {
+  //   //   // 다이아몬드 폴리곤 밖에 드롭된 경우에만 사라지게
+  //   //   setActiveBadges((prev) => prev.filter((id) => id !== badgeId));
+  //   //   return;
+  //   // }
+  //   // 2-2) 스냅할 베이스 결정: 드롭된 베이스가 있으면 우선, 없으면 lastPassedRef
+  //   let snapBase = dropBase ?? lastPassedRef.current[badgeId];
+  //   let snapPos: { x: number; y: number } | null = dropPos;
+
+  //   if (snapBase === "home-base") {
+  //     // 홈베이스에 들어왔을 때, 1·2·3루를 모두 통과했는지 확인
+  //     const passed = passedBasesRef.current[badgeId];
+  //     const requiredBases: BaseId[] = [
+  //       "first-base",
+  //       "second-base",
+  //       "third-base",
+  //     ];
+  //     const passedAll = requiredBases.every((base) => passed[base]);
+  //     if (passedAll) {
+  //       setActiveBadges((prev) => prev.filter((id) => id !== badgeId));
+  //     }
+  //     return;
+  //   }
+
+  //   if (!dropBase && snapBase) {
+  //     // 지난 베이스 위치 계산
+  //     const poly = baseRefs.current[snapBase]!;
+  //     const wrapBB = wrapEl.getBoundingClientRect();
+  //     const polyBB = poly.getBoundingClientRect();
+  //     snapPos = {
+  //       x: polyBB.left + polyBB.width / 2 - wrapBB.left,
+  //       y: polyBB.top + polyBB.height / 2 - wrapBB.top,
+  //     };
+  //   }
+
+  //   // 2-3) 이미 차지됐는지 검사
+  //   const isOccupied = Object.entries(badgeSnaps).some(
+  //     ([otherId, snap]) => otherId !== badgeId && snap?.base === snapBase
+  //   );
+
+  //   // 2-4) 상태 업데이트
+  //   setBadgeSnaps((prev) => {
+  //     const next = { ...prev };
+  //     if (snapBase && snapPos && !isOccupied) {
+  //       // ① 직전 베이스가 있다면 반드시 통과했어야 함
+  //       const idx = baseIds.indexOf(snapBase);
+  //       if (idx > 0) {
+  //         const prevBase = baseIds[idx - 1];
+  //         if (!passedBasesRef.current[badgeId][prevBase]) {
+  //           // 아직 직전 베이스를 통과하지 않았다면 스냅 무시
+  //           return next;
+  //         }
+  //       }
+  //       // // 새 스냅 허용
+  //       next[badgeId] = { base: snapBase, pos: snapPos };
+  //       // 스냅된 순서도 기록
+  //       maxReachedRef.current[badgeId] = baseOrder[snapBase];
+  //     } else {
+  //       next[badgeId] = prev[badgeId];
+  //     }
+  //     return next;
+  //   });
+
+  //   // 2-5) 다음 드래그를 위해 통과 기록만 리셋
+  //   lastPassedRef.current[badgeId] = null;
+  // }
   function handleDragEvent(
     event: DragOverEvent | DragEndEvent,
     isEnd: boolean
@@ -202,7 +453,10 @@ export default function GroundRecordModal(props: IModalProps) {
         cx > zoneBB.right ||
         cy < zoneBB.top ||
         cy > zoneBB.bottom;
-      setIsOutside(outside);
+      if (outside !== prevOutsideRef.current) {
+        prevOutsideRef.current = outside;
+        setIsOutside(outside);
+      }
     }
     /** ── OutZone 검사: 드래그 종료 시 영역 밖이면 배지 & 기록 삭제 ── **/
     if (draggableEl && outZoneRef.current && isEnd) {
@@ -233,8 +487,9 @@ export default function GroundRecordModal(props: IModalProps) {
       }
     }
 
-    // ── 드래그 놓으면 항상 복귀 ──
-    if (isEnd) {
+    // ── 드래그 종료 시, 이전에 outside였다면 복귀 ──
+    if (isEnd && prevOutsideRef.current) {
+      prevOutsideRef.current = false;
       setIsOutside(false);
     }
 
@@ -259,11 +514,13 @@ export default function GroundRecordModal(props: IModalProps) {
         }
 
         const poly = baseRefs.current[baseId];
-        if (!poly) continue;
-        const polyBB = poly.getBoundingClientRect();
-        const cx = polyBB.left + polyBB.width / 2;
-        const cy = polyBB.top + polyBB.height / 2;
-
+        // if (!poly) continue;
+        // const polyBB = poly.getBoundingClientRect();
+        // const cx = polyBB.left + polyBB.width / 2;
+        // const cy = polyBB.top + polyBB.height / 2;
+        const center = baseCentersRef.current[baseId];
+        if (!center) continue;
+        const { x: cx, y: cy } = center;
         if (
           cx >= badgeBB.left &&
           cx <= badgeBB.right &&
@@ -293,7 +550,7 @@ export default function GroundRecordModal(props: IModalProps) {
     }
 
     // --- 2) onDragEnd: 드롭 위치 우선, 없으면 lastPassedRef 기준 스냅 ---
-    console.log("🔔 handleDragEnd for:", badgeId);
+    // console.log("🔔 handleDragEnd for:", badgeId);
 
     // 2-1) 드롭된 베이스 판별
     let dropBase: BaseId | null = null;
@@ -304,9 +561,9 @@ export default function GroundRecordModal(props: IModalProps) {
       for (const baseId of baseIds) {
         const poly = baseRefs.current[baseId];
         if (!poly) continue;
-        const polyBB = poly.getBoundingClientRect();
-        const cx = polyBB.left + polyBB.width / 2;
-        const cy = polyBB.top + polyBB.height / 2;
+        const center = baseCentersRef.current[baseId];
+        if (!center) continue;
+        const { x: cx, y: cy } = center;
         if (
           cx >= badgeBB.left &&
           cx <= badgeBB.right &&
@@ -423,7 +680,7 @@ export default function GroundRecordModal(props: IModalProps) {
       id,
     });
     if (snapInfo) {
-      console.log(`🔔 [${id}] snapInfo:`, snapInfo);
+      // console.log(`🔔 [${id}] snapInfo:`, snapInfo);
     }
     const combinedRef = (el: HTMLElement | null) => {
       setNodeRef(el);
@@ -433,7 +690,7 @@ export default function GroundRecordModal(props: IModalProps) {
     // CSS position & transform 결정
     if (snapInfo) {
       const { pos } = snapInfo;
-      console.log("pos", pos);
+      // console.log("pos", pos);
       const offsetX = transform?.x ?? 0;
       const offsetY = transform?.y ?? 0;
       return (
@@ -572,7 +829,16 @@ export default function GroundRecordModal(props: IModalProps) {
     }
   };
 
+  // 성능 최적화
+  const rafId = useRef<number | null>(null);
+  // onDragMove 핸들러 재정의
+  const onDragMoveThrottled = (e: DragOverEvent) => {
+    if (rafId.current != null) cancelAnimationFrame(rafId.current);
+    rafId.current = requestAnimationFrame(() => handleDragEvent(e, false));
+  };
+
   const [isHomeBaseActive, setIsHomeBaseActive] = useState(false);
+  // 베이스별 중심 좌표를 담을 ref
 
   return (
     <ModalOverlay>
@@ -590,7 +856,7 @@ export default function GroundRecordModal(props: IModalProps) {
               strategy: MeasuringStrategy.Always,
             },
           }}
-          onDragMove={(e) => handleDragEvent(e, false)} // 드래그 중
+          onDragMove={onDragMoveThrottled} // 드래그 중
           onDragEnd={(e) => handleDragEvent(e, true)} // 드래그 끝
         >
           <CancelButtonWrapper>
@@ -631,9 +897,9 @@ export default function GroundRecordModal(props: IModalProps) {
             </ReconstructionWrapper>
 
             <ModalBottomRunnerWrapper>
-              <RedoIcon onClick={handleRedo} />
+              <LeftPolygon />
               <ModalBottomRunnerTitle>주자</ModalBottomRunnerTitle>
-              <UndoIcon onClick={handleUndo} />
+              <RightPolygon />
             </ModalBottomRunnerWrapper>
           </ModalBottomWrapper>
           <GraphicWrapper
@@ -750,10 +1016,6 @@ export default function GroundRecordModal(props: IModalProps) {
                 });
               }}
             />
-            <OutZoneWrapper ref={outZoneRef}></OutZoneWrapper>
-            <CustomBoundaryWrapper
-              ref={customBoundsRef}
-            ></CustomBoundaryWrapper>
           </GraphicWrapper>
           <ControlButton onClick={handleSubmit}>확인하기</ControlButton>
         </DndContext>

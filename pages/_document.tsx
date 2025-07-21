@@ -6,11 +6,18 @@ export default function Document() {
       <Head>
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#000000" />
-        {/* 
-        <style>
-          @import
-          url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
-        </style> */}
+
+        <link rel="preload" as="image" href="/images/ground-without-home.png" />
+        <link rel="preload" as="image" href="/images/home.png" />
+        <link rel="preload" as="image" href="/images/line.png" />
+        <link
+          rel="preload"
+          as="image"
+          href="/images/home-base-white-1.png"
+          crossOrigin="anonymous"
+        />
+        <link rel="preload" as="image" href="/images/diamond.png" />
+        <link rel="preload" as="image" href="/images/reset.png" />
       </Head>
       <body>
         <Main />
