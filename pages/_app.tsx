@@ -29,29 +29,29 @@ function MyApp({ Component, pageProps }) {
 
   /* ---------------------------------------- */
 
-  // useEffect(() => {
-  //   function setRealVh() {
-  //     const h = window.visualViewport
-  //       ? window.visualViewport.height
-  //       : window.innerHeight;
-  //     document.documentElement.style.setProperty("--vh", `${h * 0.01}px`);
-  //   }
+  useEffect(() => {
+    function setRealVh() {
+      const h = window.visualViewport
+        ? window.visualViewport.height
+        : window.innerHeight;
+      document.documentElement.style.setProperty("--vh", `${h * 0.01}px`);
+    }
 
-  //   setRealVh(); // 초기 1회
+    setRealVh(); // 초기 1회
 
-  //   const vv = window.visualViewport;
-  //   if (vv) {
-  //     vv.addEventListener("resize", setRealVh);
-  //     vv.addEventListener("scroll", setRealVh);
-  //     return () => {
-  //       vv.removeEventListener("resize", setRealVh);
-  //       vv.removeEventListener("scroll", setRealVh);
-  //     };
-  //   } else {
-  //     window.addEventListener("resize", setRealVh);
-  //     return () => window.removeEventListener("resize", setRealVh);
-  //   }
-  // }, []);
+    const vv = window.visualViewport;
+    if (vv) {
+      vv.addEventListener("resize", setRealVh);
+      vv.addEventListener("scroll", setRealVh);
+      return () => {
+        vv.removeEventListener("resize", setRealVh);
+        vv.removeEventListener("scroll", setRealVh);
+      };
+    } else {
+      window.addEventListener("resize", setRealVh);
+      return () => window.removeEventListener("resize", setRealVh);
+    }
+  }, []);
   const pretendardStyles = css`
     /* Thin (100) */
     @font-face {

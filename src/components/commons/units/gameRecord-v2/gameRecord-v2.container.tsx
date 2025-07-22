@@ -904,7 +904,7 @@ export default function GameRecordPageV2() {
   );
 
   // 배지별 스냅 정보 관리
-  type SnapInfo = { base: BaseId; pos: { x: number; y: number } };
+  type SnapInfo = { base: BaseId; pos: { xPct: number; yPct: number } };
   // 1) 초기 스냅 상태를 미리 저장해 두고…
   const initialBadgeSnaps = badgeConfigs.reduce((acc, cfg) => {
     acc[cfg.id] = null;
@@ -1110,7 +1110,7 @@ export default function GameRecordPageV2() {
     // snapBase 결정 (dropBase 우선, 없으면 lastPassedRef)
     let snapBase = dropBase ?? lastPassedRef.current[badgeId];
     let snapPos = dropPos;
-
+    const isWhite = !badgeId.startsWith("black-badge"); // ← 흰 배지 판별
     // 홈베이스 완주 시 제거
     if (snapBase === "home-base") {
       const passed = passedBasesRef.current[badgeId];
@@ -1139,6 +1139,15 @@ export default function GameRecordPageV2() {
       snapPos = {
         x: rect.left + rect.width / 2 - wrapperRect.left,
         y: rect.top + rect.height / 2 - wrapperRect.top,
+      }; // px 기준 임시 값
+    }
+
+    // ✅ NEW: px → % 변환 (흰 배지 전용)
+    let snapPosPct: { xPct: number; yPct: number } | null = null;
+    if (isWhite && snapPos) {
+      snapPosPct = {
+        xPct: (snapPos.x / wrapperRect.width) * 100,
+        yPct: (snapPos.y / wrapperRect.height) * 100,
       };
     }
 
@@ -1153,7 +1162,19 @@ export default function GameRecordPageV2() {
         const idx = baseIds.indexOf(snapBase);
         const prevBase = idx > 0 ? baseIds[idx - 1] : null;
         if (!prevBase || passedBasesRef.current[badgeId][prevBase]) {
-          next[badgeId] = { base: snapBase, pos: snapPos };
+          // ✅ CHANGED: 흰 배지는 %좌표 저장
+          if (isWhite && snapPosPct) {
+            next[badgeId] = { base: snapBase, pos: snapPosPct };
+          } else if (!isWhite && snapPos) {
+            // (검정 배지 스냅 안 쓰면 이 블록 삭제해도 됨)
+            next[badgeId] = {
+              base: snapBase,
+              pos: {
+                xPct: (snapPos.x / wrapperRect.width) * 100,
+                yPct: (snapPos.y / wrapperRect.height) * 100,
+              },
+            };
+          }
           maxReachedRef.current[badgeId] = baseOrder[snapBase];
         }
       }
@@ -1255,22 +1276,16 @@ export default function GameRecordPageV2() {
       setNodeRef(el);
       badgeRefs.current[id] = el;
     };
-    const styleWhenSnapped = snapInfo
-      ? {
-          left: `${snapInfo.pos.x}px`,
-          top: `${snapInfo.pos.y}px`,
-          transform: "translate(-50%, -50%)", // ★ 중심 보정
-        }
-      : {
-          left: initialLeft,
-          top: initialTop,
-          transform: "translate(-50%, -50%)", // 초기에도 동일 기준
-        };
 
     // const left = snapInfo ? `${snapInfo.pos.x}px` : initialLeft;
     // const top = snapInfo ? `${snapInfo.pos.y}px` : initialTop;
-    const left = snapInfo ? `${snapInfo.pos.x}px` : initialLeft;
-    const top = snapInfo ? `${snapInfo.pos.y}px` : initialTop;
+    console.log("snapInfo", snapInfo);
+    console.log();
+    const isWhite = !id.startsWith("black-badge");
+
+    const left = snapInfo && isWhite ? `${snapInfo.pos.xPct}%` : initialLeft;
+    const top = snapInfo && isWhite ? `${snapInfo.pos.yPct}%` : initialTop;
+
     return (
       <NameBadge
         id={id} /* onAnyDragMove 에서 찾기 위해 id 필요 */
@@ -1279,6 +1294,8 @@ export default function GameRecordPageV2() {
           position: "absolute",
           left,
           top,
+          transform:
+            "translate(-50%, -50%) translate3d(var(--tx), var(--ty), 0)",
         }}
         {...attributes}
         {...listeners}
