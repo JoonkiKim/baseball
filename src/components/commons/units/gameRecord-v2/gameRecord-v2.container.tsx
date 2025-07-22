@@ -1269,7 +1269,7 @@ export default function GameRecordPageV2() {
     initialTop: string;
     snapInfo: SnapInfo | null;
   }) {
-    const { attributes, listeners, setNodeRef } = useDraggable({
+    const { attributes, listeners, setNodeRef, transform } = useDraggable({
       id,
     });
     const combinedRef = (el: HTMLElement | null) => {
@@ -1286,6 +1286,9 @@ export default function GameRecordPageV2() {
     const left = snapInfo && isWhite ? `${snapInfo.pos.xPct}%` : initialLeft;
     const top = snapInfo && isWhite ? `${snapInfo.pos.yPct}%` : initialTop;
 
+    const dx = transform?.x ?? 0;
+    const dy = transform?.y ?? 0;
+
     return (
       <NameBadge
         id={id} /* onAnyDragMove 에서 찾기 위해 id 필요 */
@@ -1294,8 +1297,7 @@ export default function GameRecordPageV2() {
           position: "absolute",
           left,
           top,
-          transform:
-            "translate(-50%, -50%) translate3d(var(--tx), var(--ty), 0)",
+          transform: `translate(-50%, -50%) translate3d(${dx}px, ${dy}px, 0)`,
         }}
         {...attributes}
         {...listeners}
@@ -1315,27 +1317,30 @@ export default function GameRecordPageV2() {
     const id = e.active.id.toString();
     if (id.startsWith("black-badge")) return;
 
-    if (rafIdRef.current != null) {
-      cancelAnimationFrame(rafIdRef.current);
-    }
+    // if (rafIdRef.current != null) {
+    //   cancelAnimationFrame(rafIdRef.current);
+    // }
 
-    rafIdRef.current = requestAnimationFrame(() => {
-      // 기존 통과(highlight) 로직은 그대로 실행
-      handleWhiteDragEvent(e, false);
+    // rafIdRef.current = requestAnimationFrame(() => {
+    //   // 기존 통과(highlight) 로직은 그대로 실행
+    //   handleWhiteDragEvent(e, false);
 
-      // ① badge DOM 찾기
-      const badge = document.getElementById(id);
-      if (badge) {
-        // ② 누적 오프셋 읽기
+    //   // ① badge DOM 찾기
+    //   const badge = document.getElementById(id);
+    //   if (badge) {
+    //     // ② 누적 오프셋 읽기
 
-        const { x, y } = e.delta as { x: number; y: number };
-        // ③ CSS 변수만 갱신
-        badge.style.setProperty("--tx", `${x}px`);
-        badge.style.setProperty("--ty", `${y}px`);
-      }
+    //     const { x, y } = e.delta as { x: number; y: number };
+    //     // ③ CSS 변수만 갱신
+    //     badge.style.setProperty("--tx", `${x}px`);
+    //     badge.style.setProperty("--ty", `${y}px`);
+    //     // badge.style.setProperty("--tx", "0px");
+    //     // badge.style.setProperty("--ty", "0px");
+    //   }
 
-      rafIdRef.current = null;
-    });
+    //   rafIdRef.current = null;
+    // });
+    handleWhiteDragEvent(e, false); // 통과/하이라이트만 처리
   }
 
   function onAnyDragEnd(e: DragEndEvent) {

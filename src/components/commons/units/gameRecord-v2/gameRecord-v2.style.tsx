@@ -667,16 +667,17 @@ export const NameBadge = styled.div`
   font-family: "Pretendard";
   font-weight: 600;
   z-index: 999;
-  left: 50%;
+  /* left: 50%; */
   font-size: 0.8rem;
-  top: 85%;
+  /* top: 85%; */
   /* transform: translate(0, -50%); */
 
   /* ① 드래그 오프셋용 CSS 변수 */
-  --tx: 0px;
-  --ty: 0px;
+  /* --tx: 0px;
+  --ty: 0px; */
   /* ② 센터링 + CSS 변수 기반 오프셋 */
-  transform: translate(-50%, -50%) translate3d(var(--tx), var(--ty), 0);
+  /* transform: translate(-50%, -50%) translate3d(var(--tx), var(--ty), 0); */
+  transform: translate(-50%, -50%);
 
   background: #ffffff;
   border: 0.3px solid black;
