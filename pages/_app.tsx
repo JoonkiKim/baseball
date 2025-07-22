@@ -4,10 +4,14 @@ import { RecoilRoot } from "recoil";
 import Layout from "../src/components/commons/layout";
 import "../styles/globals.css";
 import Head from "next/head";
-import { useRouter } from "next/router";
-import { useEffect } from "react";
+import { Router, useRouter } from "next/router";
+import { useEffect, useState } from "react";
 
 import TokenInitializer from "../src/commons/libraries/TokenInitializer";
+import {
+  LoadingIcon,
+  LoadingOverlay,
+} from "../src/commons/libraries/loadingOverlay";
 function MyApp({ Component, pageProps }) {
   const router = useRouter();
   const isResultPage = router.pathname === "/result";
@@ -125,6 +129,21 @@ function MyApp({ Component, pageProps }) {
     }
   `;
 
+  const [loadingRoute, setLoadingRoute] = useState(false);
+
+  useEffect(() => {
+    const handleStart = () => setLoadingRoute(true);
+    const handleComplete = () => setLoadingRoute(false);
+    Router.events.on("routeChangeStart", handleStart);
+    Router.events.on("routeChangeComplete", handleComplete);
+    Router.events.on("routeChangeError", handleComplete);
+    return () => {
+      Router.events.off("routeChangeStart", handleStart);
+      Router.events.off("routeChangeComplete", handleComplete);
+      Router.events.off("routeChangeError", handleComplete);
+    };
+  }, []);
+
   return (
     <>
       <Head>
@@ -136,6 +155,10 @@ function MyApp({ Component, pageProps }) {
       <Global styles={pretendardStyles} />
       <RecoilRoot>
         <TokenInitializer />
+        <LoadingOverlay visible={loadingRoute}>
+          <LoadingIcon spin fontSize={48} />
+        </LoadingOverlay>
+
         <Layout>
           {/* 페이지 컴포넌트에도 필요하다면 mobileOnly 전달 */}
           <Component {...pageProps} />

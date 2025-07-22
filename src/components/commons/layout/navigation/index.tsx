@@ -1,6 +1,9 @@
 import { Global, css } from "@emotion/react";
 import styled from "@emotion/styled";
 import Link from "next/link";
+import { useEffect } from "react";
+import { getAccessToken } from "../../../../commons/libraries/token";
+import { useRouter } from "next/router";
 
 // Global 스타일로 @font-face 정의 및 적용 클래스 생성
 const navGlobalStyles = css`
@@ -43,12 +46,14 @@ export const BottomNavWrapper = styled.div`
 export const BottomNav = styled.div`
   background: #f2f2f7;
   display: flex;
+  color: #000;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   box-sizing: border-box;
   height: 10vh;
   width: 33%;
+  border: none;
 `;
 
 export const NavIcon = styled.img`
@@ -58,7 +63,7 @@ export const NavIcon = styled.img`
 
 export const NavItem = styled.div`
   margin-top: 10px;
-  font-weight: 100;
+  font-weight: 300;
   color: #000;
   text-align: center;
   font-size: 16px;
@@ -78,13 +83,28 @@ export const NavItem = styled.div`
 `;
 
 export default function LayoutNavigation() {
+  const router = useRouter();
+  useEffect(() => {
+    const token = getAccessToken();
+    console.log("현재 inMemoryAccessToken:", token);
+  }, []);
+  // 설정 버튼 클릭 핸들러
+  const handleSettingsClick = () => {
+    const token = getAccessToken();
+    if (token) {
+      router.push("/mypage");
+    } else {
+      router.push("/login");
+    }
+  };
+
   return (
     <>
       <Global styles={navGlobalStyles} />
       {/* 최상위 요소에 kbo-font 클래스를 적용하여 이 컴포넌트 내 폰트를 지정 */}
       <div className="kbo-font">
         <BottomNavWrapper>
-          <Link href="/" passHref>
+          <Link href="/mainCalendar" passHref>
             <BottomNav as="a">
               <NavIcon src="/images/calendar-new.png" />
               <NavItem>경기일정</NavItem>
@@ -103,7 +123,7 @@ export default function LayoutNavigation() {
             </BottomNav>
           </Link>
           <Link href="/login" passHref>
-            <BottomNav as="a">
+            <BottomNav as="button" onClick={handleSettingsClick}>
               <NavIcon src="/images/profile.png" />
               <NavItem>설정</NavItem>
             </BottomNav>

@@ -24,16 +24,17 @@ export default function TokenInitializer() {
   }, [setToken]);
 
   // ② 앱 초기 로드 시 refresh 토큰 요청
-  useEffect(() => {
-    API.post("/auth/refresh")
-      .then((res) => {
-        setAccessToken(res.data.accessToken);
-      })
-      .catch(() => {
-        // 리프레시 실패하면 로그인 페이지로
-        router.push("/login");
-      });
-  }, []);
+  // useEffect(() => {
+  //   API.post("/auth/refresh")
+  //     .then((res) => {
+  //       setAccessToken(res.data.accessToken);
+  //       console.log("토큰담기성공");
+  //     })
+  //     .catch(() => {
+  //       // 리프레시 실패하면 로그인 페이지로
+  //       router.push("/login");
+  //     });
+  // }, []);
 
   return null;
 }
