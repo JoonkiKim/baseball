@@ -100,10 +100,7 @@ export default function LoginPageComponent() {
       alert("로그인에 성공하였습니다!"); // 모달로 뜸
     } catch (error: any) {
       console.error("전체 onSubmit에서 잡힌 에러:", error);
-      window.alert(
-        error?.response?.data?.message ||
-          "로그인 중 오류가 발생했습니다. 다시 시도해주세요."
-      );
+      alert("로그인에 실패하였습니다.\n다시 시도해주세요");
     }
   };
 
