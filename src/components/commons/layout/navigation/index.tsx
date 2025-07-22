@@ -91,6 +91,7 @@ export default function LayoutNavigation() {
   // 설정 버튼 클릭 핸들러
   const handleSettingsClick = () => {
     const token = getAccessToken();
+    console.log("token", token);
     if (token) {
       router.push("/mypage");
     } else {

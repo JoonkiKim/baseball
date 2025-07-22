@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -55,6 +55,27 @@ export default function LoginPageComponent() {
     resolver: yupResolver(schema),
   });
 
+  // mount 체크
+  const isMounted = useRef(true);
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
+  // ✨ window.alert 가로채기
+  useEffect(() => {
+    const orig = window.alert;
+    window.alert = (msg: string) => {
+      if (isMounted.current) {
+        // ShowAlert에서는 error.message를 보므로 message 프로퍼티 추가
+        setAlertObj({ message: msg });
+      }
+    };
+    return () => {
+      window.alert = orig;
+    };
+  }, []);
   // 비밀번호 표시/숨기기 상태
   const [showPassword, setShowPassword] = useState(false);
 
@@ -62,36 +83,9 @@ export default function LoginPageComponent() {
   const handleTogglePassword = () => {
     setShowPassword(!showPassword);
   };
-
-  // const onSubmit: SubmitHandler<LoginFormData> = async (data) => {
-  //   try {
-  //     console.log(data);
-  //     // 1) 로그인 요청
-  //     const response = await API.post(
-  //       "/auth/login", // 실제 로그인 엔드포인트로 변경
-  //       {
-  //         email: data.email,
-  //         password: data.password,
-  //       }
-  //     );
-
-  //     // 2) 응답에서 accessToken 꺼내기
-  //     const { accessToken } = response.data;
-  //     console.log(accessToken);
-
-  //     // 3) 메모리·Recoil에 동기화
-  //     setAccessToken(accessToken);
-  //     alert("로그인 성공!");
-  //     // 4) 로그인 성공 후 리다이렉트 등 처리
-  //     await router.push("/mainCalendar");
-  //   } catch (error: any) {
-  //     // 에러 핸들링
-  //     alert(
-  //       error.response?.data?.message ||
-  //         "로그인 중 오류가 발생했습니다. 다시 시도해주세요."
-  //     );
-  //   }
-  // };
+  // 1) 상태를 하나로 정리 (맨 위쪽에 위치)
+  const [alertObj, setAlertObj] = useState<any>(null);
+  const [loginSuccess, setLoginSuccess] = useState(false);
 
   const onSubmit: SubmitHandler<LoginFormData> = async (data) => {
     try {
@@ -100,54 +94,28 @@ export default function LoginPageComponent() {
         password: data.password,
       });
       const { accessToken } = response.data;
-      console.log("받은 토큰:", accessToken);
-
-      // 1) setAccessToken만 따로 감싸서 에러 확인
-      try {
-        setAccessToken(accessToken);
-        console.log("setAccessToken 성공");
-      } catch (e) {
-        console.error("setAccessToken에서 에러!", e);
-        throw e; // 다시 던져서 상위 catch로
-      }
-
-      // 2) router.push만 따로 감싸서 에러 확인
-      try {
-        await router.push("/mainCalendar");
-        console.log("router.push 완료");
-      } catch (e) {
-        console.error("router.push에서 에러!", e);
-        throw e;
-      }
-
-      alert("로그인 성공!");
+      setAccessToken(accessToken);
+      // ★ push 하지 말고 성공 플래그 세팅 후 alert
+      setLoginSuccess(true);
+      alert("로그인에 성공하였습니다!"); // 모달로 뜸
     } catch (error: any) {
       console.error("전체 onSubmit에서 잡힌 에러:", error);
-      alert(
-        error.response?.data?.message ||
+      window.alert(
+        error?.response?.data?.message ||
           "로그인 중 오류가 발생했습니다. 다시 시도해주세요."
       );
     }
   };
-  const [alertInfo, setAlertInfo] = useState<{
-    message: string;
-    success?: boolean;
-  } | null>(null);
-  const [error, setError] = useState(null);
 
   return (
     <Container>
       <ShowAlert
-        error={alertInfo || error}
+        error={alertObj}
         onClose={() => {
-          if (alertInfo?.success) {
+          setAlertObj(null);
+          if (loginSuccess) {
             router.push("/mainCalendar");
           }
-          setAlertInfo(null);
-          setError(null);
-          // 성공 메시지일 때만 메인 캘린더로 이동
-
-          // 모달 닫힐 때는 alertInfo, error 둘 다 클리어
         }}
       />
       <Title>SNU BASEBALL</Title>

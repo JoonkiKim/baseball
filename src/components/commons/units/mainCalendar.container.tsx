@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import moment from "moment-timezone";
 import { useRouter } from "next/router";
 import "react-datepicker/dist/react-datepicker.css";
@@ -41,6 +41,7 @@ import { ko } from "date-fns/locale";
 // import { getAccessToken } from "../../../commons/libraries/getAccessToken";
 import ErrorAlert from "../../../commons/libraries/showErrorCode";
 import API2 from "../../../commons/apis/api2";
+import ShowAlert from "../../../commons/libraries/showAlertModal";
 
 // 새 객체 구조에 맞춘 인터페이스 정의 (matchId → gameId)
 interface RawMatch {
@@ -126,49 +127,6 @@ export default function MainCalendarPage() {
           // }
         );
 
-        // const kstDays: RawMatch[] = res.data.days.map((day: RawMatch) => {
-        //   const kst = moment.utc(day.date).tz("Asia/Seoul");
-        //   const games = day.games.map((game: Game) => {
-        //     // 시간 UTC→KST 변환
-        //     const utcDate = day.date.substring(0, 10);
-        //     const utcDateTime = moment.utc(`${utcDate}T${game.time}:00Z`);
-        //     const kstTime = utcDateTime
-        //       .clone()
-        //       .tz("Asia/Seoul")
-        //       .format("HH:mm");
-        //     if (
-        //       game.winnerTeamId != null &&
-        //       game.homeTeam.score == null &&
-        //       game.awayTeam.score == null
-        //     ) {
-        //       if (game.winnerTeamId === game.homeTeam.id) {
-        //         return {
-        //           ...game,
-        //           time: kstTime,
-        //           homeTeam: { ...game.homeTeam, score: "몰수승" },
-        //         };
-        //       } else {
-        //         return {
-        //           ...game,
-        //           time: kstTime,
-        //           awayTeam: { ...game.awayTeam, score: "몰수승" },
-        //         };
-        //       }
-        //     }
-        //     return { ...game, time: kstTime };
-        //   });
-
-        //   return {
-        //     ...day,
-        //     date: kst.format("YYYY-MM-DD"),
-        //     dayOfWeek: kst.locale("ko").format("dd"),
-        //     games,
-        //   };
-        // });
-        // const authRes = await API2.get(`/auth/me`);
-        // setAuthInfo(authRes.data);
-        // console.log("authInfo", authInfo);
-        // setAllMatchData(kstDays);
         setAllMatchData(res.data.days);
         console.log("allMatchData", allMatchData);
       } catch (err) {
@@ -275,11 +233,63 @@ export default function MainCalendarPage() {
 
   // console.log("lastRoute", lastRoute);
 
+  // 날짜 점프하기
+  const matchDateList = useMemo(() => {
+    // allMatchData: [{ date: "2025-03-02", games: [...] }, ...]
+    return allMatchData
+      .filter((d) => (d.games?.length ?? 0) > 0)
+      .map((d) => d.date) // "YYYY-MM-DD"
+      .sort();
+  }, [allMatchData]);
+
+  const jumpToMatchDate = (dir: "prev" | "next") => {
+    if (!selectedDate || matchDateList.length === 0) return;
+
+    const curr = formatDateToYMD(selectedDate); // "YYYY-MM-DD"
+
+    const prevDate = matchDateList.filter((d) => d < curr).slice(-1)[0]; // 마지막 요소
+    const nextDate = matchDateList.find((d) => d > curr);
+
+    const target =
+      dir === "prev"
+        ? matchDateList.includes(curr)
+          ? prevDate
+          : prevDate // 동일
+        : matchDateList.includes(curr)
+        ? nextDate
+        : nextDate; // 동일
+
+    if (target) {
+      setSelectedDate(moment(target, "YYYY-MM-DD").toDate());
+    } else {
+      alert("더 이상 경기가 없습니다");
+    }
+  };
+  const [alertError, setAlertError] = useState<any>(null);
+
+  useEffect(() => {
+    const original = window.alert;
+    window.alert = (msg: string) => {
+      // ShowAlert가 요구하는 형태: { message: string } 만 있으면 됨
+      setAlertError({ message: msg });
+    };
+    return () => {
+      window.alert = original;
+    };
+  }, []);
+
   return (
     <Container>
+      <ShowAlert
+        error={alertError || error} // 기존 error도 같이 보여주고 싶다면 이렇게
+        onClose={() => {
+          setAlertError(null);
+          setError(null);
+        }}
+      />
       <DaysOfWeekContainer>
         <DaysOfWeekWrapper>
-          <Arrow onClick={handleDecreaseDate}>&lt;</Arrow>
+          <Arrow onClick={() => jumpToMatchDate("prev")}>&lt;</Arrow>
 
           <DateWrapper>
             <DateDisplay>
@@ -344,7 +354,7 @@ export default function MainCalendarPage() {
             )}
           </DateWrapper>
 
-          <Arrow onClick={handleIncreaseDate}>&gt;</Arrow>
+          <Arrow onClick={() => jumpToMatchDate("next")}>&gt;</Arrow>
         </DaysOfWeekWrapper>
       </DaysOfWeekContainer>
 

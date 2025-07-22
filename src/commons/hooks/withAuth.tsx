@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getAccessToken } from "../libraries/getAccessToken";
+import { getAccessToken } from "../libraries/token";
 
 export function withAuth<T>(
   WrappedComponent: React.ComponentType<T & { isAuthenticated: boolean }>
