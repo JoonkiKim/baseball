@@ -68,6 +68,7 @@ export default function SignUpPage() {
     register,
     handleSubmit,
     getValues,
+    trigger,
     formState: { errors },
   } = useForm({
     resolver: yupResolver(schema),
@@ -243,11 +244,14 @@ export default function SignUpPage() {
       <ShowAlert
         error={alertInfo || error}
         onClose={() => {
-          // 2) 모달의 확인 버튼을 누르면, success일 때만 이동
           if (alertInfo?.success) {
             router.push("/mainCalendar");
           }
           setAlertInfo(null);
+          setError(null);
+          // 성공 메시지일 때만 메인 캘린더로 이동
+
+          // 모달 닫힐 때는 alertInfo, error 둘 다 클리어
         }}
       />
       <Container>
@@ -340,6 +344,10 @@ export default function SignUpPage() {
                 type="password"
                 placeholder="영문, 숫자가 포함된 8~20자 입력"
                 {...register("password")}
+                onChange={async (e) => {
+                  register("password").onChange(e);
+                  await trigger("password"); // password 필드만 onChange 검증
+                }}
               />
             </PasswordWrapper>
             {errors.password ? (
@@ -357,6 +365,10 @@ export default function SignUpPage() {
               type="password"
               placeholder="비밀번호 확인"
               {...register("confirmPassword")}
+              onChange={async (e) => {
+                register("confirmPassword").onChange(e);
+                await trigger("confirmPassword"); // password 필드만 onChange 검증
+              }}
             />
             {errors.confirmPassword ? (
               <ErrorMessage>{errors.confirmPassword.message}</ErrorMessage>
@@ -372,6 +384,10 @@ export default function SignUpPage() {
               type="text"
               placeholder="2~8자 입력"
               {...register("nickname")}
+              onChange={async (e) => {
+                register("nickname").onChange(e);
+                await trigger("nickname"); // password 필드만 onChange 검증
+              }}
             />
             {errors.nickname ? (
               <ErrorMessage>{errors.nickname.message}</ErrorMessage>

@@ -73,6 +73,7 @@ export default function ShowAlert({
         error.message ||
         "알 수 없는 오류가 발생했습니다.";
 
+  console.log("showalert입니다");
   return (
     <ModalOverlay>
       <ModalContainer>

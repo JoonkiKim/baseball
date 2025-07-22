@@ -82,7 +82,7 @@ export const ModalTitleSmall = styled.h2`
   white-space: pre-line;
   margin-bottom: 30px;
   margin-top: 20px;
-  font-size: 18px;
+  font-size: 1rem;
 
   font-family: "KBO-Dia-Gothic_medium";
   font-weight: 300;

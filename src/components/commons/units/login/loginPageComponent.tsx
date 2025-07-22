@@ -23,6 +23,7 @@ import Link from "next/link";
 import API from "../../../../commons/apis/api";
 import { setAccessToken } from "../../../../commons/libraries/token";
 import { useRouter } from "next/router";
+import ShowAlert from "../../../../commons/libraries/showAlertModal";
 
 // 폼에서 다룰 데이터 타입 정의
 interface LoginFormData {
@@ -128,9 +129,27 @@ export default function LoginPageComponent() {
       );
     }
   };
+  const [alertInfo, setAlertInfo] = useState<{
+    message: string;
+    success?: boolean;
+  } | null>(null);
+  const [error, setError] = useState(null);
 
   return (
     <Container>
+      <ShowAlert
+        error={alertInfo || error}
+        onClose={() => {
+          if (alertInfo?.success) {
+            router.push("/mainCalendar");
+          }
+          setAlertInfo(null);
+          setError(null);
+          // 성공 메시지일 때만 메인 캘린더로 이동
+
+          // 모달 닫힐 때는 alertInfo, error 둘 다 클리어
+        }}
+      />
       <Title>SNU BASEBALL</Title>
 
       <LogoImage src="/images/main-logo.png" alt="SNU Baseball 메인 로고" />
