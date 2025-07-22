@@ -628,10 +628,18 @@ export default function GameRecordPageV2() {
     "third-base": null,
     "home-base": null,
   });
-  const droppableSetters = baseIds.reduce((acc, id) => {
-    acc[id] = useDroppable({ id }).setNodeRef;
-    return acc;
-  }, {} as Record<BaseId, (el: HTMLElement | null) => void>);
+  const { setNodeRef: set1st } = useDroppable({ id: "first-base" });
+  const { setNodeRef: set2nd } = useDroppable({ id: "second-base" });
+  const { setNodeRef: set3rd } = useDroppable({ id: "third-base" });
+  const { setNodeRef: setHome } = useDroppable({ id: "home-base" });
+
+  // map
+  const droppableSetters = {
+    "first-base": set1st,
+    "second-base": set2nd,
+    "third-base": set3rd,
+    "home-base": setHome,
+  };
 
   // wrapper ref (배지·베이스 좌표 계산용)
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -918,7 +926,7 @@ export default function GameRecordPageV2() {
       return acc;
     }, {} as Record<BaseId, boolean>);
 
-    // console.log("Base occupancy:", occupancy);
+    console.log("Base occupancy:", occupancy);
     // 예: { "first-base": true, "second-base": false, ... }
   }, [badgeSnaps]);
   // 센서 정의
@@ -1108,6 +1116,19 @@ export default function GameRecordPageV2() {
       const passed = passedBasesRef.current[badgeId];
       if (["first-base", "second-base", "third-base"].every((b) => passed[b])) {
         setActiveBadges((prev) => prev.filter((id) => id !== badgeId));
+        // 2) 스냅 정보 삭제 → occupancy 자동 false
+        setBadgeSnaps((prev) => {
+          const next = { ...prev };
+          next[badgeId] = null;
+          return next;
+        });
+
+        // 3) 통과 기록/최대순서/마지막 통과 초기화
+        baseIds.forEach((base) => {
+          passedBasesRef.current[badgeId][base] = false;
+        });
+        lastPassedRef.current[badgeId] = null;
+        maxReachedRef.current[badgeId] = 0;
       }
       return;
     }
@@ -1234,6 +1255,17 @@ export default function GameRecordPageV2() {
       setNodeRef(el);
       badgeRefs.current[id] = el;
     };
+    const styleWhenSnapped = snapInfo
+      ? {
+          left: `${snapInfo.pos.x}px`,
+          top: `${snapInfo.pos.y}px`,
+          transform: "translate(-50%, -50%)", // ★ 중심 보정
+        }
+      : {
+          left: initialLeft,
+          top: initialTop,
+          transform: "translate(-50%, -50%)", // 초기에도 동일 기준
+        };
 
     // const left = snapInfo ? `${snapInfo.pos.x}px` : initialLeft;
     // const top = snapInfo ? `${snapInfo.pos.y}px` : initialTop;
@@ -1261,26 +1293,6 @@ export default function GameRecordPageV2() {
   ) {
     handleDragEvent(event, isEnd);
   }
-  /**
-   * onAnyDragMove: 드래그 무브 이벤트를 requestAnimationFrame 으로 묶어서
-   *                초당 최대 60번(16ms)으로 throttle
-   */
-  // function onAnyDragMove(e: DragOverEvent) {
-  //   const id = e.active.id.toString();
-  //   // 검정 배지는 별도 처리 없으므로 바로 리턴
-  //   if (id.startsWith("black-badge")) return;
-
-  //   // 이전에 예약된 프레임이 있으면 취소
-  //   if (rafIdRef.current != null) {
-  //     cancelAnimationFrame(rafIdRef.current);
-  //   }
-
-  //   // 새로운 프레임 예약: 한 프레임 당 한 번만 handleDragEvent 실행
-  //   rafIdRef.current = requestAnimationFrame(() => {
-  //     handleWhiteDragEvent(e, false);
-  //     rafIdRef.current = null;
-  //   });
-  // }
 
   function onAnyDragMove(e: DragOverEvent) {
     const id = e.active.id.toString();
@@ -1415,7 +1427,23 @@ export default function GameRecordPageV2() {
   //   img.onload = () => {
   //     console.log("/images/home-base-white-1.png preloaded!");
   //   };
-  // }, []);
+  // }, []);\
+
+  // 위치 어긋남 해결
+  function refreshRects() {
+    if (wrapperRef.current)
+      wrapperRectRef.current = wrapperRef.current.getBoundingClientRect();
+    if (outZoneRef.current)
+      zoneRectRef.current = outZoneRef.current.getBoundingClientRect();
+    baseIds.forEach((b) => {
+      const poly = baseRefs.current[b];
+      if (poly) baseRectsRef.current[b] = poly.getBoundingClientRect();
+    });
+  }
+
+  function onAnyDragStart() {
+    refreshRects();
+  }
 
   return (
     <GameRecordContainer reconstructMode={isReconstructMode}>
@@ -1487,6 +1515,7 @@ export default function GameRecordPageV2() {
             strategy: MeasuringStrategy.Always,
           },
         }}
+        onDragStart={onAnyDragStart}
         onDragMove={onAnyDragMove}
         onDragEnd={onAnyDragEnd}
       >
