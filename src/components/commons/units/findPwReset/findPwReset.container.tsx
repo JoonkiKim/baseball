@@ -24,14 +24,17 @@ interface LoginFormData {
 }
 
 // 영문, 숫자 포함 8~20자 정규식
-const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,20}$/;
-
+const passwordRegex =
+  /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d!@#$%^&*()_\-+=\[\]{};:'",.<>/?`~\\|]{8,20}$/;
 // yup을 사용한 유효성 검증 스키마 정의
 const schema = yup.object().shape({
   newPw: yup
     .string()
     .required("새로운 비밀번호를 입력하세요")
-    .matches(passwordRegex, "영문과 숫자를 포함한 8~20자를 입력하세요"),
+    .matches(
+      passwordRegex,
+      "영문과 숫자를 포함한 8~20자를 입력하세요 (특수문자 사용 가능)"
+    ),
 });
 
 export default function ResetPwPageComponent() {
