@@ -19,6 +19,8 @@ export const GameRecordContainer = styled.div<{ reconstructMode: boolean }>`
   height: calc(var(--vh) * 100);
   background-color: ${({ reconstructMode }) =>
     reconstructMode ? "#B8B8B8" : "#f2f2f7"};
+  /* padding-bottom: 10vh; */
+  /* background-color: red; */
 `;
 
 export const ScoreBoardWrapper = styled.div`
@@ -359,8 +361,9 @@ export const RecordActionsRow = styled.div`
   display: grid;
   width: 100%;
   height: 10vh;
+
   grid-template-columns: repeat(4, 1fr);
-  margin-top: auto;
+  margin-top: 5vh;
 `;
 
 export const RecordActionButton = styled.button`
