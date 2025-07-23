@@ -8,6 +8,11 @@ export const accessTokenState = atom<string | null>({
   default: null,
 });
 
+export const authCheckedState = atom<boolean>({
+  key: "authCheckedState",
+  default: false, // 아직 refresh 여부 판단 전
+});
+
 // 1. Auth 정보용 인터페이스 정의
 interface AuthInfo {
   role: string;

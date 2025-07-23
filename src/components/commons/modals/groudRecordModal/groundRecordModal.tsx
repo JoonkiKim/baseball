@@ -829,6 +829,71 @@ export default function GroundRecordModal(props: IModalProps) {
 
   const [isHomeBaseActive, setIsHomeBaseActive] = useState(false);
   // 베이스별 중심 좌표를 담을 ref
+  const baseRectsRef = useRef<Partial<Record<BaseId, DOMRect>>>({});
+  const wrapperRectRef = useRef<DOMRect | null>(null);
+  const zoneRectRef = useRef<DOMRect | null>(null);
+
+  // 위치 어긋남 해결
+  function refreshRects() {
+    if (wrapperRef.current)
+      wrapperRectRef.current = wrapperRef.current.getBoundingClientRect();
+    if (outZoneRef.current)
+      zoneRectRef.current = outZoneRef.current.getBoundingClientRect();
+    baseIds.forEach((b) => {
+      const poly = baseRefs.current[b];
+      if (poly) baseRectsRef.current[b] = poly.getBoundingClientRect();
+    });
+  }
+  function onAnyDragStart() {
+    refreshRects();
+  }
+
+  function handleWhiteDragEvent(
+    event: DragOverEvent | DragEndEvent,
+    isEnd: boolean
+  ) {
+    handleDragEvent(event, isEnd);
+  }
+
+  function onAnyDragMove(e: DragOverEvent) {
+    const id = e.active.id.toString();
+    if (id.startsWith("black-badge")) return;
+
+    // if (rafIdRef.current != null) {
+    //   cancelAnimationFrame(rafIdRef.current);
+    // }
+
+    // rafIdRef.current = requestAnimationFrame(() => {
+    //   // 기존 통과(highlight) 로직은 그대로 실행
+    //   handleWhiteDragEvent(e, false);
+
+    //   // ① badge DOM 찾기
+    //   const badge = document.getElementById(id);
+    //   if (badge) {
+    //     // ② 누적 오프셋 읽기
+
+    //     const { x, y } = e.delta as { x: number; y: number };
+    //     // ③ CSS 변수만 갱신
+    //     badge.style.setProperty("--tx", `${x}px`);
+    //     badge.style.setProperty("--ty", `${y}px`);
+    //     // badge.style.setProperty("--tx", "0px");
+    //     // badge.style.setProperty("--ty", "0px");
+    //   }
+
+    //   rafIdRef.current = null;
+    // });
+    handleWhiteDragEvent(e, false); // 통과/하이라이트만 처리
+  }
+
+  function onAnyDragEnd(e: DragEndEvent) {
+    const id = e.active.id.toString();
+    if (id.startsWith("black-badge")) {
+      // 검정 배지는 단순 이동량 누적
+    } else {
+      // 흰 배지는 베이스 스냅/아웃 로직
+      handleWhiteDragEvent(e, true);
+    }
+  }
 
   return (
     <ModalOverlay>
@@ -846,8 +911,9 @@ export default function GroundRecordModal(props: IModalProps) {
               strategy: MeasuringStrategy.Always,
             },
           }}
-          onDragMove={onDragMoveThrottled} // 드래그 중
-          onDragEnd={(e) => handleDragEvent(e, true)} // 드래그 끝
+          onDragStart={onAnyDragStart}
+          onDragMove={onAnyDragMove}
+          onDragEnd={onAnyDragEnd}
         >
           <CancelButtonWrapper>
             {" "}
@@ -868,7 +934,6 @@ export default function GroundRecordModal(props: IModalProps) {
               />
             </button>
           </CancelButtonWrapper>
-
           <ModalBottomWrapper>
             <ReconstructionWrapper>
               <ReconstructionTitle>이닝의 재구성</ReconstructionTitle>
@@ -885,7 +950,6 @@ export default function GroundRecordModal(props: IModalProps) {
                 />
               </ReconstructionButtonWrapper>
             </ReconstructionWrapper>
-
             <ModalBottomRunnerWrapper>
               <LeftPolygon />
               <ModalBottomRunnerTitle>주자</ModalBottomRunnerTitle>
@@ -893,9 +957,12 @@ export default function GroundRecordModal(props: IModalProps) {
             </ModalBottomRunnerWrapper>
           </ModalBottomWrapper>
           <GraphicWrapper
+            // as="svg"
             ref={wrapperRef}
-            outside={isOutside}
-            style={{ position: "relative" }}
+            // viewBox="0 0 110 110"
+            // preserveAspectRatio="xMidYMid meet"
+
+            // outside={isOutside}
           >
             <HomeWrapper />
             <LineWrapper />
@@ -905,12 +972,6 @@ export default function GroundRecordModal(props: IModalProps) {
             <CustomBoundaryWrapper
               ref={customBoundsRef}
             ></CustomBoundaryWrapper>
-            {/* <OutCount>
-              {outs.map((isActive, idx) => (
-                <Ellipse key={idx} active={isActive} />
-              ))}
-            </OutCount> */}
-
             <DiamondSvg
               viewBox="0 0 110 110"
               ref={(el) => {
@@ -921,19 +982,21 @@ export default function GroundRecordModal(props: IModalProps) {
               <polygon
                 id="ground"
                 points="55,0 110,55 55,110 0,55"
-                // ref={(el) => {
-                //   diamondPolyRef.current = el;
-                //   // groundRef.current = el;
-                // }}
+                // style={{ border: "1px solid black" }}
+                ref={(el) => {
+                  diamondPolyRef.current = el;
+                  // groundRef.current = el;
+                }}
               />
               {/* 디버그용: 계산된 screenPoints로 다시 그린 폴리곤 */}
               {/* {overlayPoints && (
-                      <polygon points={overlayPoints} stroke="red" strokeWidth={0.5} />
-                    )} */}
+              <polygon points={overlayPoints} stroke="red" strokeWidth={0.5} />
+            )} */}
               {/* 1루 */}
               <polygon
                 className="inner"
                 id="1st"
+                // transform="translate(-5, 10)"
                 ref={(el) => {
                   droppableSetters["first-base"](el as any);
                   baseRefs.current["first-base"] = el;
@@ -972,24 +1035,10 @@ export default function GroundRecordModal(props: IModalProps) {
               />
             </DiamondSvg>
 
-            {/* NameBadge */}
-            {/* 4) 드롭 후 스냅 or 드래그 상태에 따라 렌더 */}
-            {/* ③ activeBadges에 든 것만 렌더 */}
-            {badgeConfigs
-              .filter((cfg) => activeBadges.includes(cfg.id))
-              .map((cfg) => (
-                <DraggableBadge
-                  key={cfg.id}
-                  id={cfg.id}
-                  label={cfg.label}
-                  initialLeft={cfg.initialLeft}
-                  initialTop={cfg.initialTop}
-                  snapInfo={badgeSnaps[cfg.id]}
-                />
-              ))}
             <ResetDot
               style={{ left: "63vw", top: "2vh" }}
               onClick={() => {
+                // console.log("클릭됨");
                 // 1) 스냅 위치와 보이기 상태 초기화
                 setBadgeSnaps(initialBadgeSnaps);
                 setActiveBadges(badgeConfigs.map((cfg) => cfg.id));
@@ -1006,6 +1055,22 @@ export default function GroundRecordModal(props: IModalProps) {
                 });
               }}
             />
+
+            {/* NameBadge */}
+            {/* 4) 드롭 후 스냅 or 드래그 상태에 따라 렌더 */}
+            {/* ③ activeBadges에 든 것만 렌더 */}
+            {badgeConfigs
+              .filter((cfg) => activeBadges.includes(cfg.id))
+              .map((cfg) => (
+                <DraggableBadge
+                  key={cfg.id}
+                  id={cfg.id}
+                  label={cfg.label}
+                  initialLeft={cfg.initialLeft}
+                  initialTop={cfg.initialTop}
+                  snapInfo={badgeSnaps[cfg.id]}
+                />
+              ))}
           </GraphicWrapper>
           <ControlButton onClick={handleSubmit}>확인하기</ControlButton>
         </DndContext>

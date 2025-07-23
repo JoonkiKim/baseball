@@ -12,7 +12,10 @@ const { execSync } = require("child_process");
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-
+  devIndicators: {
+    buildActivity: false, // 로딩 스피너 끔
+    // buildActivityPosition: "bottom-right" // 위치 바꾸고 싶으면
+  },
   // ── 여기에만 추가했습니다 ──
   async redirects() {
     return [

@@ -73,11 +73,16 @@ export default function ErrorAlert({
         error.message ||
         "알 수 없는 오류가 발생했습니다.";
 
+  const handleConfirm = () => {
+    setVisible(false); // 모달 닫기
+    onClose?.(); // 부모에게도 알려주기(있다면)
+  };
+
   return (
     <ModalOverlay>
       <ModalContainer>
         <ModalTitleSmall>{message}</ModalTitleSmall>
-        <ModalButton onClick={onClose}>확인</ModalButton>
+        <ModalButton onClick={handleConfirm}>확인</ModalButton>
       </ModalContainer>
     </ModalOverlay>
   );
