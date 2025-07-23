@@ -1,10 +1,17 @@
-// libs/api.tsx
-import axios, { AxiosError, AxiosRequestConfig } from "axios";
+// libs/api.ts
+import axios, {
+  AxiosError,
+  AxiosHeaders,
+  // AxiosRequestConfig,
+  InternalAxiosRequestConfig,
+} from "axios";
 import {
   clearAccessToken,
   getAccessToken,
   setAccessToken,
 } from "../libraries/token";
+
+type RetryConfig = InternalAxiosRequestConfig & { _retry?: boolean };
 
 const API = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
@@ -12,13 +19,22 @@ const API = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
-// console.log("분기 합침 테스트");
-// ── 전역 플래그: refresh를 한 번이라도 했는지 ──
-let hasRefreshed = false;
+/* ── Refresh 중복 방지용 ─────────────────────── */
+let isRefreshing = false;
+let refreshPromise: Promise<string> | null = null;
+type Resolver = (token: string) => void;
+const requestQueue: Resolver[] = [];
 
+const subscribeTokenRefresh = (cb: Resolver) => requestQueue.push(cb);
+const onRefreshed = (token: string) => {
+  requestQueue.forEach((cb) => cb(token));
+  requestQueue.length = 0;
+};
+
+/* ── Request 인터셉터 ───────────────────────── */
 API.interceptors.request.use(
   (config) => {
-    // ── 1) games 관련 withCredentials 로직 유지 ──
+    // /games 관련 withCredentials 커스텀
     const method = config.method?.toLowerCase();
     const url = config.url ?? "";
     if (url.includes("/games")) {
@@ -28,53 +44,73 @@ API.interceptors.request.use(
         config.withCredentials = false;
       }
     }
+
     const token = getAccessToken();
-    if (token && config.headers) {
-      config.headers.Authorization = `Bearer ${token}`;
+    if (token) {
+      // Axios v1: headers는 AxiosHeaders 객체일 수 있음
+      if (!config.headers) config.headers = new AxiosHeaders();
+      (config.headers as AxiosHeaders).set("Authorization", `Bearer ${token}`);
     }
     return config;
   },
   (error) => Promise.reject(error)
 );
 
+/* ── Response 인터셉터 ──────────────────────── */
 API.interceptors.response.use(
   (res) => res,
   async (
-    error: AxiosError & { config?: AxiosRequestConfig & { _retry?: boolean } }
+    error: AxiosError & {
+      config?: RetryConfig;
+    }
   ) => {
-    const originalReq = error.config!;
+    const originalReq = error.config as RetryConfig | undefined;
+    if (!originalReq) return Promise.reject(error);
+
     const url = originalReq.url ?? "";
 
-    // ── 1) 리프레시 엔드포인트 자체는 재시도하지 않고 로그인으로 ──
+    // refresh 자체가 실패하면 끝
     if (url.endsWith("/auth/refresh")) {
       clearAccessToken();
-      // window.location.href = "/login";
       return Promise.reject(error);
     }
 
-    // ── 2) 401 에러 && 아직 이 요청에서 _retry=false && 한번도 리프레시하지 않았다면 ──
-    if (
-      error.response?.status === 401 &&
-      !originalReq._retry &&
-      !hasRefreshed
-    ) {
+    // 401 처리
+    if (error.response?.status === 401 && !originalReq._retry) {
       originalReq._retry = true;
-      hasRefreshed = true; // **여기서 플래그를 true로**
-      try {
-        // refreshToken 쿠키로 새 accessToken 요청
-        const { data } = await API.post("/auth/refresh");
-        setAccessToken(data.accessToken);
 
-        // 원래 요청 헤더에 새 토큰 세팅 후 재시도
-        if (originalReq.headers) {
-          originalReq.headers.Authorization = `Bearer ${data.accessToken}`;
-        }
-        return API(originalReq);
-      } catch {
-        // 리프레시 실패 시 토큰 초기화 & 로그인 페이지로
-        clearAccessToken();
-        window.location.href = "/login";
+      // 첫 번째 401 처리자
+      if (!isRefreshing) {
+        isRefreshing = true;
+        refreshPromise = API.post("/auth/refresh")
+          .then(({ data }) => {
+            const newToken: string = data.accessToken;
+            setAccessToken(newToken);
+            onRefreshed(newToken);
+            return newToken;
+          })
+          .catch(() => {
+            clearAccessToken();
+            window.location.href = "/login";
+            throw error;
+          })
+          .finally(() => {
+            isRefreshing = false;
+            refreshPromise = null;
+          });
       }
+
+      // 나머지는 refreshPromise 완료까지 대기 후 재시도
+      return new Promise((resolve, reject) => {
+        subscribeTokenRefresh((newToken) => {
+          if (!originalReq.headers) originalReq.headers = new AxiosHeaders();
+          (originalReq.headers as AxiosHeaders).set(
+            "Authorization",
+            `Bearer ${newToken}`
+          );
+          API(originalReq).then(resolve).catch(reject);
+        });
+      });
     }
 
     return Promise.reject(error);

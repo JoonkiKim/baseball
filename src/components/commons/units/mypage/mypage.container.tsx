@@ -73,13 +73,13 @@ export default function MypageComponent() {
           </ValueWrapper>
         </InfoRowWrapper>
 
-        <ActionWrapper>
+        {/* <ActionWrapper>
           <Link href="/changePassword" passHref>
             <a>
               <LabelWrapper>비밀번호 변경</LabelWrapper>
             </a>
           </Link>
-        </ActionWrapper>
+        </ActionWrapper> */}
 
         <ActionWrapper>
           {/* 3) 클릭하면 모달을 연다 */}
@@ -91,9 +91,9 @@ export default function MypageComponent() {
           </LabelWrapper>
         </ActionWrapper>
 
-        <ActionWrapper>
+        {/* <ActionWrapper>
           <LabelWrapper>회원탈퇴</LabelWrapper>
-        </ActionWrapper>
+        </ActionWrapper> */}
       </PageWrapper>
       {/* 4) 로그아웃 모달 조건부 렌더링 */}
       {isLogOutModalOpen && (

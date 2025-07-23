@@ -12,6 +12,7 @@ import {
   LoadingIcon,
   LoadingOverlay,
 } from "../src/commons/libraries/loadingOverlay";
+import AuthGate from "../src/commons/hooks/authGate";
 function MyApp({ Component, pageProps }) {
   const router = useRouter();
   const isResultPage = router.pathname === "/result";
@@ -168,14 +169,22 @@ function MyApp({ Component, pageProps }) {
       <Global styles={pretendardStyles} />
       <RecoilRoot>
         <TokenInitializer />
-        <LoadingOverlay visible={loadingRoute}>
-          <LoadingIcon spin fontSize={48} />
-        </LoadingOverlay>
+        <AuthGate
+          fallback={
+            <LoadingOverlay visible>
+              <LoadingIcon spin fontSize={48} />
+            </LoadingOverlay>
+          }
+        >
+          <LoadingOverlay visible={loadingRoute}>
+            <LoadingIcon spin fontSize={48} />
+          </LoadingOverlay>
 
-        <Layout>
-          {/* 페이지 컴포넌트에도 필요하다면 mobileOnly 전달 */}
-          <Component {...pageProps} />
-        </Layout>
+          <Layout>
+            {/* 페이지 컴포넌트에도 필요하다면 mobileOnly 전달 */}
+            <Component {...pageProps} />
+          </Layout>
+        </AuthGate>
       </RecoilRoot>
     </>
   );

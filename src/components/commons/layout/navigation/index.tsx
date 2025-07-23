@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useEffect } from "react";
 import { getAccessToken } from "../../../../commons/libraries/token";
 import { useRouter } from "next/router";
+import { useRecoilValue } from "recoil";
+import { accessTokenState, authCheckedState } from "../../../../commons/stores";
 
 // Global 스타일로 @font-face 정의 및 적용 클래스 생성
 const navGlobalStyles = css`
@@ -84,26 +86,24 @@ export const NavItem = styled.div`
 
 export default function LayoutNavigation() {
   const router = useRouter();
+
   useEffect(() => {
     const token = getAccessToken();
     console.log("현재 inMemoryAccessToken:", token);
   }, []);
-  // 설정 버튼 클릭 핸들러
-  const handleSettingsClick = () => {
-    const token = getAccessToken();
-    console.log("token", token);
-    if (token) {
-      router.push("/mypage");
-    } else {
-      router.push("/login");
-    }
-  };
+  const token = useRecoilValue(accessTokenState);
+  const checked = useRecoilValue(authCheckedState);
+  const targetHref = checked && token ? "/mypage" : "/login";
+  // const handleSettingsClick = () => {
+  //   if (!checked) return; // 아직 토큰 체크 안끝났으면 클릭 무시 또는 로딩
+  //   router.push(token ? "/mypage" : "/login");
+  // };
 
   return (
     <>
       <Global styles={navGlobalStyles} />
       {/* 최상위 요소에 kbo-font 클래스를 적용하여 이 컴포넌트 내 폰트를 지정 */}
-      <div className="kbo-font">
+      <div>
         <BottomNavWrapper>
           <Link href="/mainCalendar" passHref>
             <BottomNav as="a">
@@ -123,8 +123,8 @@ export default function LayoutNavigation() {
               <NavItem>선수기록</NavItem>
             </BottomNav>
           </Link>
-          <Link href="/login" passHref>
-            <BottomNav as="button" onClick={handleSettingsClick}>
+          <Link href={targetHref} passHref>
+            <BottomNav as="a">
               <NavIcon src="/images/profile.png" />
               <NavItem>설정</NavItem>
             </BottomNav>
