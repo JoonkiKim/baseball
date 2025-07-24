@@ -874,34 +874,8 @@ export default function GameRecordPageV2() {
 
   const diamondSvgRef = useRef<SVGSVGElement | null>(null);
   const diamondPolyRef = useRef<SVGPolygonElement | null>(null);
-  type PassedMap = Record<BaseId, boolean>;
-  const [isOutside, setIsOutside] = useState(false);
-  // ② useRef 에 제네릭을 명시하고, reduce에도 초기값 타입을 단언
-  const passedBasesRef = useRef<Record<string, PassedMap>>(
-    badgeConfigs.reduce<Record<string, PassedMap>>((acc, { id }) => {
-      // 각 베이스를 false 로 초기화
-      const map = {} as PassedMap;
-      baseIds.forEach((base) => {
-        map[base] = false;
-      });
-      acc[id] = map;
-      return acc;
-    }, {}) // {} 가 Record<string, PassedMap> 임을 TS에게 알려줌
-  );
 
-  const lastPassedRef = useRef<Record<string, BaseId | null>>(
-    badgeConfigs.reduce((acc, cfg) => {
-      acc[cfg.id] = null;
-      return acc;
-    }, {} as Record<string, BaseId | null>)
-  );
-  // 3) 통과한 베이스 중 최대 순서
-  const maxReachedRef = useRef<Record<string, number>>(
-    badgeConfigs.reduce((acc, cfg) => {
-      acc[cfg.id] = 0;
-      return acc;
-    }, {} as Record<string, number>)
-  );
+  const [isOutside, setIsOutside] = useState(false);
 
   // 배지별 스냅 정보 관리
   type SnapInfo = { base: BaseId; pos: { xPct: number; yPct: number } };
@@ -989,203 +963,7 @@ export default function GameRecordPageV2() {
   const rafIdRef = useRef<number | null>(null);
 
   // 2) 실제 구현부 (합집합 타입 + 플래그)
-  function handleDragEvent(
-    event: DragOverEvent | DragEndEvent,
-    isEnd: boolean
-  ) {
-    const badgeId = event.active.id as string;
-    const badgeEl = badgeRefs.current[badgeId];
-    const wrapperRect = wrapperRectRef.current;
-    const zoneRect = zoneRectRef.current;
-    if (!badgeEl || !wrapperRect) return;
 
-    // --- ① badge 중심 좌표 (live) ---
-    const { left, top, width, height } = badgeEl.getBoundingClientRect();
-    const cx = left + width / 2;
-    const cy = top + height / 2;
-
-    // --- ② out‐of‐zone 검사 (캐시된 zoneRect 사용) ---
-    if (zoneRect) {
-      const outside =
-        cx < zoneRect.left ||
-        cx > zoneRect.right ||
-        cy < zoneRect.top ||
-        cy > zoneRect.bottom;
-
-      if (outside !== isOutsideRef.current) {
-        isOutsideRef.current = outside;
-        setIsOutside(outside);
-      }
-      // drag end 시 반드시 복귀
-      if (isEnd && outside) {
-        isOutsideRef.current = false;
-        setIsOutside(false);
-      }
-    }
-
-    // --- 1) drag over: 베이스 통과 기록 & 하이라이트 (캐시된 baseRectsRef 사용) ---
-    if (!isEnd) {
-      for (const baseId of baseIds) {
-        const rect = baseRectsRef.current[baseId];
-        const idx = baseIds.indexOf(baseId);
-        if (!rect) continue;
-
-        // 순서 검사(직전 루 통과 여부)
-        if (idx > 0) {
-          const prev = baseIds[idx - 1];
-          if (!passedBasesRef.current[badgeId][prev]) continue;
-        }
-
-        if (
-          cx >= rect.left &&
-          cx <= rect.right &&
-          cy >= rect.top &&
-          cy <= rect.bottom
-        ) {
-          // highlight
-          const poly = baseRefs.current[baseId]!;
-          poly.classList.add("highlight");
-          setTimeout(() => poly.classList.remove("highlight"), 500);
-
-          // 홈베이스 액티브
-          if (baseId === "home-base") {
-            setIsHomeBaseActive(true);
-            setTimeout(() => setIsHomeBaseActive(false), 500);
-          }
-
-          // 통과 기록
-          const order = baseOrder[baseId];
-          if (order > maxReachedRef.current[badgeId]) {
-            passedBasesRef.current[badgeId][baseId] = true;
-            lastPassedRef.current[badgeId] = baseId;
-            maxReachedRef.current[badgeId] = order;
-          }
-          break;
-        }
-      }
-      return;
-    }
-
-    // --- 2) drag end: drop‐base 판별 & 스냅 ---
-    let dropBase: BaseId | null = null;
-    let dropPos: { x: number; y: number } | null = null;
-
-    // 캐시된 base rect 로 drop 감지
-    for (const baseId of baseIds) {
-      const rect = baseRectsRef.current[baseId];
-      if (!rect) continue;
-      if (
-        cx >= rect.left &&
-        cx <= rect.right &&
-        cy >= rect.top &&
-        cy <= rect.bottom
-      ) {
-        dropBase = baseId;
-        dropPos = {
-          x: rect.left + rect.width / 2 - wrapperRect.left,
-          y: rect.top + rect.height / 2 - wrapperRect.top,
-        };
-        break;
-      }
-    }
-
-    // out‐zone 밖 드롭 시 제거
-    if (
-      zoneRect &&
-      (cx < zoneRect.left ||
-        cx > zoneRect.right ||
-        cy < zoneRect.top ||
-        cy > zoneRect.bottom)
-    ) {
-      setActiveBadges((prev) => prev.filter((id) => id !== badgeId));
-      setBadgeSnaps((prev) => ({ ...prev, [badgeId]: null }));
-      baseIds.forEach(
-        (base) => (passedBasesRef.current[badgeId][base] = false)
-      );
-      lastPassedRef.current[badgeId] = null;
-      maxReachedRef.current[badgeId] = 0;
-      return;
-    }
-
-    // snapBase 결정 (dropBase 우선, 없으면 lastPassedRef)
-    let snapBase = dropBase ?? lastPassedRef.current[badgeId];
-    let snapPos = dropPos;
-    const isWhite = !badgeId.startsWith("black-badge"); // ← 흰 배지 판별
-    // 홈베이스 완주 시 제거
-    if (snapBase === "home-base") {
-      const passed = passedBasesRef.current[badgeId];
-      if (["first-base", "second-base", "third-base"].every((b) => passed[b])) {
-        setActiveBadges((prev) => prev.filter((id) => id !== badgeId));
-        // 2) 스냅 정보 삭제 → occupancy 자동 false
-        setBadgeSnaps((prev) => {
-          const next = { ...prev };
-          next[badgeId] = null;
-          return next;
-        });
-
-        // 3) 통과 기록/최대순서/마지막 통과 초기화
-        baseIds.forEach((base) => {
-          passedBasesRef.current[badgeId][base] = false;
-        });
-        lastPassedRef.current[badgeId] = null;
-        maxReachedRef.current[badgeId] = 0;
-      }
-      return;
-    }
-
-    // dropBase 없으면 캐시된 rect 로 snapPos 계산
-    if (!dropBase && snapBase) {
-      const rect = baseRectsRef.current[snapBase]!;
-      snapPos = {
-        x: rect.left + rect.width / 2 - wrapperRect.left,
-        y: rect.top + rect.height / 2 - wrapperRect.top,
-      }; // px 기준 임시 값
-    }
-
-    // ✅ NEW: px → % 변환 (흰 배지 전용)
-    let snapPosPct: { xPct: number; yPct: number } | null = null;
-    if (isWhite && snapPos) {
-      snapPosPct = {
-        xPct: (snapPos.x / wrapperRect.width) * 100,
-        yPct: (snapPos.y / wrapperRect.height) * 100,
-      };
-    }
-
-    // occupancy 검사 & 상태 업데이트
-    const occupied = Object.entries(badgeSnaps).some(
-      ([otherId, snap]) => otherId !== badgeId && snap?.base === snapBase
-    );
-
-    setBadgeSnaps((prev) => {
-      const next = { ...prev };
-      if (snapBase && snapPos && !occupied) {
-        const idx = baseIds.indexOf(snapBase);
-        const prevBase = idx > 0 ? baseIds[idx - 1] : null;
-        if (!prevBase || passedBasesRef.current[badgeId][prevBase]) {
-          // ✅ CHANGED: 흰 배지는 %좌표 저장
-          if (isWhite && snapPosPct) {
-            next[badgeId] = { base: snapBase, pos: snapPosPct };
-          } else if (!isWhite && snapPos) {
-            // (검정 배지 스냅 안 쓰면 이 블록 삭제해도 됨)
-            next[badgeId] = {
-              base: snapBase,
-              pos: {
-                xPct: (snapPos.x / wrapperRect.width) * 100,
-                yPct: (snapPos.y / wrapperRect.height) * 100,
-              },
-            };
-          }
-          maxReachedRef.current[badgeId] = baseOrder[snapBase];
-        }
-      }
-      return next;
-    });
-
-    // 다음 드래그를 위해 마지막 기록 초기화
-    lastPassedRef.current[badgeId] = null;
-  }
-
-  // DraggableBadge 컴포넌트
   // function DraggableBadge({
   //   id,
   //   label,
@@ -1202,51 +980,32 @@ export default function GameRecordPageV2() {
   //   const { attributes, listeners, setNodeRef, transform } = useDraggable({
   //     id,
   //   });
-  //   if (snapInfo) {
-  //     // console.log(`🔔 [${id}] snapInfo:`, snapInfo);
-  //   }
   //   const combinedRef = (el: HTMLElement | null) => {
   //     setNodeRef(el);
   //     badgeRefs.current[id] = el;
   //   };
 
-  //   // CSS position & transform 결정
-  //   if (snapInfo) {
-  //     const { pos } = snapInfo;
-  //     // console.log("pos", pos);
-  //     const offsetX = transform?.x ?? 0;
-  //     const offsetY = transform?.y ?? 0;
-  //     return (
-  //       <NameBadge
-  //         ref={combinedRef}
-  //         style={{
-  //           position: "absolute",
-  //           left: `${pos.x}px`,
-  //           top: `${pos.y}px`,
-  //           transform: transform
-  //             ? `translate(calc(-50% + ${offsetX}px), calc(-50% + ${offsetY}px))`
-  //             : "translate(-50%, -50%)",
-  //         }}
-  //         {...attributes}
-  //         {...listeners}
-  //       >
-  //         {label}
-  //       </NameBadge>
-  //     );
-  //   }
+  //   // const left = snapInfo ? `${snapInfo.pos.x}px` : initialLeft;
+  //   // const top = snapInfo ? `${snapInfo.pos.y}px` : initialTop;
+  //   console.log("snapInfo", snapInfo);
+  //   console.log();
+  //   const isWhite = !id.startsWith("black-badge");
 
-  //   const offsetX = transform?.x ?? 0;
-  //   const offsetY = transform?.y ?? 0;
+  //   const left = snapInfo && isWhite ? `${snapInfo.pos.xPct}%` : initialLeft;
+  //   const top = snapInfo && isWhite ? `${snapInfo.pos.yPct}%` : initialTop;
+
+  //   const dx = transform?.x ?? 0;
+  //   const dy = transform?.y ?? 0;
+
   //   return (
   //     <NameBadge
+  //       id={id} /* onAnyDragMove 에서 찾기 위해 id 필요 */
   //       ref={combinedRef}
   //       style={{
   //         position: "absolute",
-  //         left: initialLeft,
-  //         top: initialTop,
-  //         transform: transform
-  //           ? `translate3d(${offsetX}px, ${offsetY}px, 0)`
-  //           : undefined,
+  //         left,
+  //         top,
+  //         transform: `translate(-50%, -50%) translate3d(${dx}px, ${dy}px, 0)`,
   //       }}
   //       {...attributes}
   //       {...listeners}
@@ -1256,7 +1015,7 @@ export default function GameRecordPageV2() {
   //   );
   // }
 
-  function DraggableBadge({
+  const DraggableBadge = ({
     id,
     label,
     initialLeft,
@@ -1268,36 +1027,39 @@ export default function GameRecordPageV2() {
     initialLeft: string;
     initialTop: string;
     snapInfo: SnapInfo | null;
-  }) {
+  }) => {
     const { attributes, listeners, setNodeRef, transform } = useDraggable({
       id,
     });
+
     const combinedRef = (el: HTMLElement | null) => {
       setNodeRef(el);
       badgeRefs.current[id] = el;
     };
 
-    // const left = snapInfo ? `${snapInfo.pos.x}px` : initialLeft;
-    // const top = snapInfo ? `${snapInfo.pos.y}px` : initialTop;
-    console.log("snapInfo", snapInfo);
-    console.log();
     const isWhite = !id.startsWith("black-badge");
+    const dragging = !!transform;
 
+    // 1) 스냅 좌표
     const left = snapInfo && isWhite ? `${snapInfo.pos.xPct}%` : initialLeft;
     const top = snapInfo && isWhite ? `${snapInfo.pos.yPct}%` : initialTop;
 
-    const dx = transform?.x ?? 0;
-    const dy = transform?.y ?? 0;
+    // 2) transform: 드래그 중일 때만 델타 적용
+    const styleTransform = dragging
+      ? `translate(-50%, -50%) translate3d(${transform!.x}px, ${
+          transform!.y
+        }px, 0)`
+      : `translate(-50%, -50%)`;
 
     return (
       <NameBadge
-        id={id} /* onAnyDragMove 에서 찾기 위해 id 필요 */
+        id={id}
         ref={combinedRef}
         style={{
           position: "absolute",
           left,
           top,
-          transform: `translate(-50%, -50%) translate3d(${dx}px, ${dy}px, 0)`,
+          transform: styleTransform,
         }}
         {...attributes}
         {...listeners}
@@ -1305,71 +1067,74 @@ export default function GameRecordPageV2() {
         {label}
       </NameBadge>
     );
-  }
+  };
+
   function handleWhiteDragEvent(
     event: DragOverEvent | DragEndEvent,
     isEnd: boolean
   ) {
-    handleDragEvent(event, isEnd);
+    // handleDragEvent(event, isEnd);
   }
 
-  function onAnyDragMove(e: DragOverEvent) {
-    const id = e.active.id.toString();
-    if (id.startsWith("black-badge")) return;
+  // function onAnyDragMove(e: DragOverEvent) {
+  //   const id = e.active.id.toString();
+  //   if (id.startsWith("black-badge")) return;
 
-    // if (rafIdRef.current != null) {
-    //   cancelAnimationFrame(rafIdRef.current);
-    // }
+  //   // if (rafIdRef.current != null) {
+  //   //   cancelAnimationFrame(rafIdRef.current);
+  //   // }
 
-    // rafIdRef.current = requestAnimationFrame(() => {
-    //   // 기존 통과(highlight) 로직은 그대로 실행
-    //   handleWhiteDragEvent(e, false);
+  //   // rafIdRef.current = requestAnimationFrame(() => {
+  //   //   // 기존 통과(highlight) 로직은 그대로 실행
+  //   //   handleWhiteDragEvent(e, false);
 
-    //   // ① badge DOM 찾기
-    //   const badge = document.getElementById(id);
-    //   if (badge) {
-    //     // ② 누적 오프셋 읽기
+  //   //   // ① badge DOM 찾기
+  //   //   const badge = document.getElementById(id);
+  //   //   if (badge) {
+  //   //     // ② 누적 오프셋 읽기
 
-    //     const { x, y } = e.delta as { x: number; y: number };
-    //     // ③ CSS 변수만 갱신
-    //     badge.style.setProperty("--tx", `${x}px`);
-    //     badge.style.setProperty("--ty", `${y}px`);
-    //     // badge.style.setProperty("--tx", "0px");
-    //     // badge.style.setProperty("--ty", "0px");
-    //   }
+  //   //     const { x, y } = e.delta as { x: number; y: number };
+  //   //     // ③ CSS 변수만 갱신
+  //   //     badge.style.setProperty("--tx", `${x}px`);
+  //   //     badge.style.setProperty("--ty", `${y}px`);
+  //   //     // badge.style.setProperty("--tx", "0px");
+  //   //     // badge.style.setProperty("--ty", "0px");
+  //   //   }
 
-    //   rafIdRef.current = null;
-    // });
-    handleWhiteDragEvent(e, false); // 통과/하이라이트만 처리
-  }
+  //   //   rafIdRef.current = null;
+  //   // });
+  //   handleWhiteDragEvent(e, false); // 통과/하이라이트만 처리
+  // }
 
-  function onAnyDragEnd(e: DragEndEvent) {
-    const id = e.active.id.toString();
-    if (id.startsWith("black-badge")) {
-      // 검정 배지는 단순 이동량 누적
-      handleBlackDragEnd(e);
-    } else {
-      // 흰 배지는 베이스 스냅/아웃 로직
-      handleWhiteDragEvent(e, true);
-    }
-  }
-
+  const onAnyDragEnd = (e: DragEndEvent) => {
+    // 좌표는 ResizeObserver가 최신화 해주므로 보통 추가 호출 불필요
+    // 필요하면 여기서 refreshRects();
+    handleDrop(e);
+  };
   // --이닝의 재구성--//
 
   const [isReconstructMode, setIsReconstructMode] = useState(false);
-  const resetAllBadges = useCallback(() => {
-    // 스냅 위치와 보이기 상태 초기화
-    setBadgeSnaps(initialBadgeSnaps);
-    setActiveBadges(badgeConfigs.map((cfg) => cfg.id));
-    // 통과 기록 초기화
+  // ── 흰색 배지(주자) 관련 모든 기록/ref 초기화 ──
+  const resetWhiteBadges = useCallback(() => {
+    // 1) badgeSnaps(= 점유/스냅 정보) 초기화
+    const freshSnaps: Record<string, SnapInfo | null> = {};
+    badgeConfigs.forEach((c) => (freshSnaps[c.id] = null));
+    setBadgeSnaps(freshSnaps);
+
+    // 2) 화면에 모든 흰 배지 다시 보이게
+    setActiveBadges(badgeConfigs.map((c) => c.id));
+
+    // 3) 베이스 이동(순서) 기록 초기화
     badgeConfigs.forEach(({ id }) => {
-      baseIds.forEach((base) => {
-        passedBasesRef.current[id][base] = false;
-      });
-      lastPassedRef.current[id] = null;
-      maxReachedRef.current[id] = 0;
+      snappedSeqRef.current[id] = [];
     });
-  }, [badgeConfigs, baseIds, initialBadgeSnaps]);
+
+    // 4) (선택) 흰 배지 DOM ref 정리
+    badgeRefs.current = {};
+
+    // 5) (선택) 기타 UI 상태 리셋이 필요하면 여기서
+    // setIsOutside(false);
+  }, [badgeConfigs]);
 
   // 그라운드 내 직선 움직임 //
 
@@ -1463,9 +1228,205 @@ export default function GameRecordPageV2() {
     });
   }
 
-  function onAnyDragStart() {
-    refreshRects();
-  }
+  // function onAnyDragStart() {
+  //   refreshRects();
+  // }
+
+  // -----------흰색 배지 스냅으로만 동작 로직-----------------
+
+  const RUN_SEQUENCE: BaseId[] = [
+    "first-base",
+    "second-base",
+    "third-base",
+    "home-base",
+  ];
+
+  // 배지별로 지금까지 "순서대로" 스냅된 베이스 목록을 저장 (삭제하지 않고 유지)
+  const snappedSeqRef = useRef<Record<string, BaseId[]>>(
+    badgeConfigs.reduce((acc, { id }) => {
+      acc[id] = [];
+      return acc;
+    }, {} as Record<string, BaseId[]>)
+  );
+
+  // 다음에 가야 할(스냅해야 할) 베이스
+  const nextRequiredBase = (badgeId: string): BaseId => {
+    const seq = snappedSeqRef.current[badgeId];
+    return RUN_SEQUENCE[Math.min(seq.length, RUN_SEQUENCE.length - 1)];
+  };
+
+  // ─────────────────────────────────────────────
+  // 1) 좌표 자동 캐싱 훅 (ResizeObserver + window 이벤트) //
+  // 한번만 하면 되니까 성능에 좋다
+  // ─────────────────────────────────────────────
+  const useRectsCache = (
+    wrapperRef: React.RefObject<HTMLDivElement>,
+    outZoneRef: React.RefObject<HTMLDivElement>,
+    baseRefs: React.MutableRefObject<Record<BaseId, SVGPolygonElement | null>>,
+    baseIds: readonly BaseId[]
+  ) => {
+    const wrapperRectRef = useRef<DOMRect | null>(null);
+    const zoneRectRef = useRef<DOMRect | null>(null);
+    const baseRectsRef = useRef<Partial<Record<BaseId, DOMRect>>>({});
+
+    const refreshRects = useCallback(() => {
+      const wrapEl = wrapperRef.current;
+      const zoneEl = outZoneRef.current;
+
+      if (wrapEl) wrapperRectRef.current = wrapEl.getBoundingClientRect();
+      if (zoneEl) zoneRectRef.current = zoneEl.getBoundingClientRect();
+
+      baseIds.forEach((b) => {
+        const poly = baseRefs.current[b];
+        if (poly) baseRectsRef.current[b] = poly.getBoundingClientRect();
+      });
+    }, [wrapperRef, outZoneRef, baseRefs, baseIds]);
+
+    useLayoutEffect(() => {
+      // 최초 1회
+      refreshRects();
+
+      let rafId: number | null = null;
+      const schedule = () => {
+        if (rafId != null) return;
+        rafId = requestAnimationFrame(() => {
+          rafId = null;
+          refreshRects();
+        });
+      };
+
+      const ro = new ResizeObserver(() => {
+        schedule();
+      });
+
+      if (wrapperRef.current) ro.observe(wrapperRef.current);
+      if (outZoneRef.current) ro.observe(outZoneRef.current);
+      baseIds.forEach((b) => {
+        const el = baseRefs.current[b];
+        if (el) ro.observe(el);
+      });
+
+      const onResize = () => schedule();
+      const onOrientation = () => schedule();
+      const onScroll = () => schedule();
+
+      window.addEventListener("resize", onResize);
+      window.addEventListener("orientationchange", onOrientation);
+      window.addEventListener("scroll", onScroll, true);
+
+      return () => {
+        ro.disconnect();
+        if (rafId != null) cancelAnimationFrame(rafId);
+        window.removeEventListener("resize", onResize);
+        window.removeEventListener("orientationchange", onOrientation);
+        window.removeEventListener("scroll", onScroll, true);
+      };
+    }, [refreshRects, baseIds]);
+
+    return { wrapperRectRef, zoneRectRef, baseRectsRef, refreshRects };
+  };
+
+  // ─────────────────────────────────────────────
+  // 2) 드롭 순간만 검사/스냅
+  // ─────────────────────────────────────────────
+  const handleDrop = (e: DragEndEvent) => {
+    const badgeId = e.active.id as string;
+
+    // 검정 배지: 기존 자리 스왑 로직
+    if (badgeId.startsWith("black-badge")) {
+      handleBlackDragEnd(e);
+      return;
+    }
+
+    const badgeEl = badgeRefs.current[badgeId];
+    const wrapperRect = wrapperRectRef.current;
+    const zoneRect = zoneRectRef.current;
+    if (!badgeEl || !wrapperRect) return;
+
+    const { left, top, width, height } = badgeEl.getBoundingClientRect();
+    const cx = left + width / 2;
+    const cy = top + height / 2;
+
+    // 1) 필드(outZone) 밖 드롭 → 제거(기록은 유지)
+    if (
+      zoneRect &&
+      (cx < zoneRect.left ||
+        cx > zoneRect.right ||
+        cy < zoneRect.top ||
+        cy > zoneRect.bottom)
+    ) {
+      setActiveBadges((prev) => prev.filter((id) => id !== badgeId));
+      setBadgeSnaps((prev) => ({ ...prev, [badgeId]: null }));
+      return;
+    }
+
+    // 2) 어느 베이스 위인지 판정
+    let dropBase: BaseId | null = null;
+    let baseRect: DOMRect | undefined;
+    for (const b of baseIds) {
+      const rect = baseRectsRef.current[b];
+      if (!rect) continue;
+      if (
+        cx >= rect.left &&
+        cx <= rect.right &&
+        cy >= rect.top &&
+        cy <= rect.bottom
+      ) {
+        dropBase = b;
+        baseRect = rect;
+        break;
+      }
+    }
+    if (!dropBase || !baseRect) return;
+
+    // 3) 순서 강제
+    const required = nextRequiredBase(badgeId);
+    if (dropBase !== required) {
+      return; // 순서 아니면 스냅 불가
+    }
+
+    // 4) 점유 체크(1베이스 1주자)
+    const occupied = Object.entries(badgeSnaps).some(
+      ([otherId, snap]) => otherId !== badgeId && snap?.base === dropBase
+    );
+    if (occupied) {
+      return;
+    }
+
+    // 5) 스냅(흰 배지: % 좌표)
+    const x = baseRect.left + baseRect.width / 2 - wrapperRect.left;
+    const y = baseRect.top + baseRect.height / 2 - wrapperRect.top;
+
+    setBadgeSnaps((prev) => ({
+      ...prev,
+      [badgeId]: {
+        base: dropBase,
+        pos: {
+          xPct: (x / wrapperRect.width) * 100,
+          yPct: (y / wrapperRect.height) * 100,
+        },
+      },
+    }));
+
+    // 6) 진행 기록 업데이트 (유지)
+    const seq = snappedSeqRef.current[badgeId];
+    if (seq[seq.length - 1] !== dropBase) {
+      seq.push(dropBase);
+    }
+
+    // 7) 홈에 스냅 & 1~3루 모두 찍혀 있으면 완주
+    const finished =
+      dropBase === "home-base" &&
+      ["first-base", "second-base", "third-base"].every((b) =>
+        seq.includes(b as BaseId)
+      );
+
+    if (finished) {
+      setActiveBadges((prev) => prev.filter((id) => id !== badgeId));
+      setBadgeSnaps((prev) => ({ ...prev, [badgeId]: null }));
+      // 기록은 유지 (snappedSeqRef.current[badgeId]는 지우지 않음)
+    }
+  };
 
   return (
     <GameRecordContainer reconstructMode={isReconstructMode}>
@@ -1513,7 +1474,7 @@ export default function GameRecordPageV2() {
                 onChange={(checked) => {
                   // OFF로 전환될 때만 초기화
                   if (!checked) {
-                    resetAllBadges();
+                    resetWhiteBadges();
                   }
                   setIsReconstructMode(checked);
                 }}
@@ -1537,8 +1498,8 @@ export default function GameRecordPageV2() {
             strategy: MeasuringStrategy.Always,
           },
         }}
-        onDragStart={onAnyDragStart}
-        onDragMove={onAnyDragMove}
+        // onDragStart={onAnyDragStart}
+
         onDragEnd={onAnyDragEnd}
       >
         <GraphicWrapper
@@ -1662,23 +1623,7 @@ export default function GameRecordPageV2() {
           </LeftSideWrapper>
           <ResetDot
             style={{ left: "75vw", top: "2vh" }}
-            onClick={() => {
-              // console.log("클릭됨");
-              // 1) 스냅 위치와 보이기 상태 초기화
-              setBadgeSnaps(initialBadgeSnaps);
-              setActiveBadges(badgeConfigs.map((cfg) => cfg.id));
-
-              // 2) 통과한 베이스 기록 초기화
-              badgeConfigs.forEach(({ id }) => {
-                // passedBasesRef 초기화
-                baseIds.forEach((base) => {
-                  passedBasesRef.current[id][base] = false;
-                });
-                // 마지막 통과 베이스, 최대 순서 초기화
-                lastPassedRef.current[id] = null;
-                maxReachedRef.current[id] = 0;
-              });
-            }}
+            onClick={resetWhiteBadges}
           />
           {blackBadgeConfigs.map((cfg) => (
             <BlackDraggableBadge
