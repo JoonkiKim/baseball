@@ -24,6 +24,7 @@ import API from "../../../../commons/apis/api";
 import { setAccessToken } from "../../../../commons/libraries/token";
 import { useRouter } from "next/router";
 import ShowAlert from "../../../../commons/libraries/showAlertModal";
+import axios from "axios";
 
 // 폼에서 다룰 데이터 타입 정의
 interface LoginFormData {
@@ -64,18 +65,18 @@ export default function LoginPageComponent() {
   }, []);
 
   // ✨ window.alert 가로채기
-  useEffect(() => {
-    const orig = window.alert;
-    window.alert = (msg: string) => {
-      if (isMounted.current) {
-        // ShowAlert에서는 error.message를 보므로 message 프로퍼티 추가
-        setAlertObj({ message: msg });
-      }
-    };
-    return () => {
-      window.alert = orig;
-    };
-  }, []);
+  // useEffect(() => {
+  //   const orig = window.alert;
+  //   window.alert = (msg: string) => {
+  //     if (isMounted.current) {
+  //       // ShowAlert에서는 error.message를 보므로 message 프로퍼티 추가
+  //       setAlertObj({ message: msg });
+  //     }
+  //   };
+  //   return () => {
+  //     window.alert = orig;
+  //   };
+  // }, []);
   // 비밀번호 표시/숨기기 상태
   const [showPassword, setShowPassword] = useState(false);
 
@@ -87,6 +88,22 @@ export default function LoginPageComponent() {
   const [alertObj, setAlertObj] = useState<any>(null);
   const [loginSuccess, setLoginSuccess] = useState(false);
 
+  // const onSubmit: SubmitHandler<LoginFormData> = async (data) => {
+  //   try {
+  //     const response = await API.post("/auth/login", {
+  //       email: data.email,
+  //       password: data.password,
+  //     });
+  //     const { accessToken } = response.data;
+  //     setAccessToken(accessToken);
+  //     // ★ push 하지 말고 성공 플래그 세팅 후 alert
+  //     setLoginSuccess(true);
+  //     alert("로그인에 성공하였습니다!"); // 모달로 뜸
+  //   } catch (error) {
+  //     console.error("전체 onSubmit에서 잡힌 에러:", error);
+  //     alert("로그인에 실패하였습니다.\n다시 시도해주세요");
+  //   }
+  // };
   const onSubmit: SubmitHandler<LoginFormData> = async (data) => {
     try {
       const response = await API.post("/auth/login", {
@@ -95,12 +112,23 @@ export default function LoginPageComponent() {
       });
       const { accessToken } = response.data;
       setAccessToken(accessToken);
-      // ★ push 하지 말고 성공 플래그 세팅 후 alert
+
       setLoginSuccess(true);
-      alert("로그인에 성공하였습니다!"); // 모달로 뜸
-    } catch (error: any) {
-      console.error("전체 onSubmit에서 잡힌 에러:", error);
-      alert("로그인에 실패하였습니다.\n다시 시도해주세요");
+      setAlertObj({ message: "로그인에 성공하였습니다!" });
+    } catch (err: unknown) {
+      if (!isMounted.current) return;
+
+      // 1) 기본 메시지
+      let message = "로그인에 실패하였습니다.\n다시 시도해주세요";
+
+      // // 2) AxiosError 여부 검사
+      // if (axios.isAxiosError(err)) {
+      //   // 만약 서버가 { message } 형태로 보낸다면
+      //   message = err.response?.data?.message ?? err.message;
+      // }
+
+      // 3) ShowAlert 로 띄우기
+      setAlertObj({ message });
     }
   };
 

@@ -93,7 +93,7 @@ export default function LayoutNavigation() {
   }, []);
   const token = useRecoilValue(accessTokenState);
   const checked = useRecoilValue(authCheckedState);
-  const targetHref = checked && token ? "/mypage" : "/login";
+  const targetHref = "/mypage";
   // const handleSettingsClick = () => {
   //   if (!checked) return; // 아직 토큰 체크 안끝났으면 클릭 무시 또는 로딩
   //   router.push(token ? "/mypage" : "/login");
@@ -123,7 +123,7 @@ export default function LayoutNavigation() {
               <NavItem>선수기록</NavItem>
             </BottomNav>
           </Link>
-          <Link href={targetHref} passHref>
+          <Link href="mypage" passHref>
             <BottomNav as="a">
               <NavIcon src="/images/profile.png" />
               <NavItem>설정</NavItem>

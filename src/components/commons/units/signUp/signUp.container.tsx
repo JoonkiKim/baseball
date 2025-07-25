@@ -28,6 +28,7 @@ import {
 
 import { setAccessToken } from "../../../../commons/libraries/token";
 import { useRouter } from "next/router";
+import axios from "axios";
 
 // 폼에서 다룰 데이터 타입 정의
 interface SignUpFormData {
@@ -49,6 +50,15 @@ const schema = yup.object().shape({
     .string()
     .min(8, "비밀번호는 최소 8자 이상이어야 합니다.")
     .max(20, "비밀번호는 최대 20자까지 입력 가능합니다.")
+    .matches(
+      /(?=.*[A-Za-z])/,
+      "비밀번호에는 영문자가 하나 이상 포함되어야 합니다."
+    )
+    .matches(/(?=.*\d)/, "비밀번호에는 숫자가 하나 이상 포함되어야 합니다.")
+    .matches(
+      /(?=.*[A-Z])/,
+      "비밀번호에는 하나 이상의 대문자를 포함해야 합니다."
+    )
     .required("비밀번호는 필수 입력 항목입니다."),
   confirmPassword: yup
     .string()
@@ -133,6 +143,7 @@ export default function SignUpPage() {
       // ② 추가: 발송 성공 후 상태 업데이트
       setIsVerificationSent(true);
     } catch (error) {
+      alert("오류발생");
       setError(error);
       const errorCode = error?.response?.data?.errorCode; // 에러코드 추출
       console.error(error, "errorCode:", errorCode);
@@ -165,15 +176,18 @@ export default function SignUpPage() {
       console.log({ email, code });
       // 응답에서 verificationToken을 꺼내 상태로 저장
       const { verificationToken: token } = res.data;
+
       setVerificationToken(token);
       // console.log("verificationToken:", token);
       alert("인증이 완료되었습니다!");
-    } catch (error) {
-      setError(error);
-      alert("인증번호가 틀렸습니다");
-      const errorCode = error?.response?.data?.errorCode; // 에러코드 추출
-      console.error(error, "errorCode:", errorCode);
-      console.error("이메일 인증번호 발송 오류:", error);
+    } catch (err: unknown) {
+      if (!isMounted.current) return;
+      // 1) AxiosError 인지 확인
+      let msg = "인증 요청 중 알 수 없는 오류가 발생했습니다.";
+      if (axios.isAxiosError(err)) {
+        msg = err.response?.data?.message ?? err.message;
+      }
+      setAlertInfo({ message: msg, success: false });
     } finally {
       setIsSubmitting(false);
     }
@@ -191,11 +205,12 @@ export default function SignUpPage() {
         email: data.email.trim(),
         password: data.password,
         verificationToken, // state 에 저장된 토큰
-        nickname: data.nickname || "", // 닉네임이 없으면 빈 문자열
+        nickname: data.nickname, // 닉네임이 없으면 빈 문자열
       };
+      console.log(payload);
       // 2) 회원가입 API 호출
       const res = await API.post("/auth/signup", payload);
-      console.log(payload);
+      // console.log(payload);
       console.log("signup response:", res.data);
 
       // ── 여기에 토큰 동기화 추가 ──
@@ -210,6 +225,7 @@ export default function SignUpPage() {
         setAlertInfo({ message: "회원가입이 완료되었습니다!", success: true });
       }
     } catch (error) {
+      console.log(error);
       if (isMounted.current) {
         setError(error);
         setAlertInfo({ message: "회원가입 중 오류가 발생했습니다." });

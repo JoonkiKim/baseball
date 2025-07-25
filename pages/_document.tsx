@@ -6,7 +6,7 @@ export default function Document() {
       <Head>
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#000000" />
-
+        {/* 
         <link rel="preload" as="image" href="/images/ground-without-home.png" />
         <link rel="preload" as="image" href="/images/home.png" />
         <link rel="preload" as="image" href="/images/line.png" />
@@ -17,7 +17,7 @@ export default function Document() {
           crossOrigin="anonymous"
         />
         <link rel="preload" as="image" href="/images/diamond.png" />
-        <link rel="preload" as="image" href="/images/reset.png" />
+        <link rel="preload" as="image" href="/images/reset.png" /> */}
       </Head>
       <body>
         <Main />

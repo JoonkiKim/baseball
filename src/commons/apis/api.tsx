@@ -68,6 +68,15 @@ API.interceptors.response.use(
     if (!originalReq) return Promise.reject(error);
 
     const url = originalReq.url ?? "";
+    // ←– **NEW**: if this is login or signup, just bubble up the error
+    if (
+      url.endsWith("/auth/login") ||
+      url.endsWith("/auth/signup") ||
+      url.endsWith("/auth/email/request") ||
+      url.endsWith("/auth/email/verify")
+    ) {
+      return Promise.reject(error);
+    }
 
     // refresh 자체가 실패하면 끝
     if (url.endsWith("/auth/refresh")) {
@@ -89,10 +98,17 @@ API.interceptors.response.use(
             onRefreshed(newToken);
             return newToken;
           })
-          .catch(() => {
+          // 이거때매 401을 받으면 계속 login으로 갔던거임
+          // .catch(() => {
+          //   clearAccessToken();
+          //   // window.location.href = "/login";
+
+          //   throw error;
+          // })
+          .catch((err: unknown) => {
             clearAccessToken();
-            window.location.href = "/login";
-            throw error;
+            // ⚠️ 화면 알림은 여기서 하지 않습니다.
+            throw err;
           })
           .finally(() => {
             isRefreshing = false;
