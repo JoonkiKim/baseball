@@ -61,7 +61,7 @@ export default function FindPwPageComponent() {
         email: data.email,
       });
       alert("비밀번호 재설정 링크가 전송되었습니다.");
-      router.push("/mainCalendar");
+      // router.push("/mainCalendar");
     } catch (error: any) {
       console.error(error);
       alert(

@@ -61,7 +61,7 @@ export default function ResetPwPageComponent() {
         newPassword: data.newPw,
       });
       alert("비밀번호가 성공적으로 변경되었습니다.");
-      router.push("/mainCalendar");
+      // router.push("/mainCalendar");
     } catch (error: any) {
       console.error(error);
       alert(
