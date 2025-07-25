@@ -798,11 +798,11 @@ export const OutZoneWrapper = styled.div`
 export const CustomBoundaryWrapper = styled.div`
   position: fixed;
   /* 부모의 가운데(가로·세로) */
-  top: 45%;
+  top: 51%;
   left: 50%;
 
   width: 85%; // 약간의 점만 넘기면 되니까 1%만 넘겨보기
-  height: 50%;
+  height: 35%;
   /* 자신의 크기의 절반만큼 당겨서 진짜 중앙에 위치 */
   transform: translate(-45%, -45%);
   opacity: 0.5;
