@@ -21,6 +21,7 @@ import {
   DragOverEvent,
   Modifier,
   MeasuringStrategy,
+  DragMoveEvent,
 } from "@dnd-kit/core";
 import { restrictToParentElement } from "@dnd-kit/modifiers";
 
@@ -120,6 +121,83 @@ import ArrowDown from "../../../../commons/libraries/arrowDown";
 import { badgeConfigs } from "./gameRecord.variables";
 import RightPolygon from "../../../../commons/libraries/rightPolygon";
 import LeftPolygon from "../../../../commons/libraries/leftPolygon";
+
+// 1) 먼저 BaseId / BASE_IDS를 선언
+export const BASE_IDS = [
+  "first-base",
+  "second-base",
+  "third-base",
+  "home-base",
+] as const;
+
+export type BaseId = (typeof BASE_IDS)[number];
+
+export const useRectsCache = (
+  wrapperRef: React.RefObject<HTMLDivElement>,
+  outZoneRef: React.RefObject<HTMLDivElement>,
+  baseRefs: React.MutableRefObject<Record<BaseId, SVGPolygonElement | null>>,
+  BASE_IDS: readonly BaseId[]
+) => {
+  const wrapperRectRef = useRef<DOMRect | null>(null);
+  const zoneRectRef = useRef<DOMRect | null>(null);
+  const baseRectsRef = useRef<Partial<Record<BaseId, DOMRect>>>({});
+
+  const refreshRects = useCallback(() => {
+    const wrapEl = wrapperRef.current;
+    const zoneEl = outZoneRef.current;
+
+    if (wrapEl) wrapperRectRef.current = wrapEl.getBoundingClientRect();
+    if (zoneEl) zoneRectRef.current = zoneEl.getBoundingClientRect();
+
+    BASE_IDS.forEach((b) => {
+      const poly = baseRefs.current[b];
+      if (poly) baseRectsRef.current[b] = poly.getBoundingClientRect();
+    });
+  }, [wrapperRef, outZoneRef, baseRefs, BASE_IDS]);
+
+  useLayoutEffect(() => {
+    // 최초 1회
+    refreshRects();
+
+    let rafId: number | null = null;
+    const schedule = () => {
+      if (rafId != null) return;
+      rafId = requestAnimationFrame(() => {
+        rafId = null;
+        refreshRects();
+      });
+    };
+
+    const ro = new ResizeObserver(() => {
+      schedule();
+    });
+
+    if (wrapperRef.current) ro.observe(wrapperRef.current);
+    if (outZoneRef.current) ro.observe(outZoneRef.current);
+    BASE_IDS.forEach((b) => {
+      const el = baseRefs.current[b];
+      if (el) ro.observe(el);
+    });
+
+    const onResize = () => schedule();
+    const onOrientation = () => schedule();
+    const onScroll = () => schedule();
+
+    window.addEventListener("resize", onResize);
+    window.addEventListener("orientationchange", onOrientation);
+    window.addEventListener("scroll", onScroll, true);
+
+    return () => {
+      ro.disconnect();
+      if (rafId != null) cancelAnimationFrame(rafId);
+      window.removeEventListener("resize", onResize);
+      window.removeEventListener("orientationchange", onOrientation);
+      window.removeEventListener("scroll", onScroll, true);
+    };
+  }, [refreshRects, BASE_IDS]);
+
+  return { wrapperRectRef, zoneRectRef, baseRectsRef, refreshRects };
+};
 
 export default function GameRecordPageV2() {
   const [error, setError] = useState(null);
@@ -309,31 +387,31 @@ export default function GameRecordPageV2() {
   const isHomeAttack = router.query.attack === "home";
   const lineupExample = isHomeAttack ? homeExample : awayExample;
   // ── 0) 예시로 batter/pitcher 세팅 ──
-  useEffect(() => {
-    if (!lineupExample) return;
+  // useEffect(() => {
+  //   if (!lineupExample) return;
 
-    // 첫 번째 타자 예시
-    const firstBatter = lineupExample.batters[0]!;
-    setBatter({
-      battingOrder: firstBatter.battingOrder,
-      playerId: firstBatter.playerId,
-      playerName: firstBatter.playerName,
-      isElite: !firstBatter.isWC,
-      isWc: firstBatter.isWC,
-      position: firstBatter.position,
-    });
+  //   // 첫 번째 타자 예시
+  //   const firstBatter = lineupExample.batters[0]!;
+  //   setBatter({
+  //     battingOrder: firstBatter.battingOrder,
+  //     playerId: firstBatter.playerId,
+  //     playerName: firstBatter.playerName,
+  //     isElite: !firstBatter.isWC,
+  //     isWc: firstBatter.isWC,
+  //     position: firstBatter.position,
+  //   });
 
-    // 투수 예시
-    const exP = lineupExample.pitcher;
-    setPitcher({
-      battingOrder: 0, // 투수니까 굳이 order 필요 없으면 0
-      playerId: exP.playerId,
-      playerName: exP.playerName,
-      isElite: !exP.isWC,
-      isWc: exP.isWC,
-      position: "P",
-    });
-  }, []);
+  //   // 투수 예시
+  //   const exP = lineupExample.pitcher;
+  //   setPitcher({
+  //     battingOrder: 0, // 투수니까 굳이 order 필요 없으면 0
+  //     playerId: exP.playerId,
+  //     playerName: exP.playerName,
+  //     isElite: !exP.isWC,
+  //     isWc: exP.isWC,
+  //     position: "P",
+  //   });
+  // }, []);
 
   const [batterPlayerId, setBatterPlayerId] = useState(0);
 
@@ -415,49 +493,6 @@ export default function GameRecordPageV2() {
       setError(err);
     }
   }, [router.query.recordId, attackVal]);
-  // ── 2) 현재 타자 GET ──
-  const fetchBatter = useCallback(
-    async (newAttakVal) => {
-      if (!recordId || !attackVal) return;
-      try {
-        // [배포 시 다시 켜기]
-        // const teamType = newAttakVal === "home" ? "home" : "away";
-        // console.log("useEffect내부 팀타입", teamType);
-        // const res = await API.get(
-        //   `/games/${recordId}/current-batter?teamType=${teamType}`
-        //   // { withCredentials: true }
-        // );
-        // setBatter(res.data);
-        // setBatterPlayerId(res.data.playerId);
-        // console.log("타자 응답도착");
-      } catch (err) {
-        // console.error("타자 로드 실패:", err);
-        setError(err);
-      }
-    },
-    [recordId, attackVal]
-  );
-
-  // ── 3) 현재 투수 GET ──
-  const fetchPitcher = useCallback(
-    async (newAttack) => {
-      if (!recordId || !attackVal) return;
-      try {
-        // [배포 시 다시 켜기]
-        // const teamType = newAttack === "home" ? "away" : "home";
-        // const res = await API.get(
-        //   `/games/${recordId}/current-pitcher?teamType=${teamType}`
-        //   // { withCredentials: true }
-        // );
-        // setPitcher(res.data);
-        // console.log("투수 응답도착");
-      } catch (err) {
-        // console.error("투수 로드 실패:", err);
-        setError(err);
-      }
-    },
-    [recordId, attackVal]
-  );
 
   // ── 마운트 및 의존성 변경 시 호출 ──
   useEffect(() => {
@@ -511,8 +546,8 @@ export default function GameRecordPageV2() {
 
           // 3) GET 요청들만 다시 실행
           const newAttack = await fetchInningScores();
-          await fetchBatter(newAttack);
-          await fetchPitcher(newAttack);
+          // await fetchBatter(newAttack);
+          // await fetchPitcher(newAttack);
 
           // 2) Alert 표시 (확인 클릭 후 다음 로직 실행)
 
@@ -547,56 +582,15 @@ export default function GameRecordPageV2() {
       query: { isHomeTeam: isHome },
     });
   };
-  // ① POST + alert 후에 resolve 되는 async 함수로 변경
-  // → 여기에 모든 “공수교대” 로직을 몰아서 처리
-  const handleDefenseChange = useCallback(async () => {
-    if (isSubmitting) return;
-    setIsSubmitting(true);
-    try {
-      // 1) POST
-      // await API.post(`/games/${recordId}/scores`, { runs: thisInningScore }),
-      // { withCredentials: true };
-      // 2) 사용자 알림 (확인 클릭 후 다음 단계)
-      // console.log({ runs: thisInningScore });
 
-      // 3) 로컬 state 리셋
-      setIsSubstitutionSwapped((prev) => !prev);
-      setThisInningScore(0);
-      // 4) GET 리패치
-      // alert("공수교대 완료");
-      const newAttack = await fetchInningScores();
-    } catch (error) {
-      console.error("교대 오류:", error);
-      setError(error);
-      // alert("교대 오류");
-    } finally {
-      setIsSubmitting(false);
-      setIsChangeModalOpen(false);
-    }
-  }, [
-    recordId,
-    thisInningScore,
-    isSubmitting,
-    fetchInningScores,
-
-    setIsSubstitutionSwapped,
-  ]);
-
-  const [activeId, setActiveId] = useState<string | null>(null);
   // ── 모달 상태 ──
   const [isHitModalOpen, setIsHitModalOpen] = useState(false);
   const [isOutModalOpen, setIsOutModalOpen] = useState(false);
   const [isEtcModalOpen, setIsEtcModalOpen] = useState(false);
-  const [isChangeModalOpen, setIsChangeModalOpen] = useState(false);
+
   const [isGameEndModalOpen, setIsGameEndModalOpen] = useState(false);
-  const [isScorePatchModalOpen, setIsScorePatchModalOpen] = useState(false);
   const [selectedCell, setSelectedCell] = useState(null);
 
-  const handleScoreCellClick = (score, team, idx) => {
-    if (score === "" || idx >= 7) return;
-    setSelectedCell({ score: String(score), team, index: idx });
-    setIsScorePatchModalOpen(true);
-  };
   // 에러 상태
   const [validationError, setValidationError] = useState<string | null>(null);
 
@@ -615,19 +609,9 @@ export default function GameRecordPageV2() {
   // -------------------- 드래그앤드롭 ------------------------//
   // 드래그 앤 드롭 관련
   // 베이스 아이디 목록
-  const baseIds = useMemo(
-    () => ["first-base", "second-base", "third-base", "home-base"] as const,
-    []
-  );
-  type BaseId = (typeof baseIds)[number];
 
   // 베이스 <polygon> ref 저장
-  const baseRefs = useRef<Record<BaseId, SVGPolygonElement | null>>({
-    "first-base": null,
-    "second-base": null,
-    "third-base": null,
-    "home-base": null,
-  });
+
   const { setNodeRef: set1st } = useDroppable({ id: "first-base" });
   const { setNodeRef: set2nd } = useDroppable({ id: "second-base" });
   const { setNodeRef: set3rd } = useDroppable({ id: "third-base" });
@@ -642,19 +626,7 @@ export default function GameRecordPageV2() {
   };
 
   // wrapper ref (배지·베이스 좌표 계산용)
-  const wrapperRef = useRef<HTMLDivElement>(null);
-  // const wrapperRef = useRef<SVGSVGElement | null>(null);
-  // 배지 설정
 
-  const baseOrder: Record<(typeof baseIds)[number], number> = useMemo(
-    () => ({
-      "first-base": 1,
-      "second-base": 2,
-      "third-base": 3,
-      "home-base": 4,
-    }),
-    []
-  );
   interface BlackBadgeConfig {
     id: string;
     label: string;
@@ -875,7 +847,7 @@ export default function GameRecordPageV2() {
   const diamondSvgRef = useRef<SVGSVGElement | null>(null);
   const diamondPolyRef = useRef<SVGPolygonElement | null>(null);
 
-  const [isOutside, setIsOutside] = useState(false);
+  // const [isOutside, setIsOutside] = useState(false);
 
   // 배지별 스냅 정보 관리
   type SnapInfo = { base: BaseId; pos: { xPct: number; yPct: number } };
@@ -894,7 +866,7 @@ export default function GameRecordPageV2() {
   // 2) badgeSnaps 상태가 바뀔 때마다 각 베이스가 채워졌는지 체크하는 useEffect
   useEffect(() => {
     // badgeSnaps: Record<badgeId, { base: BaseId; pos: { x, y } } | null>
-    const occupancy: Record<BaseId, boolean> = baseIds.reduce((acc, base) => {
+    const occupancy: Record<BaseId, boolean> = BASE_IDS.reduce((acc, base) => {
       // badgeSnaps 중에 baseId === base 인 항목이 하나라도 있으면 true
       acc[base] = Object.values(badgeSnaps).some((snap) => snap?.base === base);
       return acc;
@@ -913,107 +885,7 @@ export default function GameRecordPageV2() {
 
   // 드래그 종료 시 스냅 처리
 
-  // 1) 오버/종료를 구분할 수 있도록 오버로드 선언
-  // function handleDragEvent(event: DragOverEvent, isEnd: false): void;
-  // function handleDragEvent(event: DragEndEvent, isEnd: true): void;
-
   // -------------------- 성능 최적화용 refs --------------------
-
-  // 컴포넌트 최상단(모든 useState/useRef 아래)에 추가
-  const baseRectsRef = useRef<Partial<Record<BaseId, DOMRect>>>({});
-  const wrapperRectRef = useRef<DOMRect | null>(null);
-  const zoneRectRef = useRef<DOMRect | null>(null);
-
-  // 측정: 마운트 시 한 번만, 필요하면 resize 시에도 다시 측handleDragEvent정
-
-  // 1️⃣ 마운트 시 한 번만: DOMRect 캐싱
-  useLayoutEffect(() => {
-    const wrapEl = wrapperRef.current;
-    const zoneEl = outZoneRef.current;
-    if (wrapEl) wrapperRectRef.current = wrapEl.getBoundingClientRect();
-    if (zoneEl) zoneRectRef.current = zoneEl.getBoundingClientRect();
-
-    baseIds.forEach((baseId) => {
-      const poly = baseRefs.current[baseId];
-      if (poly) {
-        baseRectsRef.current[baseId] = poly.getBoundingClientRect();
-      }
-    });
-  }, []);
-
-  // (선택) 리사이즈 시에도 다시 측정하려면
-  useEffect(() => {
-    const onResize = () => {
-      if (wrapperRef.current)
-        wrapperRectRef.current = wrapperRef.current.getBoundingClientRect();
-      if (outZoneRef.current)
-        zoneRectRef.current = outZoneRef.current.getBoundingClientRect();
-      baseIds.forEach((baseId) => {
-        const poly = baseRefs.current[baseId];
-        if (poly) baseRectsRef.current[baseId] = poly.getBoundingClientRect();
-      });
-    };
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
-  }, []);
-
-  // 실제 화면 업데이트는 state(isOutside)로, 비교용 값은 ref로
-  const isOutsideRef = useRef(false);
-  // requestAnimationFrame 아이디 저장
-  const rafIdRef = useRef<number | null>(null);
-
-  // 2) 실제 구현부 (합집합 타입 + 플래그)
-
-  // function DraggableBadge({
-  //   id,
-  //   label,
-  //   initialLeft,
-  //   initialTop,
-  //   snapInfo,
-  // }: {
-  //   id: string;
-  //   label: string;
-  //   initialLeft: string;
-  //   initialTop: string;
-  //   snapInfo: SnapInfo | null;
-  // }) {
-  //   const { attributes, listeners, setNodeRef, transform } = useDraggable({
-  //     id,
-  //   });
-  //   const combinedRef = (el: HTMLElement | null) => {
-  //     setNodeRef(el);
-  //     badgeRefs.current[id] = el;
-  //   };
-
-  //   // const left = snapInfo ? `${snapInfo.pos.x}px` : initialLeft;
-  //   // const top = snapInfo ? `${snapInfo.pos.y}px` : initialTop;
-  //   console.log("snapInfo", snapInfo);
-  //   console.log();
-  //   const isWhite = !id.startsWith("black-badge");
-
-  //   const left = snapInfo && isWhite ? `${snapInfo.pos.xPct}%` : initialLeft;
-  //   const top = snapInfo && isWhite ? `${snapInfo.pos.yPct}%` : initialTop;
-
-  //   const dx = transform?.x ?? 0;
-  //   const dy = transform?.y ?? 0;
-
-  //   return (
-  //     <NameBadge
-  //       id={id} /* onAnyDragMove 에서 찾기 위해 id 필요 */
-  //       ref={combinedRef}
-  //       style={{
-  //         position: "absolute",
-  //         left,
-  //         top,
-  //         transform: `translate(-50%, -50%) translate3d(${dx}px, ${dy}px, 0)`,
-  //       }}
-  //       {...attributes}
-  //       {...listeners}
-  //     >
-  //       {label}
-  //     </NameBadge>
-  //   );
-  // }
 
   const DraggableBadge = ({
     id,
@@ -1069,47 +941,11 @@ export default function GameRecordPageV2() {
     );
   };
 
-  function handleWhiteDragEvent(
-    event: DragOverEvent | DragEndEvent,
-    isEnd: boolean
-  ) {
-    // handleDragEvent(event, isEnd);
-  }
-
-  // function onAnyDragMove(e: DragOverEvent) {
-  //   const id = e.active.id.toString();
-  //   if (id.startsWith("black-badge")) return;
-
-  //   // if (rafIdRef.current != null) {
-  //   //   cancelAnimationFrame(rafIdRef.current);
-  //   // }
-
-  //   // rafIdRef.current = requestAnimationFrame(() => {
-  //   //   // 기존 통과(highlight) 로직은 그대로 실행
-  //   //   handleWhiteDragEvent(e, false);
-
-  //   //   // ① badge DOM 찾기
-  //   //   const badge = document.getElementById(id);
-  //   //   if (badge) {
-  //   //     // ② 누적 오프셋 읽기
-
-  //   //     const { x, y } = e.delta as { x: number; y: number };
-  //   //     // ③ CSS 변수만 갱신
-  //   //     badge.style.setProperty("--tx", `${x}px`);
-  //   //     badge.style.setProperty("--ty", `${y}px`);
-  //   //     // badge.style.setProperty("--tx", "0px");
-  //   //     // badge.style.setProperty("--ty", "0px");
-  //   //   }
-
-  //   //   rafIdRef.current = null;
-  //   // });
-  //   handleWhiteDragEvent(e, false); // 통과/하이라이트만 처리
-  // }
-
   const onAnyDragEnd = (e: DragEndEvent) => {
-    // 좌표는 ResizeObserver가 최신화 해주므로 보통 추가 호출 불필요
-    // 필요하면 여기서 refreshRects();
     handleDrop(e);
+    // 깔끔하게 리셋
+    prevOutsideRef.current = false;
+    setIsOutside(false);
   };
   // --이닝의 재구성--//
 
@@ -1136,13 +972,59 @@ export default function GameRecordPageV2() {
     // setIsOutside(false);
   }, [badgeConfigs]);
 
-  // 그라운드 내 직선 움직임 //
-
   // 주자 모달 창
   const [isGroundRecordModalOpen, setIsGroundRecordModalOpen] = useState(false);
 
   // 아웃존 설정
-  const outZoneRef = useRef<HTMLDivElement>(null);
+  const [isOutside, setIsOutside] = useState(false);
+  const prevOutsideRef = useRef(false);
+  const rafIdRef = useRef<number | null>(null);
+
+  const handleDragMove = (e: DragMoveEvent) => {
+    const id = String(e.active.id);
+    if (id.startsWith("black-badge")) {
+      // 검정 배지는 바깥 감지/하이라이트 로직 스킵
+      return;
+    }
+
+    if (rafIdRef.current != null) return; // 이미 예약됨(스로틀)
+    rafIdRef.current = requestAnimationFrame(() => {
+      rafIdRef.current = null;
+
+      const zoneRect = zoneRectRef.current;
+      if (!zoneRect) return;
+
+      const translated = e.active?.rect?.current?.translated;
+      let cx: number | null = null;
+      let cy: number | null = null;
+
+      if (translated) {
+        cx = translated.left + translated.width / 2;
+        cy = translated.top + translated.height / 2;
+      } else {
+        // fallback: DOM 읽기(가능하면 피하기)
+        const el = badgeRefs.current[e.active.id as string];
+        if (el) {
+          const r = el.getBoundingClientRect();
+          cx = r.left + r.width / 2;
+          cy = r.top + r.height / 2;
+        }
+      }
+
+      if (cx == null || cy == null) return;
+
+      const outsideNow =
+        cx < zoneRect.left ||
+        cx > zoneRect.right ||
+        cy < zoneRect.top ||
+        cy > zoneRect.bottom;
+
+      if (outsideNow !== prevOutsideRef.current) {
+        prevOutsideRef.current = outsideNow;
+        setIsOutside(outsideNow); // 변화 있을 때만 setState
+      }
+    });
+  };
 
   // 커스텀 경계설정
   const customBoundsRef = useRef<HTMLDivElement>(null);
@@ -1193,46 +1075,23 @@ export default function GameRecordPageV2() {
     const id = active.id.toString();
     // 배지가 베이스에 올라간(snap된) 상태면 custom, 아니면 부모 요소 제한
     // 검정 배지는 항상 custom, 흰 배지는 스냅된 경우 custom, 아닌 경우 부모 요소 제한
-    if (
-      id.startsWith("black-badge") || // ▶ 검정 배지
-      Boolean(badgeSnaps[id]) // ▶ 흰 배지(스냅됐을 때)
-    ) {
-      return restrictToCustomBounds(args);
-    } else {
-      return restrictToParentElement(args);
-    }
+    // if (
+    //   id.startsWith("black-badge") || // ▶ 검정 배지
+    //   Boolean(badgeSnaps[id]) // ▶ 흰 배지(스냅됐을 때)
+    // ) {
+    //   return restrictToCustomBounds(args);
+    // } else {
+    //   return restrictToParentElement(args);
+    // }
+    const isBlack = id.startsWith("black-badge");
+    return isBlack
+      ? restrictToCustomBounds(args)
+      : restrictToCustomBounds(args);
   };
 
   // 홈베이스 색칠
 
   const [isHomeBaseActive, setIsHomeBaseActive] = useState(false);
-  // 이미지 프리로드
-  // useEffect(() => {
-  //   const img = new Image();
-  //   img.src = "/images/home-base-white-1.png";
-  //   // (옵션) 로드 완료 콜백
-  //   img.onload = () => {
-  //     console.log("/images/home-base-white-1.png preloaded!");
-  //   };
-  // }, []);\
-
-  // 위치 어긋남 해결
-  function refreshRects() {
-    if (wrapperRef.current)
-      wrapperRectRef.current = wrapperRef.current.getBoundingClientRect();
-    if (outZoneRef.current)
-      zoneRectRef.current = outZoneRef.current.getBoundingClientRect();
-    baseIds.forEach((b) => {
-      const poly = baseRefs.current[b];
-      if (poly) baseRectsRef.current[b] = poly.getBoundingClientRect();
-    });
-  }
-
-  // function onAnyDragStart() {
-  //   refreshRects();
-  // }
-
-  // -----------흰색 배지 스냅으로만 동작 로직-----------------
 
   const RUN_SEQUENCE: BaseId[] = [
     "first-base",
@@ -1259,72 +1118,18 @@ export default function GameRecordPageV2() {
   // 1) 좌표 자동 캐싱 훅 (ResizeObserver + window 이벤트) //
   // 한번만 하면 되니까 성능에 좋다
   // ─────────────────────────────────────────────
-  const useRectsCache = (
-    wrapperRef: React.RefObject<HTMLDivElement>,
-    outZoneRef: React.RefObject<HTMLDivElement>,
-    baseRefs: React.MutableRefObject<Record<BaseId, SVGPolygonElement | null>>,
-    baseIds: readonly BaseId[]
-  ) => {
-    const wrapperRectRef = useRef<DOMRect | null>(null);
-    const zoneRectRef = useRef<DOMRect | null>(null);
-    const baseRectsRef = useRef<Partial<Record<BaseId, DOMRect>>>({});
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const outZoneRef = useRef<HTMLDivElement>(null);
+  const baseRefs = useRef<Record<BaseId, SVGPolygonElement | null>>({
+    "first-base": null,
+    "second-base": null,
+    "third-base": null,
+    "home-base": null,
+  });
 
-    const refreshRects = useCallback(() => {
-      const wrapEl = wrapperRef.current;
-      const zoneEl = outZoneRef.current;
-
-      if (wrapEl) wrapperRectRef.current = wrapEl.getBoundingClientRect();
-      if (zoneEl) zoneRectRef.current = zoneEl.getBoundingClientRect();
-
-      baseIds.forEach((b) => {
-        const poly = baseRefs.current[b];
-        if (poly) baseRectsRef.current[b] = poly.getBoundingClientRect();
-      });
-    }, [wrapperRef, outZoneRef, baseRefs, baseIds]);
-
-    useLayoutEffect(() => {
-      // 최초 1회
-      refreshRects();
-
-      let rafId: number | null = null;
-      const schedule = () => {
-        if (rafId != null) return;
-        rafId = requestAnimationFrame(() => {
-          rafId = null;
-          refreshRects();
-        });
-      };
-
-      const ro = new ResizeObserver(() => {
-        schedule();
-      });
-
-      if (wrapperRef.current) ro.observe(wrapperRef.current);
-      if (outZoneRef.current) ro.observe(outZoneRef.current);
-      baseIds.forEach((b) => {
-        const el = baseRefs.current[b];
-        if (el) ro.observe(el);
-      });
-
-      const onResize = () => schedule();
-      const onOrientation = () => schedule();
-      const onScroll = () => schedule();
-
-      window.addEventListener("resize", onResize);
-      window.addEventListener("orientationchange", onOrientation);
-      window.addEventListener("scroll", onScroll, true);
-
-      return () => {
-        ro.disconnect();
-        if (rafId != null) cancelAnimationFrame(rafId);
-        window.removeEventListener("resize", onResize);
-        window.removeEventListener("orientationchange", onOrientation);
-        window.removeEventListener("scroll", onScroll, true);
-      };
-    }, [refreshRects, baseIds]);
-
-    return { wrapperRectRef, zoneRectRef, baseRectsRef, refreshRects };
-  };
+  // ✅ 여기서 훅 호출
+  const { wrapperRectRef, zoneRectRef, baseRectsRef, refreshRects } =
+    useRectsCache(wrapperRef, outZoneRef, baseRefs, BASE_IDS);
 
   // ─────────────────────────────────────────────
   // 2) 드롭 순간만 검사/스냅
@@ -1363,7 +1168,7 @@ export default function GameRecordPageV2() {
     // 2) 어느 베이스 위인지 판정
     let dropBase: BaseId | null = null;
     let baseRect: DOMRect | undefined;
-    for (const b of baseIds) {
+    for (const b of BASE_IDS) {
       const rect = baseRectsRef.current[b];
       if (!rect) continue;
       if (
@@ -1443,7 +1248,7 @@ export default function GameRecordPageV2() {
           {teamAScores.map((s, i) => (
             <TeamScoreCell
               key={i}
-              onClick={() => handleScoreCellClick(s, "A", i)}
+              // onClick={() => handleScoreCellClick(s, "A", i)}
             >
               {s}
             </TeamScoreCell>
@@ -1456,7 +1261,7 @@ export default function GameRecordPageV2() {
           {teamBScores.map((s, i) => (
             <TeamScoreCell
               key={i}
-              onClick={() => handleScoreCellClick(s, "B", i)}
+              // onClick={() => handleScoreCellClick(s, "B", i)}
             >
               {s}
             </TeamScoreCell>
@@ -1499,7 +1304,7 @@ export default function GameRecordPageV2() {
           },
         }}
         // onDragStart={onAnyDragStart}
-
+        onDragMove={handleDragMove}
         onDragEnd={onAnyDragEnd}
       >
         <GraphicWrapper
@@ -1709,8 +1514,8 @@ export default function GameRecordPageV2() {
           playerId={batterPlayerId}
           onSuccess={async () => {
             const newAttack = await fetchInningScores();
-            await fetchBatter(newAttack);
-            await fetchPitcher(newAttack);
+            // await fetchBatter(newAttack);
+            // await fetchPitcher(newAttack);
           }}
           onTypeSelect={() => setIsGroundRecordModalOpen(true)}
         />
@@ -1721,8 +1526,8 @@ export default function GameRecordPageV2() {
           playerId={batterPlayerId}
           onSuccess={async () => {
             const newAttack = await fetchInningScores();
-            await fetchBatter(newAttack);
-            await fetchPitcher(newAttack);
+            // await fetchBatter(newAttack);
+            // await fetchPitcher(newAttack);
           }}
           onTypeSelect={() => setIsGroundRecordModalOpen(true)}
         />
@@ -1733,16 +1538,10 @@ export default function GameRecordPageV2() {
           playerId={batterPlayerId}
           onSuccess={async () => {
             const newAttack = await fetchInningScores();
-            await fetchBatter(newAttack);
-            await fetchPitcher(newAttack);
+            // await fetchBatter(newAttack);
+            // await fetchPitcher(newAttack);
           }}
           onTypeSelect={() => setIsGroundRecordModalOpen(true)}
-        />
-      )}
-      {isChangeModalOpen && (
-        <DefenseChangeModal
-          setIsChangeModalOpen={setIsChangeModalOpen}
-          onSuccess={handleDefenseChange}
         />
       )}
 
@@ -1753,24 +1552,6 @@ export default function GameRecordPageV2() {
         />
       )}
 
-      {isScorePatchModalOpen && selectedCell && (
-        <ScorePatchModal
-          setIsModalOpen={setIsScorePatchModalOpen}
-          cellValue={selectedCell.score}
-          team={selectedCell.team}
-          cellIndex={selectedCell.index}
-          onSuccess={async () => {
-            // setIsSubmitting(true);
-            try {
-              const newAttack = await fetchInningScores();
-              await fetchBatter(newAttack);
-              await fetchPitcher(newAttack);
-            } finally {
-              // setIsSubmitting(false);
-            }
-          }}
-        />
-      )}
       {!isSubmitting && validationError && (
         <ModalOverlay>
           <ModalContainer>

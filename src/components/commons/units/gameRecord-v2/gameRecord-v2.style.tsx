@@ -71,12 +71,12 @@ export const InningHeader = styled.div`
   }
 
   /* 첫 번째 셀만 보더 제거 */
-  > *:first-child {
+  > *:first-of-type {
     border-bottom: none;
   }
 
-  > *:nth-child(9),
-  > *:nth-child(10) {
+  > *:nth-of-type(9),
+  > *:nth-of-type(10) {
     color: red;
   }
   /* margin-right: 1vh; */
@@ -108,8 +108,8 @@ export const TeamRow = styled.div`
   /* border-bottom: 1px solid #ccc; */
   /* background-color: aqua; */
   height: 33%;
-  > *:nth-child(9),
-  > *:nth-child(10) {
+  > *:nth-of-type(9),
+  > *:nth-of-type(10) {
     color: red;
     font-weight: 700;
   }
@@ -376,7 +376,7 @@ export const RecordActionButton = styled.button`
   color: #ffffff;
 
   /* 마지막 버튼이 아닌 경우(1, 2, 3번째)에만 오른쪽 테두리 추가 */
-  &:not(:last-child) {
+  &:not(:last-of-type) {
     border-right: 1px solid white;
   }
 
@@ -510,6 +510,7 @@ export const Ground = styled.div<{ outside?: boolean }>`
 
   /* only paint red outside the circle at 50% 55% of 40% radius */
   background: ${(p) => (p.outside ? "red" : "transparent")};
+  /* background-color: red; */
   opacity: 30%;
   /* mask‐out that central circle */
   mask-image: radial-gradient(
@@ -810,7 +811,7 @@ export const OutZoneWrapper = styled.div`
   /* 자신의 크기의 절반만큼 당겨서 진짜 중앙에 위치 */
   transform: translate(-50%, -50%);
   opacity: 0.5;
-  /* background-color: red; */
+  /* background-color: BLUE; */
   border-radius: 50%; /* 완전한 원 */
 
   display: flex;
