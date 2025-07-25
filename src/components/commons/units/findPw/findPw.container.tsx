@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -18,6 +18,7 @@ import {
   LoadingOverlay,
 } from "../../../../commons/libraries/loadingOverlay";
 import { useRouter } from "next/router";
+import ShowAlert from "../../../../commons/libraries/showAlertModal";
 
 // 폼에서 다룰 데이터 타입 정의
 interface LoginFormData {
@@ -60,20 +61,41 @@ export default function FindPwPageComponent() {
       await API.post("/auth/password/request-reset", {
         email: data.email,
       });
-      alert("비밀번호 재설정 링크가 전송되었습니다.");
+      alert("비밀번호 재설정 링크가 \n전송되었습니다.");
       // router.push("/mainCalendar");
     } catch (error: any) {
       console.error(error);
       alert(
         error.response?.data?.message ||
-          "비밀번호 재설정 요청 중 오류가 발생했습니다."
+          "비밀번호 재설정 요청 중 \n오류가 발생했습니다."
       );
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  const [alertObj, setAlertObj] = useState<any>(null);
+  // mount 체크
+
+  // ✨ window.alert 가로채기
+  useEffect(() => {
+    const orig = window.alert;
+    window.alert = (msg: string) => {
+      setAlertObj({ message: msg });
+    };
+    return () => {
+      window.alert = orig;
+    };
+  }, []);
+
   return (
     <Container>
+      <ShowAlert
+        error={alertObj}
+        onClose={() => {
+          setAlertObj(null);
+        }}
+      />
       <Title>비밀번호 재설정</Title>
       <form onSubmit={handleSubmit(onSubmit)}>
         {/* 이메일 주소 입력 */}
