@@ -418,7 +418,7 @@ export const GraphicWrapper = styled.div`
   position: relative;
   overflow: visible;
   width: 90%;
-  height: 40vh;
+  height: 45vh;
   /* background-color: red; */
   z-index: 0;
   /* ─── 배경 이미지 전체 덮기 ─── */
@@ -637,6 +637,12 @@ export const DiamondSvg = styled.svg`
     stroke: none;
   }
 
+  /* 홈 베이스(id="Home")만 투명 처리 */
+  & polygon#Home.inner {
+    fill: transparent;
+    stroke: none;
+  }
+
   /* 여기에 highlight 스타일 추가 */
   & .inner.highlight {
     fill: blue;
@@ -690,7 +696,7 @@ export const NameBadge = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 2.6vh;
+  height: 3vh;
   width: 13vw;
   white-space: nowrap;
   touch-action: none; /* 터치 동작(스크롤/줌) 비활성화 */
@@ -803,11 +809,12 @@ export const ReconstructionSwitch = styled(Switch)`
 export const OutZoneWrapper = styled.div`
   position: absolute;
   /* 부모의 가운데(가로·세로) */
-  top: 50%;
+  top: 55%;
   left: 50%;
 
   width: 70%;
-  aspect-ratio: 1 / 1; /* 항상 정사각형 비율 유지 */
+  /* aspect-ratio: 1 / 1; */
+  height: 70%;
   /* 자신의 크기의 절반만큼 당겨서 진짜 중앙에 위치 */
   transform: translate(-50%, -50%);
   opacity: 0.5;
