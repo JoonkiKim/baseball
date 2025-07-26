@@ -774,24 +774,25 @@ export const ModalBottomRunnerTitle = styled.div`
 `;
 
 export const OutZoneWrapper = styled.div`
-  position: fixed;
+  position: absolute;
   /* 부모의 가운데(가로·세로) */
-  top: 45%;
+  top: 55%;
   left: 50%;
 
-  width: 60%;
-  height: 40%;
+  width: 70%;
+  /* aspect-ratio: 1 / 1; */
+  height: 70%;
   /* 자신의 크기의 절반만큼 당겨서 진짜 중앙에 위치 */
   transform: translate(-50%, -50%);
   opacity: 0.5;
-  /* background-color: blue; */
-  border-radius: 12px;
+  /* background-color: BLUE; */
+  border-radius: 50%; /* 완전한 원 */
 
   display: flex;
   justify-content: center;
   align-items: center;
 
-  z-index: 103;
+  z-index: 1;
   pointer-events: none;
 `;
 

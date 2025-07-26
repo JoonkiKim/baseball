@@ -2,7 +2,9 @@ const withPWA = require("next-pwa")({
   dest: "public", // PWA 리소스 저장 위치
   register: true, // 서비스 워커 자동 등록
   skipWaiting: true, // 새로운 서비스 워커 즉시 적용
-  disable: process.env.NODE_ENV === "development", // 개발 환경에서는 PWA 비활성화
+  // disable: process.env.NODE_ENV === "development", // 개발 환경에서는 PWA 비활성화
+
+  disable: false, // 개발 환경에서도 활성화
 });
 
 const fs = require("fs");
