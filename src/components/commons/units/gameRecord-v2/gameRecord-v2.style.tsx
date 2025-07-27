@@ -509,8 +509,11 @@ export const Ground = styled.div<{ outside?: boolean }>`
   height: 100%;
 
   /* only paint red outside the circle at 50% 55% of 40% radius */
-  background: ${(p) => (p.outside ? "red" : "transparent")};
-  /* background-color: red; */
+  /* background: ${(p) => (p.outside ? "red" : "transparent")}; */
+  background-color: transparent;
+  &.out-zone-active {
+    background-color: red; /* Out‑Zone 벗어나면 빨간 */
+  }
   opacity: 30%;
   /* mask‐out that central circle */
   mask-image: radial-gradient(

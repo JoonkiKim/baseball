@@ -13,6 +13,7 @@ import {
   DragEndEvent,
   DragMoveEvent,
   DragOverEvent,
+  DragStartEvent,
   MeasuringStrategy,
   Modifier,
   PointerSensor,
@@ -324,7 +325,7 @@ export default function GroundRecordModal(props: IModalProps) {
   const handleDrop = (e: DragEndEvent) => {
     const badgeId = e.active.id as string;
 
-    // 검정 배지: 기존 자리 스왑 로직
+    // // 검정 배지: 기존 자리 스왑 로직
     // if (badgeId.startsWith("black-badge")) {
     //   handleBlackDragEnd(e);
     //   return;
@@ -339,7 +340,7 @@ export default function GroundRecordModal(props: IModalProps) {
     const cx = left + width / 2;
     const cy = top + height / 2;
 
-    // 1) 필드(outZone) 밖 드롭 → 제거(기록은 유지)
+    // 아웃존 바깥 드롭 시 제거(단, 흰 배지가 최소 1개는 남아야 함)
     if (
       zoneRect &&
       (cx < zoneRect.left ||
@@ -347,15 +348,27 @@ export default function GroundRecordModal(props: IModalProps) {
         cy < zoneRect.top ||
         cy > zoneRect.bottom)
     ) {
-      setActiveBadges((prev) => prev.filter((id) => id !== badgeId));
+      setActiveBadges((prev) => {
+        // 새로 걸러낸 배열
+        const next = prev.filter((id) => id !== badgeId);
+        // 남은 흰 배지 개수 계산
+        const whiteLeft = next.filter(
+          (id) => !id.startsWith("black-badge")
+        ).length;
+        // 흰 배지가 하나라도 남으면 next, 아니면 prev 유지
+        return whiteLeft > 0 ? next : prev;
+      });
       setBadgeSnaps((prev) => ({ ...prev, [badgeId]: null }));
+
+      // Ground 배경 리셋
+      groundRef.current?.classList.remove("out-zone-active");
       return;
     }
 
     // 2) 어느 베이스 위인지 판정
     let dropBase: BaseId | null = null;
     let baseRect: DOMRect | undefined;
-    for (const b of baseIds) {
+    for (const b of BASE_IDS) {
       const rect = baseRectsRef.current[b];
       if (!rect) continue;
       if (
@@ -372,10 +385,10 @@ export default function GroundRecordModal(props: IModalProps) {
     if (!dropBase || !baseRect) return;
 
     // 3) 순서 강제
-    const required = nextRequiredBase(badgeId);
-    if (dropBase !== required) {
-      return; // 순서 아니면 스냅 불가
-    }
+    // const required = nextRequiredBase(badgeId);
+    // if (dropBase !== required) {
+    //   return; // 순서 아니면 스냅 불가
+    // }
 
     // 4) 점유 체크(1베이스 1주자)
     const occupied = Object.entries(badgeSnaps).some(
@@ -406,12 +419,16 @@ export default function GroundRecordModal(props: IModalProps) {
       seq.push(dropBase);
     }
 
-    // 7) 홈에 스냅 & 1~3루 모두 찍혀 있으면 완주
+    // 7) 홈에 스냅 & 3루 찍혀 있으면 완주
+    // 3루에서 홈으로 들어오면 배지 없어짐
+    // const finished =
+    //   dropBase === "home-base" &&
+    //   ["first-base", "second-base", "third-base"].every((b) =>
+    //     seq.includes(b as BaseId)
+    //   );
     const finished =
       dropBase === "home-base" &&
-      ["first-base", "second-base", "third-base"].every((b) =>
-        seq.includes(b as BaseId)
-      );
+      ["third-base"].every((b) => seq.includes(b as BaseId));
 
     if (finished) {
       setActiveBadges((prev) => prev.filter((id) => id !== badgeId));
@@ -419,13 +436,15 @@ export default function GroundRecordModal(props: IModalProps) {
       // 기록은 유지 (snappedSeqRef.current[badgeId]는 지우지 않음)
     }
   };
+
   const onAnyDragEnd = (e: DragEndEvent) => {
     // 좌표는 ResizeObserver가 최신화 해주므로 보통 추가 호출 불필요
     // 필요하면 여기서 refreshRects();
+    groundRef.current?.classList.remove("out-zone-active");
     handleDrop(e);
     // 깔끔하게 리셋
     prevOutsideRef.current = false;
-    setIsOutside(false);
+    // setIsOutside(false);
   };
 
   const resetWhiteBadges = useCallback(() => {
@@ -450,49 +469,107 @@ export default function GroundRecordModal(props: IModalProps) {
   }, [badgeConfigsForModal]);
 
   // ---아웃존 설정 ---
+  // 1) ref 선언
+  const originCenters = useRef<Record<string, { x: number; y: number }>>({});
+  // ① Ground용 ref 선언
+  const groundRef = useRef<HTMLDivElement | null>(null);
+
   const [isOutside, setIsOutside] = useState(false);
   const prevOutsideRef = useRef(false);
   const rafIdRef = useRef<number | null>(null);
 
-  const handleDragMove = (e: DragMoveEvent) => {
-    if (rafIdRef.current != null) return; // 이미 예약됨(스로틀)
+  function handleDragStart(event: DragStartEvent) {
+    const id = String(event.active.id);
+    const el = badgeRefs.current[id];
+    if (!el) return;
+
+    // 여기서만 한 번만 읽어 온다!
+    const rect = el.getBoundingClientRect();
+    originCenters.current[id] = {
+      x: rect.left + rect.width / 2, // 요소의 화면상 중앙 X
+      y: rect.top + rect.height / 2, // 요소의 화면상 중앙 Y
+    };
+  }
+
+  // const handleDragMove = (e: DragMoveEvent) => {
+  //   if (rafIdRef.current != null) return; // 이미 예약됨(스로틀)
+  //   rafIdRef.current = requestAnimationFrame(() => {
+  //     rafIdRef.current = null;
+
+  //     const zoneRect = zoneRectRef.current;
+  //     if (!zoneRect) return;
+
+  //     const translated = e.active?.rect?.current?.translated;
+  //     let cx: number | null = null;
+  //     let cy: number | null = null;
+
+  //     if (translated) {
+  //       cx = translated.left + translated.width / 2;
+  //       cy = translated.top + translated.height / 2;
+  //     } else {
+  //       // fallback: DOM 읽기(가능하면 피하기)
+  //       const el = badgeRefs.current[e.active.id as string];
+  //       if (el) {
+  //         const r = el.getBoundingClientRect();
+  //         cx = r.left + r.width / 2;
+  //         cy = r.top + r.height / 2;
+  //       }
+  //     }
+
+  //     if (cx == null || cy == null) return;
+
+  //     const outsideNow =
+  //       cx < zoneRect.left ||
+  //       cx > zoneRect.right ||
+  //       cy < zoneRect.top ||
+  //       cy > zoneRect.bottom;
+
+  //     if (outsideNow !== prevOutsideRef.current) {
+  //       prevOutsideRef.current = outsideNow;
+  //       setIsOutside(outsideNow); // 변화 있을 때만 setState
+  //     }
+  //   });
+  // };
+
+  function handleDragMove(event: DragMoveEvent) {
+    const id = String(event.active.id);
+    // 검정 배지는 스킵
+    if (id.startsWith("black-badge")) return;
+
+    // 아직 origin이 없으면 스킵
+    const origin = originCenters.current[id];
+    if (!origin) return;
+
+    // RAF로 한 프레임에 한 번만 실행
+    if (rafIdRef.current != null) return;
     rafIdRef.current = requestAnimationFrame(() => {
       rafIdRef.current = null;
 
-      const zoneRect = zoneRectRef.current;
-      if (!zoneRect) return;
+      // DnD‑Kit이 주는 delta.x/y + origin
+      const dx = event.delta?.x ?? 0;
+      const dy = event.delta?.y ?? 0;
+      const cx = origin.x + dx;
+      const cy = origin.y + dy;
 
-      const translated = e.active?.rect?.current?.translated;
-      let cx: number | null = null;
-      let cy: number | null = null;
-
-      if (translated) {
-        cx = translated.left + translated.width / 2;
-        cy = translated.top + translated.height / 2;
-      } else {
-        // fallback: DOM 읽기(가능하면 피하기)
-        const el = badgeRefs.current[e.active.id as string];
-        if (el) {
-          const r = el.getBoundingClientRect();
-          cx = r.left + r.width / 2;
-          cy = r.top + r.height / 2;
-        }
-      }
-
-      if (cx == null || cy == null) return;
+      // out-zone 판정: zoneRectRef.current는 이미 외부에서 갱신된 DOMRect이므로
+      const zone = zoneRectRef.current;
+      if (!zone) return;
 
       const outsideNow =
-        cx < zoneRect.left ||
-        cx > zoneRect.right ||
-        cy < zoneRect.top ||
-        cy > zoneRect.bottom;
+        cx < zone.left || cx > zone.right || cy < zone.top || cy > zone.bottom;
 
+      // 변화가 있을 때만 클래스 토글 or 스타일 변경
       if (outsideNow !== prevOutsideRef.current) {
         prevOutsideRef.current = outsideNow;
-        setIsOutside(outsideNow); // 변화 있을 때만 setState
+        // React 상태 대신 DOM 클래스로 토글하면 더 가볍습니다
+        const badgeEl = badgeRefs.current[id]!;
+        badgeEl.classList.toggle("out-zone", outsideNow);
       }
+
+      // ★ Ground 배경 토글(추가)
+      groundRef.current?.classList.toggle("out-zone-active", outsideNow);
     });
-  };
+  }
 
   return (
     <ModalOverlay>
@@ -510,6 +587,7 @@ export default function GroundRecordModal(props: IModalProps) {
               strategy: MeasuringStrategy.Always,
             },
           }}
+          onDragStart={handleDragStart}
           onDragMove={handleDragMove}
           onDragEnd={onAnyDragEnd}
         >
@@ -565,10 +643,13 @@ export default function GroundRecordModal(props: IModalProps) {
             <HomeWrapper />
             <LineWrapper />
             <HomeBaseWrapper active={isHomeBaseActive} />
-            <Ground outside={isOutside} />
+            <Ground ref={groundRef} />
+
             <OutZoneWrapper ref={outZoneRef}></OutZoneWrapper>
             <CustomBoundaryWrapper
-              ref={customBoundsRef}
+              ref={(el) => {
+                customBoundsRef.current = el; // ★ 이 한 줄 추가
+              }}
             ></CustomBoundaryWrapper>
             <DiamondSvg
               viewBox="0 0 110 110"
