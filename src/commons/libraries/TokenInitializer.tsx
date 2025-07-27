@@ -11,6 +11,8 @@ import {
 
 export default function TokenInitializer() {
   const setToken = useSetRecoilState(accessTokenState);
+
+  // setChecked는 인증 상태(액세스 토큰 유무/리프레시) 확인이 끝났다” 라는 플래그를 앱 전역에 알려주는 역할을 합니다.
   const setChecked = useSetRecoilState(authCheckedState);
   const router = useRouter();
   // console.log("분기 합침 테스트");
