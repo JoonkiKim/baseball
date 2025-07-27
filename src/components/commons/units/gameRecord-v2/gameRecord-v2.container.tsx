@@ -117,7 +117,9 @@ import {
   ModalOverlay,
   ModalTitleSmaller,
 } from "../../modals/modal.style";
-import GroundRecordModal from "../../modals/groudRecordModal/groundRecordModal";
+import GroundRecordModal, {
+  GroundRecordModalHandle,
+} from "../../modals/groudRecordModal/groundRecordModal";
 import { ArrowUp } from "../../../../commons/libraries/arrow";
 import ArrowDown from "../../../../commons/libraries/arrowDown";
 import { badgeConfigs } from "./gameRecord.variables";
@@ -546,15 +548,11 @@ export default function GameRecordPageV2() {
 
           // );
 
-          // 3) GET 요청들만 다시 실행
-          const newAttack = await fetchInningScores();
-          // await fetchBatter(newAttack);
-          // await fetchPitcher(newAttack);
+          // 스코어 재조회
+          await fetchInningScores();
 
-          // 2) Alert 표시 (확인 클릭 후 다음 로직 실행)
-
-          setIsGroundRecordModalOpen(true);
-          // alert("볼넷/사구 기록 전송 완료");
+          // 모달 열기 (기존 setIsGroundRecordModalOpen 대신)
+          groundModalRef.current?.open();
         } catch (e) {
           // console.error("볼넷/사구 오류:", e);
           setError(e);
@@ -1313,6 +1311,16 @@ export default function GameRecordPageV2() {
     }
   };
 
+  // 모달 성능 최적화 (렌더링 최소화)
+  const groundModalRef = useRef<GroundRecordModalHandle>(null);
+  // onSuccess 콜백 예시
+  const afterRecord = async () => {
+    const newAttack = await fetchInningScores();
+    // …추가 fetch…
+  };
+  // 콘솔에 다시 찍히지 않는다면 부모 컴포넌트는 리렌더링되지 않은 것!
+  console.log("▶ GameRecordPageV2 render");
+
   return (
     <GameRecordContainer reconstructMode={isReconstructMode}>
       <ScoreBoardWrapper>
@@ -1591,36 +1599,27 @@ export default function GameRecordPageV2() {
         <HitModal
           setIsHitModalOpen={setIsHitModalOpen}
           playerId={batterPlayerId}
-          onSuccess={async () => {
-            const newAttack = await fetchInningScores();
-            // await fetchBatter(newAttack);
-            // await fetchPitcher(newAttack);
-          }}
-          onTypeSelect={() => setIsGroundRecordModalOpen(true)}
+          onSuccess={afterRecord}
+          // 🔑 여기만 바꿔줍니다
+          onTypeSelect={() => groundModalRef.current?.open()}
         />
       )}
       {isOutModalOpen && (
         <OutModal
           setIsOutModalOpen={setIsOutModalOpen}
           playerId={batterPlayerId}
-          onSuccess={async () => {
-            const newAttack = await fetchInningScores();
-            // await fetchBatter(newAttack);
-            // await fetchPitcher(newAttack);
-          }}
-          onTypeSelect={() => setIsGroundRecordModalOpen(true)}
+          onSuccess={afterRecord}
+          // 🔑 여기만 바꿔줍니다
+          onTypeSelect={() => groundModalRef.current?.open()}
         />
       )}
       {isEtcModalOpen && (
         <EtcModal
           setIsEtcModalOpen={setIsEtcModalOpen}
           playerId={batterPlayerId}
-          onSuccess={async () => {
-            const newAttack = await fetchInningScores();
-            // await fetchBatter(newAttack);
-            // await fetchPitcher(newAttack);
-          }}
-          onTypeSelect={() => setIsGroundRecordModalOpen(true)}
+          onSuccess={afterRecord}
+          // 🔑 여기만 바꿔줍니다
+          onTypeSelect={() => groundModalRef.current?.open()}
         />
       )}
 
@@ -1630,6 +1629,9 @@ export default function GameRecordPageV2() {
           setIsGameEndModalOpen={setIsGameEndModalOpen}
         />
       )}
+
+      {/* ⚠️ 꼭 마지막에 항상 렌더, 내부에서만 isOpen 제어 */}
+      <GroundRecordModal ref={groundModalRef} onSuccess={afterRecord} />
 
       {!isSubmitting && validationError && (
         <ModalOverlay>
@@ -1642,12 +1644,7 @@ export default function GameRecordPageV2() {
           </ModalContainer>
         </ModalOverlay>
       )}
-      {isGroundRecordModalOpen && (
-        <GroundRecordModal
-          setIsGroundRecordModalOpen={setIsGroundRecordModalOpen}
-          /* 필요 시 props 추가 */
-        />
-      )}
+
       <LoadingOverlay visible={isSubmitting}>
         <LoadingIcon spin fontSize={48} />
       </LoadingOverlay>

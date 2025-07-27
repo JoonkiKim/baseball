@@ -1,8 +1,15 @@
 // src/components/modals/groundRecordModal.tsx
-import { useRouter } from "next/router";
+
 import API from "../../../../commons/apis/api";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 import {
   LoadingIcon,
   LoadingOverlay,
@@ -60,16 +67,55 @@ import {
   useRectsCache,
 } from "../../units/gameRecord-v2/gameRecord-v2.container";
 
-interface IModalProps {
-  setIsGroundRecordModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  playId?: number;
+// 모달 컨트롤용 핸들러 타입
+export type GroundRecordModalHandle = {
+  open: () => void;
+  close: () => void;
+};
+
+interface GroundRecordModalProps {
   onSuccess?: () => Promise<void>;
 }
 
-export default function GroundRecordModal(props: IModalProps) {
+const GroundRecordModal = forwardRef<
+  GroundRecordModalHandle,
+  GroundRecordModalProps
+>(({ onSuccess }, ref) => {
+  const [isOpen, setIsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   // const router = useRouter();
   const [error, setError] = useState(null);
+
+  // // 부모가 ref로 open()/close() 호출 가능
+  // useImperativeHandle(
+  //   ref,
+  //   () => ({
+  //     open: () => setIsOpen(true),
+  //     close: () => setIsOpen(false),
+  //   }),
+  //   []
+  // );
+
+  // 모달 닫기 핸들러
+  const handleClose = useCallback(() => {
+    setIsOpen(false);
+  }, []);
+
+  // 확인 버튼 핸들러
+  const handleSubmit = useCallback(async () => {
+    setIsSubmitting(true);
+    try {
+      await onSuccess?.();
+      handleClose();
+    } catch (e) {
+      setError(e as Error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [onSuccess, handleClose]);
+
+  // 모달이 닫혀있으면 렌더링 스킵
+  // if (!isOpen) return null;
 
   // 드래그 앤 드롭 관련
   // 베이스 아이디 목록
@@ -172,16 +218,16 @@ export default function GroundRecordModal(props: IModalProps) {
 
   const [isReconstructMode, setIsReconstructMode] = useState(false);
 
-  const handleClose = () => {
-    // 모달 닫기
-    props.setIsGroundRecordModalOpen(false);
-  };
+  // const handleClose = () => {
+  //   // 모달 닫기
+  //   props.setIsGroundRecordModalOpen(false);
+  // };
 
-  // 확인하기 눌렀을 때 실행될 함수
-  const handleSubmit = () => {
-    // // 모달 닫기
-    // props.setIsGroundRecordModalOpen(false);
-  };
+  // // 확인하기 눌렀을 때 실행될 함수
+  // const handleSubmit = () => {
+  //   // // 모달 닫기
+  //   // props.setIsGroundRecordModalOpen(false);
+  // };
 
   // 커스텀경계
 
@@ -571,6 +617,26 @@ export default function GroundRecordModal(props: IModalProps) {
     });
   }
 
+  useImperativeHandle(
+    ref,
+    () => ({
+      open: () => setIsOpen(true),
+      close: () => setIsOpen(false),
+    }),
+    []
+  );
+
+  useEffect(() => {
+    if (isOpen) {
+      refreshRects();
+    }
+  }, [isOpen, refreshRects]);
+
+  // ── 2) 훅 아래에서만 렌더링 분기
+  if (!isOpen) {
+    return null;
+  }
+
   return (
     <ModalOverlay>
       <ModalContainer
@@ -744,4 +810,6 @@ export default function GroundRecordModal(props: IModalProps) {
       <ErrorAlert error={error} />
     </ModalOverlay>
   );
-}
+});
+
+export default GroundRecordModal;
