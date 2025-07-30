@@ -1048,45 +1048,45 @@ export default function GameRecordPageV2() {
 
   // 커스텀 경계설정
 
-  function handleDragMove(event: DragMoveEvent) {
-    const id = String(event.active.id);
-    // 검정 배지는 스킵
-    if (id.startsWith("black-badge")) return;
+  // function handleDragMove(event: DragMoveEvent) {
+  //   const id = String(event.active.id);
+  //   // 검정 배지는 스킵
+  //   if (id.startsWith("black-badge")) return;
 
-    // 아직 origin이 없으면 스킵
-    const origin = originCenters.current[id];
-    if (!origin) return;
+  //   // 아직 origin이 없으면 스킵
+  //   const origin = originCenters.current[id];
+  //   if (!origin) return;
 
-    // RAF로 한 프레임에 한 번만 실행
-    if (rafIdRef.current != null) return;
-    rafIdRef.current = requestAnimationFrame(() => {
-      rafIdRef.current = null;
+  //   // RAF로 한 프레임에 한 번만 실행
+  //   if (rafIdRef.current != null) return;
+  //   rafIdRef.current = requestAnimationFrame(() => {
+  //     rafIdRef.current = null;
 
-      // DnD‑Kit이 주는 delta.x/y + origin
-      const dx = event.delta?.x ?? 0;
-      const dy = event.delta?.y ?? 0;
-      const cx = origin.x + dx;
-      const cy = origin.y + dy;
+  //     // DnD‑Kit이 주는 delta.x/y + origin
+  //     const dx = event.delta?.x ?? 0;
+  //     const dy = event.delta?.y ?? 0;
+  //     const cx = origin.x + dx;
+  //     const cy = origin.y + dy;
 
-      // out-zone 판정: zoneRectRef.current는 이미 외부에서 갱신된 DOMRect이므로
-      const zone = zoneRectRef.current;
-      if (!zone) return;
+  //     // out-zone 판정: zoneRectRef.current는 이미 외부에서 갱신된 DOMRect이므로
+  //     const zone = zoneRectRef.current;
+  //     if (!zone) return;
 
-      const outsideNow =
-        cx < zone.left || cx > zone.right || cy < zone.top || cy > zone.bottom;
+  //     const outsideNow =
+  //       cx < zone.left || cx > zone.right || cy < zone.top || cy > zone.bottom;
 
-      // 변화가 있을 때만 클래스 토글 or 스타일 변경
-      if (outsideNow !== prevOutsideRef.current) {
-        prevOutsideRef.current = outsideNow;
-        // React 상태 대신 DOM 클래스로 토글하면 더 가볍습니다
-        const badgeEl = badgeRefs.current[id]!;
-        badgeEl.classList.toggle("out-zone", outsideNow);
-      }
+  //     // 변화가 있을 때만 클래스 토글 or 스타일 변경
+  //     if (outsideNow !== prevOutsideRef.current) {
+  //       prevOutsideRef.current = outsideNow;
+  //       // React 상태 대신 DOM 클래스로 토글하면 더 가볍습니다
+  //       const badgeEl = badgeRefs.current[id]!;
+  //       badgeEl.classList.toggle("out-zone", outsideNow);
+  //     }
 
-      // ★ Ground 배경 토글(추가)
-      groundRef.current?.classList.toggle("out-zone-active", outsideNow);
-    });
-  }
+  //     // ★ Ground 배경 토글(추가)
+  //     groundRef.current?.classList.toggle("out-zone-active", outsideNow);
+  //   });
+  // }
 
   const customBoundsRef = useRef<HTMLDivElement>(null);
 
@@ -1235,7 +1235,7 @@ export default function GameRecordPageV2() {
       setBadgeSnaps((prev) => ({ ...prev, [badgeId]: null }));
 
       // ★ Ground의 'out-zone-active' 클래스 제거
-      groundRef.current?.classList.remove("out-zone-active");
+      // groundRef.current?.classList.remove("out-zone-active");
       return;
     }
 
@@ -1374,7 +1374,7 @@ export default function GameRecordPageV2() {
               />
             </ReconstructionButtonWrapper>
           </ReconstructionWrapper>
-          <ControlButtonWhite>임시저장</ControlButtonWhite>
+          <ControlButtonWhite>저장하기</ControlButtonWhite>
           <ControlButton onClick={() => setIsGameEndModalOpen(true)}>
             경기종료
           </ControlButton>
@@ -1386,14 +1386,14 @@ export default function GameRecordPageV2() {
         sensors={sensors}
         // collisionDetection={rectIntersection}
         modifiers={[dynamicBoundary]}
-        measuring={{
-          droppable: {
-            // or AlwaysExceptInitialPlacement
-            strategy: MeasuringStrategy.Always,
-          },
-        }}
+        // measuring={{
+        //   droppable: {
+        //     // or AlwaysExceptInitialPlacement
+        //     strategy: MeasuringStrategy.Always,
+
+        //   },
+        // }}
         onDragStart={handleDragStart}
-        onDragMove={handleDragMove}
         onDragEnd={onAnyDragEnd}
       >
         <GraphicWrapper ref={wrapperRef}>
