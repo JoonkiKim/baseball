@@ -865,6 +865,7 @@ const GroundRecordModal = forwardRef<
             >
               <polygon
                 id="ground"
+                style={{ border: "1px solid black", backgroundColor: "green" }}
                 points="55,0 110,55 55,110 0,55"
                 // style={{ border: "1px solid black" }}
                 ref={(el) => {
