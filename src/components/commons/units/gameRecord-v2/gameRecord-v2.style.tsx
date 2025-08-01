@@ -8,7 +8,7 @@ const large =
 const xlarge = "@media only screen and (min-width: 1025px)";
 
 // 메인 컨테이너
-export const GameRecordContainer = styled.div<{ reconstructMode: boolean }>`
+export const GameRecordContainer = styled.div`
   width: 100%;
   max-width: 100vw;
   display: flex;
@@ -17,10 +17,13 @@ export const GameRecordContainer = styled.div<{ reconstructMode: boolean }>`
   /* min-height: 100vh; */
 
   height: calc(var(--vh) * 100);
-  background-color: ${({ reconstructMode }) =>
-    reconstructMode ? "#B8B8B8" : "#f2f2f7"};
-  /* padding-bottom: 10vh; */
-  /* background-color: red; */
+  /* 기본 배경 */
+  background-color: #f2f2f7;
+
+  /* reconstruct-mode 클래스가 붙으면 배경 변경 */
+  &.reconstruct-mode {
+    background-color: #b8b8b8;
+  }
 `;
 
 export const ScoreBoardWrapper = styled.div`
@@ -775,38 +778,119 @@ export const ReconstructionButtonWrapper = styled.div`
   align-items: center;
 `;
 
+// export const ReconstructionSwitch = styled(Switch)`
+//   /* 1) 트랙 너비 조정 (높이는 이미 custom 됐으니 필요 없다면 생략) */
+//   && {
+//     background-color: #e5e5ea !important;
+//     width: 11vw !important; /* 원하는 가로 길이 */
+//     min-width: 11vw !important;
+//     height: 3vh !important;
+//   }
+//   /* ON 상태의 트랙 색 */
+//   &.ant-switch-checked {
+//     background-color: #0f0f70 !important; /* 원하는 ON 트랙 색 */
+//   }
+
+//   /* 2) 내부 여백: 패딩만큼 핸들이 옆으로 빠지지 않도록 margin 설정 */
+//   .ant-switch-inner {
+//     margin: 2px; /* trackPadding 만큼 */
+//   }
+
+//   /* 3) 핸들 크기 & 중앙 정렬 & 움직일 때 애니메이션 제거 */
+//   .ant-switch-handle {
+//     width: 4vw !important; /* handleSize */
+//     height: 4vw !important;
+//     top: 50% !important;
+//     transform: translateY(-50%) !important;
+//     left: 5px !important;
+//     /* transition: none !important; */
+//   }
+
+//   /* Checked 상태에서 핸들 위치 재계산 */
+//   &.ant-switch-checked .ant-switch-handle {
+//     left: calc(100% - 5px - 4vw) !important;
+//     /* 100% 트랙 너비에서 padding(2px)과 핸들 너비(18px)만큼 뺀 위치 */
+//   }
+// `;
+
+// export const ReconstructionSwitch = styled(Switch)`
+//   /* 1) 트랙 전체에 빠른 전환 적용 */
+//   && {
+//     background-color: #e5e5ea !important;
+//     width: 11vw !important;
+//     min-width: 11vw !important;
+//     height: 3vh !important;
+
+//     /* 배경색 전환 속도 */
+//     transition: background-color 100ms ease-in-out !important;
+//   }
+
+//   /* ON 상태 트랙 색 */
+//   &.ant-switch-checked {
+//     background-color: #0f0f70 !important;
+//   }
+
+//   /* 2) 내부 여백: 패딩만큼 핸들이 옆으로 빠지지 않도록 margin 설정 */
+//   .ant-switch-inner {
+//     margin: 2px;
+//   }
+
+//   /* 3) 핸들 크기 & 중앙 정렬 & 빠른 이동 애니메이션 */
+//   .ant-switch-handle {
+//     width: 4vw !important;
+//     height: 4vw !important;
+//     top: 50% !important;
+//     transform: translateY(-50%) !important;
+//     left: 5px !important;
+
+//     /* 핸들 이동 속도 */
+//     transition: left 200ms ease-in-out !important;
+//   }
+
+//   /* Checked 상태 핸들 위치 & 속도 재정의 */
+//   &.ant-switch-checked .ant-switch-handle {
+//     left: calc(100% - 5px - 4vw) !important;
+//     transition: left 100ms ease-in-out !important;
+//   }
+// `;
 export const ReconstructionSwitch = styled(Switch)`
-  /* 1) 트랙 너비 조정 (높이는 이미 custom 됐으니 필요 없다면 생략) */
+  /* 1) 트랙 전체에 빠른 전환 적용 */
   && {
     background-color: #e5e5ea !important;
-    width: 11vw !important; /* 원하는 가로 길이 */
+    width: 11vw !important;
     min-width: 11vw !important;
     height: 3vh !important;
+
+    /* 배경색 전환 속도 */
+    transition: background-color 100ms ease-in-out !important;
   }
-  /* ON 상태의 트랙 색 */
+
+  /* ON 상태 트랙 색 */
   &.ant-switch-checked {
-    background-color: #0f0f70 !important; /* 원하는 ON 트랙 색 */
+    background-color: #0f0f70 !important;
   }
 
   /* 2) 내부 여백: 패딩만큼 핸들이 옆으로 빠지지 않도록 margin 설정 */
   .ant-switch-inner {
-    margin: 2px; /* trackPadding 만큼 */
+    margin: 2px;
   }
 
-  /* 3) 핸들 크기 & 중앙 정렬 & 움직일 때 애니메이션 제거 */
+  /* 3) 핸들 크기 & 중앙 정렬 & 빠른 이동 애니메이션 */
   .ant-switch-handle {
-    width: 4vw !important; /* handleSize */
+    width: 4vw !important;
     height: 4vw !important;
     top: 50% !important;
     transform: translateY(-50%) !important;
     left: 5px !important;
-    /* transition: none !important; */
+
+    /* 핸들 이동 속도 */
+    transition: left 100ms ease-in-out !important;
   }
 
-  /* Checked 상태에서 핸들 위치 재계산 */
+  /* Checked 상태 핸들 위치 & 속도 재정의 */
   &.ant-switch-checked .ant-switch-handle {
     left: calc(100% - 5px - 4vw) !important;
-    /* 100% 트랙 너비에서 padding(2px)과 핸들 너비(18px)만큼 뺀 위치 */
+    transition: left 100ms ease-in-out !important;
   }
 `;
 

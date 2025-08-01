@@ -1321,8 +1321,26 @@ export default function GameRecordPageV2() {
   // 콘솔에 다시 찍히지 않는다면 부모 컴포넌트는 리렌더링되지 않은 것!
   console.log("▶ GameRecordPageV2 render");
 
+  // 이닝의 재구성 성능 올리기
+  // ① 컨테이너와 흰 배지를 감쌀 ref
+  const containerRef = useRef<HTMLDivElement>(null);
+  const whiteBadgesRef = useRef<HTMLDivElement>(null);
+
+  // ② 버튼 클릭 시 DOM 클래스/스타일만 토글
+  const handleReconstructToggle = (checked: boolean) => {
+    const container = containerRef.current;
+    const badges = whiteBadgesRef.current;
+    if (container) {
+      container.classList.toggle("reconstruct-mode", checked);
+    }
+    if (badges) {
+      // checked=true 이면 재구성 모드 → 흰 배지를 표시
+      badges.style.display = !checked ? "block" : "none";
+    }
+  };
+
   return (
-    <GameRecordContainer reconstructMode={isReconstructMode}>
+    <GameRecordContainer ref={containerRef}>
       <ScoreBoardWrapper>
         <InningHeader>
           {inningHeaders.map((inn, i) => (
@@ -1362,16 +1380,7 @@ export default function GameRecordPageV2() {
           <ReconstructionWrapper>
             <ReconstructionTitle>이닝의 재구성</ReconstructionTitle>
             <ReconstructionButtonWrapper>
-              <ReconstructionSwitch
-                checked={isReconstructMode}
-                onChange={(checked) => {
-                  // OFF로 전환될 때만 초기화
-                  if (!checked) {
-                    resetWhiteBadges();
-                  }
-                  setIsReconstructMode(checked);
-                }}
-              />
+              <ReconstructionSwitch onChange={handleReconstructToggle} />
             </ReconstructionButtonWrapper>
           </ReconstructionWrapper>
           <ControlButtonWhite>저장하기</ControlButtonWhite>
@@ -1527,18 +1536,20 @@ export default function GameRecordPageV2() {
           {/* NameBadge */}
           {/* 4) 드롭 후 스냅 or 드래그 상태에 따라 렌더 */}
           {/* ③ activeBadges에 든 것만 렌더 */}
-          {badgeConfigs
-            .filter((cfg) => activeBadges.includes(cfg.id))
-            .map((cfg) => (
-              <DraggableBadge
-                key={cfg.id}
-                id={cfg.id}
-                label={cfg.label}
-                initialLeft={cfg.initialLeft}
-                initialTop={cfg.initialTop}
-                snapInfo={badgeSnaps[cfg.id]}
-              />
-            ))}
+          <div ref={whiteBadgesRef}>
+            {badgeConfigs
+              .filter((cfg) => activeBadges.includes(cfg.id))
+              .map((cfg) => (
+                <DraggableBadge
+                  key={cfg.id}
+                  id={cfg.id}
+                  label={cfg.label}
+                  initialLeft={cfg.initialLeft}
+                  initialTop={cfg.initialTop}
+                  snapInfo={badgeSnaps[cfg.id]}
+                />
+              ))}
+          </div>
         </GraphicWrapper>
       </DndContext>
       <PlayersRow>
