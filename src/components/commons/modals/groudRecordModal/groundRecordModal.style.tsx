@@ -696,28 +696,25 @@ export const ReconstructionButtonWrapper = styled.div`
 // `;
 
 export const ReconstructionSwitch = styled(Switch)`
-  /* 1) 트랙 전체에 빠른 전환 적용 */
   && {
     background-color: #e5e5ea !important;
     width: 11vw !important;
     min-width: 11vw !important;
     height: 3vh !important;
 
-    /* 배경색 전환 속도 */
-    transition: background-color 5ms ease-in-out !important;
+    /* 즉시 반영: 트랜지션 제거 */
+    transition: none !important;
+    will-change: background-color;
   }
 
-  /* ON 상태 트랙 색 */
   &.ant-switch-checked {
     background-color: #0f0f70 !important;
   }
 
-  /* 2) 내부 여백: 패딩만큼 핸들이 옆으로 빠지지 않도록 margin 설정 */
   .ant-switch-inner {
     margin: 2px;
   }
 
-  /* 3) 핸들 크기 & 중앙 정렬 & 빠른 이동 애니메이션 */
   .ant-switch-handle {
     width: 4vw !important;
     height: 4vw !important;
@@ -725,14 +722,12 @@ export const ReconstructionSwitch = styled(Switch)`
     transform: translateY(-50%) !important;
     left: 5px !important;
 
-    /* 핸들 이동 속도 */
-    transition: left 5ms ease-in-out !important;
+    transition: none !important;
+    will-change: left;
   }
 
-  /* Checked 상태 핸들 위치 & 속도 재정의 */
   &.ant-switch-checked .ant-switch-handle {
     left: calc(100% - 5px - 4vw) !important;
-    transition: left 5ms ease-in-out !important;
   }
 `;
 
