@@ -581,6 +581,22 @@ const GroundRecordModal = forwardRef<
     }
   };
 
+  const switchRef = useRef<HTMLButtonElement | null>(null);
+  useEffect(() => {
+    const el = switchRef.current;
+    if (!el) return;
+    const onPointerDown = () => {
+      el.classList.add("ant-switch-checked");
+    };
+    const onPointerUp = () => {
+      // 실제 상태 반영은 onChange, 여기선 그냥 시각 안정화용
+    };
+    el.addEventListener("pointerdown", onPointerDown);
+    return () => {
+      el.removeEventListener("pointerdown", onPointerDown);
+    };
+  }, []);
+
   useImperativeHandle(
     ref,
     () => ({
@@ -647,6 +663,7 @@ const GroundRecordModal = forwardRef<
                   }}
                 >
                   <ReconstructionSwitch
+                    ref={switchRef}
                     defaultChecked={false} // uncontrolled: 내부 토글 UI 즉시
                     onChange={(checked: boolean) => {
                       handleReconstructToggle(checked);
