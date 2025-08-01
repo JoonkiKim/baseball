@@ -555,16 +555,32 @@ const GroundRecordModal = forwardRef<
 
   // ② 버튼 클릭 시 DOM 클래스/스타일만 토글
   const handleReconstructToggle = (checked: boolean) => {
-    if (checked) {
-      resetWhiteBadges();
-    }
-
-    reconstructModeRef.current = checked;
-
+    // 1) 시각적 변화 즉시: 클래스 토글
     if (containerRef.current) {
       containerRef.current.classList.toggle("reconstruct-mode", checked);
     }
+    reconstructModeRef.current = checked;
+
+    if (checked) {
+      // 2) 추가로 배지 위치 초기화 시각적 스냅샷을 바로 보여주고 싶다면 (선택)
+      Object.values(badgeRefs.current).forEach((el) => {
+        if (!el) return;
+        // 트랜지션 제거해서 점프처럼 즉시 반영
+        const prevTransition = el.style.transition;
+        el.style.transition = "none";
+        el.style.transform = "translate(-50%, -50%)";
+        // 레이아웃 강제 계산으로 즉시 적용 보장
+        void el.getBoundingClientRect();
+        el.style.transition = prevTransition;
+      });
+
+      // 3) 무거운 상태 리셋은 다음 프레임으로 연기
+      requestAnimationFrame(() => {
+        resetWhiteBadges();
+      });
+    }
   };
+
   useImperativeHandle(
     ref,
     () => ({
@@ -619,18 +635,25 @@ const GroundRecordModal = forwardRef<
             <ReconstructionWrapper>
               <ReconstructionTitle>이닝의 재구성</ReconstructionTitle>
               <ReconstructionButtonWrapper>
-                <ReconstructionSwitch
-                  // controlled 하지 않고 event 기반이라면 아래처럼
-                  onChange={(e: any) => {
-                    const checked =
-                      typeof e === "boolean"
-                        ? e
-                        : e?.target
-                        ? e.target.checked
-                        : false;
-                    handleReconstructToggle(checked);
+                <div
+                  style={{ touchAction: "manipulation" }}
+                  onPointerDown={() => {
+                    // 배경 즉시 토글 (checked 여부에 따라 어차피 handleReconstructToggle이 정리함)
+                    containerRef.current?.classList.add("reconstruct-mode");
                   }}
-                />
+                >
+                  <ReconstructionSwitch
+                    onChange={(e: any) => {
+                      const checked =
+                        typeof e === "boolean"
+                          ? e
+                          : e?.target
+                          ? e.target.checked
+                          : false;
+                      handleReconstructToggle(checked);
+                    }}
+                  />
+                </div>
               </ReconstructionButtonWrapper>
             </ReconstructionWrapper>
             <ModalBottomRunnerWrapper>

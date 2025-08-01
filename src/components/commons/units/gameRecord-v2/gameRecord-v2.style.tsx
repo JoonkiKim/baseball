@@ -862,7 +862,7 @@ export const ReconstructionSwitch = styled(Switch)`
     height: 3vh !important;
 
     /* 배경색 전환 속도 */
-    transition: background-color 100ms ease-in-out !important;
+    transition: background-color 5ms ease-in-out !important;
   }
 
   /* ON 상태 트랙 색 */
@@ -884,13 +884,13 @@ export const ReconstructionSwitch = styled(Switch)`
     left: 5px !important;
 
     /* 핸들 이동 속도 */
-    transition: left 100ms ease-in-out !important;
+    transition: left 5ms ease-in-out !important;
   }
 
   /* Checked 상태 핸들 위치 & 속도 재정의 */
   &.ant-switch-checked .ant-switch-handle {
     left: calc(100% - 5px - 4vw) !important;
-    transition: left 100ms ease-in-out !important;
+    transition: left 5ms ease-in-out !important;
   }
 `;
 
