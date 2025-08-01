@@ -1,17 +1,9 @@
 // PortalSwitch.tsx
-import {
-  useState,
-  useEffect,
-  useLayoutEffect,
-  memo,
-  RefObject,
-  useRef,
-} from "react";
+import { useLayoutEffect, memo, RefObject, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { ReconstructionSwitch } from "./groundRecordModal.style";
 
 interface PortalSwitchProps {
-  checked: boolean;
   onChange: (checked: boolean) => void;
   anchorRef: RefObject<HTMLElement>;
 }
@@ -36,35 +28,19 @@ function ensurePortalRoot() {
 }
 
 const PortalSwitch = memo(function PortalSwitch({
-  checked,
   onChange,
   anchorRef,
 }: PortalSwitchProps) {
-  const [internalChecked, setInternalChecked] = useState(checked);
-  const lastReportedRef = useRef<boolean>(checked);
-  const ignoreFlipRef = useRef<boolean>(false); // 잠깐 반대 방향 onChange 무시
-
-  const [position, setPosition] = useState<{
-    top: number;
-    left: number;
-    width: number;
-    height: number;
-  }>({
+  const [internalChecked, setInternalChecked] = useState(false);
+  const ignoreNextRef = useRef(false);
+  const [position, setPosition] = useState({
     top: 0,
     left: 0,
     width: 0,
     height: 0,
   });
 
-  // 외부 checked가 바뀌면 internal 동기화 (정상적인 흐름)
-  useEffect(() => {
-    if (checked !== internalChecked) {
-      setInternalChecked(checked);
-      lastReportedRef.current = checked;
-    }
-  }, [checked, internalChecked]);
-
-  // 앵커 위치 추적
+  // 앵커 위치 트래킹
   useLayoutEffect(() => {
     if (!anchorRef.current) return;
     const update = () => {
@@ -88,33 +64,24 @@ const PortalSwitch = memo(function PortalSwitch({
     };
   }, [anchorRef]);
 
-  // 포인터다운: 낙관적 토글 + 즉시 부모에 보고, 이후 반전 이벤트 잠깐 무시
+  // 낙관적 UI: pointerDown에서 즉시 반영하고 다음 underlying change는 무시
   const handlePointerDown = () => {
-    const next = !internalChecked;
-    setInternalChecked(next);
-    lastReportedRef.current = next;
-    onChange(next);
-    // 짧게 반대 방향 onChange 무시 (예: underlying switch가 뒤늦게 뒤집는 경우)
-    ignoreFlipRef.current = true;
-    setTimeout(() => {
-      ignoreFlipRef.current = false;
-    }, 250);
+    setInternalChecked((prev) => {
+      const next = !prev;
+      ignoreNextRef.current = true; // 다음 onChange 이벤트(underlying) 무시
+      onChange(next);
+      return next;
+    });
   };
 
-  // 실제 switch가 change를 보낼 때 (keyboard 등)
+  // 실제 switch가 change 콜백을 보낼 때
   const handleSwitchChange = (val: boolean) => {
-    // 이미 같은 값 보고했거나, 잠깐 반대 방향으로 들어온 이벤트라면 무시
-    if (val === lastReportedRef.current) {
+    if (ignoreNextRef.current) {
+      // 바로 이전에 pointerDown에서 반영했으므로 이 change는 redundant
+      ignoreNextRef.current = false;
       return;
     }
-    if (ignoreFlipRef.current && val !== lastReportedRef.current) {
-      // ignoreFlipRef가 true인 동안에, 만약 underlying switch가
-      // "뒤집힌" (낙관적과 반대) 값을 보내면 무시
-      return;
-    }
-    // 정식으로 반영
     setInternalChecked(val);
-    lastReportedRef.current = val;
     onChange(val);
   };
 
@@ -144,8 +111,7 @@ const PortalSwitch = memo(function PortalSwitch({
     </div>
   );
 
-  const root = ensurePortalRoot();
-  return createPortal(switchNode, root);
+  return createPortal(switchNode, ensurePortalRoot());
 });
 
 export default PortalSwitch;

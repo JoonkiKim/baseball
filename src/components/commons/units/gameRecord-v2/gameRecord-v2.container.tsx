@@ -903,7 +903,7 @@ export default function GameRecordPageV2() {
     const { attributes, listeners, setNodeRef, transform } = useDraggable({
       id,
     });
-
+    console.log("main badge render");
     const combinedRef = (el: HTMLElement | null) => {
       setNodeRef(el);
       badgeRefs.current[id] = el;
