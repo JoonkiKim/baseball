@@ -489,29 +489,43 @@ const GroundRecordModal = forwardRef<
     // setIsOutside(false);
   };
 
-  const resetWhiteBadges = useCallback(() => {
-    // 1) badgeSnaps(= 점유/스냅 정보) 초기화
-    const freshSnaps: Record<string, SnapInfo | null> = {};
-    badgeConfigsForModal.forEach((c) => (freshSnaps[c.id] = null));
-    setBadgeSnaps(freshSnaps);
+  // const resetWhiteBadges = useCallback(() => {
+  //   // 1) badgeSnaps(= 점유/스냅 정보) 초기화
+  //   const freshSnaps: Record<string, SnapInfo | null> = {};
+  //   badgeConfigsForModal.forEach((c) => (freshSnaps[c.id] = null));
+  //   setBadgeSnaps(freshSnaps);
 
-    // 2) 화면에 모든 흰 배지 다시 보이게
-    setActiveBadges(badgeConfigsForModal.map((c) => c.id));
+  //   // 2) 화면에 모든 흰 배지 다시 보이게
+  //   setActiveBadges(badgeConfigsForModal.map((c) => c.id));
 
-    // 3) 베이스 이동(순서) 기록 초기화
-    badgeConfigsForModal.forEach(({ id }) => {
-      snappedSeqRef.current[id] = [];
-    });
+  //   // 3) 베이스 이동(순서) 기록 초기화
+  //   badgeConfigsForModal.forEach(({ id }) => {
+  //     snappedSeqRef.current[id] = [];
+  //   });
 
-    // 4) (선택) 흰 배지 DOM ref 정리
-    badgeRefs.current = {};
+  //   // 4) (선택) 흰 배지 DOM ref 정리
+  //   badgeRefs.current = {};
 
-    // 5) (선택) 기타 UI 상태 리셋이 필요하면 여기서
-    // setIsOutside(false);
-  }, [badgeConfigsForModal]);
+  //   // 5) (선택) 기타 UI 상태 리셋이 필요하면 여기서
+  //   // setIsOutside(false);
+  // }, [badgeConfigsForModal]);
 
   // ---아웃존 설정 ---
   // 1) ref 선언
+  const resetWhiteBadges = useCallback(() => {
+    // 한 번에 묶인 상태 변경 (이벤트 핸들러 내부라 배칭)
+    const freshSnaps: Record<string, SnapInfo | null> = {};
+    badgeConfigsForModal.forEach((c) => (freshSnaps[c.id] = null));
+
+    setBadgeSnaps(freshSnaps);
+    setActiveBadges(badgeConfigsForModal.map((c) => c.id));
+    badgeConfigsForModal.forEach(({ id }) => {
+      snappedSeqRef.current[id] = [];
+    });
+    // badgeRefs는 DOM refs; 비워도 리렌더를 안 일으킴
+    badgeRefs.current = {};
+  }, [badgeConfigsForModal]);
+
   const originCenters = useRef<Record<string, { x: number; y: number }>>({});
   // ① Ground용 ref 선언
   const groundRef = useRef<HTMLDivElement | null>(null);
@@ -535,22 +549,22 @@ const GroundRecordModal = forwardRef<
 
   // 이닝의 재구성 성능 올리기
   // ① 컨테이너와 흰 배지를 감쌀 ref
+  const reconstructModeRef = useRef(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const whiteBadgesRef = useRef<HTMLDivElement>(null);
 
   // ② 버튼 클릭 시 DOM 클래스/스타일만 토글
   const handleReconstructToggle = (checked: boolean) => {
-    const container = containerRef.current;
-    const badges = whiteBadgesRef.current;
-    if (container) {
-      container.classList.toggle("reconstruct-mode", checked);
+    if (checked) {
+      resetWhiteBadges();
     }
-    if (badges) {
-      // checked=true 이면 재구성 모드 → 흰 배지를 표시
-      badges.style.display = !checked ? "block" : "none";
+
+    reconstructModeRef.current = checked;
+
+    if (containerRef.current) {
+      containerRef.current.classList.toggle("reconstruct-mode", checked);
     }
   };
-
   useImperativeHandle(
     ref,
     () => ({
@@ -578,12 +592,6 @@ const GroundRecordModal = forwardRef<
           id="game-record-dnd" // ← 여기에 고정된 string ID를 넣어줍니다
           sensors={sensors}
           modifiers={[dynamicBoundary]}
-          // measuring={{
-          //   droppable: {
-          //     // or AlwaysExceptInitialPlacement
-          //     strategy: MeasuringStrategy.Always,
-          //   },
-          // }}
           onDragStart={handleDragStart}
           // onDragMove={handleDragMove}
           onDragEnd={onAnyDragEnd}
@@ -612,8 +620,16 @@ const GroundRecordModal = forwardRef<
               <ReconstructionTitle>이닝의 재구성</ReconstructionTitle>
               <ReconstructionButtonWrapper>
                 <ReconstructionSwitch
-                  // checked={isReconstructMode}
-                  onChange={handleReconstructToggle}
+                  // controlled 하지 않고 event 기반이라면 아래처럼
+                  onChange={(e: any) => {
+                    const checked =
+                      typeof e === "boolean"
+                        ? e
+                        : e?.target
+                        ? e.target.checked
+                        : false;
+                    handleReconstructToggle(checked);
+                  }}
                 />
               </ReconstructionButtonWrapper>
             </ReconstructionWrapper>

@@ -30,6 +30,9 @@ export const GameRecordContainer = styled.div`
   flex-direction: column;
   align-items: center;
   min-height: 100vh;
+  &.reconstruct-mode {
+    background-color: #b8b8b8;
+  }
 `;
 
 export const ScoreBoardWrapper = styled.div`
@@ -448,6 +451,7 @@ export const ModalContainer = styled.div`
   background-color: #f2f2f7;
   &.reconstruct-mode {
     background-color: #b8b8b8;
+    will-change: background-color;
   }
 `;
 
@@ -579,6 +583,10 @@ export const NameBadge = styled.div`
   touch-action: none; /* 터치 동작(스크롤/줌) 비활성화 */
   pointer-events: all; /* 이벤트 확실히 받도록 */
   user-select: none; /* 드래그 중 텍스트 선택 방지 */
+  .name-badge {
+    will-change: transform;
+    backface-visibility: hidden;
+  }
 `;
 
 export const NameText = styled.div`
