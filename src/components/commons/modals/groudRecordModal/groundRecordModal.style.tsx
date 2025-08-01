@@ -460,13 +460,15 @@ export const GraphicWrapper = styled.div<{ outside?: boolean }>`
   overflow: visible;
   width: 90%;
   height: 35vh;
-  background-image: url("/images/ground-without-home.png");
-  background-size: cover; /* 컨테이너에 꽉 채우기 */
-  background-position: center; /* 가운데를 기준으로 하기 */
-  background-repeat: no-repeat;
+  background-color: green;
+  /* background-image: url("/images/ground-without-home.png");/ */
+  /* background-size: cover; 
+  background-position: center; 
+  background-repeat: no-repeat; */
   /* background: ${(p) => (p.outside ? "red" : "#2c660d")}; */
   border-radius: 2vh;
   z-index: 30;
+  border: 1px solid black;
   /* margin: 3vh 0; */
 `;
 export const FullImage = styled.img`
@@ -520,10 +522,9 @@ export const DiamondSvg = styled.svg`
   height: auto;
   overflow: visible;
   fill: transparent;
-  background-image: url("/images/diamond.png");
-  background-size: cover; /* 컨테이너에 꽉 채우기 */
-  background-position: center; /* 가운데를 기준으로 하기 */
-  background-repeat: no-repeat; /* 반복하지 않기 */
+
+  /* border: 1px solid black; */
+  /* background-image: url("/images/diamond.png"); */
 
   /* border: 1px solid black; */
   /* background-color: red; */
@@ -535,10 +536,6 @@ export const DiamondSvg = styled.svg`
   }
 
   /* 여기에 highlight 스타일 추가 */
-  & .inner.highlight {
-    fill: blue;
-    transition: fill 0.2s ease;
-  }
 `;
 export const Rotator = styled(OverlaySvg)`
   width: 4vw;
@@ -783,31 +780,6 @@ export const ModalBottomRedoUndoWrapper = styled.div`
 `;
 
 // Redo 아이콘용
-export const RedoIcon = styled.div`
-  margin-top: 1vh;
-  width: 2rem;
-  height: 2rem;
-  background-image: url("/images/redo2.png");
-  background-repeat: no-repeat;
-  background-position: center center; /* ← 축을 둘 다 지정 */
-  background-size: contain;
-  cursor: pointer;
-`;
-
-// Undo 아이콘용
-export const UndoIcon = styled.div`
-  margin-top: 1vh;
-  /* padding-top: 1vh; */
-  /* background-color: red; */
-  width: 2rem;
-  height: 2rem;
-  background-image: url("/images/undo2.png");
-  background-repeat: no-repeat;
-  background-position: center center; /* ← 축을 둘 다 지정 */
-  background-size: contain;
-
-  cursor: pointer;
-`;
 
 export const ModalBottomRunnerTitle = styled.div`
   /* width: 27.5vw; */
@@ -877,10 +849,7 @@ export const HomeWrapper = styled.div`
   /* background-color: red; */
   z-index: 5;
   /* ─── 배경 이미지 전체 덮기 ─── */
-  background-image: url("/images/home.png");
-  background-size: cover; /* 컨테이너에 꽉 채우기 */
-  background-position: center; /* 가운데를 기준으로 하기 */
-  background-repeat: no-repeat; /* 반복하지 않기 */
+  /* background-image: url("/images/home.png"); */
 
   border-radius: 2vh;
   /* margin: 3vh 0; */
@@ -896,10 +865,7 @@ export const LineWrapper = styled.div`
   /* background-color: red; */
   z-index: 7;
   /* ─── 배경 이미지 전체 덮기 ─── */
-  background-image: url("/images/line.png");
-  background-size: cover; /* 컨테이너에 꽉 채우기 */
-  background-position: center; /* 가운데를 기준으로 하기 */
-  background-repeat: no-repeat; /* 반복하지 않기 */
+  /* background-image: url("/images/line.png"); */
 
   border-radius: 2vh;
   /* margin: 3vh 0; */
@@ -911,20 +877,19 @@ export const HomeBaseWrapper = styled.div<{ active: boolean }>`
   z-index: 990;
 
   /* 배경색을 흰/파랑으로 토글 */
-  background-color: ${({ active }) =>
-    active ? "blue" /* 기본 흰색 png 보여줄 땐 투명 */ : "white"};
+  /* background-color: ${({ active }) => (active ? "blue" : "white")}; */
 
   /* mask 에 흰색 png 파일의 알파 채널을 씁니다 */
-  mask-image: url("/images/home-base-white-1.png");
+  /* mask-image: url("/images/home-base-white-1.png");
   mask-size: cover;
   mask-position: center;
-  mask-repeat: no-repeat;
+  mask-repeat: no-repeat; */
 
   /* 사파리(webkit) 지원을 위해 */
-  -webkit-mask-image: url("/images/home-base-white-1.png");
+  /* -webkit-mask-image: url("/images/home-base-white-1.png");
   -webkit-mask-size: cover;
   -webkit-mask-position: center;
-  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-repeat: no-repeat; */
 `;
 
 export const Ground = styled.div<{ outside?: boolean }>`
