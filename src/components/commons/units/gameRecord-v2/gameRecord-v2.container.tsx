@@ -1411,17 +1411,16 @@ export default function GameRecordPageV2() {
                 style={{ touchAction: "manipulation" }}
                 onPointerDown={() => {
                   // 배경 즉시 토글 (checked 여부에 따라 어차피 handleReconstructToggle이 정리함)
-                  containerRef.current?.classList.add("reconstruct-mode");
+                  const upcoming = !reconstructModeRef.current;
+                  containerRef.current?.classList.toggle(
+                    "reconstruct-mode",
+                    upcoming
+                  );
                 }}
               >
                 <ReconstructionSwitch
-                  onChange={(e: any) => {
-                    const checked =
-                      typeof e === "boolean"
-                        ? e
-                        : e?.target
-                        ? e.target.checked
-                        : false;
+                  defaultChecked={false} // uncontrolled: 내부 토글 UI 즉시
+                  onChange={(checked: boolean) => {
                     handleReconstructToggle(checked);
                   }}
                 />
