@@ -709,6 +709,10 @@ export const NameBadge = styled.div`
   touch-action: none; /* 터치 동작(스크롤/줌) 비활성화 */
   pointer-events: all; /* 이벤트 확실히 받도록 */
   user-select: none; /* 드래그 중 텍스트 선택 방지 */
+  .name-badge {
+    will-change: transform;
+    backface-visibility: hidden;
+  }
 `;
 
 export const NameText = styled.div`

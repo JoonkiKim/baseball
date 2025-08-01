@@ -66,6 +66,7 @@ import {
   BASE_IDS,
   useRectsCache,
 } from "../../units/gameRecord-v2/gameRecord-v2.container";
+import PortalSwitch from "./reconstructionSwitch";
 
 // 모달 컨트롤용 핸들러 타입
 export type GroundRecordModalHandle = {
@@ -554,32 +555,32 @@ const GroundRecordModal = forwardRef<
   const whiteBadgesRef = useRef<HTMLDivElement>(null);
 
   // ② 버튼 클릭 시 DOM 클래스/스타일만 토글
-  const handleReconstructToggle = (checked: boolean) => {
-    // 1) 시각적 변화 즉시: 클래스 토글
-    if (containerRef.current) {
-      containerRef.current.classList.toggle("reconstruct-mode", checked);
-    }
-    reconstructModeRef.current = checked;
+  // const handleReconstructToggle = (checked: boolean) => {
+  //   // 1) 시각적 변화 즉시: 클래스 토글
+  //   if (containerRef.current) {
+  //     containerRef.current.classList.toggle("reconstruct-mode", checked);
+  //   }
+  //   reconstructModeRef.current = checked;
 
-    if (checked) {
-      // 2) 추가로 배지 위치 초기화 시각적 스냅샷을 바로 보여주고 싶다면 (선택)
-      Object.values(badgeRefs.current).forEach((el) => {
-        if (!el) return;
-        // 트랜지션 제거해서 점프처럼 즉시 반영
-        const prevTransition = el.style.transition;
-        el.style.transition = "none";
-        el.style.transform = "translate(-50%, -50%)";
-        // 레이아웃 강제 계산으로 즉시 적용 보장
-        void el.getBoundingClientRect();
-        el.style.transition = prevTransition;
-      });
+  //   if (checked) {
+  //     // 2) 추가로 배지 위치 초기화 시각적 스냅샷을 바로 보여주고 싶다면 (선택)
+  //     Object.values(badgeRefs.current).forEach((el) => {
+  //       if (!el) return;
+  //       // 트랜지션 제거해서 점프처럼 즉시 반영
+  //       const prevTransition = el.style.transition;
+  //       el.style.transition = "none";
+  //       el.style.transform = "translate(-50%, -50%)";
+  //       // 레이아웃 강제 계산으로 즉시 적용 보장
+  //       void el.getBoundingClientRect();
+  //       el.style.transition = prevTransition;
+  //     });
 
-      // 3) 무거운 상태 리셋은 다음 프레임으로 연기
-      requestAnimationFrame(() => {
-        resetWhiteBadges();
-      });
-    }
-  };
+  //     // 3) 무거운 상태 리셋은 다음 프레임으로 연기
+  //     requestAnimationFrame(() => {
+  //       resetWhiteBadges();
+  //     });
+  //   }
+  // };
 
   const switchRef = useRef<HTMLButtonElement | null>(null);
   useEffect(() => {
@@ -596,6 +597,29 @@ const GroundRecordModal = forwardRef<
       el.removeEventListener("pointerdown", onPointerDown);
     };
   }, []);
+
+  const switchAnchorRef = useRef<HTMLDivElement>(null);
+  const [reconstructChecked, setReconstructChecked] = useState(false);
+
+  const handleReconstructToggle = useCallback(
+    (checked: boolean) => {
+      console.log("parent toggle:", checked);
+      setReconstructChecked(checked);
+      if (containerRef.current) {
+        containerRef.current.classList.toggle("reconstruct-mode", checked);
+      }
+      if (checked) {
+        requestAnimationFrame(() => {
+          resetWhiteBadges(); // 이 함수는 useCallback으로 정의돼 있어야 함
+        });
+      }
+    },
+    [resetWhiteBadges]
+  );
+
+  useEffect(() => {
+    console.log("reconstructChecked changed:", reconstructChecked);
+  }, [reconstructChecked]);
 
   useImperativeHandle(
     ref,
@@ -652,24 +676,21 @@ const GroundRecordModal = forwardRef<
               <ReconstructionTitle>이닝의 재구성</ReconstructionTitle>
               <ReconstructionButtonWrapper>
                 <div
-                  style={{ touchAction: "manipulation" }}
-                  onPointerDown={() => {
-                    // 배경 즉시 토글 (checked 여부에 따라 어차피 handleReconstructToggle이 정리함)
-                    const upcoming = !reconstructModeRef.current;
-                    containerRef.current?.classList.toggle(
-                      "reconstruct-mode",
-                      upcoming
-                    );
+                  ref={switchAnchorRef}
+                  style={{
+                    width: "11vw",
+                    height: "3vh",
+                    position: "relative",
+                    // (기본 자리 표시용; 실제 스위치는 포털로 올라감)
                   }}
-                >
-                  <ReconstructionSwitch
-                    ref={switchRef}
-                    defaultChecked={false} // uncontrolled: 내부 토글 UI 즉시
-                    onChange={(checked: boolean) => {
-                      handleReconstructToggle(checked);
-                    }}
-                  />
-                </div>
+                />
+
+                <PortalSwitch
+                  anchorRef={switchAnchorRef}
+                  checked={reconstructChecked}
+                  onChange={handleReconstructToggle}
+                />
+                {/* </div> */}
               </ReconstructionButtonWrapper>
             </ReconstructionWrapper>
             <ModalBottomRunnerWrapper>
