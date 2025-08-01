@@ -425,13 +425,11 @@ export const OrderBadge = styled.div`
  *  v2경기기록 관련
  * ───────────────────────────────────────────────────────── */
 
-interface ModalContainerProps {
-  reconstructMode?: boolean;
-}
+// interface ModalContainerProps {
+//   reconstructMode?: boolean;
+// }
 
-export const ModalContainer = styled.div<ModalContainerProps>`
-  background-color: ${({ reconstructMode }) =>
-    reconstructMode ? "#B8B8B8" : "#FFFFFF"};
+export const ModalContainer = styled.div`
   position: relative;
   /* margin-top: 20px; */
   width: 90%;
@@ -447,6 +445,10 @@ export const ModalContainer = styled.div<ModalContainerProps>`
   justify-content: space-evenly;
 
   z-index: 101;
+  background-color: #f2f2f7;
+  &.reconstruct-mode {
+    background-color: #b8b8b8;
+  }
 `;
 
 export const GraphicWrapper = styled.div<{ outside?: boolean }>`
@@ -644,38 +646,85 @@ export const ReconstructionButtonWrapper = styled.div`
   justify-content: center;
   align-items: center;
 `;
+// export const ReconstructionSwitch = styled(Switch)`
+//   /* 1) 트랙 전체에 빠른 전환 적용 */
+//   && {
+//     background-color: #e5e5ea !important;
+//     width: 11vw !important;
+//     min-width: 11vw !important;
+//     height: 3vh !important;
+
+//     /* 배경색 전환 속도 */
+//     transition: background-color 100ms ease-in-out !important;
+//   }
+
+//   /* ON 상태 트랙 색 */
+//   &.ant-switch-checked {
+//     background-color: #0f0f70 !important;
+//   }
+
+//   /* 2) 내부 여백: 패딩만큼 핸들이 옆으로 빠지지 않도록 margin 설정 */
+//   .ant-switch-inner {
+//     margin: 2px;
+//   }
+
+//   /* 3) 핸들 크기 & 중앙 정렬 & 빠른 이동 애니메이션 */
+//   .ant-switch-handle {
+//     width: 4vw !important;
+//     height: 4vw !important;
+//     top: 50% !important;
+//     transform: translateY(-50%) !important;
+//     left: 5px !important;
+
+//     /* 핸들 이동 속도 */
+//     transition: left 200ms ease-in-out !important;
+//   }
+
+//   /* Checked 상태 핸들 위치 & 속도 재정의 */
+//   &.ant-switch-checked .ant-switch-handle {
+//     left: calc(100% - 5px - 4vw) !important;
+//     transition: left 100ms ease-in-out !important;
+//   }
+// `;
+
 export const ReconstructionSwitch = styled(Switch)`
-  /* 1) 트랙 너비 조정 (높이는 이미 custom 됐으니 필요 없다면 생략) */
+  /* 1) 트랙 전체에 빠른 전환 적용 */
   && {
     background-color: #e5e5ea !important;
-    width: 11vw !important; /* 원하는 가로 길이 */
+    width: 11vw !important;
     min-width: 11vw !important;
-    height: 2.8vh !important;
+    height: 3vh !important;
+
+    /* 배경색 전환 속도 */
+    transition: background-color 100ms ease-in-out !important;
   }
-  /* ON 상태의 트랙 색 */
+
+  /* ON 상태 트랙 색 */
   &.ant-switch-checked {
-    background-color: #0f0f70 !important; /* 원하는 ON 트랙 색 */
+    background-color: #0f0f70 !important;
   }
 
   /* 2) 내부 여백: 패딩만큼 핸들이 옆으로 빠지지 않도록 margin 설정 */
   .ant-switch-inner {
-    margin: 2px; /* trackPadding 만큼 */
+    margin: 2px;
   }
 
-  /* 3) 핸들 크기 & 중앙 정렬 & 움직일 때 애니메이션 제거 */
+  /* 3) 핸들 크기 & 중앙 정렬 & 빠른 이동 애니메이션 */
   .ant-switch-handle {
-    width: 1rem !important; /* handleSize */
-    height: 1rem !important;
+    width: 4vw !important;
+    height: 4vw !important;
     top: 50% !important;
     transform: translateY(-50%) !important;
     left: 5px !important;
-    /* transition: none !important; */
+
+    /* 핸들 이동 속도 */
+    transition: left 100ms ease-in-out !important;
   }
 
-  /* Checked 상태에서 핸들 위치 재계산 */
+  /* Checked 상태 핸들 위치 & 속도 재정의 */
   &.ant-switch-checked .ant-switch-handle {
-    left: calc(100% - 5px - 18px) !important;
-    /* 100% 트랙 너비에서 padding(2px)과 핸들 너비(18px)만큼 뺀 위치 */
+    left: calc(100% - 5px - 4vw) !important;
+    transition: left 100ms ease-in-out !important;
   }
 `;
 

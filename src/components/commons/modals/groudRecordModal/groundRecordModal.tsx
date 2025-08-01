@@ -363,10 +363,6 @@ const GroundRecordModal = forwardRef<
   );
 
   // 다음에 가야 할(스냅해야 할) 베이스
-  const nextRequiredBase = (badgeId: string): BaseId => {
-    const seq = snappedSeqRef.current[badgeId];
-    return RUN_SEQUENCE[Math.min(seq.length, RUN_SEQUENCE.length - 1)];
-  };
 
   const handleDrop = (e: DragEndEvent) => {
     const badgeId = e.active.id as string;
@@ -537,85 +533,23 @@ const GroundRecordModal = forwardRef<
     };
   }
 
-  // const handleDragMove = (e: DragMoveEvent) => {
-  //   if (rafIdRef.current != null) return; // 이미 예약됨(스로틀)
-  //   rafIdRef.current = requestAnimationFrame(() => {
-  //     rafIdRef.current = null;
+  // 이닝의 재구성 성능 올리기
+  // ① 컨테이너와 흰 배지를 감쌀 ref
+  const containerRef = useRef<HTMLDivElement>(null);
+  const whiteBadgesRef = useRef<HTMLDivElement>(null);
 
-  //     const zoneRect = zoneRectRef.current;
-  //     if (!zoneRect) return;
-
-  //     const translated = e.active?.rect?.current?.translated;
-  //     let cx: number | null = null;
-  //     let cy: number | null = null;
-
-  //     if (translated) {
-  //       cx = translated.left + translated.width / 2;
-  //       cy = translated.top + translated.height / 2;
-  //     } else {
-  //       // fallback: DOM 읽기(가능하면 피하기)
-  //       const el = badgeRefs.current[e.active.id as string];
-  //       if (el) {
-  //         const r = el.getBoundingClientRect();
-  //         cx = r.left + r.width / 2;
-  //         cy = r.top + r.height / 2;
-  //       }
-  //     }
-
-  //     if (cx == null || cy == null) return;
-
-  //     const outsideNow =
-  //       cx < zoneRect.left ||
-  //       cx > zoneRect.right ||
-  //       cy < zoneRect.top ||
-  //       cy > zoneRect.bottom;
-
-  //     if (outsideNow !== prevOutsideRef.current) {
-  //       prevOutsideRef.current = outsideNow;
-  //       setIsOutside(outsideNow); // 변화 있을 때만 setState
-  //     }
-  //   });
-  // };
-
-  // function handleDragMove(event: DragMoveEvent) {
-  //   const id = String(event.active.id);
-  //   // 검정 배지는 스킵
-  //   if (id.startsWith("black-badge")) return;
-
-  //   // 아직 origin이 없으면 스킵
-  //   const origin = originCenters.current[id];
-  //   if (!origin) return;
-
-  //   // RAF로 한 프레임에 한 번만 실행
-  //   if (rafIdRef.current != null) return;
-  //   rafIdRef.current = requestAnimationFrame(() => {
-  //     rafIdRef.current = null;
-
-  //     // DnD‑Kit이 주는 delta.x/y + origin
-  //     const dx = event.delta?.x ?? 0;
-  //     const dy = event.delta?.y ?? 0;
-  //     const cx = origin.x + dx;
-  //     const cy = origin.y + dy;
-
-  //     // out-zone 판정: zoneRectRef.current는 이미 외부에서 갱신된 DOMRect이므로
-  //     const zone = zoneRectRef.current;
-  //     if (!zone) return;
-
-  //     const outsideNow =
-  //       cx < zone.left || cx > zone.right || cy < zone.top || cy > zone.bottom;
-
-  //     // 변화가 있을 때만 클래스 토글 or 스타일 변경
-  //     if (outsideNow !== prevOutsideRef.current) {
-  //       prevOutsideRef.current = outsideNow;
-  //       // React 상태 대신 DOM 클래스로 토글하면 더 가볍습니다
-  //       const badgeEl = badgeRefs.current[id]!;
-  //       badgeEl.classList.toggle("out-zone", outsideNow);
-  //     }
-
-  //     // ★ Ground 배경 토글(추가)
-  //     groundRef.current?.classList.toggle("out-zone-active", outsideNow);
-  //   });
-  // }
+  // ② 버튼 클릭 시 DOM 클래스/스타일만 토글
+  const handleReconstructToggle = (checked: boolean) => {
+    const container = containerRef.current;
+    const badges = whiteBadgesRef.current;
+    if (container) {
+      container.classList.toggle("reconstruct-mode", checked);
+    }
+    if (badges) {
+      // checked=true 이면 재구성 모드 → 흰 배지를 표시
+      badges.style.display = !checked ? "block" : "none";
+    }
+  };
 
   useImperativeHandle(
     ref,
@@ -639,10 +573,7 @@ const GroundRecordModal = forwardRef<
 
   return (
     <ModalOverlay>
-      <ModalContainer
-        onClick={(e) => e.stopPropagation()}
-        reconstructMode={isReconstructMode}
-      >
+      <ModalContainer onClick={(e) => e.stopPropagation()} ref={containerRef}>
         <DndContext
           id="game-record-dnd" // ← 여기에 고정된 string ID를 넣어줍니다
           sensors={sensors}
@@ -681,14 +612,8 @@ const GroundRecordModal = forwardRef<
               <ReconstructionTitle>이닝의 재구성</ReconstructionTitle>
               <ReconstructionButtonWrapper>
                 <ReconstructionSwitch
-                  checked={isReconstructMode}
-                  onChange={(checked) => {
-                    // OFF로 전환될 때만 초기화
-                    if (!checked) {
-                      resetWhiteBadges();
-                    }
-                    setIsReconstructMode(checked);
-                  }}
+                  // checked={isReconstructMode}
+                  onChange={handleReconstructToggle}
                 />
               </ReconstructionButtonWrapper>
             </ReconstructionWrapper>
@@ -788,18 +713,20 @@ const GroundRecordModal = forwardRef<
             {/* NameBadge */}
             {/* 4) 드롭 후 스냅 or 드래그 상태에 따라 렌더 */}
             {/* ③ activeBadges에 든 것만 렌더 */}
-            {badgeConfigsForModal
-              .filter((cfg) => activeBadges.includes(cfg.id))
-              .map((cfg) => (
-                <DraggableBadge
-                  key={cfg.id}
-                  id={cfg.id}
-                  label={cfg.label}
-                  initialLeft={cfg.initialLeft}
-                  initialTop={cfg.initialTop}
-                  snapInfo={badgeSnaps[cfg.id]}
-                />
-              ))}
+            <div ref={whiteBadgesRef}>
+              {badgeConfigsForModal
+                .filter((cfg) => activeBadges.includes(cfg.id))
+                .map((cfg) => (
+                  <DraggableBadge
+                    key={cfg.id}
+                    id={cfg.id}
+                    label={cfg.label}
+                    initialLeft={cfg.initialLeft}
+                    initialTop={cfg.initialTop}
+                    snapInfo={badgeSnaps[cfg.id]}
+                  />
+                ))}
+            </div>
           </GraphicWrapper>
           <ControlButton onClick={handleSubmit}>확인하기</ControlButton>
         </DndContext>
