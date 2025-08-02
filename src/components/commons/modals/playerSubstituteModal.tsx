@@ -240,7 +240,7 @@ export default function SubPlayerSelectionModal({
                     cursor: disabled ? "default" : "pointer",
                   }}
                 >
-                  <td>{player.departmentName}</td>
+                  <td>{player.department}</td>
                   <td>{player.name}</td>
                   <td>
                     {player.isElite && player.isWc

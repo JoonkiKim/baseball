@@ -105,7 +105,7 @@ export default function SubTeamRegistrationComponent({
   const togglePlayerSelection = (player: {
     id: number;
     name: string;
-    departmentName: string;
+    department: string;
     isWc: boolean;
   }) => {
     setSelectedPlayers((prev) =>
@@ -202,7 +202,7 @@ export default function SubTeamRegistrationComponent({
                     color: isDisabled ? "#999" : "#000",
                   }}
                 >
-                  <td>{player.departmentName}</td>
+                  <td>{player.department}</td>
                   <td>{player.name}</td>
                   <td>
                     {player.isElite && player.isWc
