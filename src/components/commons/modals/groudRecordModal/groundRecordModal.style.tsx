@@ -534,6 +534,15 @@ export const DiamondSvg = styled.svg`
     fill: #ffffff;
     stroke: none;
   }
+  /* id가 Home인 polygon만 빨간색으로 덮어쓰기 */
+
+  & polygon#ground {
+    fill: #a9a084;
+    /* stroke: 1px solid black; */
+  }
+  & polygon#Home {
+    fill: transparent;
+  }
 
   /* 여기에 highlight 스타일 추가 */
 `;
@@ -879,17 +888,19 @@ export const HomeBaseWrapper = styled.div<{ active: boolean }>`
   /* 배경색을 흰/파랑으로 토글 */
   /* background-color: ${({ active }) => (active ? "blue" : "white")}; */
 
+  /* background-color: transparent; */
+  background-color: white;
   /* mask 에 흰색 png 파일의 알파 채널을 씁니다 */
-  /* mask-image: url("/images/home-base-white-1.png");
+  mask-image: url("/images/home-base-white-1.png");
   mask-size: cover;
   mask-position: center;
-  mask-repeat: no-repeat; */
+  mask-repeat: no-repeat;
 
   /* 사파리(webkit) 지원을 위해 */
-  /* -webkit-mask-image: url("/images/home-base-white-1.png");
+  -webkit-mask-image: url("/images/home-base-white-1.png");
   -webkit-mask-size: cover;
   -webkit-mask-position: center;
-  -webkit-mask-repeat: no-repeat; */
+  -webkit-mask-repeat: no-repeat;
 `;
 
 export const Ground = styled.div<{ outside?: boolean }>`

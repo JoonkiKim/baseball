@@ -916,7 +916,7 @@ const GroundRecordModal = forwardRef<
                   droppableSetters["home-base"](el as any);
                   baseRefs.current["home-base"] = el;
                 }}
-                points="55,97 61.5,103.5 55,110 48.5,103.5"
+                points="55,100 61.5,103.5 55,130 48.5,103.5"
               />
             </DiamondSvg>
 
