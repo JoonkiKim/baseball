@@ -17,7 +17,7 @@ export const ModalOverlay = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 100;
+  z-index: 200;
 `;
 
 // 메인 컨테이너
@@ -538,7 +538,11 @@ export const DiamondSvg = styled.svg`
 
   & polygon#ground {
     fill: #a9a084;
-    /* stroke: 1px solid black; */
+    stroke: white;
+    stroke-width: 0.5px;
+    stroke-linejoin: miter;
+    stroke-miterlimit: 10;
+    /* vector-effect: non-scaling-stroke; */
   }
   & polygon#Home {
     fill: transparent;

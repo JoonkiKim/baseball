@@ -90,7 +90,7 @@ interface IPlayerSelectionModalProps {
   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
   onSelectPlayer: (selectedPlayer: {
     name: string;
-    playerId: number;
+    id: number;
     wc?: string;
   }) => void;
   selectedPlayerIds: number[]; // 이름 대신 ID 리스트
@@ -131,7 +131,7 @@ export default function PlayerSelectionModal({
   const handleRowClick = (
     player: {
       id: number;
-      departmentName: string;
+      department: string;
       name: string;
       isElite: boolean;
       isWc: boolean;
@@ -141,7 +141,7 @@ export default function PlayerSelectionModal({
     if (isAlreadySelected) return;
     onSelectPlayer({
       name: player.name,
-      playerId: player.id,
+      id: player.id,
       wc: player.isWc ? "WC" : undefined,
     });
     setIsModalOpen(false);
@@ -174,7 +174,7 @@ export default function PlayerSelectionModal({
                     cursor: isAlreadySelected ? "default" : "pointer",
                   }}
                 >
-                  <td>{player.departmentName}</td>
+                  <td>{player.department}</td>
                   <td>{player.name}</td>
                   <td>
                     {player.isElite && player.isWc

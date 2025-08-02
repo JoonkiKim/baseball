@@ -89,17 +89,8 @@ const GroundRecordModal = forwardRef<
   const [isSubmitting, setIsSubmitting] = useState(false);
   // const router = useRouter();
   const [error, setError] = useState(null);
-
-  // // 부모가 ref로 open()/close() 호출 가능
-  // useImperativeHandle(
-  //   ref,
-  //   () => ({
-  //     open: () => setIsOpen(true),
-  //     close: () => setIsOpen(false),
-  //   }),
-  //   []
-  // );
-
+  // batterid
+  const [currentBatterId, setCurrentBatterId] = useState<number | null>(null);
   // 모달 닫기 핸들러
   const handleClose = useCallback(() => {
     setIsOpen(false);
@@ -121,8 +112,12 @@ const GroundRecordModal = forwardRef<
   // 모달이 닫혀있으면 렌더링 스킵
   // if (!isOpen) return null;
 
-  // 드래그 앤 드롭 관련
-  // 베이스 아이디 목록
+  // 스냅샷 불러와서 배지에 보여주기
+
+  const [activeBadges, setActiveBadges] = useState(
+    badgeConfigsForModal.map((cfg) => cfg.id)
+  );
+
   const baseIds = [
     "first-base",
     "second-base",
@@ -146,14 +141,6 @@ const GroundRecordModal = forwardRef<
   // wrapper ref (배지·베이스 좌표 계산용)
   const wrapperRef = useRef<HTMLDivElement>(null);
 
-  // 배지 설정
-  // interface BadgeConfig {
-  //   id: string;
-  //   label: string;
-  //   initialLeft: string; // e.g. '55%'
-  //   initialTop: string; // e.g. '85%'
-  // }
-
   // 최상단에 선언
   const diamondSvgRef = useRef<SVGSVGElement | null>(null);
   const diamondPolyRef = useRef<SVGPolygonElement | null>(null);
@@ -165,9 +152,7 @@ const GroundRecordModal = forwardRef<
     useRectsCache(wrapperRef, outZoneRef, baseRefs, BASE_IDS);
   const sensors = useSensors(useSensor(PointerSensor));
   const badgeRefs = useRef<Record<string, HTMLElement | null>>({});
-  const [activeBadges, setActiveBadges] = useState(
-    badgeConfigsForModal.map((cfg) => cfg.id)
-  );
+
   console.log("▶ Modal render");
   // 배지별 스냅 정보 관리
   type SnapInfo = { base: BaseId; pos: { xPct: number; yPct: number } };
@@ -181,114 +166,13 @@ const GroundRecordModal = forwardRef<
   const [badgeSnaps, setBadgeSnaps] =
     useState<Record<string, SnapInfo | null>>(initialBadgeSnaps);
 
-  // 2) badgeSnaps 상태가 바뀔 때마다 각 베이스가 채워졌는지 체크하는 useEffect
-  // useEffect(() => {
-  //   // badgeSnaps: Record<badgeId, { base: BaseId; pos: { x, y } } | null>
-  //   const occupancy: Record<BaseId, boolean> = baseIds.reduce((acc, base) => {
-  //     // badgeSnaps 중에 baseId === base 인 항목이 하나라도 있으면 true
-  //     acc[base] = Object.values(badgeSnaps).some((snap) => snap?.base === base);
-  //     return acc;
-  //   }, {} as Record<BaseId, boolean>);
-
-  //   console.log("Base occupancy:", occupancy);
-  //   // 예: { "first-base": true, "second-base": false, ... }
-  // }, [badgeSnaps]);
-
-  // 이전 outside 값을 저장할 ref
-  // const prevOutsideRef = useRef<boolean>(false);
   // ── 베이스 중심 좌표 캐싱용 ref (이미 적용하셨다면 생략) ──
   const baseCentersRef = useRef<Record<BaseId, { x: number; y: number }>>(
     {} as Record<BaseId, { x: number; y: number }>
   );
-  // ── 마운트 시·리사이즈 시에만 베이스 중심 계산 ──
-  // useEffect(() => {
-  //   const updateCenters = () => {
-  //     baseIds.forEach((baseId) => {
-  //       const poly = baseRefs.current[baseId];
-  //       if (!poly) return;
-  //       const rect = poly.getBoundingClientRect();
-  //       baseCentersRef.current[baseId] = {
-  //         x: rect.left + rect.width / 2,
-  //         y: rect.top + rect.height / 2,
-  //       }; // ← 변경: 여기서 한 번만 계산해서 저장
-  //     });
-  //   };
-  //   updateCenters(); // ← 변경
-  //   window.addEventListener("resize", updateCenters); // ← 변경
-  //   return () => {
-  //     window.removeEventListener("resize", updateCenters); // ← 변경
-  //   };
-  // }, []);
-
-  const [isReconstructMode, setIsReconstructMode] = useState(false);
-
-  // const handleClose = () => {
-  //   // 모달 닫기
-  //   props.setIsGroundRecordModalOpen(false);
-  // };
-
-  // // 확인하기 눌렀을 때 실행될 함수
-  // const handleSubmit = () => {
-  //   // // 모달 닫기
-  //   // props.setIsGroundRecordModalOpen(false);
-  // };
-
-  // 커스텀경계
 
   // 커스텀 경계설정
   const customBoundsRef = useRef<HTMLDivElement>(null);
-
-  // const restrictToCustomBounds: Modifier = (args) => {
-  //   const { transform, draggingNodeRect } = args;
-
-  //   // ① 드래그 중이 아닐 때는 원본 transform 반환
-  //   if (!draggingNodeRect) {
-  //     return transform;
-  //   }
-
-  //   // ② 경계 요소(ref) 유효성 검사
-  //   const boundsEl = customBoundsRef.current;
-  //   if (!boundsEl) {
-  //     return transform;
-  //   }
-
-  //   // 이제 안전하게 ClientRect 사용 가능
-  //   const { width: nodeW, height: nodeH } = draggingNodeRect;
-  //   const bounds = boundsEl.getBoundingClientRect();
-
-  //   // (이하 클램핑 로직 동일)
-  //   const newLeft = draggingNodeRect.left + transform.x;
-  //   const newTop = draggingNodeRect.top + transform.y;
-
-  //   const minX = bounds.left;
-  //   const maxX = bounds.right - nodeW;
-  //   const minY = bounds.top;
-  //   const maxY = bounds.bottom - nodeH;
-
-  //   const clampedX = Math.min(Math.max(newLeft, minX), maxX);
-  //   const clampedY = Math.min(Math.max(newTop, minY), maxY);
-
-  //   return {
-  //     ...transform,
-  //     x: transform.x + (clampedX - newLeft),
-  //     y: transform.y + (clampedY - newTop),
-  //   };
-  // };
-  // const dynamicBoundary: Modifier = (args) => {
-  //   const { active, transform } = args;
-  //   // active가 없으면 아무 제한도 걸지 않고 원본 transform 그대로 반환
-  //   if (!active) {
-  //     return transform;
-  //   }
-
-  //   const id = active.id.toString();
-  //   // 배지가 베이스에 올라간(snap된) 상태면 custom, 아니면 부모 요소 제한
-  //   // 검정 배지는 항상 custom, 흰 배지는 스냅된 경우 custom, 아닌 경우 부모 요소 제한
-  //   const isBlack = id.startsWith("black-badge");
-  //   return isBlack
-  //     ? restrictToCustomBounds(args)
-  //     : restrictToCustomBounds(args);
-  // };
 
   // 성능 최적화
   const restrictToCustomBoundsFn = useCallback<Modifier>((args) => {
@@ -387,12 +271,12 @@ const GroundRecordModal = forwardRef<
   // const wrapperRectRef = useRef<DOMRect | null>(null);
   // const zoneRectRef = useRef<DOMRect | null>(null);
 
-  const RUN_SEQUENCE: BaseId[] = [
-    "first-base",
-    "second-base",
-    "third-base",
-    "home-base",
-  ];
+  // const RUN_SEQUENCE: BaseId[] = [
+  //   "first-base",
+  //   "second-base",
+  //   "third-base",
+  //   "home-base",
+  // ];
 
   // 배지별로 지금까지 "순서대로" 스냅된 베이스 목록을 저장 (삭제하지 않고 유지)
   const snappedSeqRef = useRef<Record<string, BaseId[]>>(
@@ -501,13 +385,6 @@ const GroundRecordModal = forwardRef<
       seq.push(dropBase);
     }
 
-    // 7) 홈에 스냅 & 3루 찍혀 있으면 완주
-    // 3루에서 홈으로 들어오면 배지 없어짐
-    // const finished =
-    //   dropBase === "home-base" &&
-    //   ["first-base", "second-base", "third-base"].every((b) =>
-    //     seq.includes(b as BaseId)
-    //   );
     const finished =
       dropBase === "home-base" &&
       ["third-base"].every((b) => seq.includes(b as BaseId));
@@ -528,55 +405,46 @@ const GroundRecordModal = forwardRef<
     prevOutsideRef.current = false;
     // setIsOutside(false);
   };
+  // 모달 오픈 시 한 번만 초기 스냅 저장
+  useEffect(() => {
+    if (!isOpen) return;
+
+    // activeBadges 순서대로 모든 뱃지의 현재 badgeSnaps 상태를 initialSnapsRef에 저장
+    const caps: Record<string, SnapInfo | null> = {};
+    badgeConfigsForModal.forEach(({ id }) => {
+      caps[id] = badgeSnaps[id] ?? null;
+    });
+    initialSnapsRef.current = caps;
+  }, [isOpen]);
 
   // const resetWhiteBadges = useCallback(() => {
-  //   // 1) badgeSnaps(= 점유/스냅 정보) 초기화
-  //   const freshSnaps: Record<string, SnapInfo | null> = {};
-  //   badgeConfigsForModal.forEach((c) => (freshSnaps[c.id] = null));
-  //   setBadgeSnaps(freshSnaps);
-
-  //   // 2) 화면에 모든 흰 배지 다시 보이게
-  //   setActiveBadges(badgeConfigsForModal.map((c) => c.id));
-
-  //   // 3) 베이스 이동(순서) 기록 초기화
-  //   badgeConfigsForModal.forEach(({ id }) => {
-  //     snappedSeqRef.current[id] = [];
-  //   });
-
-  //   // 4) (선택) 흰 배지 DOM ref 정리
-  //   badgeRefs.current = {};
-
-  //   // 5) (선택) 기타 UI 상태 리셋이 필요하면 여기서
-  //   // setIsOutside(false);
-  // }, [badgeConfigsForModal]);
-
-  // ---아웃존 설정 ---
-  // 1) ref 선언
-  // const resetWhiteBadges = useCallback(() => {
-  //   // 한 번에 묶인 상태 변경 (이벤트 핸들러 내부라 배칭)
   //   const freshSnaps: Record<string, SnapInfo | null> = {};
   //   badgeConfigsForModal.forEach((c) => (freshSnaps[c.id] = null));
 
-  //   setBadgeSnaps(freshSnaps);
-  //   setActiveBadges(badgeConfigsForModal.map((c) => c.id));
+  //   unstable_batchedUpdates(() => {
+  //     setBadgeSnaps(freshSnaps);
+  //     setActiveBadges(badgeConfigsForModal.map((c) => c.id));
+  //   });
+
   //   badgeConfigsForModal.forEach(({ id }) => {
   //     snappedSeqRef.current[id] = [];
   //   });
-  //   // badgeRefs는 DOM refs; 비워도 리렌더를 안 일으킴
   //   badgeRefs.current = {};
   // }, [badgeConfigsForModal]);
   const resetWhiteBadges = useCallback(() => {
-    const freshSnaps: Record<string, SnapInfo | null> = {};
-    badgeConfigsForModal.forEach((c) => (freshSnaps[c.id] = null));
-
+    // initialSnapsRef.current 에 담긴, 모달 오픈 직후 스냅 상태로 복원
     unstable_batchedUpdates(() => {
-      setBadgeSnaps(freshSnaps);
+      setBadgeSnaps({ ...initialSnapsRef.current });
       setActiveBadges(badgeConfigsForModal.map((c) => c.id));
     });
 
+    // 순서 기록도 초기 스냅 기준으로 재설정
     badgeConfigsForModal.forEach(({ id }) => {
-      snappedSeqRef.current[id] = [];
+      const snap = initialSnapsRef.current[id];
+      snappedSeqRef.current[id] = snap ? [snap.base] : [];
     });
+
+    // 참조 리셋
     badgeRefs.current = {};
   }, [badgeConfigsForModal]);
 
@@ -584,9 +452,9 @@ const GroundRecordModal = forwardRef<
   // ① Ground용 ref 선언
   const groundRef = useRef<HTMLDivElement | null>(null);
 
-  const [isOutside, setIsOutside] = useState(false);
+  // const [isOutside, setIsOutside] = useState(false);
   const prevOutsideRef = useRef(false);
-  const rafIdRef = useRef<number | null>(null);
+  // const rafIdRef = useRef<number | null>(null);
 
   function handleDragStart(event: DragStartEvent) {
     const id = String(event.active.id);
@@ -603,37 +471,9 @@ const GroundRecordModal = forwardRef<
 
   // 이닝의 재구성 성능 올리기
   // ① 컨테이너와 흰 배지를 감쌀 ref
-  const reconstructModeRef = useRef(false);
+  // const reconstructModeRef = useRef(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const whiteBadgesRef = useRef<HTMLDivElement>(null);
-
-  // ② 버튼 클릭 시 DOM 클래스/스타일만 토글
-  // const handleReconstructToggle = (checked: boolean) => {
-  //   // 1) 시각적 변화 즉시: 클래스 토글
-  //   if (containerRef.current) {
-  //     containerRef.current.classList.toggle("reconstruct-mode", checked);
-  //   }
-  //   reconstructModeRef.current = checked;
-
-  //   if (checked) {
-  //     // 2) 추가로 배지 위치 초기화 시각적 스냅샷을 바로 보여주고 싶다면 (선택)
-  //     Object.values(badgeRefs.current).forEach((el) => {
-  //       if (!el) return;
-  //       // 트랜지션 제거해서 점프처럼 즉시 반영
-  //       const prevTransition = el.style.transition;
-  //       el.style.transition = "none";
-  //       el.style.transform = "translate(-50%, -50%)";
-  //       // 레이아웃 강제 계산으로 즉시 적용 보장
-  //       void el.getBoundingClientRect();
-  //       el.style.transition = prevTransition;
-  //     });
-
-  //     // 3) 무거운 상태 리셋은 다음 프레임으로 연기
-  //     requestAnimationFrame(() => {
-  //       resetWhiteBadges();
-  //     });
-  //   }
-  // };
 
   const switchRef = useRef<HTMLButtonElement | null>(null);
   useEffect(() => {
@@ -653,76 +493,7 @@ const GroundRecordModal = forwardRef<
 
   const switchAnchorRef = useRef<HTMLDivElement>(null);
   const reconstructCheckedRef = useRef<boolean>(false);
-  // const [reconstructChecked, setReconstructChecked] = useState(false);
-  // const [isResetPending, setIsResetPending] = useState(false);
-  // const handleReconstructToggle = useCallback(
-  //   (checked: boolean) => {
-  //     // console.log("parent toggle:", checked);
-  //     setReconstructChecked(checked);
-  //     if (containerRef.current) {
-  //       containerRef.current.classList.toggle("reconstruct-mode", checked);
-  //     }
-  //     if (checked) {
-  //       requestAnimationFrame(() => {
-  //         resetWhiteBadges(); // 이 함수는 useCallback으로 정의돼 있어야 함
-  //       });
-  //     }
-  //   },
-  //   [resetWhiteBadges]
-  // );
 
-  // useEffect(() => {
-  //   console.log("reconstructChecked changed:", reconstructChecked);
-  // }, [reconstructChecked]);
-
-  // const handleReconstructToggle = useCallback(
-  //   (checked: boolean) => {
-  //     // 1) 시각 변화: 클래스 토글 즉시
-  //     if (containerRef.current) {
-  //       containerRef.current.classList.toggle("reconstruct-mode", checked);
-  //     }
-  //     setReconstructChecked(checked);
-
-  //     // 2) 무거운 리셋은 비긴급으로
-  //     const doReset = () => {
-  //       setIsResetPending(true); // optional
-  //       resetWhiteBadges();
-  //       setIsResetPending(false); // optional
-  //     };
-
-  //     if (typeof requestIdleCallback !== "undefined") {
-  //       // 여유가 있을 때 실행
-  //       (requestIdleCallback as any)(doReset, { timeout: 200 });
-  //     } else {
-  //       // 폴백
-  //       setTimeout(doReset, 0);
-  //     }
-  //   },
-  //   [resetWhiteBadges]
-  // );
-  // const handleReconstructToggle = useCallback(
-  //   (checked: boolean) => {
-  //     // 1) 시각 변화 즉시: 클래스 토글
-  //     if (containerRef.current) {
-  //       containerRef.current.classList.toggle("reconstruct-mode", checked);
-  //     }
-  //     reconstructModeRef.current = checked; // 필요하다면 상태 추적용 (state 아님)
-
-  //     // 2) 무거운 초기화는 여유 있을 때, 내부 setState들을 배치해서
-  //     const doReset = () => {
-  //       // resetWhiteBadges 자체가 unstable_batchedUpdates를 쓰고 있다면
-  //       // 그냥 호출해도 여러 setState가 합쳐진다.
-  //       resetWhiteBadges();
-  //     };
-
-  //     if (typeof requestIdleCallback !== "undefined") {
-  //       (requestIdleCallback as any)(doReset, { timeout: 200 });
-  //     } else {
-  //       setTimeout(doReset, 0);
-  //     }
-  //   },
-  //   [resetWhiteBadges]
-  // );
   const handleReconstructToggle = useCallback(
     (checked: boolean) => {
       // 1) ref에 최신 토글 상태 저장 (리렌더 없음)
@@ -757,7 +528,262 @@ const GroundRecordModal = forwardRef<
   );
 
   // 예: 어떤 이벤트 핸들러나 비주얼 피드백이 필요할 때
-  const isReconstructModeActive = () => reconstructCheckedRef.current;
+  // const isReconstructModeActive = () => reconstructCheckedRef.current;
+
+  // [runner-event기록 로직]
+  const [currentBatterName, setCurrentBatterName] = useState<string | null>(
+    null
+  );
+
+  // white badge들 중 첫 번째가 batter, 두 번째가 runner로 쓴다고 가정
+  const whiteBadges = useMemo(
+    () =>
+      badgeConfigsForModal.filter(
+        (cfg) =>
+          !cfg.id.startsWith("black-badge") && activeBadges.includes(cfg.id)
+      ),
+    [activeBadges]
+  );
+  const batterWhiteBadgeId = useMemo(
+    () => whiteBadges[0]?.id ?? null,
+    [whiteBadges]
+  );
+  const runnerWhiteBadgeIds = useMemo(
+    () => whiteBadges.slice(1).map((cfg) => cfg.id),
+    [whiteBadges]
+  );
+  // runner 배지에 붙일 정보: { [badgeId]: { runnerId, name } }
+
+  const [runnerInfoByBadge, setRunnerInfoByBadge] = useState<
+    Record<string, { runnerId: number; name: string }>
+  >({});
+  // 드래그 앤 드롭 관련
+  // 베이스 아이디 목록
+  useEffect(() => {
+    if (!isOpen) return;
+
+    try {
+      const raw = localStorage.getItem("snapshot");
+      const parsed = raw ? JSON.parse(raw) : null;
+      setSnapshotData(parsed);
+      console.log("loaded snapshot from localStorage:", parsed);
+
+      const batterName =
+        parsed?.snapshot?.currentAtBat?.batter?.name ??
+        parsed?.currentAtBat?.batter?.name ??
+        null;
+      const batterId =
+        parsed?.snapshot?.currentAtBat?.batter?.id ??
+        parsed?.currentAtBat?.batter?.id ??
+        null;
+      setCurrentBatterName(batterName);
+      setCurrentBatterId(batterId);
+    } catch (e) {
+      console.warn("snapshot 파싱 에러:", e);
+      setCurrentBatterName(null);
+      setCurrentBatterId(null);
+      setSnapshotData(null);
+    }
+  }, [isOpen]);
+  // 초기 타자 및 주자의 위치
+  const [snapshotData, setSnapshotData] = useState<any>(null);
+  const initialSnapsRef = useRef<Record<string, SnapInfo | null>>({});
+  const [baseToBadgeId, setBaseToBadgeId] = useState<Record<number, string>>(
+    {}
+  );
+
+  // 베이스 코드 변환
+  const getBaseCode = (snap: SnapInfo | null): string => {
+    if (!snap) return "B";
+    switch (snap.base) {
+      case "first-base":
+        return "1";
+      case "second-base":
+        return "2";
+      case "third-base":
+        return "3";
+      case "home-base":
+        return "H";
+      default:
+        return "B";
+    }
+  };
+
+  // 임시)  타자” 찾고 로그 찍는 useEffect
+  useEffect(() => {
+    if (!isOpen) return;
+
+    // 타자 배지와 주자 배지(흰 배지) 목록
+    if (!batterWhiteBadgeId) return;
+
+    const actualArray: Array<{
+      runnerId: number | null;
+      startBase: string;
+      endBase: string;
+    }> = [];
+
+    // 흰 배지들만 고려 (검정 배지 제외)
+    const whiteBadgeIds = badgeConfigsForModal
+      .filter(
+        (cfg) =>
+          !cfg.id.startsWith("black-badge") && activeBadges.includes(cfg.id)
+      )
+      .map((cfg) => cfg.id);
+
+    whiteBadgeIds.forEach((badgeId) => {
+      const startBase = getBaseCode(initialSnapsRef.current[badgeId] ?? null);
+
+      // 현재 스냅 결정 (home-base 완료 케이스 보정)
+      let effectiveCurrentSnap: SnapInfo | null = badgeSnaps[badgeId];
+      const seq = snappedSeqRef.current[badgeId] || [];
+      if (!effectiveCurrentSnap && seq.length > 0) {
+        const lastBase = seq[seq.length - 1];
+        if (lastBase === "home-base") {
+          effectiveCurrentSnap = {
+            base: "home-base",
+            pos: { xPct: 0, yPct: 0 },
+          };
+        }
+      }
+      const endBase = getBaseCode(effectiveCurrentSnap);
+
+      // 이동 없는 경우 건너뜀
+      if (
+        badgeId !== batterWhiteBadgeId &&
+        startBase === "B" &&
+        endBase === "B"
+      )
+        return;
+
+      let runnerId: number | null = null;
+      if (badgeId === batterWhiteBadgeId) {
+        runnerId = currentBatterId;
+      } else if (runnerInfoByBadge[badgeId]) {
+        runnerId = runnerInfoByBadge[badgeId].runnerId;
+      }
+
+      // runnerId가 없으면 (예: 매핑 안 된 배지)에도 넣을지 선택, 여기선 null 허용
+      actualArray.push({
+        runnerId,
+        startBase,
+        endBase,
+      });
+    });
+
+    const output = {
+      phase: "AFTER",
+      actual: actualArray,
+    };
+
+    if (actualArray.length > 0) {
+      console.log(JSON.stringify(output, null, 2));
+    }
+  }, [
+    badgeSnaps,
+    activeBadges,
+    currentBatterId,
+    runnerInfoByBadge,
+    batterWhiteBadgeId,
+    isOpen,
+  ]);
+
+  // 주자 위치 시키는 로직
+
+  useEffect(() => {
+    if (!isOpen) return;
+    if (!snapshotData) return;
+
+    const actualRunners =
+      snapshotData?.snapshot?.inningStats?.actual?.runnersOnBase ??
+      snapshotData?.inningStats?.actual?.runnersOnBase ??
+      [];
+    if (actualRunners.length === 0) return;
+
+    const baseMap: Record<number, BaseId> = {
+      1: "first-base",
+      2: "second-base",
+      3: "third-base",
+    };
+
+    // 사용할 수 있는 흰 배지 목록 (타자 배지 제외)
+    const whiteBadgeCandidates = badgeConfigsForModal
+      .filter(
+        (cfg) =>
+          !cfg.id.startsWith("black-badge") && activeBadges.includes(cfg.id)
+      )
+      .map((cfg) => cfg.id);
+    const availableRunnerBadges = whiteBadgeCandidates.filter(
+      (id) => id !== batterWhiteBadgeId
+    );
+
+    // base 별로 배지 할당 (기존 매핑을 유지하면서 부족한 부분만 채움)
+    const newMap: Record<number, string> = { ...baseToBadgeId };
+    const usedBadges = new Set(Object.values(newMap));
+
+    actualRunners.forEach((runner: any) => {
+      if (!newMap[runner.base]) {
+        const candidate = availableRunnerBadges.find((b) => !usedBadges.has(b));
+        if (candidate) {
+          newMap[runner.base] = candidate;
+          usedBadges.add(candidate);
+        }
+      }
+    });
+
+    // 상태 업데이트 (변경 있을 때만)
+    if (JSON.stringify(newMap) !== JSON.stringify(baseToBadgeId)) {
+      setBaseToBadgeId(newMap);
+    }
+
+    // 각 주자에 대해 해당 베이스 위치로 스냅 초기화 & runnerInfoByBadge 설정
+    actualRunners.forEach((runner: any) => {
+      const baseId = baseMap[runner.base];
+      if (!baseId) return;
+      const badgeId = newMap[runner.base];
+      if (!badgeId) return;
+
+      const tryInit = () => {
+        const wrapperEl = wrapperRef.current;
+        const baseRect = baseRectsRef.current[baseId];
+        if (!wrapperEl || !baseRect) {
+          requestAnimationFrame(tryInit);
+          return;
+        }
+
+        const wrapperRect = wrapperEl.getBoundingClientRect();
+        const x = baseRect.left + baseRect.width / 2 - wrapperRect.left;
+        const y = baseRect.top + baseRect.height / 2 - wrapperRect.top;
+
+        const snap: SnapInfo = {
+          base: baseId,
+          pos: {
+            xPct: (x / wrapperRect.width) * 100,
+            yPct: (y / wrapperRect.height) * 100,
+          },
+        };
+
+        if (!initialSnapsRef.current[badgeId]) {
+          initialSnapsRef.current[badgeId] = snap;
+          setBadgeSnaps((prev) => ({ ...prev, [badgeId]: snap }));
+          setRunnerInfoByBadge((prev) => ({
+            ...prev,
+            [badgeId]: { runnerId: runner.id, name: runner.name },
+          }));
+        }
+      };
+
+      tryInit();
+    });
+  }, [
+    isOpen,
+    snapshotData,
+    activeBadges,
+    batterWhiteBadgeId,
+    baseToBadgeId,
+    refreshRects,
+  ]);
+
+  // -------------------
 
   useImperativeHandle(
     ref,
@@ -768,6 +794,17 @@ const GroundRecordModal = forwardRef<
     []
   );
 
+  useEffect(() => {
+    // badgeSnaps: Record<badgeId, { base: BaseId; pos: { x, y } } | null>
+    const occupancy: Record<BaseId, boolean> = BASE_IDS.reduce((acc, base) => {
+      // badgeSnaps 중에 baseId === base 인 항목이 하나라도 있으면 true
+      acc[base] = Object.values(badgeSnaps).some((snap) => snap?.base === base);
+      return acc;
+    }, {} as Record<BaseId, boolean>);
+
+    console.log("Base occupancy:", occupancy);
+    // 예: { "first-base": true, "second-base": false, ... }
+  }, [badgeSnaps]);
   useEffect(() => {
     if (isOpen) {
       refreshRects();
@@ -928,20 +965,30 @@ const GroundRecordModal = forwardRef<
             {/* NameBadge */}
             {/* 4) 드롭 후 스냅 or 드래그 상태에 따라 렌더 */}
             {/* ③ activeBadges에 든 것만 렌더 */}
+
             <div ref={whiteBadgesRef}>
               {badgeConfigsForModal
                 .filter((cfg) => activeBadges.includes(cfg.id))
-                .map((cfg) => (
-                  <DraggableBadge
-                    key={cfg.id}
-                    id={cfg.id}
-                    label={cfg.label}
-                    initialLeft={cfg.initialLeft}
-                    initialTop={cfg.initialTop}
-                    snapInfo={badgeSnaps[cfg.id]}
-                    // badgeRefs={badgeRefs}
-                  />
-                ))}
+                .map((cfg) => {
+                  let overriddenLabel = cfg.label;
+
+                  if (cfg.id === batterWhiteBadgeId && currentBatterName) {
+                    overriddenLabel = currentBatterName;
+                  } else if (runnerInfoByBadge[cfg.id]) {
+                    overriddenLabel = runnerInfoByBadge[cfg.id].name;
+                  }
+
+                  return (
+                    <DraggableBadge
+                      key={cfg.id}
+                      id={cfg.id}
+                      label={overriddenLabel}
+                      initialLeft={cfg.initialLeft}
+                      initialTop={cfg.initialTop}
+                      snapInfo={badgeSnaps[cfg.id]}
+                    />
+                  );
+                })}
             </div>
           </GraphicWrapper>
           <ControlButton onClick={handleSubmit}>확인하기</ControlButton>

@@ -857,6 +857,42 @@ export const ReconstructionButtonWrapper = styled.div`
 //     transition: left 100ms ease-in-out !important;
 //   }
 // `;
+// export const ReconstructionSwitch = styled(Switch)`
+//   && {
+//     background-color: #e5e5ea !important;
+//     width: 11vw !important;
+//     min-width: 11vw !important;
+//     height: 3vh !important;
+
+//     /* 즉시 반영: 트랜지션 제거 */
+//     transition: none !important;
+//     will-change: background-color;
+//   }
+
+//   &.ant-switch-checked {
+//     background-color: #0f0f70 !important;
+//   }
+
+//   .ant-switch-inner {
+//     margin: 2px;
+//   }
+
+//   .ant-switch-handle {
+//     width: 4vw !important;
+//     height: 4vw !important;
+//     top: 50% !important;
+//     transform: translateY(-50%) !important;
+//     left: 5px !important;
+
+//     transition: none !important;
+//     will-change: left;
+//   }
+
+//   &.ant-switch-checked .ant-switch-handle {
+//     left: calc(100% - 5px - 4vw) !important;
+//   }
+// `;
+
 export const ReconstructionSwitch = styled(Switch)`
   && {
     background-color: #e5e5ea !important;

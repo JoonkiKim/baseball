@@ -39,6 +39,20 @@ export default function OutModal(props: IModalProps) {
     setIsSubmitting(true);
 
     try {
+      const resultCode = mapping[Type];
+      if (!resultCode) {
+        console.warn("알 수 없는 종류입니다:", Type);
+      } else {
+        const payload = { resultCode };
+        try {
+          localStorage.setItem(
+            "plateAppearanceResult",
+            JSON.stringify(payload)
+          );
+        } catch (e) {
+          console.warn("로컬스토리지 저장 실패:", e);
+        }
+      }
       // const endpoint = `/games/${router.query.recordId}/plate-appearance`;
       // const requestBody = { result: mapping[Type] };
       // const res = await API.post(

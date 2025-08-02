@@ -213,13 +213,13 @@ export const playerListState = atom<IPlayer[]>({
 
 export interface IHAPlayer {
   id: number;
-  departmentName: string;
-  battingOrder: number | string;
+  department: string;
+  battingOrder?: number | string;
   name: string;
   isElite: boolean;
   isWc: boolean;
   position?: string;
-  isSubstitutable: boolean;
+  isSubstitutable?: boolean;
   inLineup?: boolean;
 }
 

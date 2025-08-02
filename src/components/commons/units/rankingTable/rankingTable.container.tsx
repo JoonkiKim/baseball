@@ -10,40 +10,36 @@ import {
 import API from "../../../../commons/apis/api"; // api.ts에서 axios 인스턴스 가져옴
 import ErrorAlert from "../../../../commons/libraries/showErrorCode";
 
-export default function RankingTableComponent() {
-  const [groupData, setGroupData] = useState<Record<string, any[]>>({});
-  const [error, setError] = useState(null);
+type Team = {
+  id: number;
+  name: string;
+  games: number;
+  wins: number;
+  draws: number;
+  losses: number;
+  rank: number;
+  [key: string]: any;
+};
 
-  // 그룹별 팀 정보 가져오는 함수
-  const fetchGroupedTeams = async (group: string) => {
-    const response = await API.get("/teams/grouped", {
-      params: { group },
-    });
-    // const response = await API.get("/teams/grouped"
-    // );
+type GroupedTeams = Record<string, Team[]>;
+// 여기만 바꾸면 어떤 tournamentId로 가져올지 제어됨
+const TOURNAMENT_ID = "1";
+
+export default function RankingTableComponent() {
+  const [groupData, setGroupData] = useState<GroupedTeams>({});
+  const [error, setError] = useState<any>(null);
+
+  const fetchGroupedTeams = async (tid: string): Promise<GroupedTeams> => {
+    const response = await API.get(`/tournaments/${tid}/teams/grouped`);
     return response.data;
   };
 
   useEffect(() => {
-    const fetchGroups = async () => {
+    const fetchData = async () => {
       try {
-        const groups = ["A", "B", "C", "D"];
-
-        // const groups = ["A", "B", "C"];
-
-        const results = await Promise.all(
-          groups.map((group) => fetchGroupedTeams(group))
-        );
-        console.log(results);
-
-        const newGroupData: Record<string, any[]> = {};
-        groups.forEach((g, i) => {
-          newGroupData[g] = results[i][g] || [];
-        });
-
-        setGroupData(newGroupData);
-        console.log(groupData);
-      } catch (err) {
+        const data = await fetchGroupedTeams(TOURNAMENT_ID);
+        setGroupData(data);
+      } catch (err: any) {
         setError(err);
         const errorCode = err?.response?.data?.errorCode; // 에러코드 추출
         console.error(err, "errorCode:", errorCode);
@@ -51,20 +47,29 @@ export default function RankingTableComponent() {
       }
     };
 
-    fetchGroups();
+    fetchData();
   }, []);
 
   const getGroupName = (key: string) => `${key}조`;
+
+  // (선택) 고정된 순서로 보여주고 싶다면 여기에 순서를 정의하고, 없으면 API에서 내려준 순서대로
+  const groupOrder = ["A", "B", "C", "D"];
+  const entriesToRender = groupOrder
+    .filter((g) => groupData[g])
+    .map((g) => [g, groupData[g]] as const).length
+    ? groupOrder
+        .filter((g) => groupData[g])
+        .map((g) => [g, groupData[g]] as const)
+    : Object.entries(groupData);
 
   return (
     <RankingContainer>
       <div
         style={{
-          // overflowY: "auto",
           marginBottom: "100px",
         }}
       >
-        {Object.entries(groupData).map(([groupKey, teams]) => (
+        {entriesToRender.map(([groupKey, teams]) => (
           <div key={groupKey}>
             <GroupSelectorContainer>
               <GroupSelector>{getGroupName(groupKey)}</GroupSelector>
@@ -83,9 +88,15 @@ export default function RankingTableComponent() {
                 </thead>
                 <tbody>
                   {[...teams]
-                    .sort((a, b) => (a.rank ?? Infinity) - (b.rank ?? Infinity))
-                    .map((team: any, index: number) => (
-                      <tr key={index}>
+                    .sort((a, b) => {
+                      const rankA = a.rank ?? Infinity;
+                      const rankB = b.rank ?? Infinity;
+                      if (rankA !== rankB) return rankA - rankB;
+                      // 동률일 경우 이름 기준으로 안정적인 정렬
+                      return (a.name ?? "").localeCompare(b.name ?? "");
+                    })
+                    .map((team: Team, index: number) => (
+                      <tr key={team.id ?? index}>
                         <td>{team.rank ?? ""}</td>
                         <td>{team.name ?? team.teamName ?? ""}</td>
                         <td>{team.games ?? ""}</td>
