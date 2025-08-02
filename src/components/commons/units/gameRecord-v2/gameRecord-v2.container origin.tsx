@@ -126,9 +126,6 @@ import { badgeConfigs } from "./gameRecord.variables";
 import RightPolygon from "../../../../commons/libraries/rightPolygon";
 import LeftPolygon from "../../../../commons/libraries/leftPolygon";
 
-import { unstable_batchedUpdates } from "react-dom";
-import PortalSwitch from "./reconstructionSwitch";
-
 // 1) 먼저 BaseId / BASE_IDS를 선언
 export const BASE_IDS = [
   "first-base",
@@ -537,23 +534,9 @@ export default function GameRecordPageV2() {
         setIsHitModalOpen(true);
         break;
 
-      case "사사구":
+      case "볼넷/사구":
         setIsSubmitting(true);
         try {
-          const resultCode = "BB";
-          if (!resultCode) {
-            console.warn("알 수 없는 종류입니다");
-          } else {
-            const payload = { resultCode };
-            try {
-              localStorage.setItem(
-                "plateAppearanceResult",
-                JSON.stringify(payload)
-              );
-            } catch (e) {
-              console.warn("로컬스토리지 저장 실패:", e);
-            }
-          }
           // 1) POST 요청
 
           // [배포 시 다시 켜기]
@@ -566,7 +549,7 @@ export default function GameRecordPageV2() {
           // );
 
           // 스코어 재조회
-          // await fetchInningScores();
+          await fetchInningScores();
 
           // 모달 열기 (기존 setIsGroundRecordModalOpen 대신)
           groundModalRef.current?.open();
@@ -968,45 +951,31 @@ export default function GameRecordPageV2() {
   };
   // --이닝의 재구성--//
 
-  // const [isReconstructMode, setIsReconstructMode] = useState(false);
+  const [isReconstructMode, setIsReconstructMode] = useState(false);
   // ── 흰색 배지(주자) 관련 모든 기록/ref 초기화 ──
-  // const resetWhiteBadges = useCallback(() => {
-  //   // 1) badgeSnaps(= 점유/스냅 정보) 초기화
-  //   const freshSnaps: Record<string, SnapInfo | null> = {};
-  //   badgeConfigs.forEach((c) => (freshSnaps[c.id] = null));
-  //   setBadgeSnaps(freshSnaps);
-
-  //   // 2) 화면에 모든 흰 배지 다시 보이게
-  //   setActiveBadges(badgeConfigs.map((c) => c.id));
-
-  //   // 3) 베이스 이동(순서) 기록 초기화
-  //   badgeConfigs.forEach(({ id }) => {
-  //     snappedSeqRef.current[id] = [];
-  //   });
-
-  //   // 4) (선택) 흰 배지 DOM ref 정리
-  //   badgeRefs.current = {};
-
-  //   // 5) (선택) 기타 UI 상태 리셋이 필요하면 여기서
-  //   // setIsOutside(false);
-  // }, [badgeConfigs]);
   const resetWhiteBadges = useCallback(() => {
+    // 1) badgeSnaps(= 점유/스냅 정보) 초기화
     const freshSnaps: Record<string, SnapInfo | null> = {};
     badgeConfigs.forEach((c) => (freshSnaps[c.id] = null));
+    setBadgeSnaps(freshSnaps);
 
-    unstable_batchedUpdates(() => {
-      setBadgeSnaps(freshSnaps);
-      setActiveBadges(badgeConfigs.map((c) => c.id));
-    });
+    // 2) 화면에 모든 흰 배지 다시 보이게
+    setActiveBadges(badgeConfigs.map((c) => c.id));
 
+    // 3) 베이스 이동(순서) 기록 초기화
     badgeConfigs.forEach(({ id }) => {
       snappedSeqRef.current[id] = [];
     });
+
+    // 4) (선택) 흰 배지 DOM ref 정리
     badgeRefs.current = {};
+
+    // 5) (선택) 기타 UI 상태 리셋이 필요하면 여기서
+    // setIsOutside(false);
   }, [badgeConfigs]);
 
   // 주자 모달 창
-  // const [isGroundRecordModalOpen, setIsGroundRecordModalOpen] = useState(false);
+  const [isGroundRecordModalOpen, setIsGroundRecordModalOpen] = useState(false);
 
   // 아웃존 설정
   // 1) ref 선언
@@ -1121,77 +1090,25 @@ export default function GameRecordPageV2() {
 
   const customBoundsRef = useRef<HTMLDivElement>(null);
 
-  // const restrictToCustomBounds: Modifier = (args) => {
-  //   const { transform, draggingNodeRect } = args;
-
-  //   // ① 드래그 중이 아닐 때는 원본 transform 반환
-  //   if (!draggingNodeRect) {
-  //     return transform;
-  //   }
-
-  //   // ② 경계 요소(ref) 유효성 검사
-  //   const boundsEl = customBoundsRef.current;
-  //   if (!boundsEl) {
-  //     return transform;
-  //   }
-
-  //   // 이제 안전하게 ClientRect 사용 가능
-  //   const { width: nodeW, height: nodeH } = draggingNodeRect;
-  //   const bounds = boundsEl.getBoundingClientRect();
-
-  //   // (이하 클램핑 로직 동일)
-  //   const newLeft = draggingNodeRect.left + transform.x;
-  //   const newTop = draggingNodeRect.top + transform.y;
-
-  //   const minX = bounds.left;
-  //   const maxX = bounds.right - nodeW;
-  //   const minY = bounds.top;
-  //   const maxY = bounds.bottom - nodeH;
-
-  //   const clampedX = Math.min(Math.max(newLeft, minX), maxX);
-  //   const clampedY = Math.min(Math.max(newTop, minY), maxY);
-
-  //   return {
-  //     ...transform,
-  //     x: transform.x + (clampedX - newLeft),
-  //     y: transform.y + (clampedY - newTop),
-  //   };
-  // };
-  // const dynamicBoundary: Modifier = (args) => {
-  //   const { active, transform } = args;
-  //   // active가 없으면 아무 제한도 걸지 않고 원본 transform 그대로 반환
-  //   if (!active) {
-  //     return transform;
-  //   }
-
-  //   const id = active.id.toString();
-  //   // 배지가 베이스에 올라간(snap된) 상태면 custom, 아니면 부모 요소 제한
-  //   // 검정 배지는 항상 custom, 흰 배지는 스냅된 경우 custom, 아닌 경우 부모 요소 제한
-  //   // if (
-  //   //   id.startsWith("black-badge") || // ▶ 검정 배지
-  //   //   Boolean(badgeSnaps[id]) // ▶ 흰 배지(스냅됐을 때)
-  //   // ) {
-  //   //   return restrictToCustomBounds(args);
-  //   // } else {
-  //   //   return restrictToParentElement(args);
-  //   // }
-  //   const isBlack = id.startsWith("black-badge");
-  //   return isBlack
-  //     ? restrictToCustomBounds(args)
-  //     : restrictToCustomBounds(args);
-  // };
-
-  // 홈베이스 색칠
-
-  const restrictToCustomBoundsFn = useCallback<Modifier>((args) => {
+  const restrictToCustomBounds: Modifier = (args) => {
     const { transform, draggingNodeRect } = args;
-    if (!draggingNodeRect) return transform;
-    const boundsEl = customBoundsRef.current;
-    if (!boundsEl) return transform;
 
+    // ① 드래그 중이 아닐 때는 원본 transform 반환
+    if (!draggingNodeRect) {
+      return transform;
+    }
+
+    // ② 경계 요소(ref) 유효성 검사
+    const boundsEl = customBoundsRef.current;
+    if (!boundsEl) {
+      return transform;
+    }
+
+    // 이제 안전하게 ClientRect 사용 가능
     const { width: nodeW, height: nodeH } = draggingNodeRect;
     const bounds = boundsEl.getBoundingClientRect();
 
+    // (이하 클램핑 로직 동일)
     const newLeft = draggingNodeRect.left + transform.x;
     const newTop = draggingNodeRect.top + transform.y;
 
@@ -1208,24 +1125,41 @@ export default function GameRecordPageV2() {
       x: transform.x + (clampedX - newLeft),
       y: transform.y + (clampedY - newTop),
     };
-  }, []);
-  const dynamicBoundary = useMemo<Modifier>(() => {
-    return (args) => {
-      if (!args.active) return args.transform;
-      return restrictToCustomBoundsFn(args);
-    };
-  }, [restrictToCustomBoundsFn]);
+  };
+  const dynamicBoundary: Modifier = (args) => {
+    const { active, transform } = args;
+    // active가 없으면 아무 제한도 걸지 않고 원본 transform 그대로 반환
+    if (!active) {
+      return transform;
+    }
 
-  const modifiers = useMemo(() => [dynamicBoundary], [dynamicBoundary]);
+    const id = active.id.toString();
+    // 배지가 베이스에 올라간(snap된) 상태면 custom, 아니면 부모 요소 제한
+    // 검정 배지는 항상 custom, 흰 배지는 스냅된 경우 custom, 아닌 경우 부모 요소 제한
+    // if (
+    //   id.startsWith("black-badge") || // ▶ 검정 배지
+    //   Boolean(badgeSnaps[id]) // ▶ 흰 배지(스냅됐을 때)
+    // ) {
+    //   return restrictToCustomBounds(args);
+    // } else {
+    //   return restrictToParentElement(args);
+    // }
+    const isBlack = id.startsWith("black-badge");
+    return isBlack
+      ? restrictToCustomBounds(args)
+      : restrictToCustomBounds(args);
+  };
+
+  // 홈베이스 색칠
 
   const [isHomeBaseActive, setIsHomeBaseActive] = useState(false);
 
-  // const RUN_SEQUENCE: BaseId[] = [
-  //   "first-base",
-  //   "second-base",
-  //   "third-base",
-  //   "home-base",
-  // ];
+  const RUN_SEQUENCE: BaseId[] = [
+    "first-base",
+    "second-base",
+    "third-base",
+    "home-base",
+  ];
 
   // 배지별로 지금까지 "순서대로" 스냅된 베이스 목록을 저장 (삭제하지 않고 유지)
   const snappedSeqRef = useRef<Record<string, BaseId[]>>(
@@ -1236,10 +1170,10 @@ export default function GameRecordPageV2() {
   );
 
   // 다음에 가야 할(스냅해야 할) 베이스
-  // const nextRequiredBase = (badgeId: string): BaseId => {
-  //   const seq = snappedSeqRef.current[badgeId];
-  //   return RUN_SEQUENCE[Math.min(seq.length, RUN_SEQUENCE.length - 1)];
-  // };
+  const nextRequiredBase = (badgeId: string): BaseId => {
+    const seq = snappedSeqRef.current[badgeId];
+    return RUN_SEQUENCE[Math.min(seq.length, RUN_SEQUENCE.length - 1)];
+  };
 
   // ─────────────────────────────────────────────
   // 1) 좌표 자동 캐싱 훅 (ResizeObserver + window 이벤트) //
@@ -1405,66 +1339,32 @@ export default function GameRecordPageV2() {
   //     badges.style.display = !checked ? "block" : "none";
   //   }
   // };
-  // const handleReconstructToggle = (checked: boolean) => {
-  //   // 1) 시각적 변화 즉시: 클래스 토글
-  //   if (containerRef.current) {
-  //     containerRef.current.classList.toggle("reconstruct-mode", checked);
-  //   }
-  //   reconstructModeRef.current = checked;
+  const handleReconstructToggle = (checked: boolean) => {
+    // 1) 시각적 변화 즉시: 클래스 토글
+    if (containerRef.current) {
+      containerRef.current.classList.toggle("reconstruct-mode", checked);
+    }
+    reconstructModeRef.current = checked;
 
-  //   if (checked) {
-  //     // 2) 추가로 배지 위치 초기화 시각적 스냅샷을 바로 보여주고 싶다면 (선택)
-  //     Object.values(badgeRefs.current).forEach((el) => {
-  //       if (!el) return;
-  //       // 트랜지션 제거해서 점프처럼 즉시 반영
-  //       const prevTransition = el.style.transition;
-  //       el.style.transition = "none";
-  //       el.style.transform = "translate(-50%, -50%)";
-  //       // 레이아웃 강제 계산으로 즉시 적용 보장
-  //       void el.getBoundingClientRect();
-  //       el.style.transition = prevTransition;
-  //     });
+    if (checked) {
+      // 2) 추가로 배지 위치 초기화 시각적 스냅샷을 바로 보여주고 싶다면 (선택)
+      Object.values(badgeRefs.current).forEach((el) => {
+        if (!el) return;
+        // 트랜지션 제거해서 점프처럼 즉시 반영
+        const prevTransition = el.style.transition;
+        el.style.transition = "none";
+        el.style.transform = "translate(-50%, -50%)";
+        // 레이아웃 강제 계산으로 즉시 적용 보장
+        void el.getBoundingClientRect();
+        el.style.transition = prevTransition;
+      });
 
-  //     // 3) 무거운 상태 리셋은 다음 프레임으로 연기
-  //     requestAnimationFrame(() => {
-  //       resetWhiteBadges();
-  //     });
-  //   }
-  // };
-  const switchAnchorRefForMain = useRef<HTMLDivElement>(null);
-  const reconstructCheckedRef = useRef<boolean>(false);
-  const handleReconstructToggle = useCallback(
-    (checked: boolean) => {
-      // 1) ref에 최신 토글 상태 저장 (리렌더 없음)
-      reconstructCheckedRef.current = checked;
-
-      // 2) 즉시 시각 반영: 클래스 토글
-      if (containerRef.current) {
-        containerRef.current.classList.toggle("reconstruct-mode", checked);
-      }
-
-      // 3) checked가 true일 때만 배지 초기화 등 무거운 작업 (다음 프레임에 배치)
-      if (checked) {
-        requestAnimationFrame(() => {
-          unstable_batchedUpdates(() => {
-            // 스냅/액티브 배지 초기화
-            const freshSnaps: Record<string, SnapInfo | null> = {};
-            badgeConfigs.forEach((c) => (freshSnaps[c.id] = null));
-            setBadgeSnaps(freshSnaps);
-            setActiveBadges(badgeConfigs.map((c) => c.id));
-
-            // 순서 기록 초기화
-            badgeConfigs.forEach(({ id }) => {
-              snappedSeqRef.current[id] = [];
-            });
-          });
-          // 필요하면 rect 재계산
-          refreshRects();
-        });
-      }
-    },
-    [refreshRects]
-  );
+      // 3) 무거운 상태 리셋은 다음 프레임으로 연기
+      requestAnimationFrame(() => {
+        resetWhiteBadges();
+      });
+    }
+  };
 
   return (
     <GameRecordContainer ref={containerRef}>
@@ -1508,22 +1408,23 @@ export default function GameRecordPageV2() {
             <ReconstructionTitle>이닝의 재구성</ReconstructionTitle>
             <ReconstructionButtonWrapper>
               <div
-                ref={switchAnchorRefForMain}
-                style={{
-                  width: "11vw",
-                  height: "3vh",
-                  position: "relative",
-                  zIndex: 0,
-                  // (기본 자리 표시용; 실제 스위치는 포털로 올라감)
+                style={{ touchAction: "manipulation" }}
+                onPointerDown={() => {
+                  // 배경 즉시 토글 (checked 여부에 따라 어차피 handleReconstructToggle이 정리함)
+                  const upcoming = !reconstructModeRef.current;
+                  containerRef.current?.classList.toggle(
+                    "reconstruct-mode",
+                    upcoming
+                  );
                 }}
-              />
-
-              <PortalSwitch
-                anchorRef={switchAnchorRefForMain}
-                // checked={reconstructChecked}
-                onChange={handleReconstructToggle}
-              />
-              {/* </div> */}
+              >
+                <ReconstructionSwitch
+                  defaultChecked={false} // uncontrolled: 내부 토글 UI 즉시
+                  onChange={(checked: boolean) => {
+                    handleReconstructToggle(checked);
+                  }}
+                />
+              </div>
             </ReconstructionButtonWrapper>
           </ReconstructionWrapper>
           <ControlButtonWhite>저장하기</ControlButtonWhite>
@@ -1537,7 +1438,7 @@ export default function GameRecordPageV2() {
         id="game-record-dnd" // ← 여기에 고정된 string ID를 넣어줍니다
         sensors={sensors}
         // collisionDetection={rectIntersection}
-        modifiers={modifiers}
+        modifiers={[dynamicBoundary]}
         // measuring={{
         //   droppable: {
         //     // or AlwaysExceptInitialPlacement
@@ -1736,7 +1637,7 @@ export default function GameRecordPageV2() {
           안타
         </RecordActionButton>
         <RecordActionButton
-          onClick={() => handleRecordAction("사사구")}
+          onClick={() => handleRecordAction("볼넷/사구")}
           disabled={isSubmitting}
         >
           사사구

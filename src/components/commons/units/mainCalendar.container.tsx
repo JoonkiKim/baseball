@@ -31,7 +31,7 @@ import { formatDate2, formatDateToYMD } from "../../../commons/libraries/utils";
 import API from "../../../commons/apis/api";
 import {
   authMe,
-  gameId,
+  // gameId,
   lastRouteState,
   previousDateState,
   TeamListState,
@@ -51,24 +51,26 @@ interface RawMatch {
 }
 
 interface Game {
+  id: number;
   time: string;
   status: string;
-  winnerTeamId?: number;
+
   stage: string;
+  inning?: number;
+  inningHalf?: string;
+  isForfeit: boolean;
+  winnerTeamId?: number;
   homeTeam: {
     id: number;
     name: string;
-    score: number | null | string;
+    score: number;
   };
   awayTeam: {
     id: number;
     name: string;
-    score: number | null | string;
+    score: number;
   };
-  inning?: number;
-  inningHalf?: string;
-  gameId?: number; // gameId로 변경 (예: 1001, 1002, 1003 등)
-  isForfeit: boolean;
+
   canRecord?: boolean;
   canSubmitLineup?: { home: boolean; away: boolean };
 }
@@ -112,8 +114,8 @@ export default function MainCalendarPage() {
   // const [fromDate, setFromDate] = useState("2025-05-01");
   // const [toDate, setToDate] = useState("2025-06-10");
 
-  const [fromDate, setFromDate] = useState("2025-03-01");
-  const [toDate, setToDate] = useState("2025-06-10");
+  const [fromDate, setFromDate] = useState("2025-07-31");
+  const [toDate, setToDate] = useState("2025-08-30");
 
   useEffect(() => {
     const fetchMatches = async () => {
@@ -126,9 +128,11 @@ export default function MainCalendarPage() {
           //   withCredentials: true,
           // }
         );
+        console.log("res.data.days", res);
+        console.log("res.data.data.days", res.data.data.days);
 
-        setAllMatchData(res.data.days);
-        console.log("allMatchData", allMatchData);
+        setAllMatchData(res.data.data.days);
+        // console.log("allMatchData", allMatchData);
       } catch (err) {
         console.error(err);
         setError(err);
@@ -277,6 +281,20 @@ export default function MainCalendarPage() {
       window.alert = original;
     };
   }, []);
+
+  // * 임시용: 게임 시작 API 호출하고 응답을 로컬스토리지에 저장
+
+  const temporaryStartGameAndStore = async (gameId: number) => {
+    try {
+      const res = await API.post(`/games/${gameId}/start`);
+      // gameId별로 구분해서 저장
+      localStorage.setItem(`snapshot`, JSON.stringify(res.data));
+      return res.data;
+    } catch (e) {
+      console.warn("snapshot 실패:", e);
+      return null;
+    }
+  };
 
   return (
     <Container>
@@ -504,7 +522,10 @@ export default function MainCalendarPage() {
                   </TeamsContainer>
                   {showRecordButton ? (
                     <RecordButton
-                      onClick={() => {
+                      onClick={async () => {
+                        // 나중에 요건 없애기!
+                        await temporaryStartGameAndStore(match.id);
+
                         /* ① recoil-persist(로컬스토리지)에서 마지막 경로 가져오기 */
                         const persistedRoute = (() => {
                           try {
@@ -519,7 +540,7 @@ export default function MainCalendarPage() {
 
                         /* ② 경기 정보 로컬스토리지에 저장(기존 그대로) */
                         const selectedMatchInfo = {
-                          gameId: match.gameId,
+                          gameId: match.id,
                           awayTeam: {
                             id: match.awayTeam.id,
                             name: match.awayTeam.name,
@@ -548,34 +569,36 @@ export default function MainCalendarPage() {
                         }
 
                         /* ④ 이동 경로 결정 — 요 부분이 변경됨 */
-                        let route = "";
-                        if (
-                          match.status === "FINALIZED" ||
-                          match.status === "EDITING"
-                        ) {
-                          // 종료된 경기 결과 보기
-                          route = `/matches/${match.gameId}/result`;
-                        } else if (match.status === "IN_PROGRESS") {
-                          // 진행 중 경기 기록 입력
-                          route = `/matches/${match.gameId}/records`;
-                        } else if (match.status === "SCHEDULED") {
-                          // 예정 경기: 라벨이 "라인업제출"일 때
-                          if (
-                            !apiCanRecord &&
-                            (apiCanSubmit.home || apiCanSubmit.away)
-                          ) {
-                            route = apiCanSubmit.home
-                              ? `/matches/${match.gameId}/homeTeamRegistration`
-                              : `/matches/${match.gameId}/awayTeamRegistration`;
-                          } else {
-                            // 예정 경기이지만 실제 기록(스코어) 작성 권한이 있는 경우
-                            route =
-                              persistedRoute &&
-                              persistedRoute.includes(String(match.gameId))
-                                ? persistedRoute
-                                : `/matches/${match.gameId}/homeTeamRegistration`;
-                          }
-                        }
+                        let route = `/matches/${match.id}/records`;
+                        // [요거 다시 켜기!!]
+                        // let route = ``;
+                        // if (
+                        //   match.status === "FINALIZED" ||
+                        //   match.status === "EDITING"
+                        // ) {
+                        //   // 종료된 경기 결과 보기
+                        //   route = `/matches/${match.id}/result`;
+                        // } else if (match.status === "IN_PROGRESS") {
+                        //   // 진행 중 경기 기록 입력
+                        //   route = `/matches/${match.id}/records`;
+                        // } else if (match.status === "SCHEDULED") {
+                        //   // 예정 경기: 라벨이 "라인업제출"일 때
+                        //   if (
+                        //     !apiCanRecord &&
+                        //     (apiCanSubmit.home || apiCanSubmit.away)
+                        //   ) {
+                        //     route = apiCanSubmit.home
+                        //       ? `/matches/${match.id}/homeTeamRegistration`
+                        //       : `/matches/${match.id}/awayTeamRegistration`;
+                        //   } else {
+                        //     // 예정 경기이지만 실제 기록(스코어) 작성 권한이 있는 경우
+                        //     route =
+                        //       persistedRoute &&
+                        //       persistedRoute.includes(String(match.id))
+                        //         ? persistedRoute
+                        //         : `/matches/${match.id}/homeTeamRegistration`;
+                        //   }
+                        // }
 
                         /* ⑤ 최종 라우팅 */
                         router.push(route);
