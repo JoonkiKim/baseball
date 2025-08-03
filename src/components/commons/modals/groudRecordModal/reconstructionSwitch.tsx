@@ -1,9 +1,10 @@
 // PortalSwitch.tsx
-import { useLayoutEffect, memo, RefObject, useRef, useState } from "react";
+import { useLayoutEffect, memo, RefObject, useState } from "react";
 import { createPortal } from "react-dom";
 import { ReconstructionSwitch } from "./groundRecordModal.style";
 
 interface PortalSwitchProps {
+  checked: boolean;
   onChange: (checked: boolean) => void;
   anchorRef: RefObject<HTMLElement>;
 }
@@ -28,11 +29,10 @@ function ensurePortalRoot() {
 }
 
 const PortalSwitch = memo(function PortalSwitch({
+  checked,
   onChange,
   anchorRef,
 }: PortalSwitchProps) {
-  const [internalChecked, setInternalChecked] = useState(false);
-  const ignoreNextRef = useRef(false);
   const [position, setPosition] = useState({
     top: 0,
     left: 0,
@@ -40,7 +40,6 @@ const PortalSwitch = memo(function PortalSwitch({
     height: 0,
   });
 
-  // 앵커 위치 트래킹
   useLayoutEffect(() => {
     if (!anchorRef.current) return;
     const update = () => {
@@ -64,27 +63,6 @@ const PortalSwitch = memo(function PortalSwitch({
     };
   }, [anchorRef]);
 
-  // 낙관적 UI: pointerDown에서 즉시 반영하고 다음 underlying change는 무시
-  const handlePointerDown = () => {
-    setInternalChecked((prev) => {
-      const next = !prev;
-      ignoreNextRef.current = true; // 다음 onChange 이벤트(underlying) 무시
-      onChange(next);
-      return next;
-    });
-  };
-
-  // 실제 switch가 change 콜백을 보낼 때
-  const handleSwitchChange = (val: boolean) => {
-    if (ignoreNextRef.current) {
-      // 바로 이전에 pointerDown에서 반영했으므로 이 change는 redundant
-      ignoreNextRef.current = false;
-      return;
-    }
-    setInternalChecked(val);
-    onChange(val);
-  };
-
   const switchNode = (
     <div
       style={{
@@ -101,13 +79,11 @@ const PortalSwitch = memo(function PortalSwitch({
         transform: "translateZ(0)",
       }}
     >
-      <div onPointerDown={handlePointerDown}>
-        <ReconstructionSwitch
-          checked={internalChecked}
-          onChange={handleSwitchChange}
-          aria-checked={internalChecked}
-        />
-      </div>
+      <ReconstructionSwitch
+        checked={checked}
+        onChange={(val: boolean) => onChange(val)}
+        aria-checked={checked}
+      />
     </div>
   );
 
