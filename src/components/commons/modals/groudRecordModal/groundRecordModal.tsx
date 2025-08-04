@@ -1569,12 +1569,34 @@ const GroundRecordModal = forwardRef<
     const postUrl = `/plays/${encodedPlayId}/runner-events`;
     let postRes;
     try {
+      // 전송 직전에만 startBase === endBase인 entry 제거
+      const sanitizeCombinedRequest = (
+        req: CombinedRequest
+      ): CombinedRequest => {
+        const filter = (entries: RunnerLogEntry[] = []) =>
+          entries.filter((entry) => entry.startBase !== entry.endBase);
+
+        const actual = filter(req.actual);
+        const virtual =
+          req.virtual && req.virtual.length > 0
+            ? filter(req.virtual)
+            : undefined;
+
+        return {
+          phase: req.phase,
+          actual,
+          ...(virtual ? { virtual } : {}),
+        };
+      };
+
+      const finalRequest = sanitizeCombinedRequest(combinedRequest);
       console.log(
         "runner-events POST 요청:",
         postUrl,
-        JSON.stringify(combinedRequest, null, 2)
+        JSON.stringify(finalRequest, null, 2)
       );
-      postRes = await API.post(postUrl, combinedRequest);
+      postRes = await API.post(postUrl, finalRequest);
+
       console.log("runner-events POST 응답:", {
         status: (postRes as any)?.status,
         data:

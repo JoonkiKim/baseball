@@ -31,6 +31,7 @@ export default function OutModal(props: IModalProps) {
     삼진: "SO",
     희생번트: "SB",
     희생플라이: "SF",
+    그외아웃: "O",
   };
 
   // 아웃 종류 선택 시 실행될 비동기 함수
@@ -107,6 +108,12 @@ export default function OutModal(props: IModalProps) {
           disabled={isSubmitting}
         >
           희생번트
+        </ModalButton>
+        <ModalButton
+          onClick={() => handleTypeSelect("그외아웃")}
+          disabled={isSubmitting}
+        >
+          그 외 아웃
         </ModalButton>
       </ModalContainer>
       <LoadingOverlay visible={isSubmitting}>
