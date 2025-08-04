@@ -538,6 +538,7 @@ const GroundRecordModal = forwardRef<
       setSnapshotData(null);
     }
   }, [isOpen]);
+
   // 초기 타자 및 주자의 위치
   const [snapshotData, setSnapshotData] = useState<any>(null);
   const initialSnapsRef = useRef<Record<string, SnapInfo | null>>({});
@@ -1084,7 +1085,7 @@ const GroundRecordModal = forwardRef<
 
       setApplyResetSnapshot(true);
     });
-  }, [badgeConfigsForModal, loadSnapshot]);
+  }, [isOpen, badgeConfigsForModal, loadSnapshot]);
 
   useEffect(() => {
     if (!applyResetSnapshot) return;
@@ -1475,20 +1476,60 @@ const GroundRecordModal = forwardRef<
   // }, [combinedRequest]);
 
   // 확인 버튼 핸들러
+  const clearAllSnapsAndExitReconstructMode = useCallback(() => {
+    unstable_batchedUpdates(() => {
+      setReconstructMode(false);
+      setBadgeSnaps(
+        badgeConfigsForModal.reduce((acc, c) => {
+          acc[c.id] = null; // SnapInfo|null 이어야 하므로 null로 초기화
+          return acc;
+        }, {} as Record<string, SnapInfo | null>)
+      );
+      setActiveBadges(badgeConfigsForModal.map((c) => c.id));
+      setOutBadgesActual(new Set());
+      setOutBadgesVirtual(new Set());
+      setRunnerInfoByBadgeActual({});
+      setRunnerInfoByBadgeVirtual({});
+      setBaseToBadgeIdActual({});
+      setBaseToBadgeIdVirtual({});
+      setFinishedBadgesActual(new Set());
+      setFinishedBadgesVirtual(new Set());
+      setHomeSnappedBadgesActual(new Set());
+      setHomeSnappedBadgesVirtual(new Set());
+    });
+  }, [badgeConfigsForModal]);
+
   const sendRunnerEvents = useCallback(async () => {
     if (!combinedRequest) {
       console.warn("combinedRequest이 없어서 전송을 스킵합니다.");
       return;
     }
 
-    const playId = localStorage.getItem("playId");
-    if (!playId) {
+    // snapshot에서 playId만 꺼냄 (절대 다른 키로 대체하지 않음)
+    const rawSnapshot = localStorage.getItem("snapshot");
+    if (!rawSnapshot) {
       const msg =
-        "localStorage에 playId가 없어 runner-events 요청을 보낼 수 없습니다.";
+        "localStorage에 snapshot이 없어 runner-events 요청을 보낼 수 없습니다.";
       console.error(msg);
       throw new Error(msg);
     }
-    const encodedPlayId = encodeURIComponent(playId);
+
+    let playIdValue: unknown = null;
+    try {
+      const parsed = JSON.parse(rawSnapshot);
+      playIdValue = parsed.snapshot?.playId ?? null;
+    } catch (e) {
+      console.warn("snapshot JSON 파싱 실패:", e);
+    }
+
+    if (playIdValue == null) {
+      const msg =
+        "localStorage의 snapshot에서 snapshot.playId를 찾을 수 없어 runner-events 요청을 보낼 수 없습니다.";
+      console.error(msg);
+      throw new Error(msg);
+    }
+
+    const encodedPlayId = encodeURIComponent(String(playIdValue));
 
     // plateAppearanceResult 가져오기
     const rawPlateAppearance = localStorage.getItem("plateAppearanceResult");
@@ -1511,7 +1552,6 @@ const GroundRecordModal = forwardRef<
     try {
       console.log("PATCH /result 요청:", patchUrl, plateAppearanceResult);
       patchRes = await API.patch(patchUrl, plateAppearanceResult ?? {});
-      // 응답 출력 (axios 기준 .status, .data가 있으면 그걸, 없으면 전체)
       console.log("PATCH /result 응답:", {
         status: (patchRes as any)?.status,
         data:
@@ -1542,6 +1582,8 @@ const GroundRecordModal = forwardRef<
             ? (postRes as any).data
             : postRes,
       });
+
+      localStorage.setItem(`snapshot`, JSON.stringify(postRes.data));
     } catch (err) {
       console.error("runner-events 전송 실패:", err);
       alert("runner-events 전송 실패");
@@ -1555,7 +1597,9 @@ const GroundRecordModal = forwardRef<
     setIsSubmitting(true);
     try {
       await sendRunnerEvents();
+      clearAllSnapsAndExitReconstructMode();
       await onSuccess?.();
+      resetWhiteBadges();
       handleClose();
     } catch (e) {
       setError(e as Error);
