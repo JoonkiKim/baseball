@@ -260,140 +260,7 @@ const GroundRecordModal = forwardRef<
       console.log("Base occupancy after handleDrop:", occ);
     });
   };
-  // 다음에 가야 할(스냅해야 할) 베이스
 
-  // const handleDrop = (e: DragEndEvent) => {
-  //   const badgeId = e.active.id as string;
-
-  //   // // 검정 배지: 기존 자리 스왑 로직
-  //   // if (badgeId.startsWith("black-badge")) {
-  //   //   handleBlackDragEnd(e);
-  //   //   return;
-  //   // }
-
-  //   const badgeEl = badgeRefs.current[badgeId];
-  //   const wrapperRect = wrapperRectRef.current;
-  //   const zoneRect = zoneRectRef.current;
-  //   if (!badgeEl || !wrapperRect) return;
-
-  //   const { left, top, width, height } = badgeEl.getBoundingClientRect();
-  //   const cx = left + width / 2;
-  //   const cy = top + height / 2;
-
-  //   // 아웃존 바깥 드롭 시 제거(단, 흰 배지가 최소 1개는 남아야 함)
-  //   if (
-  //     zoneRect &&
-  //     (cx < zoneRect.left ||
-  //       cx > zoneRect.right ||
-  //       cy < zoneRect.top ||
-  //       cy > zoneRect.bottom)
-  //   ) {
-  //     // 아웃존에 들어간 배지를 기록 (모드별)
-  //     if (reconstructMode) {
-  //       setOutBadgesVirtual((prev) => {
-  //         const next = new Set(prev);
-  //         next.add(badgeId);
-  //         return next;
-  //       });
-  //     } else {
-  //       setOutBadgesActual((prev) => {
-  //         const next = new Set(prev);
-  //         next.add(badgeId);
-  //         return next;
-  //       });
-  //     }
-  //     setActiveBadges((prev) => {
-  //       // 새로 걸러낸 배열
-  //       const next = prev.filter((id) => id !== badgeId);
-  //       // 남은 흰 배지 개수 계산
-  //       const whiteLeft = next.filter(
-  //         (id) => !id.startsWith("black-badge")
-  //       ).length;
-  //       // 흰 배지가 하나라도 남으면 next, 아니면 prev 유지
-  //       return whiteLeft > 0 ? next : prev;
-  //     });
-  //     setBadgeSnaps((prev) => ({ ...prev, [badgeId]: null }));
-
-  //     // Ground 배경 리셋
-  //     groundRef.current?.classList.remove("out-zone-active");
-  //     return;
-  //   }
-
-  //   // 2) 어느 베이스 위인지 판정
-  //   let dropBase: BaseId | null = null;
-  //   let baseRect: DOMRect | undefined;
-  //   for (const b of BASE_IDS) {
-  //     const rect = baseRectsRef.current[b];
-  //     if (!rect) continue;
-  //     if (
-  //       cx >= rect.left &&
-  //       cx <= rect.right &&
-  //       cy >= rect.top &&
-  //       cy <= rect.bottom
-  //     ) {
-  //       dropBase = b;
-  //       baseRect = rect;
-  //       break;
-  //     }
-  //   }
-  //   if (!dropBase || !baseRect) return;
-  //   // excluded 배지는 베이스에 스냅되지 않음
-  //   if (isExcludedBadge(badgeId)) {
-  //     return;
-  //   }
-  //   // 3) 순서 강제
-  //   // const required = nextRequiredBase(badgeId);
-  //   // if (dropBase !== required) {
-  //   //   return; // 순서 아니면 스냅 불가
-  //   // }
-
-  //   // 4) 점유 체크(1베이스 1주자)
-  //   // const occupied = Object.entries(badgeSnaps).some(
-  //   //   ([otherId, snap]) => otherId !== badgeId && snap?.base === dropBase
-  //   // );
-  //   // if (occupied) {
-  //   //   return;
-  //   // }
-  //   if (isBaseOccupied(dropBase, badgeId, badgeSnaps)) {
-  //     scheduleOccupancyLog();
-  //     return;
-  //   }
-  //   // 5) 스냅(흰 배지: % 좌표)
-  //   const x = baseRect.left + baseRect.width / 2 - wrapperRect.left;
-  //   const y = baseRect.top + baseRect.height / 2 - wrapperRect.top;
-
-  //   setBadgeSnaps((prev) => ({
-  //     ...prev,
-  //     [badgeId]: {
-  //       base: dropBase,
-  //       pos: {
-  //         xPct: (x / wrapperRect.width) * 100,
-  //         yPct: (y / wrapperRect.height) * 100,
-  //       },
-  //     },
-  //   }));
-
-  //   // 6) 진행 기록 업데이트 (유지)
-  //   const seq = snappedSeqRef.current[badgeId];
-  //   if (seq[seq.length - 1] !== dropBase) {
-  //     seq.push(dropBase);
-  //   }
-  //   // *** 추가된 부분: 흰색 배지가 홈베이스에 스냅되면 즉시 화면에서 제거 ***
-  //   if (dropBase === "home-base" && !badgeId.startsWith("black-badge")) {
-  //     setActiveBadges((prev) => prev.filter((id) => id !== badgeId));
-  //     setBadgeSnaps((prev) => ({ ...prev, [badgeId]: null }));
-  //     // 기록은 유지 (snappedSeqRef.current[badgeId]는 지우지 않음)
-  //     return;
-  //   }
-
-  //   const finished = dropBase === "home-base";
-
-  //   if (finished) {
-  //     setActiveBadges((prev) => prev.filter((id) => id !== badgeId));
-  //     setBadgeSnaps((prev) => ({ ...prev, [badgeId]: null }));
-  //     // 기록은 유지 (snappedSeqRef.current[badgeId]는 지우지 않음)
-  //   }
-  // };
   const handleDrop = (e: DragEndEvent) => {
     const badgeId = e.active.id as string;
 
@@ -1189,7 +1056,7 @@ const GroundRecordModal = forwardRef<
   }, [badgeSnaps]);
 
   const [applyResetSnapshot, setApplyResetSnapshot] = useState(false);
-  5;
+  // 5;
 
   const resetWhiteBadges = useCallback(() => {
     unstable_batchedUpdates(() => {
