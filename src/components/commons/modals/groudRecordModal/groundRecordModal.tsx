@@ -308,21 +308,127 @@ const GroundRecordModal = forwardRef<
     }
 
     // 어느 베이스 위인지 판정
+    // let dropBase: BaseId | null = null;
+    // let baseRect: DOMRect | undefined;
+    // for (const b of BASE_IDS) {
+    //   const rect = baseRectsRef.current[b];
+    //   if (!rect) continue;
+    //   if (
+    //     cx >= rect.left &&
+    //     cx <= rect.right &&
+    //     cy >= rect.top &&
+    //     cy <= rect.bottom
+    //   ) {
+    //     dropBase = b;
+    //     baseRect = rect;
+    //     break;
+    //   }
+    // }
+    // if (!dropBase || !baseRect) return;
+    // 어느 베이스 위인지 판정 (겹침 / padding / 거리 기반 스냅)
     let dropBase: BaseId | null = null;
     let baseRect: DOMRect | undefined;
+
+    // helper: 두 사각형의 겹친 면적 계산
+    const computeOverlapArea = (
+      a: { left: number; top: number; right: number; bottom: number },
+      b: { left: number; top: number; right: number; bottom: number }
+    ) => {
+      const xOverlap = Math.max(
+        0,
+        Math.min(a.right, b.right) - Math.max(a.left, b.left)
+      );
+      const yOverlap = Math.max(
+        0,
+        Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top)
+      );
+      return xOverlap * yOverlap;
+    };
+    // helper: 점이 사각형 안에 있는지
+    const pointInRect = (
+      point: { x: number; y: number },
+      rect: { left: number; top: number; right: number; bottom: number }
+    ) => {
+      return (
+        point.x >= rect.left &&
+        point.x <= rect.right &&
+        point.y >= rect.top &&
+        point.y <= rect.bottom
+      );
+    };
+
+    const SNAP_PADDING = 8; // 주변 여유
+    const MAX_CENTER_DISTANCE = 40; // 중심 거리 허용치
+
+    const badgeRect = badgeEl.getBoundingClientRect();
+    const badgeBox = {
+      left: badgeRect.left,
+      top: badgeRect.top,
+      right: badgeRect.right,
+      bottom: badgeRect.bottom,
+    };
+    const badgeCenter = {
+      x: badgeRect.left + badgeRect.width / 2,
+      y: badgeRect.top + badgeRect.height / 2,
+    };
+
+    type Candidate = {
+      base: BaseId;
+      baseRect: DOMRect;
+      overlap: number;
+      centerDist: number;
+    };
+    const candidates: Candidate[] = [];
+
     for (const b of BASE_IDS) {
       const rect = baseRectsRef.current[b];
       if (!rect) continue;
-      if (
-        cx >= rect.left &&
-        cx <= rect.right &&
-        cy >= rect.top &&
-        cy <= rect.bottom
-      ) {
-        dropBase = b;
-        baseRect = rect;
-        break;
+
+      const baseBox = {
+        left: rect.left,
+        top: rect.top,
+        right: rect.right,
+        bottom: rect.bottom,
+      };
+      const expandedBaseBox = {
+        left: rect.left - SNAP_PADDING,
+        top: rect.top - SNAP_PADDING,
+        right: rect.right + SNAP_PADDING,
+        bottom: rect.bottom + SNAP_PADDING,
+      };
+
+      const overlapArea = computeOverlapArea(badgeBox, baseBox);
+      const baseCenter = {
+        x: rect.left + rect.width / 2,
+        y: rect.top + rect.height / 2,
+      };
+      const centerDist = Math.hypot(
+        badgeCenter.x - baseCenter.x,
+        badgeCenter.y - baseCenter.y
+      );
+
+      const qualifies =
+        overlapArea > 0 || // 실제 겹쳐졌거나
+        pointInRect(badgeCenter, expandedBaseBox) || // 중심이 확장 영역 안에 있거나
+        centerDist <= MAX_CENTER_DISTANCE; // 중심 거리 기준
+
+      if (qualifies) {
+        candidates.push({
+          base: b,
+          baseRect: rect,
+          overlap: overlapArea,
+          centerDist,
+        });
       }
+    }
+
+    if (candidates.length > 0) {
+      candidates.sort((a, b) => {
+        if (b.overlap !== a.overlap) return b.overlap - a.overlap;
+        return a.centerDist - b.centerDist;
+      });
+      dropBase = candidates[0].base;
+      baseRect = candidates[0].baseRect;
     }
     if (!dropBase || !baseRect) return;
 
@@ -1059,10 +1165,85 @@ const GroundRecordModal = forwardRef<
   const [applyResetSnapshot, setApplyResetSnapshot] = useState(false);
   // 5;
 
+  // const resetWhiteBadges = useCallback(() => {
+  //   unstable_batchedUpdates(() => {
+  //     loadSnapshot();
+
+  //     setBadgeSnaps(
+  //       badgeConfigsForModal.reduce((acc, c) => {
+  //         acc[c.id] = null;
+  //         return acc;
+  //       }, {} as Record<string, SnapInfo | null>)
+  //     );
+  //     setActiveBadges(badgeConfigsForModal.map((c) => c.id));
+  //     setOutBadgesActual(new Set());
+  //     setOutBadgesVirtual(new Set());
+  //     setRunnerInfoByBadgeActual({});
+  //     setRunnerInfoByBadgeVirtual({});
+  //     setBaseToBadgeIdActual({});
+  //     setBaseToBadgeIdVirtual({});
+
+  //     // ← 여기를 추가: 홈/완료 상태 초기화
+  //     setFinishedBadgesActual(new Set());
+  //     setFinishedBadgesVirtual(new Set());
+  //     setHomeSnappedBadgesActual(new Set());
+  //     setHomeSnappedBadgesVirtual(new Set());
+
+  //     setApplyResetSnapshot(true);
+  //   });
+  // }, [isOpen, badgeConfigsForModal, loadSnapshot]);
+  // const resetWhiteBadges = useCallback(() => {
+  //   unstable_batchedUpdates(() => {
+  //     loadSnapshot();
+
+  //     // ref들도 즉시 초기화 (이전 스냅/순서 잔재 제거)
+  //     initialSnapsRef.current = badgeConfigsForModal.reduce((acc, c) => {
+  //       acc[c.id] = null;
+  //       return acc;
+  //     }, {} as Record<string, SnapInfo | null>);
+  //     snappedSeqRef.current = badgeConfigsForModal.reduce((acc, c) => {
+  //       acc[c.id] = [];
+  //       return acc;
+  //     }, {} as Record<string, BaseId[]>);
+
+  //     setBadgeSnaps(
+  //       badgeConfigsForModal.reduce((acc, c) => {
+  //         acc[c.id] = null;
+  //         return acc;
+  //       }, {} as Record<string, SnapInfo | null>)
+  //     );
+  //     setActiveBadges(badgeConfigsForModal.map((c) => c.id));
+  //     setOutBadgesActual(new Set());
+  //     setOutBadgesVirtual(new Set());
+  //     setRunnerInfoByBadgeActual({});
+  //     setRunnerInfoByBadgeVirtual({});
+  //     setBaseToBadgeIdActual({});
+  //     setBaseToBadgeIdVirtual({});
+
+  //     setFinishedBadgesActual(new Set());
+  //     setFinishedBadgesVirtual(new Set());
+  //     setHomeSnappedBadgesActual(new Set());
+  //     setHomeSnappedBadgesVirtual(new Set());
+
+  //     setApplyResetSnapshot(true);
+  //   });
+  // }, [isOpen, badgeConfigsForModal, loadSnapshot]);
+
   const resetWhiteBadges = useCallback(() => {
     unstable_batchedUpdates(() => {
       loadSnapshot();
 
+      // refs 초기화 (이전 스냅/순서 제거)
+      initialSnapsRef.current = badgeConfigsForModal.reduce((acc, c) => {
+        acc[c.id] = null;
+        return acc;
+      }, {} as Record<string, SnapInfo | null>);
+      snappedSeqRef.current = badgeConfigsForModal.reduce((acc, c) => {
+        acc[c.id] = [];
+        return acc;
+      }, {} as Record<string, BaseId[]>);
+
+      // 상태 초기화
       setBadgeSnaps(
         badgeConfigsForModal.reduce((acc, c) => {
           acc[c.id] = null;
@@ -1076,57 +1257,65 @@ const GroundRecordModal = forwardRef<
       setRunnerInfoByBadgeVirtual({});
       setBaseToBadgeIdActual({});
       setBaseToBadgeIdVirtual({});
-
-      // ← 여기를 추가: 홈/완료 상태 초기화
       setFinishedBadgesActual(new Set());
       setFinishedBadgesVirtual(new Set());
       setHomeSnappedBadgesActual(new Set());
       setHomeSnappedBadgesVirtual(new Set());
-
-      setApplyResetSnapshot(true);
-    });
-  }, [isOpen, badgeConfigsForModal, loadSnapshot]);
-
-  useEffect(() => {
-    if (!applyResetSnapshot) return;
-    if (!snapshotData) return; // snapshotData가 아직 들어오기 전이면 대기
-
-    // 1) snapshot 기반으로 스냅/매핑 재구성 (excluded 건너뛰기)
-    syncRunnersOnBaseForMode("actual", { skipExcluded: true });
-    syncRunnersOnBaseForMode("virtual", { skipExcluded: true });
-
-    // 2) snappedSeqRef 재설정 (현재 badgeSnaps 기준)
-    badgeConfigsForModal.forEach(({ id }) => {
-      const snap = badgeSnapsRef.current[id] ?? initialSnapsRef.current[id];
-      snappedSeqRef.current[id] = snap ? [snap.base] : [];
     });
 
-    // 3) excluded 포함한 일반 sync
-    syncRunnersOnBaseForMode("actual");
-    syncRunnersOnBaseForMode("virtual");
-
-    // 4) 다음 리셋 대비 초기 스냅 저장
-    initialSnapsRef.current = { ...badgeSnapsRef.current };
-
-    // 5) 상태가 모두 반영된 뒤에 occupancy 측정 (두 프레임 확보)
+    // 초기 로딩과 동일하게 snapshot 기반 sync 한 번만 수행
     requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        const occ = computeBaseOccupancy(badgeSnapsRef.current);
-        console.log(
-          "Base occupancy after resetWhiteBadges (from snapshot):",
-          occ
-        );
+      syncRunnersOnBase();
+
+      // sync 결과가 반영된 badgeSnaps를 기준으로 initialSnaps / snappedSeq도 갱신
+      initialSnapsRef.current = { ...badgeSnapsRef.current };
+      badgeConfigsForModal.forEach(({ id }) => {
+        const snap = badgeSnapsRef.current[id];
+        snappedSeqRef.current[id] = snap ? [snap.base] : [];
       });
     });
+  }, [loadSnapshot, badgeConfigsForModal, syncRunnersOnBase]);
 
-    // 플래그 초기화
-    setApplyResetSnapshot(false);
-  }, [
-    applyResetSnapshot,
-    snapshotData,
-    syncRunnersOnBaseForMode,
-    badgeConfigsForModal,
-  ]);
+  // useEffect(() => {
+  //   if (!applyResetSnapshot) return;
+  //   if (!snapshotData) return; // snapshotData가 아직 들어오기 전이면 대기
+
+  //   // 1) snapshot 기반으로 스냅/매핑 재구성 (excluded 건너뛰기)
+  //   syncRunnersOnBaseForMode("actual", { skipExcluded: true });
+  //   syncRunnersOnBaseForMode("virtual", { skipExcluded: true });
+
+  //   // 2) snappedSeqRef 재설정 (현재 badgeSnaps 기준)
+  //   badgeConfigsForModal.forEach(({ id }) => {
+  //     const snap = badgeSnapsRef.current[id] ?? initialSnapsRef.current[id];
+  //     snappedSeqRef.current[id] = snap ? [snap.base] : [];
+  //   });
+
+  //   // 3) excluded 포함한 일반 sync
+  //   syncRunnersOnBaseForMode("actual");
+  //   syncRunnersOnBaseForMode("virtual");
+
+  //   // 4) 다음 리셋 대비 초기 스냅 저장
+  //   initialSnapsRef.current = { ...badgeSnapsRef.current };
+
+  //   // 5) 상태가 모두 반영된 뒤에 occupancy 측정 (두 프레임 확보)
+  //   requestAnimationFrame(() => {
+  //     requestAnimationFrame(() => {
+  //       const occ = computeBaseOccupancy(badgeSnapsRef.current);
+  //       console.log(
+  //         "Base occupancy after resetWhiteBadges (from snapshot):",
+  //         occ
+  //       );
+  //     });
+  //   });
+
+  //   // 플래그 초기화
+  //   setApplyResetSnapshot(false);
+  // }, [
+  //   applyResetSnapshot,
+  //   snapshotData,
+  //   syncRunnersOnBaseForMode,
+  //   badgeConfigsForModal,
+  // ]);
 
   // 모드 전환 시 기존 주자/스냅 상태 초기화 (actual <-> virtual 섞이는 문제 방지)
 
@@ -1648,9 +1837,16 @@ const GroundRecordModal = forwardRef<
     [badgeSnaps]
   );
 
+  // useEffect(() => {
+  //   console.log("Base occupancy:", occupancy);
+  // }, [occupancy]);
   useEffect(() => {
-    console.log("Base occupancy:", occupancy);
-  }, [occupancy]);
+    const occupiedEntries = Object.entries(badgeSnaps)
+      .filter(([, snap]) => snap != null)
+      .map(([id, snap]) => `${id} → ${snap!.base}`);
+    console.log("badgeSnaps contents:", occupiedEntries);
+    console.log("computed occupancy from badgeSnaps:", occupancy);
+  }, [badgeSnaps, occupancy]);
 
   useEffect(() => {
     if (isOpen) {

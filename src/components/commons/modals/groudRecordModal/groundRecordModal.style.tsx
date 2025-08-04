@@ -587,7 +587,7 @@ export const NameBadge = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 3vh;
+  height: 4vh;
   width: 13vw;
   white-space: nowrap;
   touch-action: none; /* 터치 동작(스크롤/줌) 비활성화 */
