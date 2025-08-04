@@ -19,40 +19,31 @@ import ErrorAlert from "../../../../commons/libraries/showErrorCode";
 import {
   DndContext,
   DragEndEvent,
-  DragMoveEvent,
-  DragOverEvent,
   DragStartEvent,
-  MeasuringStrategy,
   Modifier,
   PointerSensor,
-  TouchSensor,
   useDraggable,
   useDroppable,
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
 import {
-  CancelButton,
   CancelButtonWrapper,
   CustomBoundaryWrapper,
   DiamondSvg,
-  Ellipse,
   GraphicWrapper,
   Ground,
   HomeBaseWrapper,
   HomeWrapper,
   LineWrapper,
-  ModalBottomRedoUndoWrapper,
   ModalBottomRunnerTitle,
   ModalBottomRunnerWrapper,
   ModalBottomWrapper,
   ModalContainer,
   ModalOverlay,
   NameBadge,
-  OutCount,
   OutZoneWrapper,
   ReconstructionButtonWrapper,
-  ReconstructionSwitch,
   ReconstructionTitle,
   ReconstructionWrapper,
   ResetDot,
@@ -95,19 +86,6 @@ const GroundRecordModal = forwardRef<
   const handleClose = useCallback(() => {
     setIsOpen(false);
   }, []);
-
-  // 확인 버튼 핸들러
-  const handleSubmit = useCallback(async () => {
-    setIsSubmitting(true);
-    try {
-      await onSuccess?.();
-      handleClose();
-    } catch (e) {
-      setError(e as Error);
-    } finally {
-      setIsSubmitting(false);
-    }
-  }, [onSuccess, handleClose]);
 
   // 모달이 닫혀있으면 렌더링 스킵
   // if (!isOpen) return null;
@@ -167,9 +145,9 @@ const GroundRecordModal = forwardRef<
     useState<Record<string, SnapInfo | null>>(initialBadgeSnaps);
 
   // ── 베이스 중심 좌표 캐싱용 ref (이미 적용하셨다면 생략) ──
-  const baseCentersRef = useRef<Record<BaseId, { x: number; y: number }>>(
-    {} as Record<BaseId, { x: number; y: number }>
-  );
+  // const baseCentersRef = useRef<Record<BaseId, { x: number; y: number }>>(
+  //   {} as Record<BaseId, { x: number; y: number }>
+  // );
 
   // 커스텀 경계설정
   const customBoundsRef = useRef<HTMLDivElement>(null);
@@ -1440,22 +1418,50 @@ const GroundRecordModal = forwardRef<
     return [...Array.from(realByRunner.values()), ...specialEntries];
   };
 
-  // actual 전용 로그 (reconstructMode=false일 때)
+  type RunnerLogEntry = {
+    runnerId: number | null;
+    startBase: string;
+    endBase: string;
+  };
 
+  type CombinedRequest = {
+    phase: "AFTER";
+    actual: RunnerLogEntry[];
+    virtual?: RunnerLogEntry[];
+  };
+
+  const [actualRequest, setActualRequest] = useState<RunnerLogEntry[]>([]);
+  const [virtualRequest, setVirtualRequest] = useState<RunnerLogEntry[]>([]);
+  const [combinedRequest, setCombinedRequest] =
+    useState<CombinedRequest | null>(null);
+
+  // reconstructMode 켤 때 이전 actual을 보존하기 위한 ref
+  const actualBeforeReconstructRef = useRef<RunnerLogEntry[] | null>(null);
+
+  useEffect(() => {
+    if (reconstructMode) {
+      if (actualBeforeReconstructRef.current === null) {
+        actualBeforeReconstructRef.current = actualRequest;
+      }
+    } else {
+      actualBeforeReconstructRef.current = null;
+    }
+  }, [reconstructMode, actualRequest]);
+
+  // actual 전용 로그 (reconstructMode=false일 때)
   useEffect(() => {
     if (!isOpen) return;
     if (!batterWhiteBadgeId) return;
-    if (reconstructMode) return; // virtual 모드면 skip
+    if (reconstructMode) return; // reconstruct 모드면 skip
 
     const actualArray = buildArrayForMode(
       runnerInfoByBadgeActual,
       outBadgesActual,
       homeSnappedBadgesActual
     );
-
-    // runnerId가 null인 항목 제외
     const filteredActualArray = actualArray.filter(
-      (entry) => entry.runnerId !== null
+      (entry) =>
+        entry.runnerId !== null && entry.runnerId !== EXCLUDED_RUNNER_ID
     );
     const serializedActual = JSON.stringify(filteredActualArray);
 
@@ -1463,17 +1469,16 @@ const GroundRecordModal = forwardRef<
       filteredActualArray.length > 0 &&
       prevActualLogRef.current !== serializedActual
     ) {
-      console.log(
-        JSON.stringify(
-          {
-            phase: "AFTER",
-            actual: filteredActualArray,
-          },
-          null,
-          2
-        )
-      );
+      setActualRequest(filteredActualArray); // 추가된 저장
       prevActualLogRef.current = serializedActual;
+      console.log("filteredActualArray", filteredActualArray);
+      // actual만 있는 경우 combinedRequest 구성
+      const single: CombinedRequest = {
+        phase: "AFTER",
+        actual: filteredActualArray,
+      };
+      setCombinedRequest(single);
+      console.log("actual only", JSON.stringify(single, null, 2));
     }
   }, [
     badgeSnaps,
@@ -1484,24 +1489,23 @@ const GroundRecordModal = forwardRef<
     isOpen,
     outBadgesActual,
     allWhiteBadges,
-    reconstructMode,
+    // reconstructMode,
   ]);
 
   // virtual 전용 로그 (reconstructMode=true일 때)
   useEffect(() => {
     if (!isOpen) return;
     if (!batterWhiteBadgeId) return;
-    if (!reconstructMode) return; // actual 모드면 skip
+    if (!reconstructMode) return;
 
     const virtualArray = buildArrayForMode(
       runnerInfoByBadgeVirtual,
       outBadgesVirtual,
       homeSnappedBadgesVirtual
     );
-
-    // runnerId가 null인 항목 제외
     const filteredVirtualArray = virtualArray.filter(
-      (entry) => entry.runnerId !== null
+      (entry) =>
+        entry.runnerId !== null && entry.runnerId !== EXCLUDED_RUNNER_ID
     );
     const serializedVirtual = JSON.stringify(filteredVirtualArray);
 
@@ -1509,16 +1513,7 @@ const GroundRecordModal = forwardRef<
       filteredVirtualArray.length > 0 &&
       prevVirtualLogRef.current !== serializedVirtual
     ) {
-      console.log(
-        JSON.stringify(
-          {
-            phase: "AFTER",
-            virtual: filteredVirtualArray,
-          },
-          null,
-          2
-        )
-      );
+      setVirtualRequest(filteredVirtualArray); // 추가된 저장
       prevVirtualLogRef.current = serializedVirtual;
     }
   }, [
@@ -1533,6 +1528,24 @@ const GroundRecordModal = forwardRef<
     reconstructMode,
   ]);
 
+  // actual (재구성 모드 켜기 직전 스냅) + virtual 합쳐서 최종 객체 생성
+  useEffect(() => {
+    if (!reconstructMode) return;
+    if (virtualRequest.length === 0) return;
+
+    const actualToUse = actualBeforeReconstructRef.current ?? actualRequest;
+
+    const combined: CombinedRequest = {
+      phase: "AFTER",
+      actual: actualToUse,
+      virtual: virtualRequest,
+    };
+    setCombinedRequest(combined);
+    console.log("최종입니다", JSON.stringify(combined, null, 2));
+  }, [virtualRequest, reconstructMode, actualRequest]);
+
+  console.log("combinedRequest", combinedRequest);
+
   useImperativeHandle(
     ref,
     () => ({
@@ -1541,19 +1554,6 @@ const GroundRecordModal = forwardRef<
     }),
     []
   );
-
-  // useEffect(() => {
-  //   // badgeSnaps: Record<badgeId, { base: BaseId; pos: { x, y } } | null>
-  //   const occupancy: Record<BaseId, boolean> = BASE_IDS.reduce((acc, base) => {
-  //     // badgeSnaps 중에 baseId === base 인 항목이 하나라도 있으면 true
-  //     acc[base] = Object.values(badgeSnaps).some((snap) => snap?.base === base);
-  //     return acc;
-  //   }, {} as Record<BaseId, boolean>);
-
-  //   console.log("Base occupancy:", occupancy);
-  //   // 예: { "first-base": true, "second-base": false, ... }
-  // }, [badgeSnaps]);
-  // 베이스 아이디 타입 (기존에 컴포넌트 내부에 있던 것을 여기로 끌어올림)
 
   /**
    * 현재 badgeSnaps 기준으로 각 베이스가 점유되어 있는지 여부를 계산
@@ -1572,6 +1572,130 @@ const GroundRecordModal = forwardRef<
       return acc;
     }, {} as Record<BaseId, boolean>);
   }
+  // 최종 제출하기 함수
+  // 서버로 runner-events 전송 (요청값은 무조건 combinedRequest)
+  // const playId = localStorage.getItem("playId");
+  // const sendRunnerEvents = useCallback(async () => {
+  //   if (!combinedRequest) {
+  //     console.warn("combinedRequest이 없어서 전송을 스킵합니다."); // 없으면 스킵
+  //     return;
+  //   }
+  //   console.log(
+  //     "Sending runner events:",
+  //     JSON.stringify(combinedRequest, null, 2)
+  //   );
+
+  //   if (!playId) {
+  //     const msg =
+  //       "localStorage에 playId가 없어 runner-events 요청을 보낼 수 없습니다.";
+  //     console.error(msg);
+  //     throw new Error(msg);
+  //   }
+  //   const url = `/plays/${encodeURIComponent(playId)}/runner-events`;
+  //   console.log(
+  //     "Sending runner events to",
+  //     url,
+  //     JSON.stringify(combinedRequest, null, 2)
+  //   );
+  //   try {
+  //     const res = await API.post(url, combinedRequest);
+  //     return res;
+  //   } catch (e) {
+  //     console.error("runner-events 전송 실패:", e);
+  //     alert("전송 실패");
+  //     throw e;
+  //   }
+  // }, [combinedRequest]);
+
+  // 확인 버튼 핸들러
+  const sendRunnerEvents = useCallback(async () => {
+    if (!combinedRequest) {
+      console.warn("combinedRequest이 없어서 전송을 스킵합니다.");
+      return;
+    }
+
+    const playId = localStorage.getItem("playId");
+    if (!playId) {
+      const msg =
+        "localStorage에 playId가 없어 runner-events 요청을 보낼 수 없습니다.";
+      console.error(msg);
+      throw new Error(msg);
+    }
+    const encodedPlayId = encodeURIComponent(playId);
+
+    // plateAppearanceResult 가져오기
+    const rawPlateAppearance = localStorage.getItem("plateAppearanceResult");
+    let plateAppearanceResult: any = null;
+    if (rawPlateAppearance != null) {
+      try {
+        plateAppearanceResult = JSON.parse(rawPlateAppearance);
+      } catch {
+        plateAppearanceResult = rawPlateAppearance;
+      }
+    } else {
+      console.warn(
+        "localStorage에 plateAppearanceResult가 없습니다. PATCH body를 빈 객체로 보냅니다."
+      );
+    }
+
+    // 1. PATCH /plays/{playId}/result 먼저
+    const patchUrl = `/plays/${encodedPlayId}/result`;
+    let patchRes;
+    try {
+      console.log("PATCH /result 요청:", patchUrl, plateAppearanceResult);
+      patchRes = await API.patch(patchUrl, plateAppearanceResult ?? {});
+      // 응답 출력 (axios 기준 .status, .data가 있으면 그걸, 없으면 전체)
+      console.log("PATCH /result 응답:", {
+        status: (patchRes as any)?.status,
+        data:
+          typeof (patchRes as any)?.data !== "undefined"
+            ? (patchRes as any).data
+            : patchRes,
+      });
+    } catch (err) {
+      console.error("PATCH /result 실패:", err);
+      alert("결과 업데이트 실패");
+      throw err;
+    }
+
+    // 2. POST runner-events
+    const postUrl = `/plays/${encodedPlayId}/runner-events`;
+    let postRes;
+    try {
+      console.log(
+        "runner-events POST 요청:",
+        postUrl,
+        JSON.stringify(combinedRequest, null, 2)
+      );
+      postRes = await API.post(postUrl, combinedRequest);
+      console.log("runner-events POST 응답:", {
+        status: (postRes as any)?.status,
+        data:
+          typeof (postRes as any)?.data !== "undefined"
+            ? (postRes as any).data
+            : postRes,
+      });
+    } catch (err) {
+      console.error("runner-events 전송 실패:", err);
+      alert("runner-events 전송 실패");
+      throw err;
+    }
+
+    return { patchRes, postRes };
+  }, [combinedRequest]);
+
+  const handleSubmit = useCallback(async () => {
+    setIsSubmitting(true);
+    try {
+      await sendRunnerEvents();
+      await onSuccess?.();
+      handleClose();
+    } catch (e) {
+      setError(e as Error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [sendRunnerEvents, onSuccess, handleClose]);
 
   /**
    * 특정 배지를 제외하고, 주어진 베이스에 다른 배지가 이미 스냅되어 있는지 검사
