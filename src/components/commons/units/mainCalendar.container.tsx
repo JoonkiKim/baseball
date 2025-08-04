@@ -129,9 +129,9 @@ export default function MainCalendarPage() {
           // }
         );
         console.log("res.data.days", res);
-        console.log("res.data.data.days", res.data.data.days);
+        // console.log("res.data.data.days", res.data.data.days);
 
-        setAllMatchData(res.data.data.days);
+        setAllMatchData(res.data.days);
         // console.log("allMatchData", allMatchData);
       } catch (err) {
         console.error(err);
