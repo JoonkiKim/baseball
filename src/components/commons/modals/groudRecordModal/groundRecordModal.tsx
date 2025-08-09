@@ -1466,6 +1466,15 @@ const GroundRecordModal = forwardRef<
   // }, [combinedRequest]);
 
   // 확인 버튼 핸들러
+
+  const saveAndReloadSnapshot = useCallback(
+    (next: any) => {
+      localStorage.setItem("snapshot", JSON.stringify(next));
+      loadSnapshot(); // 항상 setSnapshotData까지 따라오도록
+      updateSnapshot?.(next); // 부모도 쓰고 있으면 그대로 알림
+    },
+    [loadSnapshot, updateSnapshot]
+  );
   const clearAllSnapsAndExitReconstructMode = useCallback(() => {
     unstable_batchedUpdates(() => {
       setReconstructMode(false);
@@ -1504,13 +1513,37 @@ const GroundRecordModal = forwardRef<
       throw new Error(msg);
     }
 
+    let errorFlag = false;
     let playIdValue: unknown = null;
     try {
       const parsed = JSON.parse(rawSnapshot);
+      errorFlag = !!parsed?.snapshot?.inningStats?.errorFlag;
       playIdValue = parsed.snapshot?.playId ?? null;
     } catch (e) {
       console.warn("snapshot JSON 파싱 실패:", e);
     }
+
+    // ⛔️ 여기서 preflight: PATCH 전에 차단
+    if (errorFlag) {
+      const hasBB = (arr?: RunnerLogEntry[]) =>
+        (arr ?? []).some((e) => e.startBase === "B" && e.endBase === "B");
+
+      const virtualExists =
+        Array.isArray(combinedRequest.virtual) &&
+        combinedRequest.virtual.length > 0;
+
+      if (
+        !virtualExists ||
+        hasBB(combinedRequest.actual) ||
+        hasBB(combinedRequest.virtual)
+      ) {
+        alert("이닝의 재구성을 해주세요");
+        const err: any = new Error("PRE_FLIGHT_BLOCK");
+        err.code = "PRE_FLIGHT_BLOCK"; // 식별용 코드
+        throw err; // 🚫 여기서 흐름 중단 (PATCH/POST 안 나감)
+      }
+    }
+    // ⛔️ preflight 끝 — 이 아래로 내려오면 유효하므로 PATCH/POST 진행
 
     if (playIdValue == null) {
       const msg =
@@ -1595,8 +1628,9 @@ const GroundRecordModal = forwardRef<
             : postRes,
       });
 
-      localStorage.setItem(`snapshot`, JSON.stringify(postRes.data));
-      updateSnapshot(postRes.data);
+      // localStorage.setItem(`snapshot`, JSON.stringify(postRes.data));
+      // updateSnapshot(postRes.data);
+      saveAndReloadSnapshot(postRes.data);
     } catch (err) {
       console.error("runner-events 전송 실패:", err);
       alert("runner-events 전송 실패");
@@ -1615,7 +1649,10 @@ const GroundRecordModal = forwardRef<
       resetWhiteBadges();
       handleClose();
     } catch (e) {
-      setError(e as Error);
+      // ✋ preflight 차단 에러는 그냥 삼켜서 모달 유지
+      if (e?.code !== "PRE_FLIGHT_BLOCK") {
+        setError(e as Error); // 진짜 오류만 ErrorAlert로 노출
+      }
     } finally {
       setIsSubmitting(false);
     }
