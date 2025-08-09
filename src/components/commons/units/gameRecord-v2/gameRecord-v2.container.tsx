@@ -210,7 +210,7 @@ export default function GameRecordPageV2() {
   const [error, setError] = useState(null);
   const router = useRouter();
   const recordId = router.query.recordId;
-  const [outs, setOuts] = useState<boolean[]>([false, false, false]);
+  // const [outs, setOuts] = useState<boolean[]>([false, false, false]);
 
   // 이닝 헤더 (1~7, R, H)
   const inningHeaders = ["", "1", "2", "3", "4", "5", "6", "7", "R", "H"];
@@ -220,8 +220,8 @@ export default function GameRecordPageV2() {
   const [teamBName, setTeamBName] = useState("");
 
   // 이닝별 점수 (9칸: 7이닝 + R, H)
-  const [teamAScores, setTeamAScores] = useState(Array(9).fill(""));
-  const [teamBScores, setTeamBScores] = useState(Array(9).fill(""));
+  // const [teamAScores, setTeamAScores] = useState(Array(9).fill(""));
+  // const [teamBScores, setTeamBScores] = useState(Array(9).fill(""));
 
   // 이번 이닝 득점
   const [thisInningScore, setThisInningScore] = useState(0);
@@ -391,7 +391,13 @@ export default function GameRecordPageV2() {
     },
   };
 
-  const isHomeAttack = router.query.attack === "home";
+  // 초기 타자 및 주자의 위치
+  const [snapshotData, setSnapshotData] = useState<any>(null);
+
+  // {snapshotData?.snapshot?.gameSummary?.inningHalf}
+
+  const isHomeAttack =
+    snapshotData?.snapshot?.gameSummary?.inningHalf !== "TOP";
   const lineupExample = isHomeAttack ? homeExample : awayExample;
 
   const [batterPlayerId, setBatterPlayerId] = useState(0);
@@ -405,7 +411,7 @@ export default function GameRecordPageV2() {
   // 로딩 상태
   const [isSubmitting, setIsSubmitting] = useState(false);
   // attack 쿼리 동기화를 위한 state
-  const [attackVal, setAttackVal] = useState("");
+  // const [attackVal, setAttackVal] = useState("");
 
   // 예시 데이터 객체
   const exampleScores = {
@@ -414,7 +420,7 @@ export default function GameRecordPageV2() {
       { inning: 1, inningHalf: "BOT", runs: 1 },
       { inning: 2, inningHalf: "TOP", runs: 2 },
       { inning: 2, inningHalf: "BOT", runs: 1 },
-      { inning: 3, inningHalf: "TOP", runs: 2 },
+      // { inning: 3, inningHalf: "TOP", runs: 2 },
       // … 3~7 이닝까지 필요하면 추가
     ],
     teamSummary: {
@@ -425,82 +431,151 @@ export default function GameRecordPageV2() {
 
   // 대기타석
 
-  const onDeckPlayers = lineupExample.batters.filter((b) =>
-    [1, 2, 3].includes(b.battingOrder)
-  );
+  // const onDeckPlayers = lineupExample.batters.filter((b) =>
+  //   [1, 2, 3].includes(b.battingOrder)
+  // );
 
-  // ── 1) 이닝 점수 GET ──
-  const fetchInningScores = useCallback(async () => {
-    if (!recordId) return;
-    try {
-      // 실제 호출은 잠시 주석 처리
-      // const res = await API.get(`/games/${recordId}/scores`);
-      // const response = res.data;
+  /** waitingBatters → onDeckPlayers */
+  const [onDeckPlayers, setOnDeckPlayers] = useState<
+    { playerId: number; playerName: string; battingOrder: number }[]
+  >([]);
 
-      const response = exampleScores;
-      // console.log("스코어보드 응답도착");
-      const newA = Array(9).fill("");
-      const newB = Array(9).fill("");
+  useEffect(() => {
+    setOnDeckPlayers(
+      (snapshotData?.snapshot?.waitingBatters ?? []).map((b) => ({
+        playerId: b.id,
+        playerName: b.name,
+        battingOrder: b.battingOrder,
+      }))
+    );
+  }, [snapshotData]);
 
-      if (Array.isArray(response.scoreboard)) {
-        response.scoreboard.forEach((entry) => {
-          const idx = entry.inning - 1;
-          if (idx >= 0 && idx < 7) {
-            if (entry.inningHalf === "TOP") newA[idx] = entry.runs;
-            else newB[idx] = entry.runs;
-          }
-        });
+  // 스코어보드 표시
+  const { A: initA, B: initB, nextAttack: initAttack } = getInitialScores();
+
+  const [teamAScores, setTeamAScores] = useState(initA);
+  const [teamBScores, setTeamBScores] = useState(initB);
+  const [attackVal, setAttackVal] = useState(initAttack);
+  // // ── 1) 이닝 점수 GET ──
+  // const fetchInningScores = useCallback(async () => {
+  //   if (!recordId) return;
+  //   try {
+  //     // 실제 호출은 잠시 주석 처리
+  //     // const res = await API.get(`/games/${recordId}/scores`);
+  //     // const response = res.data;
+
+  //     const response = exampleScores;
+  //     // console.log("스코어보드 응답도착");
+  //     const newA = Array(9).fill("");
+  //     const newB = Array(9).fill("");
+
+  //     if (Array.isArray(response.scoreboard)) {
+  //       response.scoreboard.forEach((entry) => {
+  //         const idx = entry.inning - 1;
+  //         if (idx >= 0 && idx < 7) {
+  //           if (entry.inningHalf === "TOP") newA[idx] = entry.runs;
+  //           else newB[idx] = entry.runs;
+  //         }
+  //       });
+  //     }
+
+  //     // R, H 컬럼
+  //     newA[7] = response.teamSummary.away.runs;
+  //     newA[8] = response.teamSummary.away.hits;
+  //     newB[7] = response.teamSummary.home.runs;
+  //     newB[8] = response.teamSummary.home.hits;
+
+  //     setTeamAScores(newA);
+  //     setTeamBScores(newB);
+
+  //     // attackVal 계산
+  //     let newAttack = "away";
+  //     if (Array.isArray(response.scoreboard) && response.scoreboard.length) {
+  //       const last = response.scoreboard[response.scoreboard.length - 1];
+  //       newAttack = last.inningHalf === "TOP" ? "home" : "away";
+  //     }
+  //     setAttackVal(newAttack);
+  //     return newAttack;
+  //   } catch (err) {
+  //     // console.error("이닝 점수 로드 실패:", err);
+  //     setError(err);
+  //   }
+  // }, [router.query.recordId, attackVal]);
+
+  /** snapshot.scoreboard → UI 배열 9칸(7이닝 + R/H)으로 변환 */
+  /** snapshot.scoreboard → 9칸(7이닝 + R/H) */
+  function parseScoreboard(scoreboard: any) {
+    const A = Array(9).fill("");
+    const B = Array(9).fill("");
+
+    // ⬅️ 1~7 이닝
+    scoreboard?.innings?.forEach((inn: any) => {
+      const i = inn.inning - 1; // 0-based
+      if (i >= 0 && i < 7) {
+        A[i] = inn.away ?? "";
+        B[i] = inn.home ?? "";
       }
+    });
 
-      // R, H 컬럼
-      newA[7] = response.teamSummary.away.runs;
-      newA[8] = response.teamSummary.away.hits;
-      newB[7] = response.teamSummary.home.runs;
-      newB[8] = response.teamSummary.home.hits;
+    // ⬅️ 마지막 두 칸(R, H)
+    A[7] = scoreboard?.totals?.away?.R ?? "";
+    A[8] = scoreboard?.totals?.away?.H ?? "";
+    B[7] = scoreboard?.totals?.home?.R ?? "";
+    B[8] = scoreboard?.totals?.home?.H ?? "";
 
-      setTeamAScores(newA);
-      setTeamBScores(newB);
+    /* 다음 공격 팀 추정용(선택) */
+    let nextAttack: "home" | "away" = "away";
+    const last = scoreboard?.innings?.[scoreboard.innings.length - 1];
+    if (last) nextAttack = last.inningHalf === "TOP" ? "home" : "away";
 
-      // attackVal 계산
-      let newAttack = "away";
-      if (Array.isArray(response.scoreboard) && response.scoreboard.length) {
-        const last = response.scoreboard[response.scoreboard.length - 1];
-        newAttack = last.inningHalf === "TOP" ? "home" : "away";
-      }
-      setAttackVal(newAttack);
-      return newAttack;
-    } catch (err) {
-      // console.error("이닝 점수 로드 실패:", err);
-      setError(err);
+    return { A, B, nextAttack };
+  }
+
+  /* 🚀 snapshot 기반 초기값 생성 함수 */
+  function getInitialScores() {
+    if (typeof window === "undefined") {
+      // SSR 경우
+      return { A: Array(9).fill(""), B: Array(9).fill(""), nextAttack: "away" };
     }
-  }, [router.query.recordId, attackVal]);
+    try {
+      const raw = localStorage.getItem("snapshot");
+      const snap = raw ? JSON.parse(raw) : null;
+      const sb = snap?.snapshot?.gameSummary?.scoreboard;
+      if (!sb) throw new Error("scoreboard 없음");
+      return parseScoreboard(sb);
+    } catch {
+      return { A: Array(9).fill(""), B: Array(9).fill(""), nextAttack: "away" };
+    }
+  }
+
+  // const [attackVal, setAttackVal] = useState(initAttack);
 
   // ── 마운트 및 의존성 변경 시 호출 ──
-  useEffect(() => {
-    // 팀 이름 로컬스토리지에서
-    const matchStr = localStorage.getItem("selectedMatch");
-    if (matchStr) {
-      try {
-        const { awayTeam, homeTeam } = JSON.parse(matchStr);
-        setTeamAName(awayTeam.name);
-        setTeamBName(homeTeam.name);
-      } catch {
-        // console.error("selectedMatch 파싱 실패");
-      }
-    }
-    fetchInningScores();
-  }, [fetchInningScores]);
+  // useEffect(() => {
+  //   // 팀 이름 로컬스토리지에서
+  //   const matchStr = localStorage.getItem("selectedMatch");
+  //   if (matchStr) {
+  //     try {
+  //       const { awayTeam, homeTeam } = JSON.parse(matchStr);
+  //       setTeamAName(awayTeam.name);
+  //       setTeamBName(homeTeam.name);
+  //     } catch {
+  //       // console.error("selectedMatch 파싱 실패");
+  //     }
+  //   }
+  //   fetchInningScores();
+  // }, [fetchInningScores]);
 
   // ── 4) attack 쿼리 실제 동기화 ──
-  useEffect(() => {
-    if (!recordId) return;
-    if (router.query.attack !== attackVal) {
-      router.replace({
-        pathname: router.pathname,
-        query: { ...router.query, attack: attackVal },
-      });
-    }
-  }, [recordId, attackVal, router.query.attack, router]);
+  // useEffect(() => {
+  //   if (!recordId) return;
+  //   if (router.query.attack !== attackVal) {
+  //     router.replace({
+  //       pathname: router.pathname,
+  //       query: { ...router.query, attack: attackVal },
+  //     });
+  //   }
+  // }, [recordId, attackVal, router.query.attack, router]);
 
   // ── 기록 액션 ──
   const handleRecordAction = async (action: string) => {
@@ -567,10 +642,17 @@ export default function GameRecordPageV2() {
   };
 
   // ── 교체/공수교대/경기종료 ──
-  const handleSubstitution = (isHome) => {
+  const handleSubstitutionHome = () => {
     router.push({
       pathname: `/matches/${recordId}/substitution`,
-      query: { isHomeTeam: isHome },
+      query: { isHomeTeam: true },
+    });
+  };
+
+  const handleSubstitutionAway = () => {
+    router.push({
+      pathname: `/matches/${recordId}/substitution`,
+      query: { isHomeTeam: false },
     });
   };
 
@@ -616,7 +698,84 @@ export default function GameRecordPageV2() {
     "home-base": setHome,
   };
 
-  // wrapper ref (배지·베이스 좌표 계산용)
+  // 수비 배지 설정
+
+  /** 0) 좌표 매핑 (앞서 만든 그대로) */
+  const POSITION_COORDS = {
+    P: { initialLeft: "50%", initialTop: "55%" },
+    C: { initialLeft: "50%", initialTop: "93%" },
+    "1B": { initialLeft: "80%", initialTop: "50%" },
+    "2B": { initialLeft: "70%", initialTop: "40%" },
+    "3B": { initialLeft: "20%", initialTop: "50%" },
+    SS: { initialLeft: "30%", initialTop: "40%" },
+    LF: { initialLeft: "20%", initialTop: "25%" },
+    CF: { initialLeft: "50%", initialTop: "15%" },
+    RF: { initialLeft: "80%", initialTop: "25%" },
+    DH: { initialLeft: "10%", initialTop: "10%" }, // ⛑ 필요하면 더 추가
+  } as const;
+
+  /** 1) 공통 타입 */
+  interface Batter {
+    id: number;
+    name: string;
+    position: keyof typeof POSITION_COORDS;
+    battingOrder: number;
+  }
+
+  // 맨 위 중첩된 POSITION_COORDS 선언부 바로 아래쯤에 추가해주세요
+  const POSITION_ORDER = [
+    "P",
+    "C",
+    "1B",
+    "2B",
+    "3B",
+    "SS",
+    "LF",
+    "CF",
+    "RF",
+  ] as const;
+
+  useEffect(() => {
+    const raw = localStorage.getItem("snapshot");
+    if (!raw) return;
+
+    try {
+      const { snapshot } = JSON.parse(raw);
+
+      // isHomeAttack 이 true 면 away, 아니면 home 라인업 사용
+      const lineup = isHomeAttack ? snapshot.lineup.away : snapshot.lineup.home;
+
+      const { batters, pitcher } = lineup;
+
+      const newConfigs: BlackBadgeConfig[] = POSITION_ORDER.map((pos, idx) => {
+        const player =
+          pos === "P" ? pitcher : batters.find((b: any) => b.position === pos);
+
+        if (!player) {
+          console.warn(`포지션 ${pos} 선수 찾기 실패.`);
+          return {
+            id: `black-badge-${idx + 1}`,
+            label: "",
+            initialLeft: POSITION_COORDS[pos].initialLeft,
+            initialTop: POSITION_COORDS[pos].initialTop,
+            sportPosition: pos,
+          };
+        }
+
+        return {
+          id: `black-badge-${idx + 1}`,
+          label: player.name,
+          initialLeft: POSITION_COORDS[pos].initialLeft,
+          initialTop: POSITION_COORDS[pos].initialTop,
+          sportPosition: pos,
+        };
+      });
+
+      setBlackBadgeConfigs(newConfigs);
+    } catch (e) {
+      console.error("snapshot 파싱 실패:", e);
+    }
+  }, [isHomeAttack]);
 
   interface BlackBadgeConfig {
     id: string;
@@ -940,44 +1099,6 @@ export default function GameRecordPageV2() {
     prevOutsideRef.current = false;
     // setIsOutside(false);
   };
-  // --이닝의 재구성--//
-
-  // const [isReconstructMode, setIsReconstructMode] = useState(false);
-  // ── 흰색 배지(주자) 관련 모든 기록/ref 초기화 ──
-  // const resetWhiteBadges = useCallback(() => {
-  //   // 1) badgeSnaps(= 점유/스냅 정보) 초기화
-  //   const freshSnaps: Record<string, SnapInfo | null> = {};
-  //   badgeConfigs.forEach((c) => (freshSnaps[c.id] = null));
-  //   setBadgeSnaps(freshSnaps);
-
-  //   // 2) 화면에 모든 흰 배지 다시 보이게
-  //   setActiveBadges(badgeConfigs.map((c) => c.id));
-
-  //   // 3) 베이스 이동(순서) 기록 초기화
-  //   badgeConfigs.forEach(({ id }) => {
-  //     snappedSeqRef.current[id] = [];
-  //   });
-
-  //   // 4) (선택) 흰 배지 DOM ref 정리
-  //   badgeRefs.current = {};
-
-  //   // 5) (선택) 기타 UI 상태 리셋이 필요하면 여기서
-  //   // setIsOutside(false);
-  // }, [badgeConfigs]);
-  // const resetWhiteBadges = useCallback(() => {
-  //   const freshSnaps: Record<string, SnapInfo | null> = {};
-  //   badgeConfigs.forEach((c) => (freshSnaps[c.id] = null));
-
-  //   unstable_batchedUpdates(() => {
-  //     setBadgeSnaps(freshSnaps);
-  //     setActiveBadges(badgeConfigs.map((c) => c.id));
-  //   });
-
-  //   badgeConfigs.forEach(({ id }) => {
-  //     snappedSeqRef.current[id] = [];
-  //   });
-  //   badgeRefs.current = {};
-  // }, [badgeConfigs]);
 
   const [applyResetSnapshot, setApplyResetSnapshot] = useState(false);
 
@@ -1007,157 +1128,7 @@ export default function GameRecordPageV2() {
     };
   }
 
-  // const handleDragMove = (e: DragMoveEvent) => {
-  //   const id = String(e.active.id);
-  //   if (id.startsWith("black-badge")) {
-  //     // 검정 배지는 바깥 감지/하이라이트 로직 스킵
-  //     return;
-  //   }
-
-  //   if (rafIdRef.current != null) return; // 이미 예약됨(스로틀)
-  //   rafIdRef.current = requestAnimationFrame(() => {
-  //     rafIdRef.current = null;
-
-  //     const zoneRect = zoneRectRef.current;
-  //     if (!zoneRect) return;
-
-  //     const translated = e.active?.rect?.current?.translated;
-  //     let cx: number | null = null;
-  //     let cy: number | null = null;
-
-  //     if (translated) {
-  //       cx = translated.left + translated.width / 2;
-  //       cy = translated.top + translated.height / 2;
-  //     } else {
-  //       // fallback: DOM 읽기(가능하면 피하기)
-  //       const el = badgeRefs.current[e.active.id as string];
-  //       if (el) {
-  //         const r = el.getBoundingClientRect();
-  //         cx = r.left + r.width / 2;
-  //         cy = r.top + r.height / 2;
-  //       }
-  //     }
-
-  //     if (cx == null || cy == null) return;
-
-  //     const outsideNow =
-  //       cx < zoneRect.left ||
-  //       cx > zoneRect.right ||
-  //       cy < zoneRect.top ||
-  //       cy > zoneRect.bottom;
-
-  //     if (outsideNow !== prevOutsideRef.current) {
-  //       prevOutsideRef.current = outsideNow;
-  //       setIsOutside(outsideNow); // 변화 있을 때만 setState
-  //     }
-  //   });
-  // };
-
-  // 커스텀 경계설정
-
-  // function handleDragMove(event: DragMoveEvent) {
-  //   const id = String(event.active.id);
-  //   // 검정 배지는 스킵
-  //   if (id.startsWith("black-badge")) return;
-
-  //   // 아직 origin이 없으면 스킵
-  //   const origin = originCenters.current[id];
-  //   if (!origin) return;
-
-  //   // RAF로 한 프레임에 한 번만 실행
-  //   if (rafIdRef.current != null) return;
-  //   rafIdRef.current = requestAnimationFrame(() => {
-  //     rafIdRef.current = null;
-
-  //     // DnD‑Kit이 주는 delta.x/y + origin
-  //     const dx = event.delta?.x ?? 0;
-  //     const dy = event.delta?.y ?? 0;
-  //     const cx = origin.x + dx;
-  //     const cy = origin.y + dy;
-
-  //     // out-zone 판정: zoneRectRef.current는 이미 외부에서 갱신된 DOMRect이므로
-  //     const zone = zoneRectRef.current;
-  //     if (!zone) return;
-
-  //     const outsideNow =
-  //       cx < zone.left || cx > zone.right || cy < zone.top || cy > zone.bottom;
-
-  //     // 변화가 있을 때만 클래스 토글 or 스타일 변경
-  //     if (outsideNow !== prevOutsideRef.current) {
-  //       prevOutsideRef.current = outsideNow;
-  //       // React 상태 대신 DOM 클래스로 토글하면 더 가볍습니다
-  //       const badgeEl = badgeRefs.current[id]!;
-  //       badgeEl.classList.toggle("out-zone", outsideNow);
-  //     }
-
-  //     // ★ Ground 배경 토글(추가)
-  //     groundRef.current?.classList.toggle("out-zone-active", outsideNow);
-  //   });
-  // }
-
   const customBoundsRef = useRef<HTMLDivElement>(null);
-
-  // const restrictToCustomBounds: Modifier = (args) => {
-  //   const { transform, draggingNodeRect } = args;
-
-  //   // ① 드래그 중이 아닐 때는 원본 transform 반환
-  //   if (!draggingNodeRect) {
-  //     return transform;
-  //   }
-
-  //   // ② 경계 요소(ref) 유효성 검사
-  //   const boundsEl = customBoundsRef.current;
-  //   if (!boundsEl) {
-  //     return transform;
-  //   }
-
-  //   // 이제 안전하게 ClientRect 사용 가능
-  //   const { width: nodeW, height: nodeH } = draggingNodeRect;
-  //   const bounds = boundsEl.getBoundingClientRect();
-
-  //   // (이하 클램핑 로직 동일)
-  //   const newLeft = draggingNodeRect.left + transform.x;
-  //   const newTop = draggingNodeRect.top + transform.y;
-
-  //   const minX = bounds.left;
-  //   const maxX = bounds.right - nodeW;
-  //   const minY = bounds.top;
-  //   const maxY = bounds.bottom - nodeH;
-
-  //   const clampedX = Math.min(Math.max(newLeft, minX), maxX);
-  //   const clampedY = Math.min(Math.max(newTop, minY), maxY);
-
-  //   return {
-  //     ...transform,
-  //     x: transform.x + (clampedX - newLeft),
-  //     y: transform.y + (clampedY - newTop),
-  //   };
-  // };
-  // const dynamicBoundary: Modifier = (args) => {
-  //   const { active, transform } = args;
-  //   // active가 없으면 아무 제한도 걸지 않고 원본 transform 그대로 반환
-  //   if (!active) {
-  //     return transform;
-  //   }
-
-  //   const id = active.id.toString();
-  //   // 배지가 베이스에 올라간(snap된) 상태면 custom, 아니면 부모 요소 제한
-  //   // 검정 배지는 항상 custom, 흰 배지는 스냅된 경우 custom, 아닌 경우 부모 요소 제한
-  //   // if (
-  //   //   id.startsWith("black-badge") || // ▶ 검정 배지
-  //   //   Boolean(badgeSnaps[id]) // ▶ 흰 배지(스냅됐을 때)
-  //   // ) {
-  //   //   return restrictToCustomBounds(args);
-  //   // } else {
-  //   //   return restrictToParentElement(args);
-  //   // }
-  //   const isBlack = id.startsWith("black-badge");
-  //   return isBlack
-  //     ? restrictToCustomBounds(args)
-  //     : restrictToCustomBounds(args);
-  // };
-
-  // 홈베이스 색칠
 
   const restrictToCustomBoundsFn = useCallback<Modifier>((args) => {
     const { transform, draggingNodeRect } = args;
@@ -1280,6 +1251,12 @@ export default function GameRecordPageV2() {
       : runnerInfoByBadgeActual[badgeId];
     return info?.runnerId === EXCLUDED_RUNNER_ID;
   };
+
+  // 초기 타자 및 주자의 위치
+
+  const initialSnapsRef = useRef<Record<string, SnapInfo | null>>({});
+
+  // 스냅샷 로딩하기
   useEffect(() => {
     // if (!isOpen) return;
 
@@ -1306,9 +1283,6 @@ export default function GameRecordPageV2() {
       setSnapshotData(null);
     }
   }, []);
-  // 초기 타자 및 주자의 위치
-  const [snapshotData, setSnapshotData] = useState<any>(null);
-  const initialSnapsRef = useRef<Record<string, SnapInfo | null>>({});
 
   // 베이스 코드 변환
 
@@ -1934,7 +1908,7 @@ export default function GameRecordPageV2() {
   const groundModalRef = useRef<GroundRecordModalHandle>(null);
   // onSuccess 콜백 예시
   const afterRecord = async () => {
-    const newAttack = await fetchInningScores();
+    // const newAttack = await fetchInningScores();
     // …추가 fetch…
   };
   // 콘솔에 다시 찍히지 않는다면 부모 컴포넌트는 리렌더링되지 않은 것!
@@ -2257,6 +2231,153 @@ export default function GameRecordPageV2() {
     setApplyResetSnapshot(true);
   }, [snapshotData]);
 
+  // 기록 전송
+  const clearAllSnapsAndExitReconstructMode = useCallback(() => {
+    unstable_batchedUpdates(() => {
+      setReconstructMode(false);
+      setBadgeSnaps(
+        badgeConfigs.reduce((acc, c) => {
+          acc[c.id] = null; // SnapInfo|null 이어야 하므로 null로 초기화
+          return acc;
+        }, {} as Record<string, SnapInfo | null>)
+      );
+      setActiveBadges(badgeConfigs.map((c) => c.id));
+      setOutBadgesActual(new Set());
+      setOutBadgesVirtual(new Set());
+      setRunnerInfoByBadgeActual({});
+      setRunnerInfoByBadgeVirtual({});
+      setBaseToBadgeIdActual({});
+      setBaseToBadgeIdVirtual({});
+      setFinishedBadgesActual(new Set());
+      setFinishedBadgesVirtual(new Set());
+      setHomeSnappedBadgesActual(new Set());
+      setHomeSnappedBadgesVirtual(new Set());
+    });
+  }, [badgeConfigs]);
+
+  const sendRunnerEvents = useCallback(async () => {
+    if (!combinedRequest) {
+      console.warn("combinedRequest이 없어서 전송을 스킵합니다.");
+      return;
+    }
+
+    // snapshot에서 playId만 꺼냄 (절대 다른 키로 대체하지 않음)
+    const rawSnapshot = localStorage.getItem("snapshot");
+    if (!rawSnapshot) {
+      const msg =
+        "localStorage에 snapshot이 없어 runner-events 요청을 보낼 수 없습니다.";
+      console.error(msg);
+      throw new Error(msg);
+    }
+
+    let playIdValue: unknown = null;
+    try {
+      const parsed = JSON.parse(rawSnapshot);
+      playIdValue = parsed.snapshot?.playId ?? null;
+    } catch (e) {
+      console.warn("snapshot JSON 파싱 실패:", e);
+    }
+
+    if (playIdValue == null) {
+      const msg =
+        "localStorage의 snapshot에서 snapshot.playId를 찾을 수 없어 runner-events 요청을 보낼 수 없습니다.";
+      console.error(msg);
+      throw new Error(msg);
+    }
+
+    const encodedPlayId = encodeURIComponent(String(playIdValue));
+
+    // 2. POST runner-events
+    const postUrl = `/plays/${encodedPlayId}/runner-events`;
+    let postRes;
+    try {
+      // 전송 직전에만 startBase === endBase인 entry 제거
+      const sanitizeCombinedRequest = (
+        req: CombinedRequest
+      ): CombinedRequest => {
+        const filter = (entries: RunnerLogEntry[] = []) =>
+          entries.filter((entry) => entry.startBase !== entry.endBase);
+
+        const actual = filter(req.actual);
+        const virtual =
+          req.virtual && req.virtual.length > 0
+            ? filter(req.virtual)
+            : undefined;
+
+        return {
+          phase: req.phase,
+          actual,
+          ...(virtual ? { virtual } : {}),
+        };
+      };
+
+      const finalRequest = sanitizeCombinedRequest(combinedRequest);
+      console.log(
+        "runner-events POST 요청:",
+        postUrl,
+        JSON.stringify(finalRequest, null, 2)
+      );
+      postRes = await API.post(postUrl, finalRequest);
+
+      console.log("runner-events POST 응답:", {
+        status: (postRes as any)?.status,
+        data:
+          typeof (postRes as any)?.data !== "undefined"
+            ? (postRes as any).data
+            : postRes,
+      });
+
+      localStorage.setItem(`snapshot`, JSON.stringify(postRes.data));
+    } catch (err) {
+      console.error("runner-events 전송 실패:", err);
+      alert("runner-events 전송 실패");
+      throw err;
+    }
+
+    return { postRes };
+  }, [combinedRequest]);
+
+  const handleSubmit = useCallback(async () => {
+    setIsSubmitting(true);
+    try {
+      await sendRunnerEvents();
+      clearAllSnapsAndExitReconstructMode();
+
+      resetWhiteBadges();
+    } catch (e) {
+      setError(e as Error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [sendRunnerEvents]);
+
+  // console.log(snapshotData.snapshot);
+
+  // 아웃카운트 표시
+
+  // ① 최초 값은 전부 false(0아웃)
+  const [outs, setOuts] = useState<boolean[]>([false, false, false]);
+
+  /* 🔄 actual out-count만 반영 */
+  useEffect(() => {
+    if (!snapshotData) {
+      setOuts([false, false, false]); // 초기값
+      return;
+    }
+
+    // snapshot 형식(중첩) / 이전 형식 둘 다 대응
+    const outCnt: number =
+      snapshotData?.snapshot?.inningStats?.actual?.outs ??
+      snapshotData?.inningStats?.actual?.outs ??
+      0;
+
+    // 0 ~ 3 → [true/false, true/false, …]
+    setOuts(
+      Array(3)
+        .fill(false)
+        .map((_, i) => i < outCnt)
+    );
+  }, [snapshotData]);
   return (
     <GameRecordContainer ref={containerRef}>
       <ScoreBoardWrapper>
@@ -2268,7 +2389,9 @@ export default function GameRecordPageV2() {
 
         {/* Team A */}
         <TeamRow>
-          <TeamNameCell>{teamAName.slice(0, 3)}</TeamNameCell>
+          <TeamNameCell>
+            {snapshotData?.snapshot?.gameSummary?.awayTeam?.name?.slice(0, 3)}
+          </TeamNameCell>
           {teamAScores.map((s, i) => (
             <TeamScoreCell
               key={i}
@@ -2281,7 +2404,9 @@ export default function GameRecordPageV2() {
 
         {/* Team B */}
         <TeamRow>
-          <TeamNameCell>{teamBName.slice(0, 3)}</TeamNameCell>
+          <TeamNameCell>
+            {snapshotData?.snapshot?.gameSummary?.homeTeam?.name?.slice(0, 3)}
+          </TeamNameCell>
           {teamBScores.map((s, i) => (
             <TeamScoreCell
               key={i}
@@ -2317,7 +2442,9 @@ export default function GameRecordPageV2() {
               {/* </div> */}
             </ReconstructionButtonWrapper>
           </ReconstructionWrapper>
-          <ControlButtonWhite>저장하기</ControlButtonWhite>
+          <ControlButtonWhite onClick={handleSubmit}>
+            저장하기
+          </ControlButtonWhite>
           <ControlButton onClick={() => setIsGameEndModalOpen(true)}>
             경기종료
           </ControlButton>
@@ -2434,24 +2561,41 @@ export default function GameRecordPageV2() {
           <LeftSideWrapper>
             <InningBoard>
               <ArrowUp color={!isHomeAttack ? "red" : "#B8B8B8"} />
-              <InningNumber>7</InningNumber>
+              <InningNumber>
+                {" "}
+                {snapshotData?.snapshot?.gameSummary.inning}
+              </InningNumber>
               <ArrowDown color={isHomeAttack ? "red" : "#B8B8B8"} />
             </InningBoard>
             <LittleScoreBoardWrapper>
               <AwayTeamWrapper>
-                <AwayTeamName> {teamAName.slice(0, 3)}</AwayTeamName>
+                <AwayTeamName>
+                  {" "}
+                  {snapshotData?.snapshot?.gameSummary?.awayTeam?.name?.slice(
+                    0,
+                    3
+                  )}
+                </AwayTeamName>
                 <AwayTeamScore>
-                  {teamAScores.length >= 2
-                    ? teamAScores[teamAScores.length - 2]
-                    : ""}
+                  {
+                    snapshotData?.snapshot?.gameSummary?.scoreboard.totals.away
+                      .R
+                  }
                 </AwayTeamScore>
               </AwayTeamWrapper>
               <HomeTeamWrapper>
-                <HomeTeamName>{teamBName.slice(0, 3)}</HomeTeamName>
+                <HomeTeamName>
+                  {" "}
+                  {snapshotData?.snapshot?.gameSummary?.homeTeam?.name?.slice(
+                    0,
+                    3
+                  )}
+                </HomeTeamName>
                 <HomeTeamScore>
-                  {teamBScores.length >= 2
-                    ? teamBScores[teamBScores.length - 2]
-                    : ""}
+                  {
+                    snapshotData?.snapshot?.gameSummary?.scoreboard.totals.home
+                      .R
+                  }
                 </HomeTeamScore>
               </HomeTeamWrapper>
             </LittleScoreBoardWrapper>
@@ -2524,14 +2668,20 @@ export default function GameRecordPageV2() {
         <PlayerBox>
           <PlayerWrapper>
             <PlayerPosition>
-              투수
+              {!isHomeAttack
+                ? "투수"
+                : `${snapshotData?.snapshot?.currentAtBat.batter.battingOrder}번타자 `}
               <Dot />
-              {isHomeAttack ? "AWAY" : "HOME"}
+              {/* {!isHomeAttack ? "AWAY" : "HOME"} */}
+              AWAY
             </PlayerPosition>
-            <PlayerInfo>{pitcher.playerName}</PlayerInfo>
-            <PlayerChangeButton
-              onClick={() => handleSubstitution(!isHomeAttack)}
-            >
+            <PlayerInfo>
+              {/* {snapshotData?.snapshot?.currentAtBat.pitcher.name} */}
+              {!isHomeAttack
+                ? snapshotData?.snapshot?.currentAtBat.pitcher.name
+                : snapshotData?.snapshot?.currentAtBat.batter.name}
+            </PlayerInfo>
+            <PlayerChangeButton onClick={() => handleSubstitutionAway()}>
               선수교체
             </PlayerChangeButton>
           </PlayerWrapper>
@@ -2540,14 +2690,19 @@ export default function GameRecordPageV2() {
         <PlayerBox>
           <PlayerWrapper>
             <PlayerPosition>
-              {batter.battingOrder}번타자
+              {isHomeAttack
+                ? "투수"
+                : `${snapshotData?.snapshot?.currentAtBat.batter.battingOrder}번타자 `}
               <Dot />
-              {isHomeAttack ? "HOME" : "AWAY"}
+              {/* {isHomeAttack ? "AWAY" : "HOME"} */}
+              HOME
             </PlayerPosition>
-            <PlayerInfo>{batter.playerName}</PlayerInfo>
-            <PlayerChangeButton
-              onClick={() => handleSubstitution(isHomeAttack)}
-            >
+            <PlayerInfo>
+              {isHomeAttack
+                ? snapshotData?.snapshot?.currentAtBat.pitcher.name
+                : snapshotData?.snapshot?.currentAtBat.batter.name}
+            </PlayerInfo>
+            <PlayerChangeButton onClick={() => handleSubstitutionHome()}>
               선수교체
             </PlayerChangeButton>
           </PlayerWrapper>

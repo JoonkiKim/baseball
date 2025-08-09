@@ -587,7 +587,7 @@ export const NameBadge = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 4vh;
+  height: 3vh;
   width: 13vw;
   white-space: nowrap;
   touch-action: none; /* 터치 동작(스크롤/줌) 비활성화 */
@@ -813,12 +813,12 @@ export const ModalBottomRunnerTitle = styled.div`
 export const OutZoneWrapper = styled.div`
   position: absolute;
   /* 부모의 가운데(가로·세로) */
-  top: 55%;
+  top: 50%;
   left: 50%;
 
-  width: 70%;
+  width: 60%;
   /* aspect-ratio: 1 / 1; */
-  height: 70%;
+  height: 60%;
   /* 자신의 크기의 절반만큼 당겨서 진짜 중앙에 위치 */
   transform: translate(-50%, -50%);
   opacity: 0.5;
