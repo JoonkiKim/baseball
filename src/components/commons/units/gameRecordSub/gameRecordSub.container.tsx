@@ -33,6 +33,7 @@ import {
   HomeTeamPlayerListState,
   AwayTeamPlayerListState,
   IHAPlayer,
+  snapshotState,
 } from "../../../../commons/stores/index";
 import API from "../../../../commons/apis/api";
 import SubPlayerSelectionModal from "../../modals/playerSubstituteModal";
@@ -622,6 +623,8 @@ export default function TeamRegistrationPageComponent() {
 
   const [isSubReturnModalOpen, setIsSubReturnModalOpen] = useState(false);
 
+  const [, setSnapshotData] = useRecoilState(snapshotState);
+
   // 교체완료 버튼 시
   const onSubmit = async (data: any) => {
     // 이미 제출 중이면 무시
@@ -777,7 +780,7 @@ export default function TeamRegistrationPageComponent() {
         // }
       );
       console.log("전송 성공:", response.data);
-
+      setSnapshotData(response.data);
       router.push(`/matches/${gameId}/records`);
     } catch (error) {
       setError(error);

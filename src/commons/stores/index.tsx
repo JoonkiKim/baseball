@@ -324,3 +324,9 @@ export const lastRouteState = atom<string | null>({
   default: "/",
   effects_UNSTABLE: [persistAtom], // 추가
 });
+
+export type Snapshot = any; // 필요하면 타입 지정
+export const snapshotState = atom<Snapshot | null>({
+  key: "snapshotState",
+  default: null,
+});
