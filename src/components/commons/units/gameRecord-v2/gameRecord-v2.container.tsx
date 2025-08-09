@@ -104,6 +104,7 @@ import ScorePatchModal from "../../modals/scorePatchModal";
 import {
   awayBatterNumberState,
   homeBatterNumberState,
+  snapshotState,
   substitutionSwappedState,
 } from "../../../../commons/stores";
 import { useRecoilState } from "recoil";
@@ -393,11 +394,11 @@ export default function GameRecordPageV2() {
   };
 
   // 초기 타자 및 주자의 위치
-  const [snapshotData, setSnapshotData] = useState<any>(null);
-  const applySnapshot = useCallback((nextSnap: any) => {
-    localStorage.setItem("snapshot", JSON.stringify(nextSnap));
-    setSnapshotData(nextSnap); // ← 이게 ‘단일 진실 소스’
-  }, []);
+  const [snapshotData, setSnapshotData] = useRecoilState(snapshotState);
+  // const applySnapshot = useCallback((nextSnap: any) => {
+  //   localStorage.setItem("snapshot", JSON.stringify(nextSnap));
+  //   setSnapshotData(nextSnap); // ← 이게 ‘단일 진실 소스’
+  // }, []);
 
   useEffect(() => {
     try {
