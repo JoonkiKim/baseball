@@ -1346,32 +1346,74 @@ export default function GameRecordPageV2() {
   const initialSnapsRef = useRef<Record<string, SnapInfo | null>>({});
 
   // 스냅샷 로딩하기
-  useEffect(() => {
-    // if (!isOpen) return;
+  // useEffect(() => {
+  //   // if (!isOpen) return;
 
+  //   try {
+  //     const raw = localStorage.getItem("snapshot");
+  //     const parsed = raw ? JSON.parse(raw) : null;
+  //     setSnapshotData(parsed);
+  //     console.log("loaded snapshot from localStorage:", parsed);
+
+  //     const batterName =
+  //       parsed?.snapshot?.currentAtBat?.batter?.name ??
+  //       parsed?.currentAtBat?.batter?.name ??
+  //       null;
+  //     const batterId =
+  //       parsed?.snapshot?.currentAtBat?.batter?.id ??
+  //       parsed?.currentAtBat?.batter?.id ??
+  //       null;
+  //     setCurrentBatterName(batterName);
+  //     setCurrentBatterId(batterId);
+  //   } catch (e) {
+  //     console.warn("snapshot 파싱 에러:", e);
+  //     setCurrentBatterName(null);
+  //     setCurrentBatterId(null);
+  //     setSnapshotData(null);
+  //   }
+  // }, []);
+  // useEffect(() => {
+  //   const s = snapshotData?.snapshot ?? snapshotData;
+  //   setCurrentBatterName(s?.currentAtBat?.batter?.name ?? null);
+  //   setCurrentBatterId(s?.currentAtBat?.batter?.id ?? null);
+  // }, [
+  //   snapshotData?.snapshot?.currentAtBat?.batter?.id,
+  //   snapshotData?.snapshot?.currentAtBat?.batter?.name,
+  //   snapshotData,
+  // ]);
+
+  // ✅ 부팅용 하이드레이션: 이거 하나만 남기기
+  useEffect(() => {
     try {
       const raw = localStorage.getItem("snapshot");
-      const parsed = raw ? JSON.parse(raw) : null;
-      setSnapshotData(parsed);
-      console.log("loaded snapshot from localStorage:", parsed);
-
-      const batterName =
-        parsed?.snapshot?.currentAtBat?.batter?.name ??
-        parsed?.currentAtBat?.batter?.name ??
-        null;
-      const batterId =
-        parsed?.snapshot?.currentAtBat?.batter?.id ??
-        parsed?.currentAtBat?.batter?.id ??
-        null;
-      setCurrentBatterName(batterName);
-      setCurrentBatterId(batterId);
+      if (!raw) return; // 없으면 굳이 null로 덮지 말고 그대로 둠
+      setSnapshotData(JSON.parse(raw));
     } catch (e) {
-      console.warn("snapshot 파싱 에러:", e);
-      setCurrentBatterName(null);
-      setCurrentBatterId(null);
-      setSnapshotData(null);
+      console.warn("snapshot parse failed", e);
     }
-  }, []);
+  }, [setSnapshotData]);
+
+  // ✅ 서버/모달 등에서 새 스냅샷 받으면 이 함수로만 업데이트
+  const updateSnapshot = useCallback(
+    (next: any) => {
+      setSnapshotData(next);
+      try {
+        localStorage.setItem("snapshot", JSON.stringify(next));
+      } catch {}
+    },
+    [setSnapshotData]
+  );
+
+  // 타자 이름 바꾸기
+  useEffect(() => {
+    const s = snapshotData?.snapshot ?? snapshotData;
+    setCurrentBatterName(s?.currentAtBat?.batter?.name ?? null);
+    setCurrentBatterId(s?.currentAtBat?.batter?.id ?? null);
+  }, [
+    snapshotData?.snapshot?.currentAtBat?.batter?.id,
+    snapshotData?.snapshot?.currentAtBat?.batter?.name,
+    snapshotData,
+  ]);
 
   // 베이스 코드 변환
 
@@ -2944,7 +2986,7 @@ export default function GameRecordPageV2() {
       <GroundRecordModal
         ref={groundModalRef}
         onSuccess={afterRecord}
-        updateSnapshot={setSnapshotData}
+        updateSnapshot={updateSnapshot}
       />
 
       {!isSubmitting && validationError && (
