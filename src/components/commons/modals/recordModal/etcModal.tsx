@@ -24,7 +24,7 @@ interface IModalProps {
 const mapping: Record<string, string> = {
   낫아웃: "SO_DROP",
   야수선택: "FC",
-  타격방해: "IF",
+  인터페어: "IF",
   에러: "E",
 };
 // const [error, setError] = useState(null);
@@ -98,10 +98,10 @@ export default function EtcModal(props: IModalProps) {
         </ModalButton>
 
         <ModalButton
-          onClick={() => handleTypeSelect("타격방해")}
+          onClick={() => handleTypeSelect("인터페어")}
           disabled={isSubmitting}
         >
-          타격방해
+          인터페어
         </ModalButton>
         <ModalButton
           onClick={() => handleTypeSelect("에러")}

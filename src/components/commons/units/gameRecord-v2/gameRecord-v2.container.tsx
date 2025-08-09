@@ -2395,6 +2395,8 @@ export default function GameRecordPageV2() {
       };
 
       const finalRequest = sanitizeCombinedRequest(combinedRequest);
+      console.log("finalRequest", finalRequest);
+
       console.log(
         "runner-events POST 요청:",
         postUrl,
