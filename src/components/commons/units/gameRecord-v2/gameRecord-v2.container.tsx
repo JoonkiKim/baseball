@@ -563,6 +563,14 @@ export default function GameRecordPageV2() {
     }
   }
 
+  useEffect(() => {
+    const sb = snapshotData?.snapshot?.gameSummary?.scoreboard;
+    if (!sb) return;
+    const { A, B } = parseScoreboard(sb);
+    setTeamAScores(A);
+    setTeamBScores(B);
+  }, [snapshotData?.snapshot?.gameSummary?.scoreboard]);
+
   // const [attackVal, setAttackVal] = useState(initAttack);
 
   // ── 마운트 및 의존성 변경 시 호출 ──
@@ -780,47 +788,82 @@ export default function GameRecordPageV2() {
     "RF",
   ] as const;
 
+  // useEffect(() => {
+  //   const raw = localStorage.getItem("snapshot");
+  //   if (!raw) return;
+
+  //   try {
+  //     const { snapshot } = JSON.parse(raw);
+
+  //     // isHomeAttack 이 true 면 away, 아니면 home 라인업 사용
+  //     const lineup = isHomeAttack ? snapshot.lineup.away : snapshot.lineup.home;
+
+  //     const { batters, pitcher } = lineup;
+
+  //     const newConfigs: BlackBadgeConfig[] = POSITION_ORDER.map((pos, idx) => {
+  //       const player =
+  //         pos === "P" ? pitcher : batters.find((b: any) => b.position === pos);
+
+  //       if (!player) {
+  //         console.warn(`포지션 ${pos} 선수 찾기 실패.`);
+  //         return {
+  //           id: `black-badge-${idx + 1}`,
+  //           label: "",
+  //           initialLeft: POSITION_COORDS[pos].initialLeft,
+  //           initialTop: POSITION_COORDS[pos].initialTop,
+  //           sportPosition: pos,
+  //         };
+  //       }
+
+  //       return {
+  //         id: `black-badge-${idx + 1}`,
+  //         label: player.name,
+  //         initialLeft: POSITION_COORDS[pos].initialLeft,
+  //         initialTop: POSITION_COORDS[pos].initialTop,
+  //         sportPosition: pos,
+  //       };
+  //     });
+
+  //     setBlackBadgeConfigs(newConfigs);
+  //   } catch (e) {
+  //     console.error("snapshot 파싱 실패:", e);
+  //   }
+  // }, [isHomeAttack]);
+
   useEffect(() => {
-    const raw = localStorage.getItem("snapshot");
-    if (!raw) return;
+    // 스냅샷 구조가 중첩/평면 두 타입을 모두 케어
+    const snap = snapshotData?.snapshot ?? snapshotData;
+    if (!snap) return;
 
-    try {
-      const { snapshot } = JSON.parse(raw);
+    const lineup = isHomeAttack ? snap?.lineup?.away : snap?.lineup?.home;
+    if (!lineup) return;
 
-      // isHomeAttack 이 true 면 away, 아니면 home 라인업 사용
-      const lineup = isHomeAttack ? snapshot.lineup.away : snapshot.lineup.home;
+    const posToName: Record<string, string> = {};
 
-      const { batters, pitcher } = lineup;
+    // 투수
+    if (lineup.pitcher?.name) posToName["P"] = lineup.pitcher.name;
 
-      const newConfigs: BlackBadgeConfig[] = POSITION_ORDER.map((pos, idx) => {
-        const player =
-          pos === "P" ? pitcher : batters.find((b: any) => b.position === pos);
+    // 야수들
+    (lineup.batters ?? []).forEach((b: any) => {
+      if (b?.position && b?.name) posToName[b.position] = b.name;
+    });
 
-        if (!player) {
-          console.warn(`포지션 ${pos} 선수 찾기 실패.`);
-          return {
-            id: `black-badge-${idx + 1}`,
-            label: "",
-            initialLeft: POSITION_COORDS[pos].initialLeft,
-            initialTop: POSITION_COORDS[pos].initialTop,
-            sportPosition: pos,
-          };
-        }
+    // ✅ 좌표(initialLeft/Top)와 sportPosition(스왑 결과)을 유지한 채 라벨만 업데이트
+    setBlackBadgeConfigs((prev) =>
+      prev.map((cfg) => ({
+        ...cfg,
+        label: posToName[cfg.sportPosition] ?? "", // 포지션→이름 매핑
+      }))
+    );
 
-        return {
-          id: `black-badge-${idx + 1}`,
-          label: player.name,
-          initialLeft: POSITION_COORDS[pos].initialLeft,
-          initialTop: POSITION_COORDS[pos].initialTop,
-          sportPosition: pos,
-        };
-      });
-
-      setBlackBadgeConfigs(newConfigs);
-    } catch (e) {
-      console.error("snapshot 파싱 실패:", e);
-    }
-  }, [isHomeAttack]);
+    // 선택: 라벨만 바꾸는 거라면 blackPositions 초기화는 필요 없음
+  }, [
+    isHomeAttack,
+    snapshotData?.snapshot?.lineup?.home,
+    snapshotData?.snapshot?.lineup?.away,
+    // 스냅샷이 평면형이면 ↓ 이렇게 넓게 걸어도 됨
+    snapshotData,
+  ]);
 
   interface BlackBadgeConfig {
     id: string;
@@ -1477,7 +1520,18 @@ export default function GameRecordPageV2() {
   const syncRunnersOnBase = useCallback(() => {
     // 1. 원본 runners 가져오기 (actual / virtual 구분은 getRunnersOnBase가 처리)
     const rawRunners = getRunnersOnBase();
-    if (rawRunners.length === 0) return;
+    if (rawRunners.length === 0) {
+      // 주자 전부 숨김 + 스냅 해제
+      setRunnerInfoByBadgeCurrent({});
+      setBadgeSnaps((prev) => {
+        const next = { ...prev };
+        Object.keys(next).forEach((id) => {
+          next[id] = null;
+        });
+        return next;
+      });
+      return; // ← 여기서 끝내되, "정리"는 반드시 수행
+    }
 
     // 2. 홈에 완료된 배지들에 대응하는 runnerId들을 수집 → 제외 대상
     const homeSnappedSet = reconstructMode
@@ -2470,25 +2524,34 @@ export default function GameRecordPageV2() {
     setOuts(deriveOuts(snapshotData));
   }, [snapshotData]);
 
-  // useEffect(() => {
-  //   if (!snapshotData) {
-  //     setOuts([false, false, false]); // 초기값
-  //     return;
-  //   }
+  // 타자 주자 위치 업데이트
+  useEffect(() => {
+    const snap = snapshotData?.snapshot;
+    if (!snap) return;
 
-  //   // snapshot 형식(중첩) / 이전 형식 둘 다 대응
-  //   const outCnt: number =
-  //     snapshotData?.snapshot?.inningStats?.actual?.outs ??
-  //     snapshotData?.inningStats?.actual?.outs ??
-  //     0;
+    // 1) 렌더 가드/표식들을 리셋
+    setActiveBadges(badgeConfigs.map((c) => c.id));
+    setOutBadgesActual(new Set());
+    setOutBadgesVirtual(new Set());
+    setHomeSnappedBadgesActual(new Set());
+    setHomeSnappedBadgesVirtual(new Set());
+    setFinishedBadgesActual(new Set());
+    setFinishedBadgesVirtual(new Set());
+    setBaseToBadgeIdActual({});
+    setBaseToBadgeIdVirtual({});
 
-  //   // 0 ~ 3 → [true/false, true/false, …]
-  //   setOuts(
-  //     Array(3)
-  //       .fill(false)
-  //       .map((_, i) => i < outCnt)
-  //   );
-  // }, [snapshotData]);
+    // 2) 스냅 좌표 초기화
+    setBadgeSnaps(
+      badgeConfigs.reduce((acc, c) => {
+        acc[c.id] = null;
+        return acc;
+      }, {} as Record<string, SnapInfo | null>)
+    );
+
+    // 3) 새 스냅샷으로 주자/좌표 다시 매핑
+    syncRunnersOnBase();
+  }, [snapshotData?.snapshot?.playId, reconstructMode]); // playId 등 "한 플레이" 단위 키를 의존성으로
+
   return (
     <GameRecordContainer ref={containerRef}>
       <ScoreBoardWrapper>
