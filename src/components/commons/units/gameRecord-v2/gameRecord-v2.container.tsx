@@ -1059,17 +1059,17 @@ export default function GameRecordPageV2() {
   // console.log("badgeSnaps", badgeSnaps);
 
   // 2) badgeSnaps 상태가 바뀔 때마다 각 베이스가 채워졌는지 체크하는 useEffect
-  useEffect(() => {
-    // badgeSnaps: Record<badgeId, { base: BaseId; pos: { x, y } } | null>
-    const occupancy: Record<BaseId, boolean> = BASE_IDS.reduce((acc, base) => {
-      // badgeSnaps 중에 baseId === base 인 항목이 하나라도 있으면 true
-      acc[base] = Object.values(badgeSnaps).some((snap) => snap?.base === base);
-      return acc;
-    }, {} as Record<BaseId, boolean>);
+  // useEffect(() => {
+  //   // badgeSnaps: Record<badgeId, { base: BaseId; pos: { x, y } } | null>
+  //   const occupancy: Record<BaseId, boolean> = BASE_IDS.reduce((acc, base) => {
+  //     // badgeSnaps 중에 baseId === base 인 항목이 하나라도 있으면 true
+  //     acc[base] = Object.values(badgeSnaps).some((snap) => snap?.base === base);
+  //     return acc;
+  //   }, {} as Record<BaseId, boolean>);
 
-    console.log("Base occupancy:", occupancy);
-    // 예: { "first-base": true, "second-base": false, ... }
-  }, [badgeSnaps]);
+  //   console.log("Base occupancy:", occupancy);
+  //   // 예: { "first-base": true, "second-base": false, ... }
+  // }, [badgeSnaps]);
   // 센서 정의
   const sensors = useSensors(useSensor(PointerSensor));
 
@@ -1719,6 +1719,11 @@ export default function GameRecordPageV2() {
     syncRunnersOnBase();
   }, [snapshotData, reconstructMode]);
 
+  // useEffect(() => {
+  //   if (!snapshotData) return;
+  //   syncRunnersOnBase();
+  // }, [snapshotData]);
+
   const handleDrop = (e: DragEndEvent) => {
     const badgeId = e.active.id as string;
 
@@ -2277,6 +2282,9 @@ export default function GameRecordPageV2() {
 
   // 기록 전송
   const clearAllSnapsAndExitReconstructMode = useCallback(() => {
+    // reconstruct-mode 스타일 제거
+    containerRef.current?.classList.remove("reconstruct-mode");
+
     unstable_batchedUpdates(() => {
       setReconstructMode(false);
       setBadgeSnaps(
@@ -2334,17 +2342,17 @@ export default function GameRecordPageV2() {
 
     // ⛔️ 여기서 preflight: PATCH 전에 차단
     if (errorFlag) {
-      const hasBB = (arr?: RunnerLogEntry[]) =>
-        (arr ?? []).some((e) => e.startBase === "B" && e.endBase === "B");
+      // const hasBB = (arr?: RunnerLogEntry[]) =>
+      //   (arr ?? []).some((e) => e.startBase === "B" && e.endBase === "B");
 
       const virtualExists =
         Array.isArray(combinedRequest.virtual) &&
         combinedRequest.virtual.length > 0;
 
       if (
-        !virtualExists ||
-        hasBB(combinedRequest.actual) ||
-        hasBB(combinedRequest.virtual)
+        !virtualExists
+        // hasBB(combinedRequest.actual) ||
+        // hasBB(combinedRequest.virtual)
       ) {
         alert("이닝의 재구성을 해주세요");
         const err: any = new Error("PRE_FLIGHT_BLOCK");
@@ -2370,9 +2378,9 @@ export default function GameRecordPageV2() {
       const sanitizeCombinedRequest = (
         req: CombinedRequest
       ): CombinedRequest => {
+        // B→B만 제거, 나머지(예: 1→1, 2→2 등)는 유지
         const filter = (entries: RunnerLogEntry[] = []) =>
-          entries.filter((entry) => entry.startBase !== entry.endBase);
-
+          entries.filter((e) => !(e.startBase === "B" && e.endBase === "B"));
         const actual = filter(req.actual);
         const virtual =
           req.virtual && req.virtual.length > 0
@@ -2419,6 +2427,7 @@ export default function GameRecordPageV2() {
     setIsSubmitting(true);
     try {
       await sendRunnerEvents();
+      setReconstructMode(false);
       clearAllSnapsAndExitReconstructMode();
 
       resetWhiteBadges();
@@ -2536,7 +2545,7 @@ export default function GameRecordPageV2() {
 
               <PortalSwitch
                 anchorRef={switchAnchorRefForMain}
-                // checked={reconstructChecked}
+                checked={reconstructMode}
                 onChange={handleReconstructToggle}
               />
               {/* </div> */}

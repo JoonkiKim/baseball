@@ -1,10 +1,18 @@
 // PortalSwitch.tsx
-import { useLayoutEffect, memo, RefObject, useRef, useState } from "react";
+import {
+  useLayoutEffect,
+  memo,
+  RefObject,
+  useRef,
+  useState,
+  useEffect,
+} from "react";
 import { createPortal } from "react-dom";
 import { ReconstructionSwitch } from "./gameRecord-v2.style";
 
 interface PortalSwitchProps {
   onChange: (checked: boolean) => void;
+  checked: boolean;
   anchorRef: RefObject<HTMLElement>;
 }
 
@@ -29,10 +37,16 @@ function ensurePortalRoot() {
 
 const PortalSwitch = memo(function PortalSwitch({
   onChange,
+  checked,
   anchorRef,
 }: PortalSwitchProps) {
   const [internalChecked, setInternalChecked] = useState(false);
   const ignoreNextRef = useRef(false);
+
+  // 2) 부모에서 checked 바뀌면 내부도 동기화
+  useEffect(() => {
+    setInternalChecked(checked);
+  }, [checked]);
   const [position, setPosition] = useState({
     top: 0,
     left: 0,
@@ -69,6 +83,7 @@ const PortalSwitch = memo(function PortalSwitch({
     setInternalChecked((prev) => {
       const next = !prev;
       ignoreNextRef.current = true; // 다음 onChange 이벤트(underlying) 무시
+      setInternalChecked(next); // 즉시 UI 반영
       onChange(next);
       return next;
     });
