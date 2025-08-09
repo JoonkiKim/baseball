@@ -816,13 +816,13 @@ export const OutZoneWrapper = styled.div`
   top: 50%;
   left: 50%;
 
-  width: 60%;
+  width: 70%;
   /* aspect-ratio: 1 / 1; */
-  height: 60%;
+  height: 85%;
   /* 자신의 크기의 절반만큼 당겨서 진짜 중앙에 위치 */
   transform: translate(-50%, -50%);
   opacity: 0.5;
-  /* background-color: BLUE; */
+  background-color: BLUE;
   border-radius: 50%; /* 완전한 원 */
 
   display: flex;

@@ -394,6 +394,19 @@ export default function GameRecordPageV2() {
 
   // 초기 타자 및 주자의 위치
   const [snapshotData, setSnapshotData] = useState<any>(null);
+  const applySnapshot = useCallback((nextSnap: any) => {
+    localStorage.setItem("snapshot", JSON.stringify(nextSnap));
+    setSnapshotData(nextSnap); // ← 이게 ‘단일 진실 소스’
+  }, []);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("snapshot");
+      setSnapshotData(raw ? JSON.parse(raw) : null);
+    } catch {
+      setSnapshotData(null);
+    }
+  }, []);
 
   // {snapshotData?.snapshot?.gameSummary?.inningHalf}
 
@@ -579,16 +592,38 @@ export default function GameRecordPageV2() {
   //   }
   // }, [recordId, attackVal, router.query.attack, router]);
 
+  // 저장 전 배지 이동이 있었는지 (startBase ≠ endBase가 하나라도 있나)
+  const [actualRequest, setActualRequest] = useState<RunnerLogEntry[]>([]);
+  const [virtualRequest, setVirtualRequest] = useState<RunnerLogEntry[]>([]);
+  const [reconstructMode, setReconstructMode] = useState(false);
+  const hasAnyMovement = useMemo(() => {
+    const entries = reconstructMode
+      ? [...actualRequest, ...virtualRequest] // 재구성 모드면 둘 다 체크
+      : actualRequest; // 아니면 actual만 체크
+
+    if (entries.length === 0) return false;
+    return entries.some((e) => e.startBase !== e.endBase);
+  }, [actualRequest, virtualRequest, reconstructMode]);
+
+  const modalMessage = "저장하기를 먼저 눌러주세요";
   // ── 기록 액션 ──
   const handleRecordAction = async (action: string) => {
     if (isSubmitting) return;
 
     switch (action) {
       case "안타":
+        if (hasAnyMovement) {
+          alert(modalMessage);
+          return;
+        }
         setIsHitModalOpen(true);
         break;
 
       case "사사구":
+        if (hasAnyMovement) {
+          alert(modalMessage);
+          return;
+        }
         setIsSubmitting(true);
         try {
           const resultCode = "BB";
@@ -631,10 +666,18 @@ export default function GameRecordPageV2() {
         break;
 
       case "아웃":
+        if (hasAnyMovement) {
+          alert(modalMessage);
+          return;
+        }
         setIsOutModalOpen(true);
         break;
 
       case "etc":
+        if (hasAnyMovement) {
+          alert(modalMessage);
+          return;
+        }
         setIsEtcModalOpen(true);
         break;
 
@@ -1210,7 +1253,7 @@ export default function GameRecordPageV2() {
   // ─────────────────────────────────────────────
   // 2) 드롭 순간만 검사/스냅
   // ─────────────────────────────────────────────
-  const [reconstructMode, setReconstructMode] = useState(false);
+
   const [runnerInfoByBadgeActual, setRunnerInfoByBadgeActual] = useState<
     Record<string, { runnerId: number; name: string }>
   >({});
@@ -2075,14 +2118,13 @@ export default function GameRecordPageV2() {
   };
 
   type CombinedRequest = {
-    phase: "AFTER";
+    phase: "PREV";
     actual: RunnerLogEntry[];
     virtual?: RunnerLogEntry[];
   };
   const prevActualLogRef = useRef<string | null>(null);
   const prevVirtualLogRef = useRef<string | null>(null);
-  const [actualRequest, setActualRequest] = useState<RunnerLogEntry[]>([]);
-  const [virtualRequest, setVirtualRequest] = useState<RunnerLogEntry[]>([]);
+
   const [combinedRequest, setCombinedRequest] =
     useState<CombinedRequest | null>(null);
 
@@ -2125,7 +2167,7 @@ export default function GameRecordPageV2() {
       console.log("filteredActualArray", filteredActualArray);
       // actual만 있는 경우 combinedRequest 구성
       const single: CombinedRequest = {
-        phase: "AFTER",
+        phase: "PREV",
         actual: filteredActualArray,
       };
       setCombinedRequest(single);
@@ -2187,7 +2229,7 @@ export default function GameRecordPageV2() {
     const actualToUse = actualBeforeReconstructRef.current ?? actualRequest;
 
     const combined: CombinedRequest = {
-      phase: "AFTER",
+      phase: "PREV",
       actual: actualToUse,
       virtual: virtualRequest,
     };
@@ -2257,6 +2299,14 @@ export default function GameRecordPageV2() {
     });
   }, [badgeConfigs]);
 
+  const saveAndReloadSnapshot = useCallback(
+    (next: any) => {
+      localStorage.setItem("snapshot", JSON.stringify(next));
+      loadSnapshot(); // 항상 로컬스토리지 → state 싱크
+    },
+    [loadSnapshot]
+  );
+
   const sendRunnerEvents = useCallback(async () => {
     if (!combinedRequest) {
       console.warn("combinedRequest이 없어서 전송을 스킵합니다.");
@@ -2272,14 +2322,37 @@ export default function GameRecordPageV2() {
       throw new Error(msg);
     }
 
+    let errorFlag = false;
     let playIdValue: unknown = null;
     try {
       const parsed = JSON.parse(rawSnapshot);
+      errorFlag = !!parsed?.snapshot?.inningStats?.errorFlag;
       playIdValue = parsed.snapshot?.playId ?? null;
     } catch (e) {
       console.warn("snapshot JSON 파싱 실패:", e);
     }
 
+    // ⛔️ 여기서 preflight: PATCH 전에 차단
+    if (errorFlag) {
+      const hasBB = (arr?: RunnerLogEntry[]) =>
+        (arr ?? []).some((e) => e.startBase === "B" && e.endBase === "B");
+
+      const virtualExists =
+        Array.isArray(combinedRequest.virtual) &&
+        combinedRequest.virtual.length > 0;
+
+      if (
+        !virtualExists ||
+        hasBB(combinedRequest.actual) ||
+        hasBB(combinedRequest.virtual)
+      ) {
+        alert("이닝의 재구성을 해주세요");
+        const err: any = new Error("PRE_FLIGHT_BLOCK");
+        err.code = "PRE_FLIGHT_BLOCK"; // 식별용 코드
+        throw err; // 🚫 여기서 흐름 중단 (PATCH/POST 안 나감)
+      }
+    }
+    // ⛔️ preflight 끝 — 이 아래로 내려오면 유효하므로 PATCH/POST 진행
     if (playIdValue == null) {
       const msg =
         "localStorage의 snapshot에서 snapshot.playId를 찾을 수 없어 runner-events 요청을 보낼 수 없습니다.";
@@ -2329,9 +2402,10 @@ export default function GameRecordPageV2() {
             : postRes,
       });
 
-      localStorage.setItem(`snapshot`, JSON.stringify(postRes.data));
-      // ② 상태도 즉시 갱신 (이 한 줄이 포인트!)
-      setSnapshotData(postRes.data);
+      // localStorage.setItem(`snapshot`, JSON.stringify(postRes.data));
+      // // ② 상태도 즉시 갱신 (이 한 줄이 포인트!)
+      // setSnapshotData(postRes.data);
+      saveAndReloadSnapshot(postRes.data);
     } catch (err) {
       console.error("runner-events 전송 실패:", err);
       alert("runner-events 전송 실패");
@@ -2349,7 +2423,10 @@ export default function GameRecordPageV2() {
 
       resetWhiteBadges();
     } catch (e) {
-      setError(e as Error);
+      // ✋ preflight 차단 에러는 그냥 삼켜서 모달 유지
+      if (e?.code !== "PRE_FLIGHT_BLOCK") {
+        setError(e as Error); // 진짜 오류만 ErrorAlert로 노출
+      }
     } finally {
       setIsSubmitting(false);
     }
