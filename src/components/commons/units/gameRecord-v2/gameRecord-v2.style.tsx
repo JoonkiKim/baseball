@@ -558,7 +558,7 @@ export const OutCount = styled.div`
   justify-content: space-evenly;
   background: #000;
   border-radius: 50px;
-
+  z-index: 10000;
   /* padding: 0.5vh 1vw; */
 `;
 
@@ -577,7 +577,7 @@ export const SideWrapper = styled.div`
 export const Ellipse = styled.div<{ active?: boolean }>`
   width: 1vh;
   height: 1vh;
-  align-self: center;
+  /* align-self: center; */
   border-radius: 50%;
   background: ${(p) => (p.active ? "#fb0000" : "#707070")};
 `;

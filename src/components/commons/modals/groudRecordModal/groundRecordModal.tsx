@@ -266,7 +266,8 @@ const GroundRecordModal = forwardRef<
 
     const badgeEl = badgeRefs.current[badgeId];
     const wrapperRect = wrapperRectRef.current;
-    const zoneRect = zoneRectRef.current;
+    // const zoneRect = zoneRectRef.current;
+    const zoneRect = outZoneRef.current?.getBoundingClientRect();
     if (!badgeEl || !wrapperRect) return;
 
     const { left, top, width, height } = badgeEl.getBoundingClientRect();
@@ -307,25 +308,6 @@ const GroundRecordModal = forwardRef<
       return;
     }
 
-    // 어느 베이스 위인지 판정
-    // let dropBase: BaseId | null = null;
-    // let baseRect: DOMRect | undefined;
-    // for (const b of BASE_IDS) {
-    //   const rect = baseRectsRef.current[b];
-    //   if (!rect) continue;
-    //   if (
-    //     cx >= rect.left &&
-    //     cx <= rect.right &&
-    //     cy >= rect.top &&
-    //     cy <= rect.bottom
-    //   ) {
-    //     dropBase = b;
-    //     baseRect = rect;
-    //     break;
-    //   }
-    // }
-    // if (!dropBase || !baseRect) return;
-    // 어느 베이스 위인지 판정 (겹침 / padding / 거리 기반 스냅)
     let dropBase: BaseId | null = null;
     let baseRect: DOMRect | undefined;
 
@@ -933,189 +915,6 @@ const GroundRecordModal = forwardRef<
     finishedBadges,
     badgeConfigsForModal,
   ]);
-
-  const syncRunnersOnBaseForMode = useCallback(
-    (mode: "actual" | "virtual", options?: { skipExcluded?: boolean }) => {
-      if (!snapshotData) return;
-
-      // 1. 원본 runners 가져오기 (actual / virtual)
-      const rawRunners =
-        mode === "actual"
-          ? snapshotData?.snapshot?.inningStats?.actual?.runnersOnBase ??
-            snapshotData?.inningStats?.actual?.runnersOnBase ??
-            []
-          : snapshotData?.snapshot?.inningStats?.virtual?.runnersOnBase ??
-            snapshotData?.inningStats?.virtual?.runnersOnBase ??
-            [];
-
-      if (rawRunners.length === 0) return;
-
-      // 2. 홈에 스냅된 배지들에 대응하는 runnerId들 추출 → 제외
-      const homeSnappedSetForMode =
-        mode === "actual" ? homeSnappedBadgesActual : homeSnappedBadgesVirtual;
-      const runnerInfoForMode =
-        mode === "actual" ? runnerInfoByBadgeActual : runnerInfoByBadgeVirtual;
-      const finishedBadgesForMode =
-        mode === "actual" ? finishedBadgesActual : finishedBadgesVirtual;
-
-      const finishedRunnerIds = Array.from(homeSnappedSetForMode)
-        .map((badgeId) => runnerInfoForMode[badgeId]?.runnerId)
-        .filter((id): id is number => id != null && id !== EXCLUDED_RUNNER_ID);
-
-      // 3. 홈에 이미 완료된 주자들을 제외한 실제 동기화 대상 runners
-      const runners = (rawRunners as any[]).filter(
-        (r) => !finishedRunnerIds.includes(r.id)
-      );
-      if (runners.length === 0) return;
-
-      const baseMap: Record<number, BaseId> = {
-        1: "first-base",
-        2: "second-base",
-        3: "third-base",
-      };
-
-      // 4. 후보 배지 (finishedBadgesForMode 반영)
-      const whiteBadgeCandidates = badgeConfigsForModal
-        .filter(
-          (cfg) =>
-            !cfg.id.startsWith("black-badge") &&
-            activeBadges.includes(cfg.id) &&
-            !finishedBadgesForMode.has(cfg.id)
-        )
-        .map((cfg) => cfg.id);
-      const availableRunnerBadges = whiteBadgeCandidates.filter(
-        (id) => id !== batterWhiteBadgeId
-      );
-
-      // 5. mode 별 상태 선택
-      const baseToBadgeIdCurrent =
-        mode === "actual" ? baseToBadgeIdActual : baseToBadgeIdVirtual;
-      const setBaseToBadgeIdForMode =
-        mode === "actual" ? setBaseToBadgeIdActual : setBaseToBadgeIdVirtual;
-      const setRunnerInfoForMode =
-        mode === "actual"
-          ? setRunnerInfoByBadgeActual
-          : setRunnerInfoByBadgeVirtual;
-
-      // 6. 복제 및 갱신 (base → badge 매핑)
-      const newMap: Record<number, string> = { ...baseToBadgeIdCurrent };
-      const usedBadges = new Set(Object.values(newMap));
-
-      runners.forEach((runner: any) => {
-        if (!newMap[runner.base]) {
-          const candidate = availableRunnerBadges.find(
-            (b) => !usedBadges.has(b)
-          );
-          if (candidate) {
-            newMap[runner.base] = candidate;
-            usedBadges.add(candidate);
-          }
-        }
-      });
-
-      if (JSON.stringify(newMap) !== JSON.stringify(baseToBadgeIdCurrent)) {
-        setBaseToBadgeIdForMode(newMap);
-      }
-
-      // 7. 스냅 초기화 및 runnerInfo 설정
-      runners.forEach((runner: any) => {
-        const baseId = baseMap[runner.base];
-        if (!baseId) return;
-        const badgeId = newMap[runner.base];
-        if (!badgeId) return;
-
-        const tryInit = () => {
-          const wrapperEl = wrapperRef.current;
-          const baseRect = baseRectsRef.current[baseId];
-          if (!wrapperEl || !baseRect) {
-            requestAnimationFrame(tryInit);
-            return;
-          }
-
-          const wrapperRect = wrapperEl.getBoundingClientRect();
-          const x = baseRect.left + baseRect.width / 2 - wrapperRect.left;
-          const y = baseRect.top + baseRect.height / 2 - wrapperRect.top;
-
-          const snap: SnapInfo = {
-            base: baseId,
-            pos: {
-              xPct: (x / wrapperRect.width) * 100,
-              yPct: (y / wrapperRect.height) * 100,
-            },
-          };
-
-          if (!initialSnapsRef.current[badgeId]) {
-            initialSnapsRef.current[badgeId] = snap;
-            setBadgeSnaps((prev) => ({ ...prev, [badgeId]: snap }));
-            setRunnerInfoForMode((prev) => ({
-              ...prev,
-              [badgeId]: { runnerId: runner.id, name: runner.name },
-            }));
-          }
-        };
-        tryInit();
-      });
-
-      // 8. 매핑되지 않은 후보 배지들을 "할당 제외"로 표시 (항상)
-      const mappedBadgesForMode = new Set(Object.values(newMap));
-      const candidateBadgeIds = whiteBadgeCandidates.filter(
-        (id) => id !== batterWhiteBadgeId
-      );
-      candidateBadgeIds.forEach((badgeId) => {
-        if (!mappedBadgesForMode.has(badgeId)) {
-          setRunnerInfoForMode((prev) => {
-            const existing = prev[badgeId];
-            if (existing && existing.runnerId === EXCLUDED_RUNNER_ID)
-              return prev;
-            return {
-              ...prev,
-              [badgeId]: { runnerId: EXCLUDED_RUNNER_ID, name: "할당 제외" },
-            };
-          });
-        }
-      });
-
-      // 9. 기존의 excluded 처리 (옵션 없으면 중복 실행되지만 원래 의도 유지)
-      if (!options?.skipExcluded) {
-        const mappedBadgesForMode2 = new Set(Object.values(newMap));
-        const candidateBadgeIds2 = whiteBadgeCandidates.filter(
-          (id) => id !== batterWhiteBadgeId
-        );
-        candidateBadgeIds2.forEach((badgeId) => {
-          if (!mappedBadgesForMode2.has(badgeId)) {
-            setRunnerInfoForMode((prev) => {
-              const existing = prev[badgeId];
-              if (existing && existing.runnerId === EXCLUDED_RUNNER_ID)
-                return prev;
-              return {
-                ...prev,
-                [badgeId]: { runnerId: EXCLUDED_RUNNER_ID, name: "할당 제외" },
-              };
-            });
-          }
-        });
-      }
-    },
-    [
-      snapshotData,
-      activeBadges,
-      batterWhiteBadgeId,
-      baseToBadgeIdActual,
-      baseToBadgeIdVirtual,
-      setBaseToBadgeIdActual,
-      setBaseToBadgeIdVirtual,
-      setRunnerInfoByBadgeActual,
-      setRunnerInfoByBadgeVirtual,
-      refreshRects,
-      homeSnappedBadgesActual,
-      homeSnappedBadgesVirtual,
-      runnerInfoByBadgeActual,
-      runnerInfoByBadgeVirtual,
-      finishedBadgesActual,
-      finishedBadgesVirtual,
-      badgeConfigsForModal,
-    ]
-  );
 
   const loadSnapshot = useCallback(() => {
     try {
