@@ -1,4 +1,4 @@
-// src/components/pages/GameRecordPage.jsx
+// src/components/pages/GameRecordViewerPage.jsx
 import { useState, useEffect, useCallback, useRef, Fragment } from "react";
 import { useDraggable, useDroppable } from "@dnd-kit/core";
 import { useRouter } from "next/router";
@@ -78,11 +78,126 @@ import ErrorAlert from "../../../../commons/libraries/showErrorCode";
 import { OnDeckWrapper } from "../gameRecord-v2/gameRecord-v2.style";
 import { ArrowUp } from "../../../../commons/libraries/arrow";
 import ArrowDown from "../../../../commons/libraries/arrowDown";
+import { getAccessToken } from "../../../../commons/libraries/token";
 
 export default function GameRecordPageViewer() {
-  const [error, setError] = useState(null);
+  // 스냅샷 받아오기
+
+  // ⬇️ 컴포넌트 내부에 추가 (A안의 esRef/useEffect 대신 사용)
+  const controllerRef = useRef<AbortController | null>(null);
   const router = useRouter();
   const recordId = router.query.recordId;
+
+  // ⬇️ 컴포넌트 내부에 추가
+  const [sseData, setSseData] = useState<any>(null);
+  const esRef = useRef<EventSource | null>(null);
+  console.log("sseData", sseData);
+  // snapshot → 화면 상태 반영
+  const applySnapshot = useCallback((snap: any) => {
+    if (!snap) return;
+
+    // 팀명
+    setTeamAName(snap?.gameSummary?.awayTeam?.name ?? "");
+    setTeamBName(snap?.gameSummary?.homeTeam?.name ?? "");
+
+    // 스코어보드 (1~7 + R, H)
+    const newA = Array(9).fill("");
+    const newB = Array(9).fill("");
+    const innings = snap?.gameSummary?.scoreboard?.innings ?? [];
+    for (const inn of innings) {
+      const idx = (inn?.inning ?? 0) - 1;
+      if (idx >= 0 && idx < 7) {
+        newA[idx] = inn?.away ?? "";
+        newB[idx] = inn?.home ?? "";
+      }
+    }
+    const totals = snap?.gameSummary?.scoreboard?.totals;
+    if (totals) {
+      newA[7] = totals?.away?.R ?? "";
+      newA[8] = totals?.away?.H ?? "";
+      newB[7] = totals?.home?.R ?? "";
+      newB[8] = totals?.home?.H ?? "";
+    }
+    setTeamAScores(newA);
+    setTeamBScores(newB);
+
+    // 아웃카운트
+    const outsCount: number = snap?.inningStats?.actual?.outs ?? 0;
+    setOuts([0, 1, 2].map((i) => i < outsCount));
+
+    // 공격 중인 팀 (TOP=away 타석, BOTTOM=home 타석)
+    const half = snap?.gameSummary?.inningHalf;
+    setAttackVal(half === "TOP" ? "away" : "home");
+
+    // 필요하면 로컬스토리지에 최신 스냅샷 저장
+    // try {
+    //   localStorage.setItem("snapshot", JSON.stringify({ snapshot: snap }));
+    // } catch {}
+  }, []);
+
+  useEffect(() => {
+    if (!router.isReady || !recordId) return;
+
+    const base = process.env.NEXT_PUBLIC_API_URL ?? "";
+    const url = `${base}/games/${recordId}/snapshot/stream`;
+
+    // const token = localStorage.getItem("accessToken") ?? ""; // 네 프로젝트 방식에 맞춰 가져와
+    const controller = new AbortController();
+    controllerRef.current = controller;
+
+    (async () => {
+      const res = await fetch(url, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${getAccessToken() || ""}`,
+          Accept: "text/event-stream",
+        },
+        signal: controller.signal,
+        credentials: "include", // 쿠키도 같이 쓰면 유지
+      });
+
+      const reader = res.body!.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+
+        // SSE는 "\n\n"으로 이벤트 구분
+        const chunks = buffer.split("\n\n");
+        buffer = chunks.pop() ?? "";
+
+        for (const chunk of chunks) {
+          // 여러 줄 중 data: 만 모아서 이어붙임
+          const dataLines = chunk
+            .split("\n")
+            .filter((l) => l.startsWith("data:"))
+            .map((l) => l.slice(5).trim());
+          if (!dataLines.length) continue;
+
+          const dataStr = dataLines.join("\n");
+          try {
+            const payload = JSON.parse(dataStr);
+            const snap = payload?.snapshot ?? payload;
+            setSseData(snap);
+            applySnapshot(snap);
+          } catch (e) {
+            console.warn("[SSE/fetch] invalid JSON:", dataStr);
+          }
+        }
+      }
+    })().catch((e) => console.warn("[SSE/fetch] error:", e));
+
+    return () => {
+      controller.abort();
+      controllerRef.current = null;
+    };
+  }, [router.isReady, recordId, applySnapshot]);
+
+  const [error, setError] = useState(null);
+
   const [outs, setOuts] = useState<boolean[]>([false, false, false]);
 
   // 이닝 헤더 (1~7, R, H)
