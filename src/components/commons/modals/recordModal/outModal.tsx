@@ -29,7 +29,7 @@ export default function OutModal(props: IModalProps) {
   const router = useRouter();
   const mapping: { [key: string]: string } = {
     삼진: "SO",
-    희생번트: "SB",
+    희생번트: "SH",
     희생플라이: "SF",
     그외아웃: "O",
   };

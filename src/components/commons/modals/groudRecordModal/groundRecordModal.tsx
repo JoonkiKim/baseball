@@ -1859,7 +1859,7 @@ const GroundRecordModal = forwardRef<
                 })}
             </div>
           </GraphicWrapper>
-          <ControlButton onClick={handleSubmit}>확인하기</ControlButton>
+          <ControlButton onClick={handleSubmit}>확인</ControlButton>
         </DndContext>
       </ModalContainer>
       <LoadingOverlay visible={isSubmitting}>
