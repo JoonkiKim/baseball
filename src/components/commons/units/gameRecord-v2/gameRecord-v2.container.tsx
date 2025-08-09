@@ -93,6 +93,7 @@ import {
   HomeTeamWrapper,
   AwayTeamScore,
   HomeTeamScore,
+  OnDeckNameWrapper,
 } from "./gameRecord-v2.style";
 import HitModal from "../../modals/recordModal/hitModal";
 import OutModal from "../../modals/recordModal/outModal";
@@ -539,6 +540,7 @@ export default function GameRecordPageV2() {
     }
     try {
       const raw = localStorage.getItem("snapshot");
+
       const snap = raw ? JSON.parse(raw) : null;
       const sb = snap?.snapshot?.gameSummary?.scoreboard;
       if (!sb) throw new Error("scoreboard 없음");
@@ -2328,6 +2330,8 @@ export default function GameRecordPageV2() {
       });
 
       localStorage.setItem(`snapshot`, JSON.stringify(postRes.data));
+      // ② 상태도 즉시 갱신 (이 한 줄이 포인트!)
+      setSnapshotData(postRes.data);
     } catch (err) {
       console.error("runner-events 전송 실패:", err);
       alert("runner-events 전송 실패");
@@ -2359,25 +2363,44 @@ export default function GameRecordPageV2() {
   const [outs, setOuts] = useState<boolean[]>([false, false, false]);
 
   /* 🔄 actual out-count만 반영 */
-  useEffect(() => {
-    if (!snapshotData) {
-      setOuts([false, false, false]); // 초기값
-      return;
-    }
-
-    // snapshot 형식(중첩) / 이전 형식 둘 다 대응
+  const deriveOuts = (snap: any): boolean[] => {
     const outCnt: number =
-      snapshotData?.snapshot?.inningStats?.actual?.outs ??
-      snapshotData?.inningStats?.actual?.outs ??
+      snap?.snapshot?.inningStats?.actual?.outs ??
+      snap?.inningStats?.actual?.outs ??
       0;
 
-    // 0 ~ 3 → [true/false, true/false, …]
-    setOuts(
-      Array(3)
-        .fill(false)
-        .map((_, i) => i < outCnt)
-    );
+    return Array(3)
+      .fill(false)
+      .map((_, i) => i < outCnt);
+  };
+
+  useEffect(() => {
+    if (!snapshotData) {
+      setOuts([false, false, false]);
+      return;
+    }
+    setOuts(deriveOuts(snapshotData));
   }, [snapshotData]);
+
+  // useEffect(() => {
+  //   if (!snapshotData) {
+  //     setOuts([false, false, false]); // 초기값
+  //     return;
+  //   }
+
+  //   // snapshot 형식(중첩) / 이전 형식 둘 다 대응
+  //   const outCnt: number =
+  //     snapshotData?.snapshot?.inningStats?.actual?.outs ??
+  //     snapshotData?.inningStats?.actual?.outs ??
+  //     0;
+
+  //   // 0 ~ 3 → [true/false, true/false, …]
+  //   setOuts(
+  //     Array(3)
+  //       .fill(false)
+  //       .map((_, i) => i < outCnt)
+  //   );
+  // }, [snapshotData]);
   return (
     <GameRecordContainer ref={containerRef}>
       <ScoreBoardWrapper>
@@ -2547,15 +2570,17 @@ export default function GameRecordPageV2() {
               ))}
             </OutCount>
             <OnDeckWrapper>
-              {onDeckPlayers.length > 0 ? (
-                onDeckPlayers.map((p) => (
-                  <div key={p.playerId}>
-                    {p.battingOrder} {p.playerName}
-                  </div>
-                ))
-              ) : (
-                <div>대기타석입니다</div>
-              )}
+              <OnDeckNameWrapper>
+                {onDeckPlayers.length > 0 ? (
+                  onDeckPlayers.map((p) => (
+                    <div key={p.playerId}>
+                      {p.battingOrder} {p.playerName}
+                    </div>
+                  ))
+                ) : (
+                  <div>대기타석입니다</div>
+                )}
+              </OnDeckNameWrapper>
             </OnDeckWrapper>
           </SideWrapper>
           <LeftSideWrapper>
@@ -2669,8 +2694,8 @@ export default function GameRecordPageV2() {
           <PlayerWrapper>
             <PlayerPosition>
               {!isHomeAttack
-                ? "투수"
-                : `${snapshotData?.snapshot?.currentAtBat.batter.battingOrder}번타자 `}
+                ? `${snapshotData?.snapshot?.currentAtBat.batter.battingOrder}번타자 `
+                : "투수"}
               <Dot />
               {/* {!isHomeAttack ? "AWAY" : "HOME"} */}
               AWAY
@@ -2678,8 +2703,8 @@ export default function GameRecordPageV2() {
             <PlayerInfo>
               {/* {snapshotData?.snapshot?.currentAtBat.pitcher.name} */}
               {!isHomeAttack
-                ? snapshotData?.snapshot?.currentAtBat.pitcher.name
-                : snapshotData?.snapshot?.currentAtBat.batter.name}
+                ? snapshotData?.snapshot?.currentAtBat.batter.name
+                : snapshotData?.snapshot?.currentAtBat.pitcher.name}
             </PlayerInfo>
             <PlayerChangeButton onClick={() => handleSubstitutionAway()}>
               선수교체
@@ -2690,7 +2715,7 @@ export default function GameRecordPageV2() {
         <PlayerBox>
           <PlayerWrapper>
             <PlayerPosition>
-              {isHomeAttack
+              {!isHomeAttack
                 ? "투수"
                 : `${snapshotData?.snapshot?.currentAtBat.batter.battingOrder}번타자 `}
               <Dot />
@@ -2698,7 +2723,7 @@ export default function GameRecordPageV2() {
               HOME
             </PlayerPosition>
             <PlayerInfo>
-              {isHomeAttack
+              {!isHomeAttack
                 ? snapshotData?.snapshot?.currentAtBat.pitcher.name
                 : snapshotData?.snapshot?.currentAtBat.batter.name}
             </PlayerInfo>
@@ -2764,7 +2789,11 @@ export default function GameRecordPageV2() {
       )}
 
       {/* ⚠️ 꼭 마지막에 항상 렌더, 내부에서만 isOpen 제어 */}
-      <GroundRecordModal ref={groundModalRef} onSuccess={afterRecord} />
+      <GroundRecordModal
+        ref={groundModalRef}
+        onSuccess={afterRecord}
+        updateSnapshot={setSnapshotData}
+      />
 
       {!isSubmitting && validationError && (
         <ModalOverlay>

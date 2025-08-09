@@ -3,6 +3,7 @@
 import API from "../../../../commons/apis/api";
 
 import {
+  Dispatch,
   forwardRef,
   useCallback,
   useEffect,
@@ -70,12 +71,13 @@ export type GroundRecordModalHandle = {
 
 interface GroundRecordModalProps {
   onSuccess?: () => Promise<void>;
+  updateSnapshot?: Dispatch<any>;
 }
 
 const GroundRecordModal = forwardRef<
   GroundRecordModalHandle,
   GroundRecordModalProps
->(({ onSuccess }, ref) => {
+>(({ onSuccess, updateSnapshot }, ref) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   // const router = useRouter();
@@ -1594,6 +1596,7 @@ const GroundRecordModal = forwardRef<
       });
 
       localStorage.setItem(`snapshot`, JSON.stringify(postRes.data));
+      updateSnapshot(postRes.data);
     } catch (err) {
       console.error("runner-events 전송 실패:", err);
       alert("runner-events 전송 실패");

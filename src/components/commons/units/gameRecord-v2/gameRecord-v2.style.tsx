@@ -585,7 +585,34 @@ export const Ellipse = styled.div<{ active?: boolean }>`
 export const OnDeckWrapper = styled.div`
   margin-top: 0.5vh;
   /* position: absolute; */
-  width: 5vh;
+  width: 6vh;
+  /* dynamic height로 바꿔주면 내용에 맞게 늘어납니다 */
+  height: 5.5vh;
+  z-index: 80;
+  font-family: "Pretendard";
+  font-weight: 400;
+  /* font-weight: bold; */
+  font-size: 0.5rem;
+  background-color: black;
+  color: #f2f2f7;
+  border-radius: 5px;
+  /* margin-top: 0.4rem; */
+  display: flex;
+  flex-direction: column;
+  /* 위아래 간격을 0.3rem씩 주기 */
+  /* gap: 0.22rem; */
+  /* 항목들이 위쪽부터 시작하도록 */
+  justify-content: center;
+  align-items: center;
+
+  /* 위아래 여백도 추가하고 싶으면 padding 활용 */
+  /* padding: 0.3rem 0; */
+`;
+
+export const OnDeckNameWrapper = styled.div`
+  /* margin-top: 0.5vh; */
+  /* position: absolute; */
+  /* width: 6vh; */
   /* dynamic height로 바꿔주면 내용에 맞게 늘어납니다 */
   height: 5.5vh;
   z-index: 80;
@@ -603,7 +630,7 @@ export const OnDeckWrapper = styled.div`
   /* gap: 0.22rem; */
   /* 항목들이 위쪽부터 시작하도록 */
   justify-content: space-evenly;
-  align-items: center;
+  align-items: start;
 
   /* 위아래 여백도 추가하고 싶으면 padding 활용 */
   /* padding: 0.3rem 0; */
