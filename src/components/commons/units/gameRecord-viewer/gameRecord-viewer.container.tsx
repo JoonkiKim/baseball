@@ -207,7 +207,6 @@ export default function GameRecordPageViewer() {
     const base = process.env.NEXT_PUBLIC_API_URL ?? "";
     const url = `${base}/games/${recordId}/snapshot/stream`;
 
-    // const token = localStorage.getItem("accessToken") ?? ""; // 네 프로젝트 방식에 맞춰 가져와
     const controller = new AbortController();
     controllerRef.current = controller;
 
@@ -219,7 +218,7 @@ export default function GameRecordPageViewer() {
           Accept: "text/event-stream",
         },
         signal: controller.signal,
-        // credentials: "include", // 쿠키도 같이 쓰면 유지
+        credentials: "include",
       });
 
       const reader = res.body!.getReader();
@@ -270,49 +269,50 @@ export default function GameRecordPageViewer() {
   const fetchedOnceRef = useRef(false);
 
   // ✅ 화면 로드시 한 번만: GET /games/{gameId}/snapshot/umpire → localStorage('snapshot') 저장 + 화면 반영
-  useEffect(() => {
-    if (!router.isReady || !recordId) return;
-    if (fetchedOnceRef.current) return;
-    fetchedOnceRef.current = true;
+  // 나중에 지우기
+  // useEffect(() => {
+  //   if (!router.isReady || !recordId) return;
+  //   if (fetchedOnceRef.current) return;
+  //   fetchedOnceRef.current = true;
 
-    (async () => {
-      try {
-        const base = process.env.NEXT_PUBLIC_API_URL ?? "";
-        const url = `${base}/games/${recordId}/snapshot/stream`;
+  //   (async () => {
+  //     try {
+  //       const base = process.env.NEXT_PUBLIC_API_URL ?? "";
+  //       const url = `${base}/games/${recordId}/snapshot/stream`;
 
-        const res = await fetch(url, {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${getAccessToken?.() || ""}`,
-            Accept: "application/json",
-          },
-          // credentials: "include", // 쿠키 기반이면 주석 해제
-        });
+  //       const res = await fetch(url, {
+  //         method: "GET",
+  //         headers: {
+  //           Authorization: `Bearer ${getAccessToken?.() || ""}`,
+  //           Accept: "application/json",
+  //         },
+  //         // credentials: "include", // 쿠키 기반이면 주석 해제
+  //       });
 
-        if (!res.ok) {
-          throw new Error(`GET snapshot/stream failed: ${res.status}`);
-        }
+  //       if (!res.ok) {
+  //         throw new Error(`GET snapshot/stream failed: ${res.status}`);
+  //       }
 
-        const json = await res.json();
-        // 응답 래핑 형태 유연 처리
-        const snap = json?.data ?? json;
-        console.log("snap", snap);
-        setSseData(snap);
-        // 1) localStorage 저장
-        try {
-          localStorage.setItem("snapshot", JSON.stringify(snap));
-        } catch (e) {
-          console.warn("localStorage(snapshot) 저장 실패:", e);
-        }
-        console.log("연결용 GET /snapshot/stream 저장완료");
-        // 2) 화면 상태 반영
-        applySnapshot(snap);
-      } catch (err) {
-        console.error("GET /snapshot/stream error:", err);
-        setError(err);
-      }
-    })();
-  }, [router.isReady, recordId, applySnapshot]);
+  //       const json = await res.json();
+  //       // 응답 래핑 형태 유연 처리
+  //       const snap = json?.data ?? json;
+  //       console.log("snap", snap);
+  //       setSseData(snap);
+  //       // 1) localStorage 저장
+  //       try {
+  //         localStorage.setItem("snapshot", JSON.stringify(snap));
+  //       } catch (e) {
+  //         console.warn("localStorage(snapshot) 저장 실패:", e);
+  //       }
+  //       console.log("연결용 GET /snapshot/stream 저장완료");
+  //       // 2) 화면 상태 반영
+  //       applySnapshot(snap);
+  //     } catch (err) {
+  //       console.error("GET /snapshot/stream error:", err);
+  //       setError(err);
+  //     }
+  //   })();
+  // }, [router.isReady, recordId, applySnapshot]);
 
   console.log("sseData", sseData);
 
