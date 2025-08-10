@@ -32,11 +32,11 @@ export default function GameOverModal(props: IModalProps) {
         const requestBody = { runs: props.inningScore };
         console.log("경기종료 요청 바디:", requestBody);
         const response = await API.post(
-          `/games/${router.query.recordId}/results`,
+          `/games/${router.query.recordId}/result`,
           requestBody
         );
         console.log(
-          `/games/${router.query.recordId}/results`,
+          `/games/${router.query.recordId}/result`,
           "응답 상태:",
           response.status
         );

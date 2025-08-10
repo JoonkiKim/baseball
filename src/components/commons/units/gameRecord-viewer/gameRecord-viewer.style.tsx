@@ -66,12 +66,12 @@ export const InningHeader = styled.div`
   }
 
   /* 첫 번째 셀만 보더 제거 */
-  > *:first-child {
+  > *:first-of-type {
     border-bottom: none;
   }
 
-  > *:nth-child(9),
-  > *:nth-child(10) {
+  > *:nth-of-type(9),
+  > *:nth-of-type(10) {
     color: red;
   }
   /* margin-right: 1vh; */
@@ -103,8 +103,8 @@ export const TeamRow = styled.div`
   /* border-bottom: 1px solid #ccc; */
   /* background-color: aqua; */
   height: 33%;
-  > *:nth-child(9),
-  > *:nth-child(10) {
+  > *:nth-of-type(9),
+  > *:nth-of-type(10) {
     color: red;
     font-weight: 700;
   }
@@ -386,17 +386,16 @@ export const PlayerName = styled.div`
   justify-content: flex-start;
 `;
 
-export const ResultBox = styled.div<{ isOut?: boolean }>`
+export const ResultBox = styled.div<{ $isOut?: boolean }>`
   width: 7vw;
   height: 1.6vh;
-  background-color: ${({ isOut }) => (isOut ? "red" : "#007AFF")};
+  background-color: ${({ $isOut }) => ($isOut ? "red" : "#007AFF")};
   font-family: "Pretendard";
-  font-size: 0.5rem; /* 8px */
+  font-size: 0.5rem;
   font-weight: 700;
   color: #ffffff;
   border-radius: 3.125rem;
   text-align: center;
-
   display: flex;
   justify-content: center;
   align-items: center;

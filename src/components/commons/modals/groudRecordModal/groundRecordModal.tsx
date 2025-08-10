@@ -259,7 +259,7 @@ const GroundRecordModal = forwardRef<
   const scheduleOccupancyLog = () => {
     requestAnimationFrame(() => {
       const occ = computeBaseOccupancy(badgeSnapsRef.current);
-      console.log("Base occupancy after handleDrop:", occ);
+      // console.log("Base occupancy after handleDrop:", occ);
     });
   };
 
@@ -609,7 +609,7 @@ const GroundRecordModal = forwardRef<
       const raw = localStorage.getItem("snapshot");
       const parsed = raw ? JSON.parse(raw) : null;
       setSnapshotData(parsed);
-      console.log("loaded snapshot from localStorage:", parsed);
+      // console.log("loaded snapshot from localStorage:", parsed);
 
       const batterName =
         parsed?.snapshot?.currentAtBat?.batter?.name ??
@@ -899,10 +899,10 @@ const GroundRecordModal = forwardRef<
         }
       });
 
-    console.log(
-      `runner assignment (${reconstructMode ? "virtual" : "actual"}):`,
-      baseAssignment
-    );
+    // console.log(
+    //   `runner assignment (${reconstructMode ? "virtual" : "actual"}):`,
+    //   baseAssignment
+    // );
   }, [
     getRunnersOnBase,
     activeBadges,
@@ -950,10 +950,10 @@ const GroundRecordModal = forwardRef<
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         const occ = computeBaseOccupancy(badgeSnapsRef.current);
-        console.log(
-          `Base occupancy after reconstructMode=${reconstructMode}:`,
-          occ
-        );
+        // console.log(
+        //   `Base occupancy after reconstructMode=${reconstructMode}:`,
+        //   occ
+        // );
       });
     });
   }, [reconstructMode]);
@@ -1145,7 +1145,7 @@ const GroundRecordModal = forwardRef<
       // badgeSnaps 업데이트가 비동기라 다음 프레임에 occupancy 계산
       requestAnimationFrame(() => {
         const occ = computeBaseOccupancy(badgeSnapsRef.current);
-        console.log("Base occupancy after reconstruct toggle:", occ);
+        // console.log("Base occupancy after reconstruct toggle:", occ);
       });
     },
 
@@ -1329,14 +1329,14 @@ const GroundRecordModal = forwardRef<
     ) {
       setActualRequest(filteredActualArray); // 추가된 저장
       prevActualLogRef.current = serializedActual;
-      console.log("filteredActualArray", filteredActualArray);
+      // console.log("filteredActualArray", filteredActualArray);
       // actual만 있는 경우 combinedRequest 구성
       const single: CombinedRequest = {
         phase: "AFTER",
         actual: filteredActualArray,
       };
       setCombinedRequest(single);
-      console.log("actual only", JSON.stringify(single, null, 2));
+      // console.log("actual only", JSON.stringify(single, null, 2));
     }
   }, [
     badgeSnaps,
@@ -1399,10 +1399,10 @@ const GroundRecordModal = forwardRef<
       virtual: virtualRequest,
     };
     setCombinedRequest(combined);
-    console.log("최종입니다", JSON.stringify(combined, null, 2));
+    // console.log("최종입니다", JSON.stringify(combined, null, 2));
   }, [virtualRequest, reconstructMode, actualRequest]);
 
-  console.log("combinedRequest", combinedRequest);
+  // console.log("combinedRequest", combinedRequest);
 
   useImperativeHandle(
     ref,
@@ -1683,8 +1683,8 @@ const GroundRecordModal = forwardRef<
     const occupiedEntries = Object.entries(badgeSnaps)
       .filter(([, snap]) => snap != null)
       .map(([id, snap]) => `${id} → ${snap!.base}`);
-    console.log("badgeSnaps contents:", occupiedEntries);
-    console.log("computed occupancy from badgeSnaps:", occupancy);
+    // console.log("badgeSnaps contents:", occupiedEntries);
+    // console.log("computed occupancy from badgeSnaps:", occupancy);
   }, [badgeSnaps, occupancy]);
 
   useEffect(() => {

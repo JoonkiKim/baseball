@@ -1,5 +1,13 @@
 // src/components/pages/GameRecordViewerPage.jsx
-import { useState, useEffect, useCallback, useRef, Fragment } from "react";
+import {
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  Fragment,
+  useMemo,
+  useLayoutEffect,
+} from "react";
 import { useDraggable, useDroppable } from "@dnd-kit/core";
 import { useRouter } from "next/router";
 import API from "../../../../commons/apis/api";
@@ -75,10 +83,73 @@ import {
   LoadingOverlay,
 } from "../../../../commons/libraries/loadingOverlay";
 import ErrorAlert from "../../../../commons/libraries/showErrorCode";
-import { OnDeckWrapper } from "../gameRecord-v2/gameRecord-v2.style";
+import {
+  OnDeckNameWrapper,
+  OnDeckWrapper,
+} from "../gameRecord-v2/gameRecord-v2.style";
 import { ArrowUp } from "../../../../commons/libraries/arrow";
 import ArrowDown from "../../../../commons/libraries/arrowDown";
 import { getAccessToken } from "../../../../commons/libraries/token";
+
+// 타자 주자 초기 세팅
+
+// ── BASE IDS / 타입 ──
+const BASE_IDS = [
+  "first-base",
+  "second-base",
+  "third-base",
+  "home-base",
+] as const;
+type BaseId = (typeof BASE_IDS)[number];
+
+// ── 베이스/래퍼 DOMRect 캐시 훅 ──
+function useRectsCache(
+  wrapperRef: React.RefObject<HTMLDivElement>,
+  baseRefs: React.MutableRefObject<Record<BaseId, SVGPolygonElement | null>>
+) {
+  const wrapperRectRef = useRef<DOMRect | null>(null);
+  const baseRectsRef = useRef<Partial<Record<BaseId, DOMRect>>>({});
+
+  const refreshRects = useCallback(() => {
+    if (wrapperRef.current)
+      wrapperRectRef.current = wrapperRef.current.getBoundingClientRect();
+    BASE_IDS.forEach((b) => {
+      const poly = baseRefs.current[b];
+      if (poly) baseRectsRef.current[b] = poly.getBoundingClientRect();
+    });
+  }, [wrapperRef, baseRefs]);
+
+  useLayoutEffect(() => {
+    refreshRects();
+    let rafId: number | null = null;
+    const schedule = () => {
+      if (rafId != null) return;
+      rafId = requestAnimationFrame(() => {
+        rafId = null;
+        refreshRects();
+      });
+    };
+    const ro = new ResizeObserver(() => schedule());
+    if (wrapperRef.current) ro.observe(wrapperRef.current);
+    BASE_IDS.forEach(
+      (b) => baseRefs.current[b] && ro.observe(baseRefs.current[b]!)
+    );
+
+    const onResize = () => schedule();
+    const onScroll = () => schedule();
+    window.addEventListener("resize", onResize);
+    window.addEventListener("scroll", onScroll, true);
+
+    return () => {
+      ro.disconnect();
+      if (rafId != null) cancelAnimationFrame(rafId);
+      window.removeEventListener("resize", onResize);
+      window.removeEventListener("scroll", onScroll, true);
+    };
+  }, [refreshRects]);
+
+  return { wrapperRectRef, baseRectsRef, refreshRects };
+}
 
 export default function GameRecordPageViewer() {
   // 스냅샷 받아오기
@@ -90,9 +161,10 @@ export default function GameRecordPageViewer() {
 
   // ⬇️ 컴포넌트 내부에 추가
   const [sseData, setSseData] = useState<any>(null);
-  const esRef = useRef<EventSource | null>(null);
-  console.log("sseData", sseData);
+  // const esRef = useRef<EventSource | null>(null);
+  // console.log("sseData", sseData);
   // snapshot → 화면 상태 반영
+  // 3) applySnapshot 한 곳에서만 세팅
   const applySnapshot = useCallback((snap: any) => {
     if (!snap) return;
 
@@ -100,7 +172,7 @@ export default function GameRecordPageViewer() {
     setTeamAName(snap?.gameSummary?.awayTeam?.name ?? "");
     setTeamBName(snap?.gameSummary?.homeTeam?.name ?? "");
 
-    // 스코어보드 (1~7 + R, H)
+    // 스코어보드
     const newA = Array(9).fill("");
     const newB = Array(9).fill("");
     const innings = snap?.gameSummary?.scoreboard?.innings ?? [];
@@ -121,18 +193,12 @@ export default function GameRecordPageViewer() {
     setTeamAScores(newA);
     setTeamBScores(newB);
 
-    // 아웃카운트
-    const outsCount: number = snap?.inningStats?.actual?.outs ?? 0;
-    setOuts([0, 1, 2].map((i) => i < outsCount));
+    // ✅ 아웃카운트: 여기서만
+    setOuts(deriveOuts(snap));
 
-    // 공격 중인 팀 (TOP=away 타석, BOTTOM=home 타석)
+    // 공격 팀(필요 시)
     const half = snap?.gameSummary?.inningHalf;
     setAttackVal(half === "TOP" ? "away" : "home");
-
-    // 필요하면 로컬스토리지에 최신 스냅샷 저장
-    // try {
-    //   localStorage.setItem("snapshot", JSON.stringify({ snapshot: snap }));
-    // } catch {}
   }, []);
 
   useEffect(() => {
@@ -153,7 +219,7 @@ export default function GameRecordPageViewer() {
           Accept: "text/event-stream",
         },
         signal: controller.signal,
-        credentials: "include", // 쿠키도 같이 쓰면 유지
+        // credentials: "include", // 쿠키도 같이 쓰면 유지
       });
 
       const reader = res.body!.getReader();
@@ -180,7 +246,10 @@ export default function GameRecordPageViewer() {
           const dataStr = dataLines.join("\n");
           try {
             const payload = JSON.parse(dataStr);
-            const snap = payload?.snapshot ?? payload;
+            console.log("payload", payload);
+            // const snap = payload?.snapshot ?? payload;
+            const snap = payload?.data ?? payload;
+
             setSseData(snap);
             applySnapshot(snap);
           } catch (e) {
@@ -196,6 +265,57 @@ export default function GameRecordPageViewer() {
     };
   }, [router.isReady, recordId, applySnapshot]);
 
+  // 연결용 GET
+  // StrictMode에서 useEffect가 2번 도는 것을 방지
+  const fetchedOnceRef = useRef(false);
+
+  // ✅ 화면 로드시 한 번만: GET /games/{gameId}/snapshot/umpire → localStorage('snapshot') 저장 + 화면 반영
+  useEffect(() => {
+    if (!router.isReady || !recordId) return;
+    if (fetchedOnceRef.current) return;
+    fetchedOnceRef.current = true;
+
+    (async () => {
+      try {
+        const base = process.env.NEXT_PUBLIC_API_URL ?? "";
+        const url = `${base}/games/${recordId}/snapshot/stream`;
+
+        const res = await fetch(url, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${getAccessToken?.() || ""}`,
+            Accept: "application/json",
+          },
+          // credentials: "include", // 쿠키 기반이면 주석 해제
+        });
+
+        if (!res.ok) {
+          throw new Error(`GET snapshot/stream failed: ${res.status}`);
+        }
+
+        const json = await res.json();
+        // 응답 래핑 형태 유연 처리
+        const snap = json?.data ?? json;
+        console.log("snap", snap);
+        setSseData(snap);
+        // 1) localStorage 저장
+        try {
+          localStorage.setItem("snapshot", JSON.stringify(snap));
+        } catch (e) {
+          console.warn("localStorage(snapshot) 저장 실패:", e);
+        }
+        console.log("연결용 GET /snapshot/stream 저장완료");
+        // 2) 화면 상태 반영
+        applySnapshot(snap);
+      } catch (err) {
+        console.error("GET /snapshot/stream error:", err);
+        setError(err);
+      }
+    })();
+  }, [router.isReady, recordId, applySnapshot]);
+
+  console.log("sseData", sseData);
+
   const [error, setError] = useState(null);
 
   const [outs, setOuts] = useState<boolean[]>([false, false, false]);
@@ -210,6 +330,24 @@ export default function GameRecordPageViewer() {
   // 이닝별 점수 (9칸: 7이닝 + R, H)
   const [teamAScores, setTeamAScores] = useState(Array(9).fill(""));
   const [teamBScores, setTeamBScores] = useState(Array(9).fill(""));
+
+  /* 🔄 actual out-count만 반영 */
+  const deriveOuts = (snap: any): boolean[] => {
+    const outCnt: number = snap.outs;
+
+    return Array(3)
+      .fill(false)
+      .map((_, i) => i < outCnt);
+  };
+
+  // // 아웃카운트
+  // useEffect(() => {
+  //   if (!sseData) {
+  //     setOuts([false, false, false]);
+  //     return;
+  //   }
+  //   setOuts(deriveOuts(sseData));
+  // }, []);
 
   // 현재 타자/투수
 
@@ -234,77 +372,77 @@ export default function GameRecordPageViewer() {
   };
 
   // ── 1) 이닝 점수 GET ──
-  const fetchInningScores = useCallback(async () => {
-    if (!recordId) return;
-    try {
-      // 실제 호출은 잠시 주석 처리
-      // const res = await API.get(`/games/${recordId}/scores`);
-      // const response = res.data;
+  // const fetchInningScores = useCallback(async () => {
+  //   if (!recordId) return;
+  //   try {
+  //     // 실제 호출은 잠시 주석 처리
+  //     // const res = await API.get(`/games/${recordId}/scores`);
+  //     // const response = res.data;
 
-      const response = exampleScores;
-      // console.log("스코어보드 응답도착");
-      const newA = Array(9).fill("");
-      const newB = Array(9).fill("");
+  //     const response = exampleScores;
+  //     // console.log("스코어보드 응답도착");
+  //     const newA = Array(9).fill("");
+  //     const newB = Array(9).fill("");
 
-      if (Array.isArray(response.scoreboard)) {
-        response.scoreboard.forEach((entry) => {
-          const idx = entry.inning - 1;
-          if (idx >= 0 && idx < 7) {
-            if (entry.inningHalf === "TOP") newA[idx] = entry.runs;
-            else newB[idx] = entry.runs;
-          }
-        });
-      }
+  //     if (Array.isArray(response.scoreboard)) {
+  //       response.scoreboard.forEach((entry) => {
+  //         const idx = entry.inning - 1;
+  //         if (idx >= 0 && idx < 7) {
+  //           if (entry.inningHalf === "TOP") newA[idx] = entry.runs;
+  //           else newB[idx] = entry.runs;
+  //         }
+  //       });
+  //     }
 
-      // R, H 컬럼
-      newA[7] = response.teamSummary.away.runs;
-      newA[8] = response.teamSummary.away.hits;
-      newB[7] = response.teamSummary.home.runs;
-      newB[8] = response.teamSummary.home.hits;
+  //     // R, H 컬럼
+  //     newA[7] = response.teamSummary.away.runs;
+  //     newA[8] = response.teamSummary.away.hits;
+  //     newB[7] = response.teamSummary.home.runs;
+  //     newB[8] = response.teamSummary.home.hits;
 
-      setTeamAScores(newA);
-      setTeamBScores(newB);
+  //     setTeamAScores(newA);
+  //     setTeamBScores(newB);
 
-      // attackVal 계산
-      let newAttack = "away";
-      if (Array.isArray(response.scoreboard) && response.scoreboard.length) {
-        const last = response.scoreboard[response.scoreboard.length - 1];
-        newAttack = last.inningHalf === "TOP" ? "home" : "away";
-      }
-      setAttackVal(newAttack);
-      return newAttack;
-    } catch (err) {
-      console.error("이닝 점수 로드 실패:", err);
-      setError(err);
-    }
-  }, [router.query.recordId, attackVal]);
+  //     // attackVal 계산
+  //     let newAttack = "away";
+  //     if (Array.isArray(response.scoreboard) && response.scoreboard.length) {
+  //       const last = response.scoreboard[response.scoreboard.length - 1];
+  //       newAttack = last.inningHalf === "TOP" ? "home" : "away";
+  //     }
+  //     setAttackVal(newAttack);
+  //     return newAttack;
+  //   } catch (err) {
+  //     console.error("이닝 점수 로드 실패:", err);
+  //     setError(err);
+  //   }
+  // }, [router.query.recordId, attackVal]);
 
   // ── 마운트 및 의존성 변경 시 호출 ──
-  useEffect(() => {
-    // 팀 이름 로컬스토리지에서
-    const matchStr = localStorage.getItem("selectedMatch");
-    if (matchStr) {
-      try {
-        const { awayTeam, homeTeam } = JSON.parse(matchStr);
-        setTeamAName(awayTeam.name);
-        setTeamBName(homeTeam.name);
-      } catch {
-        console.error("selectedMatch 파싱 실패");
-      }
-    }
-    fetchInningScores();
-  }, [fetchInningScores]);
+  // useEffect(() => {
+  //   // 팀 이름 로컬스토리지에서
+  //   const matchStr = localStorage.getItem("selectedMatch");
+  //   if (matchStr) {
+  //     try {
+  //       const { awayTeam, homeTeam } = JSON.parse(matchStr);
+  //       setTeamAName(awayTeam.name);
+  //       setTeamBName(homeTeam.name);
+  //     } catch {
+  //       console.error("selectedMatch 파싱 실패");
+  //     }
+  //   }
+  //   fetchInningScores();
+  // }, [fetchInningScores]);
 
   // ── 4) attack 쿼리 실제 동기화 ──
-  useEffect(() => {
-    if (!recordId) return;
-    if (router.query.attack !== attackVal) {
-      router.replace({
-        pathname: router.pathname,
-        query: { ...router.query, attack: attackVal },
-      });
-    }
-  }, [recordId, attackVal, router.query.attack, router]);
+  // useEffect(() => {
+  //   if (!recordId) return;
+  //   if (router.query.attack !== attackVal) {
+  //     router.replace({
+  //       pathname: router.pathname,
+  //       query: { ...router.query, attack: attackVal },
+  //     });
+  //   }
+  // }, [recordId, attackVal, router.query.attack, router]);
 
   // ── 기록 액션 ──
 
@@ -473,21 +611,32 @@ export default function GameRecordPageViewer() {
   // 대기타석
   const isHomeAttack = router.query.attack === "home";
   const lineupExample = isHomeAttack ? homeExample : awayExample;
-  const onDeckPlayers = lineupExample.batters.filter((b) =>
-    [1, 2, 3].includes(b.battingOrder)
-  );
+  const [onDeckPlayers, setOnDeckPlayers] = useState<
+    { playerId: number; playerName: string; battingOrder: number }[]
+  >([]);
+
+  useEffect(() => {
+    setOnDeckPlayers(
+      (sseData?.waitingBatters ?? []).map((b) => ({
+        playerId: b.id,
+        playerName: b.name,
+        battingOrder: b.battingOrder,
+      }))
+    );
+  }, [sseData]);
+
   console.log("isHomeAttack", isHomeAttack);
 
   // -------------------- 드래그앤드롭 ------------------------//
   // 드래그 앤 드롭 관련
   // 베이스 아이디 목록
-  const baseIds = [
-    "first-base",
-    "second-base",
-    "third-base",
-    "home-base",
-  ] as const;
-  type BaseId = (typeof baseIds)[number];
+  // const baseIds = [
+  //   "first-base",
+  //   "second-base",
+  //   "third-base",
+  //   "home-base",
+  // ] as const;
+  // type BaseId = (typeof baseIds)[number];
 
   // 베이스 <polygon> ref 저장
   const baseRefs = useRef<Record<BaseId, SVGPolygonElement | null>>({
@@ -496,7 +645,7 @@ export default function GameRecordPageViewer() {
     "third-base": null,
     "home-base": null,
   });
-  const droppableSetters = baseIds.reduce((acc, id) => {
+  const droppableSetters = BASE_IDS.reduce((acc, id) => {
     acc[id] = useDroppable({ id }).setNodeRef;
     return acc;
   }, {} as Record<BaseId, (el: HTMLElement | null) => void>);
@@ -512,17 +661,11 @@ export default function GameRecordPageViewer() {
     initialTop: string; // e.g. '85%'
   }
   const badgeConfigs: BadgeConfig[] = [
-    { id: "badge-1", label: "이정후", initialLeft: "43%", initialTop: "80%" },
-    // { id: "badge-2", label: "송성문", initialLeft: "80%", initialTop: "75%" },
-    // { id: "badge-3", label: "김하성", initialLeft: "80%", initialTop: "85%" },
-    // { id: "badge-4", label: "박병호", initialLeft: "80%", initialTop: "95%" },
+    { id: "badge-1", label: "", initialLeft: "50%", initialTop: "80%" },
+    { id: "badge-2", label: "", initialLeft: "80%", initialTop: "75%" },
+    { id: "badge-3", label: "", initialLeft: "80%", initialTop: "85%" },
+    { id: "badge-4", label: "", initialLeft: "80%", initialTop: "95%" },
   ];
-  const baseOrder: Record<BaseId, number> = {
-    "first-base": 1,
-    "second-base": 2,
-    "third-base": 3,
-    "home-base": 4,
-  };
 
   interface BlackBadgeConfig {
     id: string;
@@ -538,63 +681,63 @@ export default function GameRecordPageViewer() {
   >([
     {
       id: "black-badge-1",
-      label: "원태인",
+      label: "",
       initialLeft: "50%",
       initialTop: "55%",
       sportPosition: "P",
     },
     {
       id: "black-badge-2",
-      label: "강민호",
+      label: "",
       initialLeft: "50%",
       initialTop: "93%",
       sportPosition: "C",
     },
     {
       id: "black-badge-3",
-      label: "박병호",
+      label: "",
       initialLeft: "80%",
       initialTop: "50%",
       sportPosition: "1B",
     },
     {
       id: "black-badge-4",
-      label: "류지혁",
+      label: "",
       initialLeft: "70%",
       initialTop: "40%",
       sportPosition: "2B",
     },
     {
       id: "black-badge-5",
-      label: "김영웅",
+      label: "",
       initialLeft: "20%",
       initialTop: "50%",
       sportPosition: "3B",
     },
     {
       id: "black-badge-6",
-      label: "이재현",
+      label: "",
       initialLeft: "30%",
       initialTop: "40%",
       sportPosition: "SS",
     },
     {
       id: "black-badge-7",
-      label: "구자욱",
+      label: "",
       initialLeft: "20%",
       initialTop: "25%",
       sportPosition: "LF",
     },
     {
       id: "black-badge-8",
-      label: "김지찬",
+      label: "",
       initialLeft: "50%",
       initialTop: "15%",
       sportPosition: "CF",
     },
     {
       id: "black-badge-9",
-      label: "김성윤",
+      label: "",
       initialLeft: "80%",
       initialTop: "25%",
       sportPosition: "RF",
@@ -661,6 +804,40 @@ export default function GameRecordPageViewer() {
   // ▶️ 3) swap 포함 drag end 핸들러
 
   console.log("blackBadgeConfigs", blackBadgeConfigs);
+  useEffect(() => {
+    // 스냅샷 구조가 중첩/평면 두 타입을 모두 케어
+    const snap = sseData;
+    if (!snap) return;
+
+    const lineup = isHomeAttack ? snap?.lineup?.away : snap?.lineup?.home;
+    if (!lineup) return;
+
+    const posToName: Record<string, string> = {};
+
+    // 투수
+    if (lineup.pitcher?.name) posToName["P"] = lineup.pitcher.name;
+
+    // 야수들
+    (lineup.batters ?? []).forEach((b: any) => {
+      if (b?.position && b?.name) posToName[b.position] = b.name;
+    });
+
+    // ✅ 좌표(initialLeft/Top)와 sportPosition(스왑 결과)을 유지한 채 라벨만 업데이트
+    setBlackBadgeConfigs((prev) =>
+      prev.map((cfg) => ({
+        ...cfg,
+        label: posToName[cfg.sportPosition] ?? "", // 포지션→이름 매핑
+      }))
+    );
+
+    // 선택: 라벨만 바꾸는 거라면 blackPositions 초기화는 필요 없음
+  }, [
+    isHomeAttack,
+    sseData?.lineup?.home,
+    sseData?.lineup?.away,
+    // 스냅샷이 평면형이면 ↓ 이렇게 넓게 걸어도 됨
+    // snapshotData,
+  ]);
 
   const diamondSvgRef = useRef<SVGSVGElement | null>(null);
   const diamondPolyRef = useRef<SVGPolygonElement | null>(null);
@@ -671,7 +848,7 @@ export default function GameRecordPageViewer() {
     badgeConfigs.reduce<Record<string, PassedMap>>((acc, { id }) => {
       // 각 베이스를 false 로 초기화
       const map = {} as PassedMap;
-      baseIds.forEach((base) => {
+      BASE_IDS.forEach((base) => {
         map[base] = false;
       });
       acc[id] = map;
@@ -693,26 +870,6 @@ export default function GameRecordPageViewer() {
     }, {} as Record<string, number>)
   );
 
-  // 배지별 스냅 정보 관리
-  type SnapInfo = { base: BaseId; pos: { x: number; y: number } };
-  // 1) 초기 스냅 상태를 미리 저장해 두고…
-  const initialBadgeSnaps = badgeConfigs.reduce((acc, cfg) => {
-    acc[cfg.id] = null;
-    return acc;
-  }, {} as Record<string, SnapInfo | null>);
-
-  // 2) useState 초기값에 사용
-  const [badgeSnaps, setBadgeSnaps] =
-    useState<Record<string, SnapInfo | null>>(initialBadgeSnaps);
-
-  console.log("badgeSnaps", badgeSnaps);
-
-  const badgeRefs = useRef<Record<string, HTMLElement | null>>({});
-  const [activeBadges, setActiveBadges] = useState(
-    badgeConfigs.map((cfg) => cfg.id)
-  );
-
-  // DraggableBadge 컴포넌트
   function DraggableBadge({
     id,
     label,
@@ -729,51 +886,25 @@ export default function GameRecordPageViewer() {
     const { attributes, listeners, setNodeRef, transform } = useDraggable({
       id,
     });
-    if (snapInfo) {
-      console.log(`🔔 [${id}] snapInfo:`, snapInfo);
-    }
     const combinedRef = (el: HTMLElement | null) => {
       setNodeRef(el);
       badgeRefs.current[id] = el;
     };
 
-    // CSS position & transform 결정
-    if (snapInfo) {
-      const { pos } = snapInfo;
-      console.log("pos", pos);
-      const offsetX = transform?.x ?? 0;
-      const offsetY = transform?.y ?? 0;
-      return (
-        <NameBadge
-          ref={combinedRef}
-          style={{
-            position: "absolute",
-            left: `${pos.x}px`,
-            top: `${pos.y}px`,
-            transform: transform
-              ? `translate(calc(-50% + ${offsetX}px), calc(-50% + ${offsetY}px))`
-              : "translate(-50%, -50%)",
-          }}
-          {...attributes}
-          {...listeners}
-        >
-          {label}
-        </NameBadge>
-      );
-    }
+    const left = snapInfo ? `${snapInfo.pos.xPct}%` : initialLeft;
+    const top = snapInfo ? `${snapInfo.pos.yPct}%` : initialTop;
 
-    const offsetX = transform?.x ?? 0;
-    const offsetY = transform?.y ?? 0;
+    const dx = transform?.x ?? 0;
+    const dy = transform?.y ?? 0;
+
     return (
       <NameBadge
         ref={combinedRef}
         style={{
           position: "absolute",
-          left: initialLeft,
-          top: initialTop,
-          transform: transform
-            ? `translate3d(${offsetX}px, ${offsetY}px, 0)`
-            : undefined,
+          left,
+          top,
+          transform: `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`,
         }}
         {...attributes}
         {...listeners}
@@ -783,8 +914,181 @@ export default function GameRecordPageViewer() {
     );
   }
 
-  // 하단 중계화면
-  const lineup = (isHomeAttack ? homeExample : awayExample).batters.slice(0, 3);
+  // 타자 이름 결정
+  const currentBatterName = useMemo(() => {
+    const arr = sseData?.playerRecords?.batters;
+    if (!Array.isArray(arr) || arr.length === 0) return null;
+    return arr[arr.length - 1]?.name ?? null;
+  }, [sseData?.playerRecords?.batters]);
+
+  const RESULT_LABELS: Record<string, string> = {
+    "1B": "1루타",
+    "2B": "2루타",
+    "3B": "3루타",
+    HR: "홈런",
+    BB: "볼넷",
+    SF: "희플",
+    SAC: "희생번트",
+    SO: "삼진",
+    O: "아웃",
+    SO_DROP: "낫아웃",
+    FC: "야수선택",
+    IF: "타격방해",
+    E: "실책",
+  };
+
+  const getResultLabel = (code?: string) =>
+    RESULT_LABELS[
+      String(code ?? "")
+        .trim()
+        .toUpperCase()
+    ] ?? String(code ?? "");
+
+  // batters 원본 → UI에서 쓰기 좋은 형태로 매핑
+  const battersForUI = useMemo(() => {
+    const list = sseData?.playerRecords?.batters ?? [];
+    return list.map((b) => ({
+      id: b.id,
+      name: b.name,
+      battingOrder: b.battingOrder,
+      avg: b.battingAverage ?? 0,
+      battingResult: b.battingResult ?? "",
+      today: {
+        PA: b.todayStats?.PA ?? 0,
+        AB: b.todayStats?.AB ?? 0,
+        H: b.todayStats?.H ?? 0,
+        runs: b.todayStats?.runs ?? 0,
+        RBI: b.todayStats?.RBI ?? 0,
+      },
+    }));
+  }, [sseData?.playerRecords?.batters]);
+
+  const OUT_CODES = new Set(["SO", "O", "SO_DROP"]);
+  const isOutResult = (code) => OUT_CODES.has(String(code).toUpperCase());
+
+  // 타자 주자 위치 결정
+  // ── 배지 스냅 상태 (좌표는 %로 관리) ──
+  type SnapInfo = { base: BaseId; pos: { xPct: number; yPct: number } };
+  const initialBadgeSnaps = badgeConfigs.reduce((acc, cfg) => {
+    acc[cfg.id] = null as SnapInfo | null;
+    return acc;
+  }, {} as Record<string, SnapInfo | null>);
+  const [badgeSnaps, setBadgeSnaps] =
+    useState<Record<string, SnapInfo | null>>(initialBadgeSnaps);
+
+  // ── 배지 라벨/활성/런너 매핑 ──
+  const badgeRefs = useRef<Record<string, HTMLElement | null>>({});
+  const [activeBadges, setActiveBadges] = useState(
+    badgeConfigs.map((c) => c.id)
+  );
+  const [runnerInfoByBadge, setRunnerInfoByBadge] = useState<
+    Record<string, { runnerId: number; name: string }>
+  >({});
+  const EXCLUDED_RUNNER_ID = -1;
+
+  // 흰 배지만 추출 → 첫 번째를 타자 배지로 사용
+  const allWhiteBadges = useMemo(
+    () => badgeConfigs.filter((c) => !c.id.startsWith("black-badge")),
+    [badgeConfigs]
+  );
+  const batterWhiteBadgeId = useMemo(
+    () => allWhiteBadges[0]?.id ?? null,
+    [allWhiteBadges]
+  );
+
+  // 현재 타자 이름/ID (sseData로 동기화 되어 있음)
+
+  // 루/래퍼 좌표 캐시 훅 사용
+  const { wrapperRectRef, baseRectsRef, refreshRects } = useRectsCache(
+    wrapperRef,
+    baseRefs
+  );
+
+  // 숫자 베이스 → BaseId
+  const baseNumToId: Record<number, BaseId> = {
+    1: "first-base",
+    2: "second-base",
+    3: "third-base",
+    4: "home-base", // 필요시
+  };
+
+  const syncRunnersOnBase = useCallback(() => {
+    // const runners = sseData?.inningStats?.actual?.runnersOnBase ?? [];
+
+    // 주자 정보는 top-level runnersOnBase 를 우선 사용 (없으면 구버전 경로 fallback)
+    const runners =
+      sseData?.runnersOnBase ??
+      sseData?.inningStats?.actual?.runnersOnBase ??
+      []; // [{id, name, base}, ...]
+
+    if (!wrapperRef.current) return;
+
+    // 타자 배지를 제외한 나머지 흰 배지들 중에서 주자에게 할당
+    const candidateBadges = allWhiteBadges
+      .map((c) => c.id)
+      .filter((id) => id !== batterWhiteBadgeId);
+
+    const used = new Set<string>();
+    const nextBadgeSnaps: Record<string, SnapInfo | null> = { ...badgeSnaps };
+    const nextRunnerMap: Record<string, { runnerId: number; name: string }> = {
+      ...runnerInfoByBadge,
+    };
+
+    // 초기화: 일단 모두 null/제외로 만들고 다시 채움
+    candidateBadges.forEach((id) => {
+      nextBadgeSnaps[id] = null;
+      nextRunnerMap[id] = { runnerId: EXCLUDED_RUNNER_ID, name: "할당 제외" };
+    });
+
+    const wrapperRect = wrapperRectRef.current!;
+    const pickBadge = () => candidateBadges.find((id) => !used.has(id));
+
+    runners.forEach((r: any) => {
+      const baseId = baseNumToId[r.base as number];
+      const rect = baseRectsRef.current[baseId];
+      const badgeId = pickBadge();
+
+      if (!baseId || !rect || !badgeId) return;
+
+      const cx = rect.left + rect.width / 2 - wrapperRect.left;
+      const cy = rect.top + rect.height / 2 - wrapperRect.top;
+
+      nextBadgeSnaps[badgeId] = {
+        base: baseId,
+        pos: {
+          xPct: (cx / wrapperRect.width) * 100,
+          yPct: (cy / wrapperRect.height) * 100,
+        },
+      };
+      nextRunnerMap[badgeId] = { runnerId: r.id, name: r.name };
+      used.add(badgeId);
+    });
+
+    // 동일 내용이면 setState 생략하여 렌더 폭주 방지
+    if (JSON.stringify(badgeSnaps) !== JSON.stringify(nextBadgeSnaps)) {
+      setBadgeSnaps(nextBadgeSnaps);
+    }
+    if (JSON.stringify(runnerInfoByBadge) !== JSON.stringify(nextRunnerMap)) {
+      setRunnerInfoByBadge(nextRunnerMap);
+    }
+  }, [
+    sseData,
+    allWhiteBadges,
+    batterWhiteBadgeId,
+
+    wrapperRectRef,
+    baseRectsRef,
+  ]);
+
+  // sseData가 바뀌면 한 번 스냅 동기화
+  useEffect(() => {
+    if (!sseData) return;
+    // DOMRect가 먼저 준비되도록 한 프레임 뒤에 실행
+    requestAnimationFrame(() => {
+      refreshRects();
+      requestAnimationFrame(() => syncRunnersOnBase());
+    });
+  }, [sseData, refreshRects, syncRunnersOnBase]);
 
   return (
     <GameRecordContainer>
@@ -797,17 +1101,31 @@ export default function GameRecordPageViewer() {
 
         {/* Team A */}
         <TeamRow>
-          <TeamNameCell>{teamAName.slice(0, 3)}</TeamNameCell>
+          <TeamNameCell>
+            {sseData?.gameSummary?.awayTeam?.name?.slice(0, 3)}
+          </TeamNameCell>
           {teamAScores.map((s, i) => (
-            <TeamScoreCell key={i}>{s}</TeamScoreCell>
+            <TeamScoreCell
+              key={i}
+              // onClick={() => handleScoreCellClick(s, "A", i)}
+            >
+              {s}
+            </TeamScoreCell>
           ))}
         </TeamRow>
 
         {/* Team B */}
         <TeamRow>
-          <TeamNameCell>{teamBName.slice(0, 3)}</TeamNameCell>
+          <TeamNameCell>
+            {sseData?.gameSummary?.homeTeam?.name?.slice(0, 3)}
+          </TeamNameCell>
           {teamBScores.map((s, i) => (
-            <TeamScoreCell key={i}>{s}</TeamScoreCell>
+            <TeamScoreCell
+              key={i}
+              // onClick={() => handleScoreCellClick(s, "B", i)}
+            >
+              {s}
+            </TeamScoreCell>
           ))}
         </TeamRow>
       </ScoreBoardWrapper>
@@ -895,38 +1213,42 @@ export default function GameRecordPageViewer() {
             ))}
           </OutCount>
           <OnDeckWrapper>
-            {onDeckPlayers.length > 0 ? (
-              onDeckPlayers.map((p) => (
-                <div key={p.playerId}>
-                  {p.battingOrder} {p.playerName}
-                </div>
-              ))
-            ) : (
-              <div>대기타석입니다</div>
-            )}
+            <OnDeckNameWrapper>
+              {onDeckPlayers.length > 0 ? (
+                onDeckPlayers.map((p) => (
+                  <div key={p.playerId}>
+                    {p.battingOrder} {p.playerName}
+                  </div>
+                ))
+              ) : (
+                <div></div>
+              )}
+            </OnDeckNameWrapper>
           </OnDeckWrapper>
         </SideWrapper>
         <LeftSideWrapper>
           <InningBoard>
             <ArrowUp color={!isHomeAttack ? "red" : "#B8B8B8"} />
-            <InningNumber>7</InningNumber>
+            <InningNumber> {sseData?.gameSummary.inning}</InningNumber>
             <ArrowDown color={isHomeAttack ? "red" : "#B8B8B8"} />
           </InningBoard>
           <LittleScoreBoardWrapper>
             <AwayTeamWrapper>
-              <AwayTeamName> {teamAName.slice(0, 3)}</AwayTeamName>
+              <AwayTeamName>
+                {" "}
+                {sseData?.gameSummary?.awayTeam?.name?.slice(0, 3)}
+              </AwayTeamName>
               <AwayTeamScore>
-                {teamAScores.length >= 2
-                  ? teamAScores[teamAScores.length - 2]
-                  : ""}
+                {sseData?.gameSummary?.scoreboard.totals.away.R}
               </AwayTeamScore>
             </AwayTeamWrapper>
             <HomeTeamWrapper>
-              <HomeTeamName>{teamBName.slice(0, 3)}</HomeTeamName>
+              <HomeTeamName>
+                {" "}
+                {sseData?.gameSummary?.homeTeam?.name?.slice(0, 3)}
+              </HomeTeamName>
               <HomeTeamScore>
-                {teamBScores.length >= 2
-                  ? teamBScores[teamBScores.length - 2]
-                  : ""}
+                {sseData?.gameSummary?.scoreboard.totals.home.R}
               </HomeTeamScore>
             </HomeTeamWrapper>
           </LittleScoreBoardWrapper>
@@ -943,89 +1265,126 @@ export default function GameRecordPageViewer() {
         {/* 4) 드롭 후 스냅 or 드래그 상태에 따라 렌더 */}
         {/* ③ activeBadges에 든 것만 렌더 */}
         {badgeConfigs
-          .filter((cfg) => activeBadges.includes(cfg.id))
-          .map((cfg) => (
-            <DraggableBadge
-              key={cfg.id}
-              id={cfg.id}
-              label={cfg.label}
-              initialLeft={cfg.initialLeft}
-              initialTop={cfg.initialTop}
-              snapInfo={badgeSnaps[cfg.id]}
-            />
-          ))}
+          .filter((cfg) => {
+            if (!activeBadges.includes(cfg.id)) return false;
+
+            // 타자 배지: 현재 타자 ID가 있어야 표시
+            if (cfg.id === batterWhiteBadgeId) return true;
+
+            // 주자 배지: runnerInfo가 있고 excluded(-1) 아니어야 표시
+            const info = runnerInfoByBadge[cfg.id];
+            if (!info) return false;
+            if (info.runnerId === EXCLUDED_RUNNER_ID) return false;
+            return info.runnerId != null;
+          })
+          .map((cfg) => {
+            // 라벨 덮어쓰기: 타자는 currentBatterName, 주자는 runnerInfo 이름
+            let label = cfg.label;
+            if (cfg.id === batterWhiteBadgeId && currentBatterName) {
+              label = currentBatterName;
+            } else if (runnerInfoByBadge[cfg.id]) {
+              label = runnerInfoByBadge[cfg.id].name;
+            }
+            return (
+              <DraggableBadge
+                key={cfg.id}
+                id={cfg.id}
+                label={label}
+                initialLeft={cfg.initialLeft}
+                initialTop={cfg.initialTop}
+                snapInfo={badgeSnaps[cfg.id]}
+              />
+            );
+          })}
       </GraphicWrapper>
 
       <PlayersRow>
         <BatterPlayerBox>
-          {lineup.reverse().map((b, idx, arr) => (
-            <Fragment key={b.playerId}>
-              <BatterPlayerSingleBox>
-                <BatterGroup>
-                  <BatterRow>
-                    <WhoContainer>
-                      <NameResultContainer>
-                        <PlayerName>{b.playerName}</PlayerName>
-                        {idx !== 0 && <ResultBox isOut={true}>아웃</ResultBox>}
-                      </NameResultContainer>
-                      <AvgFrame>
-                        <BattingOrderLabel>
-                          {b.battingOrder}번타자
-                        </BattingOrderLabel>
-                        <AvgText>
-                          <AvgLabel>타율</AvgLabel>
-                          {/* 나중에 b.avg로 교체 */}
-                          <AvgValue>0.000</AvgValue>
-                        </AvgText>
-                      </AvgFrame>
-                    </WhoContainer>
+          {battersForUI
+            .slice()
+            .reverse()
+            .map((b, idx, arr) => (
+              <Fragment key={b.id}>
+                <BatterPlayerSingleBox>
+                  <BatterGroup>
+                    <BatterRow>
+                      <WhoContainer>
+                        <NameResultContainer>
+                          <PlayerName>{b.name}</PlayerName>
+                          {/* 필요하면 결과/상태 표기 */}
+                          {b.battingResult && (
+                            <ResultBox $isOut={isOutResult(b.battingResult)}>
+                              {getResultLabel(b.battingResult)}
+                            </ResultBox>
+                          )}
+                        </NameResultContainer>
 
-                    <TodayContainer>
-                      <TodayFrame>
-                        <TodayLabel>타석</TodayLabel>
-                        {/* 나중에 b.stats.pa로 교체 */}
-                        <TodayValue>0</TodayValue>
-                      </TodayFrame>
-                      <TodayFrame>
-                        <TodayLabel>타수</TodayLabel>
-                        <TodayValue>0</TodayValue>
-                      </TodayFrame>
-                      <TodayFrame>
-                        <TodayLabel>안타</TodayLabel>
-                        <TodayValue>0</TodayValue>
-                      </TodayFrame>
-                      <TodayFrame>
-                        <TodayLabel>득점</TodayLabel>
-                        <TodayValue>0</TodayValue>
-                      </TodayFrame>
-                      <TodayFrame>
-                        <TodayLabel>타점</TodayLabel>
-                        <TodayValue>0</TodayValue>
-                      </TodayFrame>
-                    </TodayContainer>
-                  </BatterRow>
-                </BatterGroup>
-              </BatterPlayerSingleBox>
-              {/* 마지막 아이템 뒤에는 Divider 넣지 않음 */}
-              {idx < arr.length - 1 && <Divider />}
-            </Fragment>
-          ))}
+                        <AvgFrame>
+                          <BattingOrderLabel>
+                            {b.battingOrder}번타자
+                          </BattingOrderLabel>
+                          <AvgText>
+                            <AvgLabel>타율</AvgLabel>
+                            <AvgValue>{Number(b.avg).toFixed(3)}</AvgValue>
+                          </AvgText>
+                        </AvgFrame>
+                      </WhoContainer>
+
+                      <TodayContainer>
+                        <TodayFrame>
+                          <TodayLabel>타석</TodayLabel>
+                          <TodayValue>{b.today.PA}</TodayValue>
+                        </TodayFrame>
+                        <TodayFrame>
+                          <TodayLabel>타수</TodayLabel>
+                          <TodayValue>{b.today.AB}</TodayValue>
+                        </TodayFrame>
+                        <TodayFrame>
+                          <TodayLabel>안타</TodayLabel>
+                          <TodayValue>{b.today.H}</TodayValue>
+                        </TodayFrame>
+                        <TodayFrame>
+                          <TodayLabel>득점</TodayLabel>
+                          <TodayValue>{b.today.runs}</TodayValue>
+                        </TodayFrame>
+                        <TodayFrame>
+                          <TodayLabel>타점</TodayLabel>
+                          <TodayValue>{b.today.RBI}</TodayValue>
+                        </TodayFrame>
+                      </TodayContainer>
+                    </BatterRow>
+                  </BatterGroup>
+                </BatterPlayerSingleBox>
+
+                {idx < arr.length - 1 && <Divider />}
+              </Fragment>
+            ))}
         </BatterPlayerBox>
+
         <PitcherPlayerBox>
           <PitcherGroup>
             <PitcherWho>
-              <PitcherName>{awayExample.pitcher.playerName}</PitcherName>
+              <PitcherName>
+                {" "}
+                {sseData?.playerRecords?.pitcher?.at(-1)?.name ?? "-"}
+              </PitcherName>
               <PitcherToday>
                 <StatFrame>
                   <StatText>
                     <StatLabel>실점</StatLabel>
-                    <StatValue>2</StatValue>
+                    <StatValue>
+                      {sseData?.playerRecords?.pitcher?.at(-1)?.todayStats
+                        .runs ?? "-"}
+                    </StatValue>
                   </StatText>
                 </StatFrame>
                 <StatFrame2>
                   <StatText>
                     <StatLabel>ERA</StatLabel>
-                    <StatValue>1.21</StatValue>
+                    <StatValue>
+                      {sseData?.playerRecords?.pitcher?.at(-1)?.todayStats
+                        .earnedRuns ?? "-"}
+                    </StatValue>
                   </StatText>
                 </StatFrame2>
               </PitcherToday>
@@ -1033,11 +1392,20 @@ export default function GameRecordPageViewer() {
 
             <PitcherStatsGrid>
               {[
-                { name: "이닝", value: 2 },
+                {
+                  name: "이닝",
+                  value: sseData?.playerRecords?.pitcher?.at(-1)?.todayStats.IP,
+                },
 
                 { name: "자책", value: 2 },
-                { name: "삼진", value: 2 },
-                { name: "볼넷", value: 2 },
+                {
+                  name: "삼진",
+                  value: sseData?.playerRecords?.pitcher?.at(-1)?.todayStats.K,
+                },
+                {
+                  name: "볼넷",
+                  value: sseData?.playerRecords?.pitcher?.at(-1)?.todayStats.BB,
+                },
               ].map((s, i) => (
                 <StatCell key={i}>
                   <StatName>{s.name}</StatName>
