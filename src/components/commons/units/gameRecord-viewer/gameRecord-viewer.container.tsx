@@ -1090,6 +1090,14 @@ export default function GameRecordPageViewer() {
     });
   }, [sseData, refreshRects, syncRunnersOnBase]);
 
+  const lastItem = (v) => (Array.isArray(v) ? v[v.length - 1] : v ?? undefined);
+
+  // memo로 파생값 생성
+  const lastPitcher = useMemo(
+    () => lastItem(sseData?.playerRecords?.pitcher),
+    [sseData?.playerRecords?.pitcher]
+  );
+
   return (
     <GameRecordContainer>
       <ScoreBoardWrapper>
@@ -1366,15 +1374,15 @@ export default function GameRecordPageViewer() {
             <PitcherWho>
               <PitcherName>
                 {" "}
-                {sseData?.playerRecords?.pitcher?.at(-1)?.name ?? "-"}
+                {/* {sseData?.playerRecords?.pitcher?.at(-1)?.name ?? "-"} */}
+                {lastPitcher?.name ?? "-"}
               </PitcherName>
               <PitcherToday>
                 <StatFrame>
                   <StatText>
                     <StatLabel>실점</StatLabel>
                     <StatValue>
-                      {sseData?.playerRecords?.pitcher?.at(-1)?.todayStats
-                        .runs ?? "-"}
+                      {lastPitcher?.todayStats?.runs ?? "-"}
                     </StatValue>
                   </StatText>
                 </StatFrame>
@@ -1382,8 +1390,7 @@ export default function GameRecordPageViewer() {
                   <StatText>
                     <StatLabel>ERA</StatLabel>
                     <StatValue>
-                      {sseData?.playerRecords?.pitcher?.at(-1)?.todayStats
-                        .earnedRuns ?? "-"}
+                      {lastPitcher?.todayStats?.earnedRuns ?? "-"}
                     </StatValue>
                   </StatText>
                 </StatFrame2>
@@ -1392,20 +1399,10 @@ export default function GameRecordPageViewer() {
 
             <PitcherStatsGrid>
               {[
-                {
-                  name: "이닝",
-                  value: sseData?.playerRecords?.pitcher?.at(-1)?.todayStats.IP,
-                },
-
+                { name: "이닝", value: lastPitcher?.todayStats?.IP },
                 { name: "자책", value: 2 },
-                {
-                  name: "삼진",
-                  value: sseData?.playerRecords?.pitcher?.at(-1)?.todayStats.K,
-                },
-                {
-                  name: "볼넷",
-                  value: sseData?.playerRecords?.pitcher?.at(-1)?.todayStats.BB,
-                },
+                { name: "삼진", value: lastPitcher?.todayStats?.K },
+                { name: "볼넷", value: lastPitcher?.todayStats?.BB },
               ].map((s, i) => (
                 <StatCell key={i}>
                   <StatName>{s.name}</StatName>
