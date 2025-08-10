@@ -2596,7 +2596,8 @@ export default function GameRecordPageV2() {
         JSON.stringify(finalRequest, null, 2)
       );
       postRes = await API.post(postUrl, finalRequest);
-
+      // ⬇️ 먼저 화면 상태를 싹 비움 (스냅샷 읽지 않음)
+      softResetWhiteBadges();
       console.log("runner-events POST 응답:", {
         status: (postRes as any)?.status,
         data:
@@ -2617,6 +2618,10 @@ export default function GameRecordPageV2() {
 
     return { postRes };
   }, [combinedRequest]);
+  // 하드 리마운트 트리거
+  // const bumpBadgesVersion = useCallback(() => {
+  //   setBadgesVersion(v => v + 1);
+  // }, []);
 
   const handleSubmit = useCallback(async () => {
     setIsSubmitting(true);
@@ -2624,7 +2629,7 @@ export default function GameRecordPageV2() {
       await sendRunnerEvents();
       setReconstructMode(false);
       clearAllSnapsAndExitReconstructMode();
-
+      // bumpBadgesVersion();
       resetWhiteBadges();
     } catch (e) {
       // ✋ preflight 차단 에러는 그냥 삼켜서 모달 유지
@@ -2737,6 +2742,56 @@ export default function GameRecordPageV2() {
 
     return byBadge;
   }, [freshRunners, baseToBadgeId, batterWhiteBadgeId, badgeConfigs]);
+  const [badgesVersion, setBadgesVersion] = useState(0);
+
+  const softResetWhiteBadges = useCallback(() => {
+    // 스냅샷을 다시 읽지 않고, 화면/메모리의 배지 관련 상태만 싹 비움
+    initialSnapsRef.current = badgeConfigs.reduce((acc, c) => {
+      acc[c.id] = null;
+      return acc;
+    }, {} as Record<string, SnapInfo | null>);
+    snappedSeqRef.current = badgeConfigs.reduce((acc, c) => {
+      acc[c.id] = [];
+      return acc;
+    }, {} as Record<string, BaseId[]>);
+
+    unstable_batchedUpdates(() => {
+      setBadgeSnaps(
+        badgeConfigs.reduce((acc, c) => {
+          acc[c.id] = null;
+          return acc;
+        }, {} as Record<string, SnapInfo | null>)
+      );
+      setActiveBadges(badgeConfigs.map((c) => c.id));
+
+      setOutBadgesActual(new Set());
+      setOutBadgesVirtual(new Set());
+
+      setRunnerInfoByBadgeActual({});
+      setRunnerInfoByBadgeVirtual({});
+
+      setBaseToBadgeIdActual({});
+      setBaseToBadgeIdVirtual({});
+
+      setFinishedBadgesActual(new Set());
+      setFinishedBadgesVirtual(new Set());
+      setHomeSnappedBadgesActual(new Set());
+      setHomeSnappedBadgesVirtual(new Set());
+
+      setReconstructMode(false);
+    });
+
+    // playId가 그대로일 때도 강제 리마운트
+    setBadgesVersion((v) => v + 1);
+  }, [badgeConfigs]);
+
+  // 새 플레이로 넘어가면 0으로
+  useEffect(() => {
+    setBadgesVersion(0);
+  }, [snap?.playId]);
+  useEffect(() => {
+    badgeSnapsRef.current = badgeSnaps;
+  }, [badgeSnaps]);
 
   return (
     <GameRecordContainer ref={containerRef}>
@@ -2979,7 +3034,10 @@ export default function GameRecordPageV2() {
           {/* NameBadge */}
           {/* 4) 드롭 후 스냅 or 드래그 상태에 따라 렌더 */}
           {/* ③ activeBadges에 든 것만 렌더 */}
-          <div ref={whiteBadgesRef} key={snap?.playId ?? 0}>
+          <div
+            ref={whiteBadgesRef}
+            key={`${snap?.playId ?? "same"}-${badgesVersion}`}
+          >
             {badgeConfigs
               .filter((cfg) => {
                 if (!activeBadges.includes(cfg.id)) return false;
