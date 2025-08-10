@@ -1480,13 +1480,16 @@ export default function GameRecordPageV2() {
   //   [setSnapshotData]
   // );
 
-  const updateSnapshot = useCallback((next: any) => {
-    const boxed = next?.snapshot ? next : { snapshot: next };
-    setSnapshotData((prev) => (prev === boxed ? { ...boxed } : boxed)); // 새 레퍼런스 보장
-    try {
-      localStorage.setItem("snapshot", JSON.stringify(boxed));
-    } catch {}
-  }, []);
+  const updateSnapshot = useCallback(
+    (next: any) => {
+      const boxed = next?.snapshot ? next : { snapshot: next };
+      setSnapshotData(boxed);
+      try {
+        localStorage.setItem("snapshot", JSON.stringify(boxed));
+      } catch {}
+    },
+    [setSnapshotData]
+  );
 
   // 타자 이름 바꾸기
   // useEffect(() => {
@@ -1892,23 +1895,10 @@ export default function GameRecordPageV2() {
       });
     });
   }, [reconstructMode]);
-
-  const runnersSig = useMemo(
-    () =>
-      JSON.stringify({
-        a: snap?.inningStats?.actual?.runnersOnBase ?? [],
-        v: snap?.inningStats?.virtual?.runnersOnBase ?? [],
-      }),
-    [
-      snap?.inningStats?.actual?.runnersOnBase,
-      snap?.inningStats?.virtual?.runnersOnBase,
-    ]
-  );
-
   useEffect(() => {
     if (!snapshotData) return;
     syncRunnersOnBase();
-  }, [runnersSig, snapshotData, reconstructMode]);
+  }, [snapshotData, reconstructMode]);
 
   // useEffect(() => {
   //   if (!snapshotData) return;
@@ -2506,14 +2496,14 @@ export default function GameRecordPageV2() {
   //   [loadSnapshot]
   // );
 
-  // const saveAndReloadSnapshot = useCallback(
-  //   (next: any) => {
-  //     const boxed = next?.snapshot ? next : { snapshot: next };
-  //     localStorage.setItem("snapshot", JSON.stringify(boxed));
-  //     loadSnapshot();
-  //   },
-  //   [loadSnapshot]
-  // );
+  const saveAndReloadSnapshot = useCallback(
+    (next: any) => {
+      const boxed = next?.snapshot ? next : { snapshot: next };
+      localStorage.setItem("snapshot", JSON.stringify(boxed));
+      loadSnapshot();
+    },
+    [loadSnapshot]
+  );
 
   const sendRunnerEvents = useCallback(async () => {
     if (!combinedRequest) {
@@ -2572,7 +2562,7 @@ export default function GameRecordPageV2() {
     }
 
     const encodedPlayId = encodeURIComponent(String(playIdValue));
-    softResetWhiteBadges();
+
     // 2. POST runner-events
     const postUrl = `/plays/${encodedPlayId}/runner-events`;
     let postRes;
@@ -2607,7 +2597,7 @@ export default function GameRecordPageV2() {
       );
       postRes = await API.post(postUrl, finalRequest);
       // ⬇️ 먼저 화면 상태를 싹 비움 (스냅샷 읽지 않음)
-
+      softResetWhiteBadges();
       console.log("runner-events POST 응답:", {
         status: (postRes as any)?.status,
         data:
@@ -2619,8 +2609,7 @@ export default function GameRecordPageV2() {
       // localStorage.setItem(`snapshot`, JSON.stringify(postRes.data));
       // // ② 상태도 즉시 갱신 (이 한 줄이 포인트!)
       // setSnapshotData(postRes.data);
-      // saveAndReloadSnapshot(postRes.data);
-      updateSnapshot(postRes.data);
+      saveAndReloadSnapshot(postRes.data);
     } catch (err) {
       console.error("runner-events 전송 실패:", err);
       alert("runner-events 전송 실패");
