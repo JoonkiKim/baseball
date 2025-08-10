@@ -1353,7 +1353,7 @@ export default function GameRecordPageViewer() {
                         </TodayFrame>
                         <TodayFrame>
                           <TodayLabel>득점</TodayLabel>
-                          <TodayValue>{b.today.runs}</TodayValue>
+                          <TodayValue>{b.today.R}</TodayValue>
                         </TodayFrame>
                         <TodayFrame>
                           <TodayLabel>타점</TodayLabel>
@@ -1381,17 +1381,13 @@ export default function GameRecordPageViewer() {
                 <StatFrame>
                   <StatText>
                     <StatLabel>실점</StatLabel>
-                    <StatValue>
-                      {lastPitcher?.todayStats?.runs ?? "-"}
-                    </StatValue>
+                    <StatValue>{lastPitcher?.todayStats?.R ?? "-"}</StatValue>
                   </StatText>
                 </StatFrame>
                 <StatFrame2>
                   <StatText>
                     <StatLabel>ERA</StatLabel>
-                    <StatValue>
-                      {lastPitcher?.todayStats?.earnedRuns ?? "-"}
-                    </StatValue>
+                    <StatValue>{lastPitcher?.todayStats?.ERA ?? "-"}</StatValue>
                   </StatText>
                 </StatFrame2>
               </PitcherToday>
@@ -1400,7 +1396,7 @@ export default function GameRecordPageViewer() {
             <PitcherStatsGrid>
               {[
                 { name: "이닝", value: lastPitcher?.todayStats?.IP },
-                { name: "자책", value: 2 },
+                { name: "자책", value: lastPitcher?.todayStats?.ER },
                 { name: "삼진", value: lastPitcher?.todayStats?.K },
                 { name: "볼넷", value: lastPitcher?.todayStats?.BB },
               ].map((s, i) => (
