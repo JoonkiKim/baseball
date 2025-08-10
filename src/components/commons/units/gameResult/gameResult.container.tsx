@@ -224,7 +224,7 @@ export default function FinalGameRecordPage() {
   const fetchResults = useCallback(async () => {
     if (!recordId) return;
     try {
-      const { data } = await API.get(`/games/${recordId}/results`);
+      const { data } = await API.get(`/games/${recordId}/result`);
       const { scoreboard, teamSummary, batterStats, pitcherStats } = data;
       // 마지막 이닝 정보 저장
       const lastEntry = scoreboard[scoreboard.length - 1] || {
