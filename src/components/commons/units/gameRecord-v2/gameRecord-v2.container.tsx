@@ -2521,12 +2521,131 @@ export default function GameRecordPageV2() {
     [loadSnapshot]
   );
 
+  // const sendRunnerEvents = useCallback(async () => {
+  //   if (!combinedRequest) {
+  //     console.warn("combinedRequest이 없어서 전송을 스킵합니다.");
+  //     return;
+  //   }
+
+  //   // snapshot에서 playId만 꺼냄 (절대 다른 키로 대체하지 않음)
+  //   const rawSnapshot = localStorage.getItem("snapshot");
+  //   if (!rawSnapshot) {
+  //     const msg =
+  //       "localStorage에 snapshot이 없어 runner-events 요청을 보낼 수 없습니다.";
+  //     console.error(msg);
+  //     throw new Error(msg);
+  //   }
+
+  //   let errorFlag = false;
+  //   let playIdValue: unknown = null;
+  //   try {
+  //     const parsed = JSON.parse(rawSnapshot);
+  //     const core = parsed?.snapshot ?? parsed;
+  //     // errorFlag = !!parsed?.snapshot?.inningStats?.errorFlag;
+  //     // playIdValue = parsed.snapshot?.playId ?? null;
+  //     errorFlag = !!core?.inningStats?.errorFlag;
+  //     playIdValue = core?.playId ?? null;
+  //   } catch (e) {
+  //     console.warn("snapshot JSON 파싱 실패:", e);
+  //   }
+
+  //   // ⛔️ 여기서 preflight: PATCH 전에 차단
+  //   if (errorFlag) {
+  //     // const hasBB = (arr?: RunnerLogEntry[]) =>
+  //     //   (arr ?? []).some((e) => e.startBase === "B" && e.endBase === "B");
+
+  //     const virtualExists =
+  //       Array.isArray(combinedRequest.virtual) &&
+  //       combinedRequest.virtual.length > 0;
+
+  //     if (
+  //       !virtualExists
+  //       // hasBB(combinedRequest.actual) ||
+  //       // hasBB(combinedRequest.virtual)
+  //     ) {
+  //       alert("이닝의 재구성을 해주세요");
+  //       const err: any = new Error("PRE_FLIGHT_BLOCK");
+  //       err.code = "PRE_FLIGHT_BLOCK"; // 식별용 코드
+  //       throw err; // 🚫 여기서 흐름 중단 (PATCH/POST 안 나감)
+  //     }
+  //   }
+  //   // ⛔️ preflight 끝 — 이 아래로 내려오면 유효하므로 PATCH/POST 진행
+  //   if (playIdValue == null) {
+  //     const msg =
+  //       "localStorage의 snapshot에서 snapshot.playId를 찾을 수 없어 runner-events 요청을 보낼 수 없습니다.";
+  //     console.error(msg);
+  //     throw new Error(msg);
+  //   }
+
+  //   const encodedPlayId = encodeURIComponent(String(playIdValue));
+  //   softResetWhiteBadges();
+  //   // 2. POST runner-events
+  //   const postUrl = `/plays/${encodedPlayId}/runner-events`;
+  //   let postRes;
+  //   try {
+  //     // 전송 직전에만 startBase === endBase인 entry 제거
+  //     const sanitizeCombinedRequest = (
+  //       req: CombinedRequest
+  //     ): CombinedRequest => {
+  //       // B→B만 제거, 나머지(예: 1→1, 2→2 등)는 유지
+  //       const filter = (entries: RunnerLogEntry[] = []) =>
+  //         entries.filter((e) => !(e.startBase === "B" && e.endBase === "B"));
+  //       const actual = filter(req.actual);
+  //       const virtual =
+  //         req.virtual && req.virtual.length > 0
+  //           ? filter(req.virtual)
+  //           : undefined;
+
+  //       return {
+  //         phase: req.phase,
+  //         actual,
+  //         ...(virtual ? { virtual } : {}),
+  //       };
+  //     };
+
+  //     const finalRequest = sanitizeCombinedRequest(combinedRequest);
+  //     // console.log("finalRequest", finalRequest);
+
+  //     console.log(
+  //       "runner-events POST 요청:",
+  //       postUrl,
+  //       JSON.stringify(finalRequest, null, 2)
+  //     );
+  //     postRes = await API.post(postUrl, finalRequest);
+  //     // ⬇️ 먼저 화면 상태를 싹 비움 (스냅샷 읽지 않음)
+
+  //     console.log("runner-events POST 응답:", {
+  //       status: (postRes as any)?.status,
+  //       data:
+  //         typeof (postRes as any)?.data !== "undefined"
+  //           ? (postRes as any).data
+  //           : postRes,
+  //     });
+
+  //     // localStorage.setItem(`snapshot`, JSON.stringify(postRes.data));
+  //     // // ② 상태도 즉시 갱신 (이 한 줄이 포인트!)
+  //     // setSnapshotData(postRes.data);
+  //     // saveAndReloadSnapshot(postRes.data);
+  //     updateSnapshot(postRes.data);
+  //   } catch (err) {
+  //     console.error("runner-events 전송 실패:", err);
+  //     alert("runner-events 전송 실패");
+  //     throw err;
+  //   }
+
+  //   return { postRes };
+  // }, [combinedRequest]);
+  // 하드 리마운트 트리거
+  // const bumpBadgesVersion = useCallback(() => {
+  //   setBadgesVersion(v => v + 1);
+  // }, []);
+
   const sendRunnerEvents = useCallback(async () => {
     if (!combinedRequest) {
       console.warn("combinedRequest이 없어서 전송을 스킵합니다.");
       return;
     }
-
+  
     // snapshot에서 playId만 꺼냄 (절대 다른 키로 대체하지 않음)
     const rawSnapshot = localStorage.getItem("snapshot");
     if (!rawSnapshot) {
@@ -2535,29 +2654,26 @@ export default function GameRecordPageV2() {
       console.error(msg);
       throw new Error(msg);
     }
-
+  
     let errorFlag = false;
     let playIdValue: unknown = null;
     try {
       const parsed = JSON.parse(rawSnapshot);
-      const core = parsed?.snapshot ?? parsed;
-      // errorFlag = !!parsed?.snapshot?.inningStats?.errorFlag;
-      // playIdValue = parsed.snapshot?.playId ?? null;
-      errorFlag = !!core?.inningStats?.errorFlag;
-      playIdValue = core?.playId ?? null;
+      errorFlag = !!parsed?.snapshot?.inningStats?.errorFlag;
+      playIdValue = parsed.snapshot?.playId ?? null;
     } catch (e) {
       console.warn("snapshot JSON 파싱 실패:", e);
     }
-
+  
     // ⛔️ 여기서 preflight: PATCH 전에 차단
     if (errorFlag) {
       // const hasBB = (arr?: RunnerLogEntry[]) =>
       //   (arr ?? []).some((e) => e.startBase === "B" && e.endBase === "B");
-
+  
       const virtualExists =
         Array.isArray(combinedRequest.virtual) &&
         combinedRequest.virtual.length > 0;
-
+  
       if (
         !virtualExists
         // hasBB(combinedRequest.actual) ||
@@ -2566,7 +2682,7 @@ export default function GameRecordPageV2() {
         alert("이닝의 재구성을 해주세요");
         const err: any = new Error("PRE_FLIGHT_BLOCK");
         err.code = "PRE_FLIGHT_BLOCK"; // 식별용 코드
-        throw err; // 🚫 여기서 흐름 중단 (PATCH/POST 안 나감)
+        throw err; // �� 여기서 흐름 중단 (PATCH/POST 안 나감)
       }
     }
     // ⛔️ preflight 끝 — 이 아래로 내려오면 유효하므로 PATCH/POST 진행
@@ -2576,7 +2692,7 @@ export default function GameRecordPageV2() {
       console.error(msg);
       throw new Error(msg);
     }
-
+  
     const encodedPlayId = encodeURIComponent(String(playIdValue));
     softResetWhiteBadges();
     // 2. POST runner-events
@@ -2595,17 +2711,17 @@ export default function GameRecordPageV2() {
           req.virtual && req.virtual.length > 0
             ? filter(req.virtual)
             : undefined;
-
+  
         return {
           phase: req.phase,
           actual,
           ...(virtual ? { virtual } : {}),
         };
       };
-
+  
       const finalRequest = sanitizeCombinedRequest(combinedRequest);
       // console.log("finalRequest", finalRequest);
-
+  
       console.log(
         "runner-events POST 요청:",
         postUrl,
@@ -2613,7 +2729,7 @@ export default function GameRecordPageV2() {
       );
       postRes = await API.post(postUrl, finalRequest);
       // ⬇️ 먼저 화면 상태를 싹 비움 (스냅샷 읽지 않음)
-
+  
       console.log("runner-events POST 응답:", {
         status: (postRes as any)?.status,
         data:
@@ -2621,24 +2737,30 @@ export default function GameRecordPageV2() {
             ? (postRes as any).data
             : postRes,
       });
-
-      // localStorage.setItem(`snapshot`, JSON.stringify(postRes.data));
-      // // ② 상태도 즉시 갱신 (이 한 줄이 포인트!)
-      // setSnapshotData(postRes.data);
-      // saveAndReloadSnapshot(postRes.data);
-      updateSnapshot(postRes.data);
+  
+      // �� 새로운 데이터를 Recoil 상태에 반영
+      const newSnapshotData = postRes.data;
+      setSnapshotData(newSnapshotData);
+      
+      // �� localStorage에도 저장
+      localStorage.setItem("snapshot", JSON.stringify(newSnapshotData));
+      
+      // 🆕 새로운 데이터로 syncRunnersOnBase 실행
+      // 다음 프레임에서 실행하여 상태 업데이트가 완료된 후 동작하도록 함
+      requestAnimationFrame(() => {
+        syncRunnersOnBase();
+      });
+  
+      // 부모 컴포넌트에도 알림
+      updateSnapshot(newSnapshotData);
     } catch (err) {
       console.error("runner-events 전송 실패:", err);
       alert("runner-events 전송 실패");
       throw err;
     }
-
+  
     return { postRes };
-  }, [combinedRequest]);
-  // 하드 리마운트 트리거
-  // const bumpBadgesVersion = useCallback(() => {
-  //   setBadgesVersion(v => v + 1);
-  // }, []);
+  }, [combinedRequest, syncRunnersOnBase, updateSnapshot, setSnapshotData]);
 
   const handleSubmit = useCallback(async () => {
     setIsSubmitting(true);
