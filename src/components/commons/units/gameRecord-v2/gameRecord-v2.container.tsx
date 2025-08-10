@@ -395,11 +395,18 @@ export default function GameRecordPageV2() {
 
   // 초기 스냅샷 GET
   const didFetchUmpireRef = useRef(false);
+  // const persistSnapshot = (data: any) => {
+  //   try {
+  //     localStorage.setItem("snapshot", JSON.stringify(data));
+  //     setSnapshotData(data); // recoil 상태도 함께 갱신
+  //   } catch {}
+  // };
   const persistSnapshot = (data: any) => {
+    const boxed = data?.snapshot ? data : { snapshot: data };
     try {
-      localStorage.setItem("snapshot", JSON.stringify(data));
+      localStorage.setItem("snapshot", JSON.stringify(boxed));
     } catch {}
-    setSnapshotData(data); // recoil 상태도 함께 갱신
+    setSnapshotData(boxed);
   };
   // 컴포넌트 상단 어딘가
   const shouldFetchOnThisLoadRef = useRef(false);
@@ -445,7 +452,10 @@ export default function GameRecordPageV2() {
 
   // 읽어오기 경로
   // 공통 뷰(항상 이걸로 접근)
-  const snap = useMemo(() => snapshotData?.snapshot as any, [snapshotData]);
+  const snap = useMemo(
+    () => (snapshotData?.snapshot ?? snapshotData ?? null) as any,
+    [snapshotData]
+  );
 
   // 공격/수비 판정 (값 없을 땐 안전하게 false)
   const half = snap?.gameSummary?.inningHalf?.toUpperCase?.();
@@ -577,22 +587,22 @@ export default function GameRecordPageV2() {
   }
 
   /* 🚀 snapshot 기반 초기값 생성 함수 */
-  function getInitialScores() {
-    if (typeof window === "undefined") {
-      // SSR 경우
-      return { A: Array(9).fill(""), B: Array(9).fill(""), nextAttack: "away" };
-    }
-    try {
-      const raw = localStorage.getItem("snapshot");
+  // function getInitialScores() {
+  //   if (typeof window === "undefined") {
+  //     // SSR 경우
+  //     return { A: Array(9).fill(""), B: Array(9).fill(""), nextAttack: "away" };
+  //   }
+  //   try {
+  //     const raw = localStorage.getItem("snapshot");
 
-      const snap = raw ? JSON.parse(raw) : null;
-      const sb = snap?.snapshot?.gameSummary?.scoreboard;
-      if (!sb) throw new Error("scoreboard 없음");
-      return parseScoreboard(sb);
-    } catch {
-      return { A: Array(9).fill(""), B: Array(9).fill(""), nextAttack: "away" };
-    }
-  }
+  //     const snap = raw ? JSON.parse(raw) : null;
+  //     const sb = snap?.snapshot?.gameSummary?.scoreboard;
+  //     if (!sb) throw new Error("scoreboard 없음");
+  //     return parseScoreboard(sb);
+  //   } catch {
+  //     return { A: Array(9).fill(""), B: Array(9).fill(""), nextAttack: "away" };
+  //   }
+  // }
 
   // useEffect(() => {
   //   const sb = snapshotData?.snapshot?.gameSummary?.scoreboard;
@@ -601,6 +611,22 @@ export default function GameRecordPageV2() {
   //   setTeamAScores(A);
   //   setTeamBScores(B);
   // }, [snapshotData?.snapshot?.gameSummary?.scoreboard]);
+  function getInitialScores() {
+    if (typeof window === "undefined") {
+      return { A: Array(9).fill(""), B: Array(9).fill(""), nextAttack: "away" };
+    }
+    try {
+      const raw = localStorage.getItem("snapshot");
+      const parsed = raw ? JSON.parse(raw) : null;
+      const v = parsed?.snapshot ?? parsed;
+      const sb = v?.gameSummary?.scoreboard;
+      if (!sb) throw new Error("scoreboard 없음");
+      return parseScoreboard(sb);
+    } catch {
+      return { A: Array(9).fill(""), B: Array(9).fill(""), nextAttack: "away" };
+    }
+  }
+
   useEffect(() => {
     if (!scoreboard) return;
     const { A, B } = parseScoreboard(scoreboard); // parseScoreboard는 지금 코드 그대로 OK
@@ -1444,26 +1470,42 @@ export default function GameRecordPageV2() {
   }, [setSnapshotData]);
 
   // ✅ 서버/모달 등에서 새 스냅샷 받으면 이 함수로만 업데이트
+  // const updateSnapshot = useCallback(
+  //   (next: any) => {
+  //     setSnapshotData(next);
+  //     try {
+  //       localStorage.setItem("snapshot", JSON.stringify(next));
+  //     } catch {}
+  //   },
+  //   [setSnapshotData]
+  // );
+
   const updateSnapshot = useCallback(
     (next: any) => {
-      setSnapshotData(next);
+      const boxed = next?.snapshot ? next : { snapshot: next };
+      setSnapshotData(boxed);
       try {
-        localStorage.setItem("snapshot", JSON.stringify(next));
+        localStorage.setItem("snapshot", JSON.stringify(boxed));
       } catch {}
     },
     [setSnapshotData]
   );
 
   // 타자 이름 바꾸기
+  // useEffect(() => {
+  //   const s = snapshotData?.snapshot ?? snapshotData;
+  //   setCurrentBatterName(s?.currentAtBat?.batter?.name ?? null);
+  //   setCurrentBatterId(s?.currentAtBat?.batter?.id ?? null);
+  // }, [
+  //   snapshotData?.snapshot?.currentAtBat?.batter?.id,
+  //   snapshotData?.snapshot?.currentAtBat?.batter?.name,
+  //   snapshotData,
+  // ]);
+  // 현재 타자
   useEffect(() => {
-    const s = snapshotData?.snapshot ?? snapshotData;
-    setCurrentBatterName(s?.currentAtBat?.batter?.name ?? null);
-    setCurrentBatterId(s?.currentAtBat?.batter?.id ?? null);
-  }, [
-    snapshotData?.snapshot?.currentAtBat?.batter?.id,
-    snapshotData?.snapshot?.currentAtBat?.batter?.name,
-    snapshotData,
-  ]);
+    setCurrentBatterName(snap?.currentAtBat?.batter?.name ?? null);
+    setCurrentBatterId(snap?.currentAtBat?.batter?.id ?? null);
+  }, [snap?.currentAtBat?.batter?.id, snap?.currentAtBat?.batter?.name]);
 
   // 베이스 코드 변환
 
@@ -2460,10 +2502,19 @@ export default function GameRecordPageV2() {
     });
   }, [badgeConfigs]);
 
+  // const saveAndReloadSnapshot = useCallback(
+  //   (next: any) => {
+  //     localStorage.setItem("snapshot", JSON.stringify(next));
+  //     loadSnapshot(); // 항상 로컬스토리지 → state 싱크
+  //   },
+  //   [loadSnapshot]
+  // );
+
   const saveAndReloadSnapshot = useCallback(
     (next: any) => {
-      localStorage.setItem("snapshot", JSON.stringify(next));
-      loadSnapshot(); // 항상 로컬스토리지 → state 싱크
+      const boxed = next?.snapshot ? next : { snapshot: next };
+      localStorage.setItem("snapshot", JSON.stringify(boxed));
+      loadSnapshot();
     },
     [loadSnapshot]
   );
@@ -2487,8 +2538,11 @@ export default function GameRecordPageV2() {
     let playIdValue: unknown = null;
     try {
       const parsed = JSON.parse(rawSnapshot);
-      errorFlag = !!parsed?.snapshot?.inningStats?.errorFlag;
-      playIdValue = parsed.snapshot?.playId ?? null;
+      const core = parsed?.snapshot ?? parsed;
+      // errorFlag = !!parsed?.snapshot?.inningStats?.errorFlag;
+      // playIdValue = parsed.snapshot?.playId ?? null;
+      errorFlag = !!core?.inningStats?.errorFlag;
+      playIdValue = core?.playId ?? null;
     } catch (e) {
       console.warn("snapshot JSON 파싱 실패:", e);
     }
@@ -2604,26 +2658,37 @@ export default function GameRecordPageV2() {
   const [outs, setOuts] = useState<boolean[]>([false, false, false]);
 
   /* 🔄 actual out-count만 반영 */
-  const deriveOuts = (snap: any): boolean[] => {
-    const outCnt: number =
-      snap?.snapshot?.inningStats?.actual?.outs ??
-      snap?.inningStats?.actual?.outs ??
-      0;
+  // const deriveOuts = (snap: any): boolean[] => {
+  //   const outCnt: number =
+  //     snap?.snapshot?.inningStats?.actual?.outs ??
+  //     snap?.inningStats?.actual?.outs ??
+  //     0;
 
+  //   return Array(3)
+  //     .fill(false)
+  //     .map((_, i) => i < outCnt);
+  // };
+
+  // useEffect(() => {
+  //   if (!snapshotData) {
+  //     setOuts([false, false, false]);
+  //     return;
+  //   }
+  //   setOuts(deriveOuts(snapshotData));
+  // }, [snapshotData]);
+
+  // 타자 주자 위치 업데이트
+
+  const deriveOuts = (v: any): boolean[] => {
+    const outCnt: number = v?.inningStats?.actual?.outs ?? 0;
     return Array(3)
       .fill(false)
       .map((_, i) => i < outCnt);
   };
-
   useEffect(() => {
-    if (!snapshotData) {
-      setOuts([false, false, false]);
-      return;
-    }
-    setOuts(deriveOuts(snapshotData));
-  }, [snapshotData]);
+    setOuts(deriveOuts(snap));
+  }, [snap?.inningStats?.actual?.outs]);
 
-  // 타자 주자 위치 업데이트
   useEffect(() => {
     const snap = snapshotData?.snapshot;
     if (!snap) return;
@@ -2838,10 +2903,7 @@ export default function GameRecordPageV2() {
           <LeftSideWrapper>
             <InningBoard>
               <ArrowUp color={!isHomeAttack ? "red" : "#B8B8B8"} />
-              <InningNumber>
-                {" "}
-                {snapshotData?.snapshot?.gameSummary.inning}
-              </InningNumber>
+              <InningNumber> {snap?.gameSummary?.inning}</InningNumber>
               <ArrowDown color={isHomeAttack ? "red" : "#B8B8B8"} />
             </InningBoard>
             <LittleScoreBoardWrapper>
