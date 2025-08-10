@@ -218,7 +218,7 @@ export default function GameRecordPageViewer() {
           Accept: "text/event-stream",
         },
         signal: controller.signal,
-        credentials: "include",
+        // credentials: "include",
       });
 
       const reader = res.body!.getReader();
@@ -270,49 +270,49 @@ export default function GameRecordPageViewer() {
 
   // ✅ 화면 로드시 한 번만: GET /games/{gameId}/snapshot/umpire → localStorage('snapshot') 저장 + 화면 반영
   // 나중에 지우기
-  // useEffect(() => {
-  //   if (!router.isReady || !recordId) return;
-  //   if (fetchedOnceRef.current) return;
-  //   fetchedOnceRef.current = true;
+  useEffect(() => {
+    if (!router.isReady || !recordId) return;
+    if (fetchedOnceRef.current) return;
+    fetchedOnceRef.current = true;
 
-  //   (async () => {
-  //     try {
-  //       const base = process.env.NEXT_PUBLIC_API_URL ?? "";
-  //       const url = `${base}/games/${recordId}/snapshot/stream`;
+    (async () => {
+      try {
+        const base = process.env.NEXT_PUBLIC_API_URL ?? "";
+        const url = `${base}/games/${recordId}/snapshot/stream`;
 
-  //       const res = await fetch(url, {
-  //         method: "GET",
-  //         headers: {
-  //           Authorization: `Bearer ${getAccessToken?.() || ""}`,
-  //           Accept: "application/json",
-  //         },
-  //         // credentials: "include", // 쿠키 기반이면 주석 해제
-  //       });
+        const res = await fetch(url, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${getAccessToken?.() || ""}`,
+            Accept: "application/json",
+          },
+          // credentials: "include", // 쿠키 기반이면 주석 해제
+        });
 
-  //       if (!res.ok) {
-  //         throw new Error(`GET snapshot/stream failed: ${res.status}`);
-  //       }
+        if (!res.ok) {
+          throw new Error(`GET snapshot/stream failed: ${res.status}`);
+        }
 
-  //       const json = await res.json();
-  //       // 응답 래핑 형태 유연 처리
-  //       const snap = json?.data ?? json;
-  //       console.log("snap", snap);
-  //       setSseData(snap);
-  //       // 1) localStorage 저장
-  //       try {
-  //         localStorage.setItem("snapshot", JSON.stringify(snap));
-  //       } catch (e) {
-  //         console.warn("localStorage(snapshot) 저장 실패:", e);
-  //       }
-  //       console.log("연결용 GET /snapshot/stream 저장완료");
-  //       // 2) 화면 상태 반영
-  //       applySnapshot(snap);
-  //     } catch (err) {
-  //       console.error("GET /snapshot/stream error:", err);
-  //       setError(err);
-  //     }
-  //   })();
-  // }, [router.isReady, recordId, applySnapshot]);
+        const json = await res.json();
+        // 응답 래핑 형태 유연 처리
+        const snap = json?.data ?? json;
+        console.log("snap", snap);
+        setSseData(snap);
+        // 1) localStorage 저장
+        try {
+          localStorage.setItem("snapshot", JSON.stringify(snap));
+        } catch (e) {
+          console.warn("localStorage(snapshot) 저장 실패:", e);
+        }
+        console.log("연결용 GET /snapshot/stream 저장완료");
+        // 2) 화면 상태 반영
+        applySnapshot(snap);
+      } catch (err) {
+        console.error("GET /snapshot/stream error:", err);
+        setError(err);
+      }
+    })();
+  }, [router.isReady, recordId, applySnapshot]);
 
   console.log("sseData", sseData);
 
@@ -957,12 +957,13 @@ export default function GameRecordPageViewer() {
         PA: b.todayStats?.PA ?? 0,
         AB: b.todayStats?.AB ?? 0,
         H: b.todayStats?.H ?? 0,
-        runs: b.todayStats?.runs ?? 0,
+        R: b.todayStats?.R ?? 0,
         RBI: b.todayStats?.RBI ?? 0,
       },
     }));
   }, [sseData?.playerRecords?.batters]);
 
+  const isCompact = (battersForUI?.length ?? 0) < 3;
   const OUT_CODES = new Set(["SO", "O", "SO_DROP"]);
   const isOutResult = (code) => OUT_CODES.has(String(code).toUpperCase());
 
@@ -1097,6 +1098,12 @@ export default function GameRecordPageViewer() {
     () => lastItem(sseData?.playerRecords?.pitcher),
     [sseData?.playerRecords?.pitcher]
   );
+
+  const VISIBLE_ROWS = 3;
+  const batterRows3 = useMemo(() => {
+    const list = (battersForUI ?? []).slice().reverse();
+    return Array.from({ length: VISIBLE_ROWS }, (_, i) => list[i] ?? null);
+  }, [battersForUI]);
 
   return (
     <GameRecordContainer>
@@ -1308,25 +1315,21 @@ export default function GameRecordPageViewer() {
 
       <PlayersRow>
         <BatterPlayerBox>
-          {battersForUI
-            .slice()
-            .reverse()
-            .map((b, idx, arr) => (
-              <Fragment key={b.id}>
-                <BatterPlayerSingleBox>
+          {batterRows3.map((b, idx) => (
+            <Fragment key={b ? b.id : `empty-${idx}`}>
+              <BatterPlayerSingleBox>
+                {b && (
                   <BatterGroup>
                     <BatterRow>
                       <WhoContainer>
                         <NameResultContainer>
                           <PlayerName>{b.name}</PlayerName>
-                          {/* 필요하면 결과/상태 표기 */}
                           {b.battingResult && (
                             <ResultBox $isOut={isOutResult(b.battingResult)}>
                               {getResultLabel(b.battingResult)}
                             </ResultBox>
                           )}
                         </NameResultContainer>
-
                         <AvgFrame>
                           <BattingOrderLabel>
                             {b.battingOrder}번타자
@@ -1337,7 +1340,6 @@ export default function GameRecordPageViewer() {
                           </AvgText>
                         </AvgFrame>
                       </WhoContainer>
-
                       <TodayContainer>
                         <TodayFrame>
                           <TodayLabel>타석</TodayLabel>
@@ -1362,13 +1364,12 @@ export default function GameRecordPageViewer() {
                       </TodayContainer>
                     </BatterRow>
                   </BatterGroup>
-                </BatterPlayerSingleBox>
-
-                {idx < arr.length - 1 && <Divider />}
-              </Fragment>
-            ))}
+                )}
+              </BatterPlayerSingleBox>
+              {idx < 2 && <Divider />}
+            </Fragment>
+          ))}
         </BatterPlayerBox>
-
         <PitcherPlayerBox>
           <PitcherGroup>
             <PitcherWho>

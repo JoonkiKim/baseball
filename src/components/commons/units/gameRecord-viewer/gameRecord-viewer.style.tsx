@@ -282,24 +282,77 @@ export const PlayersRow = styled.div`
   padding: 2vh;
 `;
 
-export const BatterPlayerBox = styled.div`
+// export const BatterPlayerBox = styled.div`
+//   width: 70%;
+//   display: flex;
+//   height: 90%;
+//   flex-direction: column;
+//   justify-content: space-evenly;
+//   align-items: center;
+//   background-color: red;
+// `;
+export const BatterPlayerBox = styled.div<{ $compact?: boolean }>`
   width: 70%;
   display: flex;
   height: 90%;
   flex-direction: column;
-  justify-content: space-evenly;
-  align-items: center;
-`;
 
-export const BatterPlayerSingleBox = styled.div`
+  /* 👇 3개 미만일 때 상단 붙이기 */
+  justify-content: ${({ $compact }) =>
+    $compact ? "flex-start" : "space-evenly"};
+  align-items: ${({ $compact }) => ($compact ? "stretch" : "center")};
+
+  /* 간격/패딩 보정 */
+  gap: ${({ $compact }) => ($compact ? "1.2vh" : "0")};
+  padding-top: ${({ $compact }) => ($compact ? "1vh" : "0")};
+
+  /* background-color: red; */
+`;
+export const BatterPlayerSingleBox = styled.div<{ $compact?: boolean }>`
   width: 100%;
   display: flex;
-  height: 35%;
-  /* background-color: red; */
 
-  /* flex-direction: row;
-  align-items: center; */
+  /* 👇 compact 모드에서는 고정 높이 제거 */
+  height: ${({ $compact }) => ($compact ? "auto" : "35%")};
 `;
+
+// styled-components
+export const PlaceholderRow = styled.div`
+  width: 85%;
+  height: 35%;
+  display: flex;
+  align-items: center;
+  gap: 0.6vw;
+  opacity: 0.6;
+  background-color: red;
+
+  &::before,
+  &::after {
+    content: "";
+    display: block;
+    height: 1.4vh;
+    border-radius: 9999px;
+    background: #eee;
+  }
+  /* 이름 바 */
+  &::before {
+    flex: 0 0 13vw;
+  }
+  /* 결과칩 바 */
+  &::after {
+    flex: 0 0 7vw;
+  }
+`;
+
+// export const BatterPlayerSingleBox = styled.div`
+//   width: 100%;
+//   display: flex;
+//   height: 35%;
+//   /* background-color: red; */
+
+//   /* flex-direction: row;
+//   align-items: center; */
+// `;
 export const Divider = styled.div`
   width: 90%;
   height: 0.3px;

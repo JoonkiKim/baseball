@@ -1524,6 +1524,26 @@ const GroundRecordModal = forwardRef<
     }
 
     // ⛔️ 여기서 preflight: PATCH 전에 차단
+    // if (errorFlag) {
+    //   const hasBB = (arr?: RunnerLogEntry[]) =>
+    //     (arr ?? []).some((e) => e.startBase === "B" && e.endBase === "B");
+
+    //   const virtualExists =
+    //     Array.isArray(combinedRequest.virtual) &&
+    //     combinedRequest.virtual.length > 0;
+
+    //   if (
+    //     !virtualExists ||
+    //     hasBB(combinedRequest.actual) ||
+    //     hasBB(combinedRequest.virtual)
+    //   ) {
+    //     alert("이닝의 재구성을 해주세요");
+    //     const err: any = new Error("PRE_FLIGHT_BLOCK");
+    //     err.code = "PRE_FLIGHT_BLOCK"; // 식별용 코드
+    //     throw err; // 🚫 여기서 흐름 중단 (PATCH/POST 안 나감)
+    //   }
+    // }
+    // ⛔️ 여기서 preflight: PATCH 전에 차단
     if (errorFlag) {
       const hasBB = (arr?: RunnerLogEntry[]) =>
         (arr ?? []).some((e) => e.startBase === "B" && e.endBase === "B");
@@ -1532,15 +1552,26 @@ const GroundRecordModal = forwardRef<
         Array.isArray(combinedRequest.virtual) &&
         combinedRequest.virtual.length > 0;
 
-      if (
-        !virtualExists ||
-        hasBB(combinedRequest.actual) ||
-        hasBB(combinedRequest.virtual)
-      ) {
+      const hasBBActual = hasBB(combinedRequest.actual);
+      const hasBBVirtual = hasBB(combinedRequest.virtual);
+
+      // 1) 가상 이동 자체가 비어있는 경우
+      if (!virtualExists) {
         alert("이닝의 재구성을 해주세요");
-        const err: any = new Error("PRE_FLIGHT_BLOCK");
-        err.code = "PRE_FLIGHT_BLOCK"; // 식별용 코드
-        throw err; // 🚫 여기서 흐름 중단 (PATCH/POST 안 나감)
+        const err: any = new Error("PRE_FLIGHT_NO_VIRTUAL");
+        err.code = "PRE_FLIGHT_BLOCK";
+        err.reason = "NO_VIRTUAL";
+        throw err; // 🚫 여기서 중단
+      }
+
+      // 2) B→B 항목이 포함된 경우 (actual/virtual 각각 다른 문구)
+      if (hasBBActual || hasBBVirtual) {
+        const target = hasBBActual ? "실제 기록(actual)" : "재구성(virtual)";
+        alert(`타자를 먼저 이동해주세요`);
+        const err: any = new Error("PRE_FLIGHT_HAS_BB");
+        err.code = "PRE_FLIGHT_BLOCK";
+        err.reason = hasBBActual ? "HAS_BB_ACTUAL" : "HAS_BB_VIRTUAL";
+        throw err; // 🚫 여기서 중단
       }
     }
     // ⛔️ preflight 끝 — 이 아래로 내려오면 유효하므로 PATCH/POST 진행

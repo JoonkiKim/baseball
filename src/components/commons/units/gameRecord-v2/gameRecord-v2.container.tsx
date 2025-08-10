@@ -1593,20 +1593,6 @@ export default function GameRecordPageV2() {
       return acc;
     }, {} as Record<BaseId, boolean>);
   }
-  // const getRunnersOnBase = useCallback(() => {
-  //   if (!snapshotData) return [];
-
-  //   const actual =
-  //     snapshotData?.snapshot?.inningStats?.actual?.runnersOnBase ??
-  //     snapshotData?.inningStats?.actual?.runnersOnBase ??
-  //     [];
-  //   const virtual =
-  //     snapshotData?.snapshot?.inningStats?.virtual?.runnersOnBase ??
-  //     snapshotData?.inningStats?.virtual?.runnersOnBase ??
-  //     [];
-
-  //   return reconstructMode ? virtual : actual;
-  // }, [snapshotData, reconstructMode]);
 
   const getRunnersOnBase = useCallback(() => {
     const actual = snap?.inningStats?.actual?.runnersOnBase ?? [];
@@ -2716,6 +2702,42 @@ export default function GameRecordPageV2() {
     syncRunnersOnBase();
   }, [snapshotData?.snapshot?.playId, reconstructMode]); // playId 등 "한 플레이" 단위 키를 의존성으로
 
+  // 주자 새로 불러오기
+  // 최신 runnersOnBase (actual/virtual 중 모드에 따라 선택)
+  const freshRunners = useMemo(() => {
+    const v = reconstructMode
+      ? snap?.inningStats?.virtual?.runnersOnBase
+      : snap?.inningStats?.actual?.runnersOnBase;
+    return Array.isArray(v) ? v : [];
+  }, [
+    reconstructMode,
+    snap?.inningStats?.actual?.runnersOnBase,
+    snap?.inningStats?.virtual?.runnersOnBase,
+  ]);
+
+  const freshRunnerByBadge = useMemo(() => {
+    // 배터 배지 제외한 흰 배지 후보
+    const candidates = badgeConfigs
+      .filter(
+        (c) => !c.id.startsWith("black-badge") && c.id !== batterWhiteBadgeId
+      )
+      .map((c) => c.id);
+
+    const byBadge: Record<string, { runnerId: number; name: string }> = {};
+
+    // 베이스 오름차순 → 배지 할당
+    freshRunners
+      .slice()
+      .sort((a, b) => (a.base ?? 0) - (b.base ?? 0))
+      .forEach((r, i) => {
+        const preferred = baseToBadgeId[r.base]; // 이미 매핑돼 있으면 그거 그대로
+        const badgeId = preferred ?? candidates[i];
+        if (badgeId) byBadge[badgeId] = { runnerId: r.id, name: r.name };
+      });
+
+    return byBadge;
+  }, [freshRunners, baseToBadgeId, batterWhiteBadgeId, badgeConfigs]);
+
   return (
     <GameRecordContainer ref={containerRef}>
       <ScoreBoardWrapper>
@@ -2957,39 +2979,30 @@ export default function GameRecordPageV2() {
           {/* NameBadge */}
           {/* 4) 드롭 후 스냅 or 드래그 상태에 따라 렌더 */}
           {/* ③ activeBadges에 든 것만 렌더 */}
-          <div ref={whiteBadgesRef}>
+          <div ref={whiteBadgesRef} key={snap?.playId ?? 0}>
             {badgeConfigs
               .filter((cfg) => {
-                // active한 것만
                 if (!activeBadges.includes(cfg.id)) return false;
 
-                // 타자 배지: currentBatterId가 있어야 보여줌
+                // 타자 배지는 기존 로직 그대로
                 if (cfg.id === batterWhiteBadgeId) {
                   return currentBatterId != null;
                 }
 
-                // 주자 배지: runnerInfoByBadge에 있고 runnerId가 null이 아니어야 보여줌
-                const info = runnerInfoByBadge[cfg.id];
-                if (!info) return false;
-
-                // 타자 배지 처리
-                if (cfg.id === batterWhiteBadgeId) {
-                  return currentBatterId != null;
-                }
-
-                // 할당 제외면 렌더링 안 함
-                if (info.runnerId === EXCLUDED_RUNNER_ID) return false;
-
-                // 진짜 주자만 보여줌
-                return info.runnerId != null;
+                // ⬇️ 스냅샷에서 바로 파생한 freshRunnerByBadge 사용
+                const info = freshRunnerByBadge[cfg.id];
+                if (!info) return false; // 스냅샷에 주자가 없으면 안 그리기
+                return info.runnerId != null; // (여기선 EXCLUDED 같은 캐시 상태에 안 묶임)
               })
               .map((cfg) => {
                 let overriddenLabel = cfg.label;
 
+                // 타자 이름은 여전히 snap 기반
                 if (cfg.id === batterWhiteBadgeId && currentBatterName) {
                   overriddenLabel = currentBatterName;
-                } else if (runnerInfoByBadge[cfg.id]) {
-                  overriddenLabel = runnerInfoByBadge[cfg.id].name;
+                  // ⬇️ 주자 이름도 스냅샷 기반으로 즉시 반영
+                } else if (freshRunnerByBadge[cfg.id]) {
+                  overriddenLabel = freshRunnerByBadge[cfg.id].name;
                 }
 
                 return (
