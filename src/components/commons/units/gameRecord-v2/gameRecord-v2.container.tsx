@@ -2064,6 +2064,14 @@ export default function GameRecordPageV2() {
       dropBase = candidates[0].base;
       baseRect = candidates[0].baseRect;
     }
+
+      // 타자 배지는 베이스에 스냅할 수 없도록 체크
+  if (dropBase && badgeId === batterWhiteBadgeId) {
+    console.log(" 타자 배지는 베이스에 스냅할 수 없습니다");
+    scheduleOccupancyLog();
+    return;
+  }
+  
     if (!dropBase || !baseRect) return;
 
     // excluded 배지는 스냅 불가
