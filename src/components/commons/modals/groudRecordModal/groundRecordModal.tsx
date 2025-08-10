@@ -768,8 +768,11 @@ const GroundRecordModal = forwardRef<
   // 실제 / 재구성 기준으로 배지 매핑 및 스냅 초기화
 
   const syncRunnersOnBase = useCallback(() => {
+    console.log("🔄 syncRunnersOnBase 실행됨");
+  console.log("📊 실행 시점의 snap:", snap);
     // 1. 원본 runners 가져오기 (actual / virtual 구분은 getRunnersOnBase가 처리)
     const rawRunners = getRunnersOnBase();
+    console.log("🏃‍♂️ rawRunners:", rawRunners);
     if (rawRunners.length === 0) return;
 
     // 2. 홈에 완료된 배지들에 대응하는 runnerId들을 수집 → 제외 대상
@@ -783,11 +786,15 @@ const GroundRecordModal = forwardRef<
     const finishedRunnerIds = Array.from(homeSnappedSet)
       .map((badgeId) => runnerInfoMap[badgeId]?.runnerId)
       .filter((id): id is number => id != null && id !== EXCLUDED_RUNNER_ID);
+console.log("🏠 finishedRunnerIds:", finishedRunnerIds);
+
 
     // 3. 홈 완료된 주자들을 제거한 실제 sync 대상 runners
     const runners = (rawRunners as any[]).filter(
       (r) => !finishedRunnerIds.includes(r.id)
     );
+
+    console.log("�� sync 대상 runners:", runners);
     if (runners.length === 0) return;
 
     const baseMap: Record<number, BaseId> = {
@@ -947,6 +954,104 @@ const GroundRecordModal = forwardRef<
       setCurrentBatterId(null);
     }
   }, []);
+
+// 🆕 주자 데이터 디버깅용 useEffect 추가
+// ... existing code ...
+
+// 🆕 주자 데이터 디버깅용 useEffect 추가
+useEffect(() => {
+  if (!isOpen) return;
+
+  console.log("=== ��‍♂️ 현재 화면 주자 데이터 ===");
+  console.log("📊 snapshotData:", snapshotData);
+  console.log(" snap:", snap);
+  
+  const runners = getRunnersOnBase();
+  console.log("🏃‍♂️ getRunnersOnBase() 결과:", runners);
+  
+  console.log(" reconstructMode:", reconstructMode);
+  console.log("🎯 runnerInfoByBadge:", runnerInfoByBadge);
+  console.log("🎯 baseToBadgeId:", baseToBadgeId);
+  console.log("🎯 badgeSnaps:", badgeSnaps);
+  console.log("🎯 activeBadges:", activeBadges);
+  console.log("🎯 outBadgesCurrent:", outBadgesCurrent);
+  console.log("🎯 homeSnappedBadges:", homeSnappedBadges);
+  console.log("🎯 finishedBadges:", finishedBadges);
+  
+  // �� runnerInfoByBadge와 getRunnersOnBase 비교 분석
+  console.log("🔍 === 데이터 불일치 분석 ===");
+  
+  // getRunnersOnBase에서 가져온 주자들의 ID
+  const runnerIdsFromData = runners.map((r: any) => r.id);
+  console.log("📊 getRunnersOnBase의 runnerIds:", runnerIdsFromData);
+  
+  // runnerInfoByBadge에서 실제 매핑된 주자들의 ID
+  const runnerIdsFromMapping = Object.values(runnerInfoByBadge)
+    .map(info => info.runnerId)
+    .filter(id => id != null && id !== EXCLUDED_RUNNER_ID);
+  console.log("�� runnerInfoByBadge의 runnerIds:", runnerIdsFromMapping);
+  
+  // 누락된 주자들
+  const missingRunners = runnerIdsFromData.filter(id => !runnerIdsFromMapping.includes(id));
+  console.log("❌ 누락된 주자들:", missingRunners);
+  
+  // 추가된 주자들
+  const extraRunners = runnerIdsFromMapping.filter(id => !runnerIdsFromData.includes(id));
+  console.log("➕ 추가된 주자들:", extraRunners);
+  
+  // 베이스별 매핑 상태
+  console.log("🏟️ 베이스별 매핑 상태:");
+  runners.forEach((runner: any) => {
+    const badgeId = baseToBadgeId[runner.base];
+    const info = badgeId ? runnerInfoByBadge[badgeId] : null;
+    console.log(`  베이스 ${runner.base}: ${runner.name} (ID: ${runner.id}) → 배지: ${badgeId} → 매핑: ${info ? 'O' : 'X'}`);
+  });
+  
+  // 실제 화면에 렌더링되는 배지들
+  const renderedBadges = badgeConfigsForModal
+    .filter((cfg) => {
+      if (!activeBadges.includes(cfg.id)) {
+        console.log(`❌ ${cfg.id}: activeBadges에 없음`);
+        return false;
+      }
+      if (cfg.id === batterWhiteBadgeId) {
+        const hasBatter = currentBatterId != null;
+        console.log(`🏏 ${cfg.id}: 타자 배지, currentBatterId=${currentBatterId}, 렌더링=${hasBatter}`);
+        return hasBatter;
+      }
+      const info = runnerInfoByBadge[cfg.id];
+      if (!info) {
+        console.log(`❌ ${cfg.id}: runnerInfoByBadge에 없음`);
+        return false;
+      }
+      if (info.runnerId === EXCLUDED_RUNNER_ID) {
+        console.log(`🚫 ${cfg.id}: EXCLUDED_RUNNER_ID`);
+        return false;
+      }
+      const hasRunnerId = info.runnerId != null;
+      console.log(`✅ ${cfg.id}: runnerId=${info.runnerId}, name=${info.name}, 렌더링=${hasRunnerId}`);
+      return hasRunnerId;
+    })
+    .map((cfg) => {
+      const info = runnerInfoByBadge[cfg.id];
+      const snap = badgeSnaps[cfg.id];
+      return {
+        badgeId: cfg.id,
+        label: cfg.label,
+        runnerId: info?.runnerId,
+        runnerName: info?.name,
+        snapInfo: snap,
+        isBatter: cfg.id === batterWhiteBadgeId,
+        isExcluded: info?.runnerId === EXCLUDED_RUNNER_ID,
+      };
+    });
+  
+  console.log("🎨 실제 렌더링되는 배지들:", renderedBadges);
+  console.log("=== 🏃‍♂️ 주자 데이터 끝 ===\n");
+}, [isOpen, snapshotData, snap, getRunnersOnBase, reconstructMode, runnerInfoByBadge, baseToBadgeId, badgeSnaps, activeBadges, outBadgesCurrent, homeSnappedBadges, finishedBadges, batterWhiteBadgeId, currentBatterId]);
+
+// ... existing code ...
+
 
   // 리셋버튼 함수
 
@@ -1680,67 +1785,230 @@ const GroundRecordModal = forwardRef<
 
 // ... existing code ...
 
+// const sendRunnerEvents = useCallback(async () => {
+//   if (!combinedRequest) {
+//     console.warn("combinedRequest이 없어서 전송을 스킵합니다.");
+//     return;
+//   }
+
+//   // snapshot에서 playId만 꺼냄 (절대 다른 키로 대체하지 않음)
+//   const rawSnapshot = localStorage.getItem("snapshot");
+//   if (!rawSnapshot) {
+//     const msg =
+//       "localStorage에 snapshot이 없어 runner-events 요청을 보낼 수 없습니다.";
+//     console.error(msg);
+//     throw new Error(msg);
+//   }
+
+//   let errorFlag = false;
+//   let playIdValue: unknown = null;
+//   try {
+//     const parsed = JSON.parse(rawSnapshot);
+//     errorFlag = !!parsed?.snapshot?.inningStats?.errorFlag;
+//     playIdValue = parsed.snapshot?.playId ?? null;
+//   } catch (e) {
+//     console.warn("snapshot JSON 파싱 실패:", e);
+//   }
+
+//   // ⛔️ 여기서 preflight: PATCH 전에 차단
+//   if (errorFlag) {
+//     const hasBB = (arr?: RunnerLogEntry[]) =>
+//       (arr ?? []).some((e) => e.startBase === "B" && e.endBase === "B");
+
+//     const virtualExists =
+//       Array.isArray(combinedRequest.virtual) &&
+//       combinedRequest.virtual.length > 0;
+
+//     const hasBBActual = hasBB(combinedRequest.actual);
+//     const hasBBVirtual = hasBB(combinedRequest.virtual);
+
+//     // 1) 가상 이동 자체가 비어있는 경우
+//     if (!virtualExists) {
+//       alert("이닝의 재구성을 해주세요");
+//       const err: any = new Error("PRE_FLIGHT_NO_VIRTUAL");
+//       err.code = "PRE_FLIGHT_BLOCK";
+//       err.reason = "NO_VIRTUAL";
+//       throw err; // 🚫 여기서 중단
+//     }
+
+//     // 2) B→B 항목이 포함된 경우 (actual/virtual 각각 다른 문구)
+//     if (hasBBActual || hasBBVirtual) {
+//       const target = hasBBActual ? "실제 기록(actual)" : "재구성(virtual)";
+//       alert(`타자를 먼저 이동해주세요`);
+//       const err: any = new Error("PRE_FLIGHT_HAS_BB");
+//       err.code = "PRE_FLIGHT_BLOCK";
+//       err.reason = hasBBActual ? "HAS_BB_ACTUAL" : "HAS_BB_VIRTUAL";
+//       throw err; // �� 여기서 중단
+//     }
+//   }
+//   // ⛔️ preflight 끝 — 이 아래로 내려오면 유효하므로 PATCH/POST 진행
+
+//   if (playIdValue == null) {
+//     const msg =
+//       "localStorage의 snapshot에서 snapshot.playId를 찾을 수 없어 runner-events 요청을 보낼 수 없습니다.";
+//     console.error(msg);
+//     throw new Error(msg);
+//   }
+
+//   const encodedPlayId = encodeURIComponent(String(playIdValue));
+
+//   // plateAppearanceResult 가져오기
+//   const rawPlateAppearance = localStorage.getItem("plateAppearanceResult");
+//   let plateAppearanceResult: any = null;
+//   if (rawPlateAppearance != null) {
+//     try {
+//       plateAppearanceResult = JSON.parse(rawPlateAppearance);
+//     } catch {
+//       plateAppearanceResult = rawPlateAppearance;
+//     }
+//   } else {
+//     console.warn(
+//       "localStorage에 plateAppearanceResult가 없습니다. PATCH body를 빈 객체로 보냅니다."
+//     );
+//   }
+
+//   // 1. PATCH /plays/{playId}/result 먼저
+//   const patchUrl = `/plays/${encodedPlayId}/result`;
+//   let patchRes;
+//   try {
+//     console.log("PATCH /result 요청:", patchUrl, plateAppearanceResult);
+//     patchRes = await API.patch(patchUrl, plateAppearanceResult ?? {});
+//     console.log("PATCH /result 응답:", {
+//       status: (patchRes as any)?.status,
+//       data:
+//         typeof (patchRes as any)?.data !== "undefined"
+//           ? (patchRes as any).data
+//           : patchRes,
+//     });
+//   } catch (err) {
+//     console.error("PATCH /result 실패:", err);
+//     alert("결과 업데이트 실패");
+//     throw err;
+//   }
+
+//   // 2. POST runner-events
+//   const postUrl = `/plays/${encodedPlayId}/runner-events`;
+//   let postRes;
+//   try {
+//     // 전송 직전에만 startBase === endBase인 entry 제거
+//     const sanitizeCombinedRequest = (
+//       req: CombinedRequest
+//     ): CombinedRequest => {
+//       const filter = (entries: RunnerLogEntry[] = []) =>
+//         entries.filter((entry) => entry.startBase !== entry.endBase);
+
+//       const actual = filter(req.actual);
+//       const virtual =
+//         req.virtual && req.virtual.length > 0
+//           ? filter(req.virtual)
+//           : undefined;
+
+//       return {
+//         phase: req.phase,
+//         actual,
+//         ...(virtual ? { virtual } : {}),
+//       };
+//     };
+
+//     const finalRequest = sanitizeCombinedRequest(combinedRequest);
+//     console.log(
+//       "runner-events POST 요청:",
+//       postUrl,
+//       JSON.stringify(finalRequest, null, 2)
+//     );
+//     postRes = await API.post(postUrl, finalRequest);
+
+//     console.log("runner-events POST 응답:", {
+//       status: (postRes as any)?.status,
+//       data:
+//         typeof (postRes as any)?.data !== "undefined"
+//           ? (postRes as any).data
+//           : postRes,
+//     });
+
+//     // �� 새로운 데이터를 모달 내부 상태에 반영
+//     // const newSnapshotData = postRes.data;
+//     // setSnapshotData(newSnapshotData);
+//        // 🆕 새로운 데이터를 localStorage에 저장하고 커스텀 이벤트 발생
+//        const newSnapshotData = postRes.data;
+//        localStorage.setItem("snapshot", JSON.stringify(newSnapshotData));
+//         // �� 커스텀 이벤트 발생 (같은 탭에서 localStorage 변경 감지용)
+//     window.dispatchEvent(new CustomEvent('localStorageChange', {
+//       detail: { newData: newSnapshotData }
+//     }));
+    
+//     // �� 새로운 타자 정보 업데이트
+//     const newBatterName = 
+//       newSnapshotData?.snapshot?.currentAtBat?.batter?.name ??
+//       newSnapshotData?.currentAtBat?.batter?.name ??
+//       null;
+//     const newBatterId = 
+//       newSnapshotData?.snapshot?.currentAtBat?.batter?.id ??
+//       newSnapshotData?.currentAtBat?.batter?.id ??
+//       null;
+//     setCurrentBatterName(newBatterName);
+//     setCurrentBatterId(newBatterId);
+
+//     // 🆕 새로운 데이터로 syncRunnersOnBase 실행
+//     // 다음 프레임에서 실행하여 상태 업데이트가 완료된 후 동작하도록 함
+//     requestAnimationFrame(() => {
+//       syncRunnersOnBase();
+//     });
+
+//     // 부모 컴포넌트에도 알림
+//     updateSnapshot?.(newSnapshotData);
+//   } catch (err) {
+//     console.error("runner-events 전송 실패:", err);
+//     alert("runner-events 전송 실패");
+//     throw err;
+//   }
+
+//   return { patchRes, postRes };
+// }, [combinedRequest, syncRunnersOnBase, updateSnapshot]);
+
+
+//   const handleSubmit = useCallback(async () => {
+//     setIsSubmitting(true);
+//     try {
+//       await sendRunnerEvents();
+//       clearAllSnapsAndExitReconstructMode();
+//       await onSuccess?.();
+//       resetWhiteBadges();
+//       handleClose();
+//     } catch (e) {
+//       // ✋ preflight 차단 에러는 그냥 삼켜서 모달 유지
+//       if (e?.code !== "PRE_FLIGHT_BLOCK") {
+//         setError(e as Error); // 진짜 오류만 ErrorAlert로 노출
+//       }
+//     } finally {
+//       setIsSubmitting(false);
+//     }
+//   }, [sendRunnerEvents, onSuccess, handleClose]);
+
 const sendRunnerEvents = useCallback(async () => {
   if (!combinedRequest) {
     console.warn("combinedRequest이 없어서 전송을 스킵합니다.");
     return;
   }
 
-  // snapshot에서 playId만 꺼냄 (절대 다른 키로 대체하지 않음)
+  // snapshot에서 playId만 꺼냄
   const rawSnapshot = localStorage.getItem("snapshot");
   if (!rawSnapshot) {
-    const msg =
-      "localStorage에 snapshot이 없어 runner-events 요청을 보낼 수 없습니다.";
+    const msg = "localStorage에 snapshot이 없어 runner-events 요청을 보낼 수 없습니다.";
     console.error(msg);
     throw new Error(msg);
   }
 
-  let errorFlag = false;
   let playIdValue: unknown = null;
   try {
     const parsed = JSON.parse(rawSnapshot);
-    errorFlag = !!parsed?.snapshot?.inningStats?.errorFlag;
     playIdValue = parsed.snapshot?.playId ?? null;
   } catch (e) {
     console.warn("snapshot JSON 파싱 실패:", e);
   }
 
-  // ⛔️ 여기서 preflight: PATCH 전에 차단
-  if (errorFlag) {
-    const hasBB = (arr?: RunnerLogEntry[]) =>
-      (arr ?? []).some((e) => e.startBase === "B" && e.endBase === "B");
-
-    const virtualExists =
-      Array.isArray(combinedRequest.virtual) &&
-      combinedRequest.virtual.length > 0;
-
-    const hasBBActual = hasBB(combinedRequest.actual);
-    const hasBBVirtual = hasBB(combinedRequest.virtual);
-
-    // 1) 가상 이동 자체가 비어있는 경우
-    if (!virtualExists) {
-      alert("이닝의 재구성을 해주세요");
-      const err: any = new Error("PRE_FLIGHT_NO_VIRTUAL");
-      err.code = "PRE_FLIGHT_BLOCK";
-      err.reason = "NO_VIRTUAL";
-      throw err; // 🚫 여기서 중단
-    }
-
-    // 2) B→B 항목이 포함된 경우 (actual/virtual 각각 다른 문구)
-    if (hasBBActual || hasBBVirtual) {
-      const target = hasBBActual ? "실제 기록(actual)" : "재구성(virtual)";
-      alert(`타자를 먼저 이동해주세요`);
-      const err: any = new Error("PRE_FLIGHT_HAS_BB");
-      err.code = "PRE_FLIGHT_BLOCK";
-      err.reason = hasBBActual ? "HAS_BB_ACTUAL" : "HAS_BB_VIRTUAL";
-      throw err; // �� 여기서 중단
-    }
-  }
-  // ⛔️ preflight 끝 — 이 아래로 내려오면 유효하므로 PATCH/POST 진행
-
   if (playIdValue == null) {
-    const msg =
-      "localStorage의 snapshot에서 snapshot.playId를 찾을 수 없어 runner-events 요청을 보낼 수 없습니다.";
+    const msg = "localStorage의 snapshot에서 snapshot.playId를 찾을 수 없어 runner-events 요청을 보낼 수 없습니다.";
     console.error(msg);
     throw new Error(msg);
   }
@@ -1756,10 +2024,6 @@ const sendRunnerEvents = useCallback(async () => {
     } catch {
       plateAppearanceResult = rawPlateAppearance;
     }
-  } else {
-    console.warn(
-      "localStorage에 plateAppearanceResult가 없습니다. PATCH body를 빈 객체로 보냅니다."
-    );
   }
 
   // 1. PATCH /plays/{playId}/result 먼저
@@ -1770,10 +2034,7 @@ const sendRunnerEvents = useCallback(async () => {
     patchRes = await API.patch(patchUrl, plateAppearanceResult ?? {});
     console.log("PATCH /result 응답:", {
       status: (patchRes as any)?.status,
-      data:
-        typeof (patchRes as any)?.data !== "undefined"
-          ? (patchRes as any).data
-          : patchRes,
+      data: typeof (patchRes as any)?.data !== "undefined" ? (patchRes as any).data : patchRes,
     });
   } catch (err) {
     console.error("PATCH /result 실패:", err);
@@ -1785,54 +2046,44 @@ const sendRunnerEvents = useCallback(async () => {
   const postUrl = `/plays/${encodedPlayId}/runner-events`;
   let postRes;
   try {
-    // 전송 직전에만 startBase === endBase인 entry 제거
-    const sanitizeCombinedRequest = (
-      req: CombinedRequest
-    ): CombinedRequest => {
-      const filter = (entries: RunnerLogEntry[] = []) =>
-        entries.filter((entry) => entry.startBase !== entry.endBase);
-
-      const actual = filter(req.actual);
-      const virtual =
-        req.virtual && req.virtual.length > 0
-          ? filter(req.virtual)
-          : undefined;
-
-      return {
-        phase: req.phase,
-        actual,
-        ...(virtual ? { virtual } : {}),
-      };
-    };
-
-    const finalRequest = sanitizeCombinedRequest(combinedRequest);
-    console.log(
-      "runner-events POST 요청:",
-      postUrl,
-      JSON.stringify(finalRequest, null, 2)
-    );
-    postRes = await API.post(postUrl, finalRequest);
+    console.log("runner-events POST 요청:", postUrl, JSON.stringify(combinedRequest, null, 2));
+    postRes = await API.post(postUrl, combinedRequest);
 
     console.log("runner-events POST 응답:", {
       status: (postRes as any)?.status,
-      data:
-        typeof (postRes as any)?.data !== "undefined"
-          ? (postRes as any).data
-          : postRes,
+      data: typeof (postRes as any)?.data !== "undefined" ? (postRes as any).data : postRes,
     });
 
-    // �� 새로운 데이터를 모달 내부 상태에 반영
-    // const newSnapshotData = postRes.data;
-    // setSnapshotData(newSnapshotData);
-       // 🆕 새로운 데이터를 localStorage에 저장하고 커스텀 이벤트 발생
-       const newSnapshotData = postRes.data;
-       localStorage.setItem("snapshot", JSON.stringify(newSnapshotData));
-        // �� 커스텀 이벤트 발생 (같은 탭에서 localStorage 변경 감지용)
-    window.dispatchEvent(new CustomEvent('localStorageChange', {
-      detail: { newData: newSnapshotData }
-    }));
+    // 🆕 무식하게 API 응답으로 모든 상태 덮어쓰기
+    const newSnapshotData = postRes.data;
     
-    // �� 새로운 타자 정보 업데이트
+    // 1) localStorage 업데이트
+    localStorage.setItem("snapshot", JSON.stringify(newSnapshotData));
+    
+    // 2) 모달 내부 상태 완전 초기화
+    setSnapshotData(newSnapshotData);
+    
+    // 3) 모든 배지 상태 초기화
+    setBadgeSnaps(
+      badgeConfigsForModal.reduce((acc, c) => {
+        acc[c.id] = null;
+        return acc;
+      }, {} as Record<string, SnapInfo | null>)
+    );
+    
+    // 4) 모든 매핑 상태 초기화
+    setRunnerInfoByBadgeActual({});
+    setRunnerInfoByBadgeVirtual({});
+    setBaseToBadgeIdActual({});
+    setBaseToBadgeIdVirtual({});
+    setOutBadgesActual(new Set());
+    setOutBadgesVirtual(new Set());
+    setHomeSnappedBadgesActual(new Set());
+    setHomeSnappedBadgesVirtual(new Set());
+    setFinishedBadgesActual(new Set());
+    setFinishedBadgesVirtual(new Set());
+    
+    // 5) 타자 정보 업데이트
     const newBatterName = 
       newSnapshotData?.snapshot?.currentAtBat?.batter?.name ??
       newSnapshotData?.currentAtBat?.batter?.name ??
@@ -1843,15 +2094,55 @@ const sendRunnerEvents = useCallback(async () => {
       null;
     setCurrentBatterName(newBatterName);
     setCurrentBatterId(newBatterId);
-
-    // 🆕 새로운 데이터로 syncRunnersOnBase 실행
-    // 다음 프레임에서 실행하여 상태 업데이트가 완료된 후 동작하도록 함
-    requestAnimationFrame(() => {
-      syncRunnersOnBase();
+    
+    // 6) 새로운 데이터로 주자 배지 다시 매핑
+    const runners = newSnapshotData?.snapshot?.inningStats?.actual?.runnersOnBase ?? [];
+    console.log("🆕 새로운 주자 데이터:", runners);
+    
+    // 7) 주자 배지에 직접 매핑
+    const newRunnerInfo: Record<string, { runnerId: number; name: string }> = {};
+    const newBaseToBadgeId: Record<number, string> = {};
+    
+    // 사용 가능한 주자 배지들 (타자 배지 제외)
+    const availableRunnerBadges = badgeConfigsForModal
+      .filter(cfg => !cfg.id.startsWith("black-badge") && cfg.id !== batterWhiteBadgeId)
+      .map(cfg => cfg.id);
+    
+    runners.forEach((runner: any, index: number) => {
+      if (index < availableRunnerBadges.length) {
+        const badgeId = availableRunnerBadges[index];
+        newRunnerInfo[badgeId] = { runnerId: runner.id, name: runner.name };
+        newBaseToBadgeId[runner.base] = badgeId;
+        
+        // 베이스 위치에 스냅
+        const baseMap: Record<number, BaseId> = {
+          1: "first-base",
+          2: "second-base", 
+          3: "third-base",
+        };
+        const baseId = baseMap[runner.base];
+        if (baseId) {
+          setBadgeSnaps(prev => ({
+            ...prev,
+            [badgeId]: {
+              base: baseId,
+              pos: { xPct: 0, yPct: 0 } // 실제 위치는 나중에 계산
+            }
+          }));
+        }
+      }
     });
-
+    
+    // 8) 새로운 매핑 적용
+    setRunnerInfoByBadgeActual(newRunnerInfo);
+    setBaseToBadgeIdActual(newBaseToBadgeId);
+    
+    console.log("🆕 새로운 매핑:", { newRunnerInfo, newBaseToBadgeId });
+    
     // 부모 컴포넌트에도 알림
-    updateSnapshot?.(newSnapshotData);
+     // �� 무식하게: API 응답을 저장하고 화면 리로드
+     updateSnapshot(postRes.data);
+     window.location.reload();
   } catch (err) {
     console.error("runner-events 전송 실패:", err);
     alert("runner-events 전송 실패");
@@ -1859,28 +2150,24 @@ const sendRunnerEvents = useCallback(async () => {
   }
 
   return { patchRes, postRes };
-}, [combinedRequest, syncRunnersOnBase, updateSnapshot]);
+}, [combinedRequest, updateSnapshot, batterWhiteBadgeId, badgeConfigsForModal]);
 
-
-
-
-  const handleSubmit = useCallback(async () => {
-    setIsSubmitting(true);
-    try {
-      await sendRunnerEvents();
-      clearAllSnapsAndExitReconstructMode();
-      await onSuccess?.();
-      resetWhiteBadges();
-      handleClose();
-    } catch (e) {
-      // ✋ preflight 차단 에러는 그냥 삼켜서 모달 유지
-      if (e?.code !== "PRE_FLIGHT_BLOCK") {
-        setError(e as Error); // 진짜 오류만 ErrorAlert로 노출
-      }
-    } finally {
-      setIsSubmitting(false);
+const handleSubmit = useCallback(async () => {
+  setIsSubmitting(true);
+  try {
+    await sendRunnerEvents();
+    clearAllSnapsAndExitReconstructMode();
+    await onSuccess?.();
+    handleClose();
+  } catch (e) {
+    if (e?.code !== "PRE_FLIGHT_BLOCK") {
+      setError(e as Error);
     }
-  }, [sendRunnerEvents, onSuccess, handleClose]);
+  } finally {
+    setIsSubmitting(false);
+  }
+}, [sendRunnerEvents, onSuccess, handleClose]);
+
 
   /**
    * 특정 배지를 제외하고, 주어진 베이스에 다른 배지가 이미 스냅되어 있는지 검사
