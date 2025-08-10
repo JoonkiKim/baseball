@@ -71,7 +71,7 @@ export type GroundRecordModalHandle = {
 
 interface GroundRecordModalProps {
   onSuccess?: () => Promise<void>;
-  updateSnapshot?: Dispatch<any>;
+  updateSnapshot?: (next: any) => void;
 }
 
 const GroundRecordModal = forwardRef<
@@ -725,21 +725,26 @@ const GroundRecordModal = forwardRef<
   );
 
   // 주자 위치 시키는 로직
+  // const getRunnersOnBase = useCallback(() => {
+  //   if (!snapshotData) return [];
+
+  //   const actual =
+  //     snapshotData?.snapshot?.inningStats?.actual?.runnersOnBase ??
+  //     snapshotData?.inningStats?.actual?.runnersOnBase ??
+  //     [];
+  //   const virtual =
+  //     snapshotData?.snapshot?.inningStats?.virtual?.runnersOnBase ??
+  //     snapshotData?.inningStats?.virtual?.runnersOnBase ??
+  //     [];
+
+  //   return reconstructMode ? virtual : actual;
+  // }, [snapshotData, reconstructMode]);
+  const snap = (snapshotData as any)?.snapshot ?? snapshotData ?? null;
   const getRunnersOnBase = useCallback(() => {
-    if (!snapshotData) return [];
-
-    const actual =
-      snapshotData?.snapshot?.inningStats?.actual?.runnersOnBase ??
-      snapshotData?.inningStats?.actual?.runnersOnBase ??
-      [];
-    const virtual =
-      snapshotData?.snapshot?.inningStats?.virtual?.runnersOnBase ??
-      snapshotData?.inningStats?.virtual?.runnersOnBase ??
-      [];
-
+    const actual = snap?.inningStats?.actual?.runnersOnBase ?? [];
+    const virtual = snap?.inningStats?.virtual?.runnersOnBase ?? [];
     return reconstructMode ? virtual : actual;
-  }, [snapshotData, reconstructMode]);
-
+  }, [snap, reconstructMode]);
   // 타자 주자 로그 찍는
 
   // 아래 위치: "// 타자 주자 로그 찍는 useEffect" 주석 바로 아래에 넣어주면 됨
@@ -1467,14 +1472,14 @@ const GroundRecordModal = forwardRef<
 
   // 확인 버튼 핸들러
 
-  const saveAndReloadSnapshot = useCallback(
-    (next: any) => {
-      localStorage.setItem("snapshot", JSON.stringify(next));
-      loadSnapshot(); // 항상 setSnapshotData까지 따라오도록
-      updateSnapshot?.(next); // 부모도 쓰고 있으면 그대로 알림
-    },
-    [loadSnapshot, updateSnapshot]
-  );
+  // const saveAndReloadSnapshot = useCallback(
+  //   (next: any) => {
+  //     localStorage.setItem("snapshot", JSON.stringify(next));
+  //     loadSnapshot(); // 항상 setSnapshotData까지 따라오도록
+  //     updateSnapshot?.(next); // 부모도 쓰고 있으면 그대로 알림
+  //   },
+  //   [loadSnapshot, updateSnapshot]
+  // );
   const clearAllSnapsAndExitReconstructMode = useCallback(() => {
     unstable_batchedUpdates(() => {
       setReconstructMode(false);
@@ -1661,7 +1666,8 @@ const GroundRecordModal = forwardRef<
 
       // localStorage.setItem(`snapshot`, JSON.stringify(postRes.data));
       // updateSnapshot(postRes.data);
-      saveAndReloadSnapshot(postRes.data);
+      // saveAndReloadSnapshot(postRes.data);
+      updateSnapshot?.(postRes.data);
     } catch (err) {
       console.error("runner-events 전송 실패:", err);
       alert("runner-events 전송 실패");
