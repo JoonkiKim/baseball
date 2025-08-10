@@ -154,111 +154,59 @@ export default function FinalGameRecordPage() {
   // scoreboard DOM 컨테이너 ref
   const scoreboardRef = useRef<HTMLDivElement>(null);
 
-  // useEffect(() => {
-  //   if (!recordId) return;
-  //   API.get(`/games/${recordId}/results`)
-  //     .then((response) => {
-  //       const { scoreboard, teamSummary, batterStats, pitcherStats } =
-  //         response.data;
-  //       console.log(recordId);
-  //       console.log("응답이 왔어요!", response.data);
-  //       // 마지막 이닝 정보 저장
-  //       const lastEntry = scoreboard[scoreboard.length - 1] || {
-  //         inning: 0,
-  //         inningHalf: "",
-  //       };
-  //       lastEntryRef.current = lastEntry;
-
-  //       // console.log 메시지
-  //       // const { inning, inningHalf } = lastEntry;
-  //       // if (inningHalf === "TOP") {
-  //       //   console.log(`${inning}회초에 공격끝남`);
-  //       // } else {
-  //       //   console.log(`${inning}회말에 공격끝남`);
-  //       // }
-
-  //       // 팀 이름 셋팅
-  //       setTeamAName(teamSummary.away.name.substring(0, 3));
-  //       setTeamBName(teamSummary.home.name.substring(0, 3));
-
-  //       // 스코어보드 배열 복사
-  //       const newTeamAScores = [...defaultTeamAScores];
-  //       const newTeamBScores = [...defaultTeamBScores];
-
-  //       // scoreboard 데이터 채우기
-  //       scoreboard.forEach((item: any) => {
-  //         const idx = item.inning - 1;
-  //         if (item.inningHalf === "TOP") {
-  //           newTeamAScores[idx] = String(item.runs);
-  //         } else {
-  //           newTeamBScores[idx] = String(item.runs);
-  //         }
-  //       });
-
-  //       // 최종 R/H 칸 채우기
-  //       newTeamAScores[7] = String(teamSummary.home.runs);
-  //       newTeamAScores[8] = String(teamSummary.away.hits);
-
-  //       newTeamBScores[7] = String(teamSummary.away.runs);
-  //       newTeamBScores[8] = String(teamSummary.home.hits);
-
-  //       setTeamAScores(newTeamAScores);
-  //       setTeamBScores(newTeamBScores);
-
-  //       // 타자/투수 기록
-  //       setAwayBatters(batterStats.away);
-  //       setHomeBatters(batterStats.home);
-  //       setAwayPitchers(pitcherStats.away);
-  //       setHomePitchers(pitcherStats.home);
-  //     })
-  //     .catch((error) => {
-  //       const errorCode = error?.response?.data?.errorCode; // 에러코드 추출
-  //       console.error(error, "errorCode:", errorCode);
-  //       console.error("API GET 요청 에러:", error);
-  //     });
-  // }, [recordId]);
-
-  // 렌더 후 DOM 조작: “끝난 이닝” 반대 half 칸에 "-" 삽입
-
-  // ➊ Fetch results callback
+  
+  
   const fetchResults = useCallback(async () => {
     if (!recordId) return;
     try {
       const { data } = await API.get(`/games/${recordId}/result`);
       const { scoreboard, teamSummary, batterStats, pitcherStats } = data;
-      // 마지막 이닝 정보 저장
-      const lastEntry = scoreboard[scoreboard.length - 1] || {
-        inning: 0,
-        inningHalf: "",
-      };
-      lastEntryRef.current = lastEntry;
-      // Update scoreboard
+      
+      // 🎯 새로운 scoreboard 구조 처리
       const newA = Array(9).fill("");
       const newB = Array(9).fill("");
-      scoreboard.forEach((item: any) => {
-        const idx = item.inning - 1;
-        if (item.inningHalf === "TOP") newA[idx] = String(item.runs);
-        else newB[idx] = String(item.runs);
-      });
-
-      // 마지막 이닝이 TOP이면 홈팀(배열 B)에 "-" 표시
-      if (lastEntry.inningHalf === "TOP" && lastEntry.inning > 0) {
-        newB[lastEntry.inning - 1] = "-";
+      
+      // 1~7이닝 점수 처리
+      if (scoreboard?.innings) {
+        scoreboard.innings.forEach((inning: any) => {
+          const idx = inning.inning - 1; // 0-based index
+          if (idx >= 0 && idx < 7) {
+            newA[idx] = String(inning.away ?? "");
+            newB[idx] = String(inning.home ?? "");
+          }
+        });
       }
-      newA[7] = String(teamSummary.away.runs);
-      newA[8] = String(teamSummary.away.hits);
-      newB[7] = String(teamSummary.home.runs);
-      newB[8] = String(teamSummary.home.hits);
+      
+      // R, H 컬럼 처리 (scoreboard.totals 사용)
+      if (scoreboard?.totals) {
+        newA[7] = String(scoreboard.totals.away?.R ?? "");
+        newA[8] = String(scoreboard.totals.away?.H ?? "");
+        newB[7] = String(scoreboard.totals.home?.R ?? "");
+        newB[8] = String(scoreboard.totals.home?.H ?? "");
+      }
+      
+      // 마지막 이닝 정보 저장 (기존 로직 유지)
+      const lastInning = scoreboard?.innings?.[scoreboard.innings.length - 1];
+      if (lastInning) {
+        lastEntryRef.current = {
+          inning: lastInning.inning,
+          inningHalf: lastInning.away > lastInning.home ? "TOP" : "BOT"
+        };
+      }
+      
       setTeamAScores(newA);
       setTeamBScores(newB);
-      setTeamAName(teamSummary.away.name);
-      setTeamBName(teamSummary.home.name);
+      
+      // 팀 이름 설정 (teamSummary 사용)
+      setTeamAName(teamSummary?.away?.name ?? "");
+      setTeamBName(teamSummary?.home?.name ?? "");
 
-      // Update stats
-      setAwayBatters(batterStats.away);
-      setHomeBatters(batterStats.home);
-      setAwayPitchers(pitcherStats.away);
-      setHomePitchers(pitcherStats.home);
+      // 선수 기록 설정
+      setAwayBatters(batterStats?.away ?? []);
+      setHomeBatters(batterStats?.home ?? []);
+      setAwayPitchers(pitcherStats?.away ?? []);
+      setHomePitchers(pitcherStats?.home ?? []);
+      
       console.log("결과요청됨");
       console.log(data);
     } catch (e) {
@@ -307,18 +255,22 @@ export default function FinalGameRecordPage() {
 
   // (2) 타자 칸 클릭 → 모달 열기 (mode="batter")
   const handleBatterClick = (player: any) => {
-    setSelectedStatId(player.batterGameStatsId);
+    setSelectedStatId(player.id);
     const msg =
-      `id: ${player.batterGameStatsId}\n` +
-      `플레이어: ${player.playerName}\n` +
-      `타석: ${player.PA}\n` +
-      `타수: ${player.AB}\n` +
-      `안타: ${player["H"]}\n` +
-      `볼넷/사구: ${player.BB}\n` +
-      `2루타: ${player["2B"]}\n` +
-      `3루타: ${player["3B"]}\n` +
-      `홈런: ${player["HR"]}\n` +
-      `희플: ${player["SAC"]}\n`;
+    `id: ${player.id}\n` +
+    `플레이어: ${player.name}\n` +
+    `타석: ${player.PA}\n` +
+    `타수: ${player.AB}\n` +
+    `안타: ${player["H"]}\n` +
+    `2루타: ${player["2B"]}\n` +
+    `3루타: ${player["3B"]}\n` +
+    `홈런: ${player["HR"]}\n` +
+    `타점: ${player["RBI"]}\n` +
+    `득점: ${player["R"]}\n` +
+    `볼넷: ${player.BB}\n` +
+    `삼진: ${player["SO"]}\n` +
+    `희플: ${player["SH"]}\n` +
+    `희번: ${player["SF"]}`;
     setAlertMessage(msg);
     setModalMode("batter");
     setSelectedCell({ cellValue: "", team: "A", cellIndex: 0 });
@@ -327,11 +279,15 @@ export default function FinalGameRecordPage() {
 
   // (3) 투수 칸 클릭 → 모달 열기 (mode="pitcher")
   const handlePitcherClick = (pitcher: any) => {
-    setSelectedStatId(pitcher.pitcherGameStatsId);
+    setSelectedStatId(pitcher.id);
     const msg =
-      `id: ${pitcher.pitcherGameStatsId}\n` +
-      `플레이어: ${pitcher.playerName}\n` +
-      `K: ${pitcher.K}`;
+    `id: ${pitcher.id}\n` +
+    `플레이어: ${pitcher.name}\n` +
+    `이닝: ${pitcher.IP}\n` +
+    `실점: ${pitcher.R}\n` +
+    `자책: ${pitcher.ER}\n` +
+    `삼진: ${pitcher.K}\n` +
+    `볼넷: ${pitcher.BB}`;
     setAlertMessage(msg);
     setModalMode("pitcher");
     setSelectedCell({ cellValue: "", team: "A", cellIndex: 0 });
@@ -388,14 +344,13 @@ export default function FinalGameRecordPage() {
           ))}
         </InningHeader>
 
-        {/* 팀 A (원정) */}
+        {/* 팀 A (원정) - away 팀 */}
         <TeamRow className="team-row">
           <TeamNameCell>{teamAName.slice(0, 3)}</TeamNameCell>
           {teamAScores.map((score, idx) => (
             <TeamScoreCell
               key={idx}
               className="score-cell"
-              // onClick={() => handleScoreCellClick(score, "A", idx)}
               onClick={
                 isFinalized
                   ? undefined
@@ -407,14 +362,13 @@ export default function FinalGameRecordPage() {
           ))}
         </TeamRow>
 
-        {/* 팀 B (홈) */}
+        {/* 팀 B (홈) - home 팀 */}
         <TeamRow className="team-row">
           <TeamNameCell>{teamBName.slice(0, 3)}</TeamNameCell>
           {teamBScores.map((score, idx) => (
             <TeamScoreCell
               key={idx}
               className="score-cell"
-              // onClick={() => handleScoreCellClick(score, "B", idx)}
               onClick={
                 isFinalized
                   ? undefined
@@ -439,106 +393,143 @@ export default function FinalGameRecordPage() {
               <th>타석</th>
               <th>타수</th>
               <th>안타</th>
-              <th>볼넷</th>
               <th>2루타</th>
               <th>3루타</th>
               <th>홈런</th>
+              <th>타점</th>
+              <th>득점</th>
+              <th>볼넷</th>
+              <th>삼진</th>
               <th>희플</th>
+              <th>희번</th>
+              
             </tr>
           </thead>
           <tbody>
             {awayBatters.map((player, idx) => (
-              <tr key={player.batterGameStatsId}>
+              <tr key={player.id || idx}>
                 <td>{getDisplayOrder(idx, awayBatters)}</td>
-                <td>{player.playerName}</td>
+                <td>{player.name}</td>
                 <td>
-                  <EditableInput
-                    type="number"
-                    value={player.PA}
-                    readOnly
-                    // onClick={() => handleBatterClick(player)}
-                    onClick={
-                      isFinalized ? undefined : () => handleBatterClick(player)
-                    }
-                  />
-                </td>
-                <td>
-                  <EditableInput
-                    type="number"
-                    value={player.AB}
-                    readOnly
-                    // onClick={() => handleBatterClick(player)}
-                    onClick={
-                      isFinalized ? undefined : () => handleBatterClick(player)
-                    }
-                  />
-                </td>
-                <td>
-                  <EditableInput
-                    type="number"
-                    value={player["H"]}
-                    readOnly
-                    // onClick={() => handleBatterClick(player)}
-                    onClick={
-                      isFinalized ? undefined : () => handleBatterClick(player)
-                    }
-                  />
-                </td>
-                <td>
-                  <EditableInput
-                    type="number"
-                    value={player.BB}
-                    readOnly
-                    // onClick={() => handleBatterClick(player)}
-                    onClick={
-                      isFinalized ? undefined : () => handleBatterClick(player)
-                    }
-                  />
-                </td>
-                <td>
-                  <EditableInput
-                    type="number"
-                    value={player["2B"]}
-                    readOnly
-                    // onClick={() => handleBatterClick(player)}
-                    onClick={
-                      isFinalized ? undefined : () => handleBatterClick(player)
-                    }
-                  />
-                </td>
-                <td>
-                  <EditableInput
-                    type="number"
-                    value={player["3B"]}
-                    readOnly
-                    // onClick={() => handleBatterClick(player)}
-                    onClick={
-                      isFinalized ? undefined : () => handleBatterClick(player)
-                    }
-                  />
-                </td>
-                <td>
-                  <EditableInput
-                    type="number"
-                    value={player.HR}
-                    readOnly
-                    // onClick={() => handleBatterClick(player)}
-                    onClick={
-                      isFinalized ? undefined : () => handleBatterClick(player)
-                    }
-                  />
-                </td>
-                <td>
-                  <EditableInput
-                    type="number"
-                    value={player.SAC}
-                    readOnly
-                    // onClick={() => handleBatterClick(player)}
-                    onClick={
-                      isFinalized ? undefined : () => handleBatterClick(player)
-                    }
-                  />
-                </td>
+            <EditableInput
+              type="number"
+              value={player.PA || 0}
+              readOnly
+              onClick={
+                isFinalized ? undefined : () => handleBatterClick(player)
+              }
+            />
+          </td>
+          <td>
+            <EditableInput
+              type="number"
+              value={player.AB || 0}
+              readOnly
+              onClick={
+                isFinalized ? undefined : () => handleBatterClick(player)
+              }
+            />
+          </td>
+          <td>
+            <EditableInput
+              type="number"
+              value={player.H || 0}
+              readOnly
+              onClick={
+                isFinalized ? undefined : () => handleBatterClick(player)
+              }
+            />
+          </td>
+          <td>
+            <EditableInput
+              type="number"
+              value={player.BB || 0}
+              readOnly
+              onClick={
+                isFinalized ? undefined : () => handleBatterClick(player)
+              }
+            />
+          </td>
+          <td>
+            <EditableInput
+              type="number"
+              value={player["2B"] || 0}
+              readOnly
+              onClick={
+                isFinalized ? undefined : () => handleBatterClick(player)
+              }
+            />
+          </td>
+          <td>
+            <EditableInput
+              type="number"
+              value={player["3B"] || 0}
+              readOnly
+              onClick={
+                isFinalized ? undefined : () => handleBatterClick(player)
+              }
+            />
+          </td>
+          <td>
+            <EditableInput
+              type="number"
+              value={player.HR || 0}
+              readOnly
+              onClick={
+                isFinalized ? undefined : () => handleBatterClick(player)
+              }
+            />
+          </td>
+          <td>
+            <EditableInput
+              type="number"
+              value={player.RBI || 0}
+              readOnly
+              onClick={
+                isFinalized ? undefined : () => handleBatterClick(player)
+              }
+            />
+          </td>
+          <td>
+            <EditableInput
+              type="number"
+              value={player.R || 0}
+              readOnly
+              onClick={
+                isFinalized ? undefined : () => handleBatterClick(player)
+              }
+            />
+          </td>
+          <td>
+            <EditableInput
+              type="number"
+              value={player.SO || 0}
+              readOnly
+              onClick={
+                isFinalized ? undefined : () => handleBatterClick(player)
+              }
+            />
+          </td>
+          <td>
+            <EditableInput
+              type="number"
+              value={player.SH || 0}
+              readOnly
+              onClick={
+                isFinalized ? undefined : () => handleBatterClick(player)
+              }
+            />
+          </td>
+          <td>
+            <EditableInput
+              type="number"
+              value={player.SF || 0}
+              readOnly
+              onClick={
+                isFinalized ? undefined : () => handleBatterClick(player)
+              }
+            />
+          </td>
               </tr>
             ))}
           </tbody>
@@ -553,27 +544,79 @@ export default function FinalGameRecordPage() {
             <tr>
               <th></th>
               <th>이름</th>
+              <th>이닝</th>
+              <th>실점</th>
+              <th>자책</th>
               <th>삼진</th>
+              <th>볼넷</th>
+          
             </tr>
           </thead>
           <tbody>
             {awayPitchers.map((pitcher, idx) => (
-              <tr key={pitcher.pitcherGameStatsId}>
+              <tr key={pitcher.id || idx}>
                 <td>{idx === 0 ? "" : "↑"}</td>
-                <td>{pitcher.playerName}</td>
+                <td>{pitcher.name}</td>
                 <td>
-                  <EditableInput
-                    type="number"
-                    value={pitcher.K}
-                    readOnly
-                    // onClick={() => handlePitcherClick(pitcher)}
-                    onClick={
-                      isFinalized
-                        ? undefined
-                        : () => handlePitcherClick(pitcher)
-                    }
-                  />
-                </td>
+            <EditableInput
+              type="number"
+              value={pitcher.IP || 0}
+              readOnly
+              onClick={
+                isFinalized
+                  ? undefined
+                  : () => handlePitcherClick(pitcher)
+              }
+            />
+          </td>
+          <td>
+            <EditableInput
+              type="number"
+              value={pitcher.R || 0}
+              readOnly
+              onClick={
+                isFinalized
+                  ? undefined
+                  : () => handlePitcherClick(pitcher)
+              }
+            />
+          </td>
+          <td>
+            <EditableInput
+              type="number"
+              value={pitcher.ER || 0}
+              readOnly
+              onClick={
+                isFinalized
+                  ? undefined
+                  : () => handlePitcherClick(pitcher)
+              }
+            />
+          </td>
+          <td>
+            <EditableInput
+              type="number"
+              value={pitcher.K || 0}
+              readOnly
+              onClick={
+                isFinalized
+                  ? undefined
+                  : () => handlePitcherClick(pitcher)
+              }
+            />
+          </td>
+          <td>
+            <EditableInput
+              type="number"
+              value={pitcher.BB || 0}
+              readOnly
+              onClick={
+                isFinalized
+                  ? undefined
+                  : () => handlePitcherClick(pitcher)
+              }
+            />
+          </td>
               </tr>
             ))}
           </tbody>
@@ -592,106 +635,142 @@ export default function FinalGameRecordPage() {
               <th>타석</th>
               <th>타수</th>
               <th>안타</th>
-              <th>볼넷</th>
               <th>2루타</th>
               <th>3루타</th>
               <th>홈런</th>
+              <th>타점</th>
+              <th>득점</th>
+              <th>볼넷</th>
+              <th>삼진</th>
               <th>희플</th>
+              <th>희번</th>
             </tr>
           </thead>
           <tbody>
             {homeBatters.map((player, idx) => (
-              <tr key={player.batterGameStatsId}>
+              <tr key={player.id || idx}>
                 <td>{getDisplayOrder(idx, homeBatters)}</td>
-                <td>{player.playerName}</td>
+                <td>{player.name}</td>
                 <td>
-                  <EditableInput
-                    type="number"
-                    value={player.PA}
-                    readOnly
-                    // onClick={() => handleBatterClick(player)}
-                    onClick={
-                      isFinalized ? undefined : () => handleBatterClick(player)
-                    }
-                  />
-                </td>
-                <td>
-                  <EditableInput
-                    type="number"
-                    value={player.AB}
-                    readOnly
-                    // onClick={() => handleBatterClick(player)}
-                    onClick={
-                      isFinalized ? undefined : () => handleBatterClick(player)
-                    }
-                  />
-                </td>
-                <td>
-                  <EditableInput
-                    type="number"
-                    value={player["H"]}
-                    readOnly
-                    // onClick={() => handleBatterClick(player)}
-                    onClick={
-                      isFinalized ? undefined : () => handleBatterClick(player)
-                    }
-                  />
-                </td>
-                <td>
-                  <EditableInput
-                    type="number"
-                    value={player.BB}
-                    readOnly
-                    // onClick={() => handleBatterClick(player)}
-                    onClick={
-                      isFinalized ? undefined : () => handleBatterClick(player)
-                    }
-                  />
-                </td>
-                <td>
-                  <EditableInput
-                    type="number"
-                    value={player["2B"]}
-                    readOnly
-                    // onClick={() => handleBatterClick(player)}
-                    onClick={
-                      isFinalized ? undefined : () => handleBatterClick(player)
-                    }
-                  />
-                </td>
-                <td>
-                  <EditableInput
-                    type="number"
-                    value={player["3B"]}
-                    readOnly
-                    // onClick={() => handleBatterClick(player)}
-                    onClick={
-                      isFinalized ? undefined : () => handleBatterClick(player)
-                    }
-                  />
-                </td>
-                <td>
-                  <EditableInput
-                    type="number"
-                    value={player.HR}
-                    readOnly
-                    // onClick={() => handleBatterClick(player)}
-                    onClick={
-                      isFinalized ? undefined : () => handleBatterClick(player)
-                    }
-                  />
-                </td>
-                <td>
-                  <EditableInput
-                    type="number"
-                    value={player.SAC}
-                    readOnly
-                    // onClick={() => handleBatterClick(player)}
-                    onClick={
-                      isFinalized ? undefined : () => handleBatterClick(player)
-                    }
-                  />
-                </td>
+            <EditableInput
+              type="number"
+              value={player.PA || 0}
+              readOnly
+              onClick={
+                isFinalized ? undefined : () => handleBatterClick(player)
+              }
+            />
+          </td>
+          <td>
+            <EditableInput
+              type="number"
+              value={player.AB || 0}
+              readOnly
+              onClick={
+                isFinalized ? undefined : () => handleBatterClick(player)
+              }
+            />
+          </td>
+          <td>
+            <EditableInput
+              type="number"
+              value={player.H || 0}
+              readOnly
+              onClick={
+                isFinalized ? undefined : () => handleBatterClick(player)
+              }
+            />
+          </td>
+          <td>
+            <EditableInput
+              type="number"
+              value={player.BB || 0}
+              readOnly
+              onClick={
+                isFinalized ? undefined : () => handleBatterClick(player)
+              }
+            />
+          </td>
+          <td>
+            <EditableInput
+              type="number"
+              value={player["2B"] || 0}
+              readOnly
+              onClick={
+                isFinalized ? undefined : () => handleBatterClick(player)
+              }
+            />
+          </td>
+          <td>
+            <EditableInput
+              type="number"
+              value={player["3B"] || 0}
+              readOnly
+              onClick={
+                isFinalized ? undefined : () => handleBatterClick(player)
+              }
+            />
+          </td>
+          <td>
+            <EditableInput
+              type="number"
+              value={player.HR || 0}
+              readOnly
+              onClick={
+                isFinalized ? undefined : () => handleBatterClick(player)
+              }
+            />
+          </td>
+          <td>
+            <EditableInput
+              type="number"
+              value={player.RBI || 0}
+              readOnly
+              onClick={
+                isFinalized ? undefined : () => handleBatterClick(player)
+              }
+            />
+          </td>
+          <td>
+            <EditableInput
+              type="number"
+              value={player.R || 0}
+              readOnly
+              onClick={
+                isFinalized ? undefined : () => handleBatterClick(player)
+              }
+            />
+          </td>
+          <td>
+            <EditableInput
+              type="number"
+              value={player.SO || 0}
+              readOnly
+              onClick={
+                isFinalized ? undefined : () => handleBatterClick(player)
+              }
+            />
+          </td>
+          <td>
+            <EditableInput
+              type="number"
+              value={player.SH || 0}
+              readOnly
+              onClick={
+                isFinalized ? undefined : () => handleBatterClick(player)
+              }
+            />
+          </td>
+          <td>
+            <EditableInput
+              type="number"
+              value={player.SF || 0}
+              readOnly
+              onClick={
+                isFinalized ? undefined : () => handleBatterClick(player)
+              }
+            />
+          </td>
               </tr>
             ))}
           </tbody>
@@ -706,27 +785,78 @@ export default function FinalGameRecordPage() {
             <tr>
               <th></th>
               <th>이름</th>
+              <th>이닝</th>
+              <th>실점</th>
+              <th>자책</th>
               <th>삼진</th>
+              <th>볼넷</th>
             </tr>
           </thead>
           <tbody>
             {homePitchers.map((pitcher, idx) => (
-              <tr key={pitcher.pitcherGameStatsId}>
+              <tr key={pitcher.id || idx}>
                 <td>{idx === 0 ? "" : "↑"}</td>
-                <td>{pitcher.playerName}</td>
+                <td>{pitcher.name}</td>
                 <td>
-                  <EditableInput
-                    type="number"
-                    value={pitcher.K}
-                    readOnly
-                    // onClick={() => handlePitcherClick(pitcher)}
-                    onClick={
-                      isFinalized
-                        ? undefined
-                        : () => handlePitcherClick(pitcher)
-                    }
-                  />
-                </td>
+            <EditableInput
+              type="number"
+              value={pitcher.IP || 0}
+              readOnly
+              onClick={
+                isFinalized
+                  ? undefined
+                  : () => handlePitcherClick(pitcher)
+              }
+            />
+          </td>
+          <td>
+            <EditableInput
+              type="number"
+              value={pitcher.R || 0}
+              readOnly
+              onClick={
+                isFinalized
+                  ? undefined
+                  : () => handlePitcherClick(pitcher)
+              }
+            />
+          </td>
+          <td>
+            <EditableInput
+              type="number"
+              value={pitcher.ER || 0}
+              readOnly
+              onClick={
+                isFinalized
+                  ? undefined
+                  : () => handlePitcherClick(pitcher)
+              }
+            />
+          </td>
+          <td>
+            <EditableInput
+              type="number"
+              value={pitcher.K || 0}
+              readOnly
+              onClick={
+                isFinalized
+                  ? undefined
+                  : () => handlePitcherClick(pitcher)
+              }
+            />
+          </td>
+          <td>
+            <EditableInput
+              type="number"
+              value={pitcher.BB || 0}
+              readOnly
+              onClick={
+                isFinalized
+                  ? undefined
+                  : () => handlePitcherClick(pitcher)
+              }
+            />
+          </td>
               </tr>
             ))}
           </tbody>
@@ -758,9 +888,29 @@ export default function FinalGameRecordPage() {
           />
         )}
 
-      {authInfo.role === "UMPIRE" &&
+      {/* {authInfo.role === "UMPIRE" &&
         // && currentGameId !== null
         authInfo.gameIds.includes(Number(router.query.recordId)) &&
+        isScorePatchModalOpen &&
+        selectedCell && (
+          <ScorePatchModal
+            setIsModalOpen={setIsScorePatchModalOpen}
+            cellValue={selectedCell.cellValue}
+            team={selectedCell.team}
+            cellIndex={selectedCell.cellIndex}
+            mode={modalMode}
+            statId={selectedStatId}
+            alertMessage={alertMessage}
+            onSuccess={fetchResults}
+            // setError={setError}
+            // isSubmitting={isSubmitting}
+            // setIsSubmitting={setIsSubmitting}
+          />
+        )} */}
+
+{/* // 권한 제공 이후 모달 오픈 여부 바꾸기 */}
+
+{
         isScorePatchModalOpen &&
         selectedCell && (
           <ScorePatchModal

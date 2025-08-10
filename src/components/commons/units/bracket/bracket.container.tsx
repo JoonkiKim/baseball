@@ -672,7 +672,7 @@ export default function Bracket() {
 
   return (
     <BracketContainer>
-      <LargeTitle>2025 총장배 토너먼트 대진표</LargeTitle>
+      <LargeTitle>2025 스누나래 토너먼트 대진표</LargeTitle>
       <BrackGroundContainer>
         <svg
           viewBox="0 0 233 396"

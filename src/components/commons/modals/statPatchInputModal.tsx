@@ -105,13 +105,21 @@ IStatPatchInputModalProps) {
         타석: "PA",
         타수: "AB",
         안타: "H",
-        "볼넷/사구": "BB",
         "2루타": "2B",
         "3루타": "3B",
         홈런: "HR",
-        희플: "SAC",
+        타점: "RBI",
+        득점: "R",
+        볼넷: "BB",
+        삼진: "SO",
+        희플: "SH",
+        희번: "SF",
       };
-      const pitcherKeyMap: Record<string, string> = { 삼진: "K" };
+      const pitcherKeyMap: Record<string, string> = {  이닝: "IP",
+        실점: "R",
+        자책: "ER",
+        삼진: "K",
+        볼넷: "BB", };
 
       /* ❷ 키 변환하여 body 구성 */
       const { id: _omit, 플레이어, playerName, ...rest } = stat;
@@ -133,12 +141,12 @@ IStatPatchInputModalProps) {
           : mode === "pitcher"
           ? `/games/${router.query.recordId}/results/pitchers/${id}`
           : null;
-
+ 
       if (!url) {
         alert("수정에 실패하였습니다.");
         return;
       }
-
+      console.log("body", body)
       const res = await API.patch(
         url,
         body

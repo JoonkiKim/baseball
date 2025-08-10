@@ -2600,7 +2600,7 @@ export default function GameRecordPageV2() {
       );
       postRes = await API.post(postUrl, finalRequest);
       // ⬇️ 먼저 화면 상태를 싹 비움 (스냅샷 읽지 않음)
-      softResetWhiteBadges();
+      // softResetWhiteBadges();
       console.log("runner-events POST 응답:", {
         status: (postRes as any)?.status,
         data:
@@ -2608,13 +2608,19 @@ export default function GameRecordPageV2() {
             ? (postRes as any).data
             : postRes,
       });
+      
 
       // localStorage.setItem(`snapshot`, JSON.stringify(postRes.data));
       // // ② 상태도 즉시 갱신 (이 한 줄이 포인트!)
       // setSnapshotData(postRes.data);
       // saveAndReloadSnapshot(postRes.data);
+
+
+      localStorage.setItem('snapshot', JSON.stringify(postRes.data));
+window.dispatchEvent(new CustomEvent('localStorageChange', { detail: { key: 'snapshot' } }));
       updateSnapshot(postRes.data);
-      window.location.reload();
+      setSnapshotData(postRes.data);
+      // window.location.reload();
     } catch (err) {
       console.error("runner-events 전송 실패:", err);
       alert("runner-events 전송 실패");
@@ -2631,11 +2637,12 @@ export default function GameRecordPageV2() {
   const handleSubmit = useCallback(async () => {
     setIsSubmitting(true);
     try {
-      await sendRunnerEvents();
+      await sendRunnerEvents(); // 여기서 updateSnapshot만 수행
+      // await sendRunnerEvents();
       setReconstructMode(false);
       clearAllSnapsAndExitReconstructMode();
-      // bumpBadgesVersion();
-      resetWhiteBadges();
+      // // bumpBadgesVersion();
+      // resetWhiteBadges();
     } catch (e) {
       // ✋ preflight 차단 에러는 그냥 삼켜서 모달 유지
       if (e?.code !== "PRE_FLIGHT_BLOCK") {

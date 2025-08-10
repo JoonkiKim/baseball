@@ -817,7 +817,8 @@ console.log("🏠 finishedRunnerIds:", finishedRunnerIds);
     );
 
     // 5. baseToBadgeId 갱신
-    const newMap: Record<number, string> = { ...baseToBadgeId };
+    // const newMap: Record<number, string> = { ...baseToBadgeId };
+    const newMap: Record<number, string> = {}; 
     const usedBadges = new Set(Object.values(newMap));
 
     runners.forEach((runner: any) => {
@@ -830,9 +831,10 @@ console.log("🏠 finishedRunnerIds:", finishedRunnerIds);
       }
     });
 
-    if (JSON.stringify(newMap) !== JSON.stringify(baseToBadgeId)) {
-      setBaseToBadgeIdCurrent(newMap);
-    }
+    // if (JSON.stringify(newMap) !== JSON.stringify(baseToBadgeId)) {
+    //   setBaseToBadgeIdCurrent(newMap);
+    // }
+    setBaseToBadgeIdCurrent(newMap);
 
     // 6. 스냅 초기화 및 runnerInfo 설정
     runners.forEach((runner: any) => {
@@ -1609,381 +1611,6 @@ useEffect(() => {
     });
   }, [badgeConfigsForModal]);
 
-  // const sendRunnerEvents = useCallback(async () => {
-  //   if (!combinedRequest) {
-  //     console.warn("combinedRequest이 없어서 전송을 스킵합니다.");
-  //     return;
-  //   }
-
-  //   // snapshot에서 playId만 꺼냄 (절대 다른 키로 대체하지 않음)
-  //   const rawSnapshot = localStorage.getItem("snapshot");
-  //   if (!rawSnapshot) {
-  //     const msg =
-  //       "localStorage에 snapshot이 없어 runner-events 요청을 보낼 수 없습니다.";
-  //     console.error(msg);
-  //     throw new Error(msg);
-  //   }
-
-  //   let errorFlag = false;
-  //   let playIdValue: unknown = null;
-  //   try {
-  //     const parsed = JSON.parse(rawSnapshot);
-  //     errorFlag = !!parsed?.snapshot?.inningStats?.errorFlag;
-  //     playIdValue = parsed.snapshot?.playId ?? null;
-  //   } catch (e) {
-  //     console.warn("snapshot JSON 파싱 실패:", e);
-  //   }
-
-  //   // ⛔️ 여기서 preflight: PATCH 전에 차단
-  //   // if (errorFlag) {
-  //   //   const hasBB = (arr?: RunnerLogEntry[]) =>
-  //   //     (arr ?? []).some((e) => e.startBase === "B" && e.endBase === "B");
-
-  //   //   const virtualExists =
-  //   //     Array.isArray(combinedRequest.virtual) &&
-  //   //     combinedRequest.virtual.length > 0;
-
-  //   //   if (
-  //   //     !virtualExists ||
-  //   //     hasBB(combinedRequest.actual) ||
-  //   //     hasBB(combinedRequest.virtual)
-  //   //   ) {
-  //   //     alert("이닝의 재구성을 해주세요");
-  //   //     const err: any = new Error("PRE_FLIGHT_BLOCK");
-  //   //     err.code = "PRE_FLIGHT_BLOCK"; // 식별용 코드
-  //   //     throw err; // 🚫 여기서 흐름 중단 (PATCH/POST 안 나감)
-  //   //   }
-  //   // }
-  //   // ⛔️ 여기서 preflight: PATCH 전에 차단
-  //   if (errorFlag) {
-  //     const hasBB = (arr?: RunnerLogEntry[]) =>
-  //       (arr ?? []).some((e) => e.startBase === "B" && e.endBase === "B");
-
-  //     const virtualExists =
-  //       Array.isArray(combinedRequest.virtual) &&
-  //       combinedRequest.virtual.length > 0;
-
-  //     const hasBBActual = hasBB(combinedRequest.actual);
-  //     const hasBBVirtual = hasBB(combinedRequest.virtual);
-
-  //     // 1) 가상 이동 자체가 비어있는 경우
-  //     if (!virtualExists) {
-  //       alert("이닝의 재구성을 해주세요");
-  //       const err: any = new Error("PRE_FLIGHT_NO_VIRTUAL");
-  //       err.code = "PRE_FLIGHT_BLOCK";
-  //       err.reason = "NO_VIRTUAL";
-  //       throw err; // 🚫 여기서 중단
-  //     }
-
-  //     // 2) B→B 항목이 포함된 경우 (actual/virtual 각각 다른 문구)
-  //     if (hasBBActual || hasBBVirtual) {
-  //       const target = hasBBActual ? "실제 기록(actual)" : "재구성(virtual)";
-  //       alert(`타자를 먼저 이동해주세요`);
-  //       const err: any = new Error("PRE_FLIGHT_HAS_BB");
-  //       err.code = "PRE_FLIGHT_BLOCK";
-  //       err.reason = hasBBActual ? "HAS_BB_ACTUAL" : "HAS_BB_VIRTUAL";
-  //       throw err; // 🚫 여기서 중단
-  //     }
-  //   }
-  //   // ⛔️ preflight 끝 — 이 아래로 내려오면 유효하므로 PATCH/POST 진행
-
-  //   if (playIdValue == null) {
-  //     const msg =
-  //       "localStorage의 snapshot에서 snapshot.playId를 찾을 수 없어 runner-events 요청을 보낼 수 없습니다.";
-  //     console.error(msg);
-  //     throw new Error(msg);
-  //   }
-
-  //   const encodedPlayId = encodeURIComponent(String(playIdValue));
-
-  //   // plateAppearanceResult 가져오기
-  //   const rawPlateAppearance = localStorage.getItem("plateAppearanceResult");
-  //   let plateAppearanceResult: any = null;
-  //   if (rawPlateAppearance != null) {
-  //     try {
-  //       plateAppearanceResult = JSON.parse(rawPlateAppearance);
-  //     } catch {
-  //       plateAppearanceResult = rawPlateAppearance;
-  //     }
-  //   } else {
-  //     console.warn(
-  //       "localStorage에 plateAppearanceResult가 없습니다. PATCH body를 빈 객체로 보냅니다."
-  //     );
-  //   }
-
-  //   // 1. PATCH /plays/{playId}/result 먼저
-  //   const patchUrl = `/plays/${encodedPlayId}/result`;
-  //   let patchRes;
-  //   try {
-  //     console.log("PATCH /result 요청:", patchUrl, plateAppearanceResult);
-  //     patchRes = await API.patch(patchUrl, plateAppearanceResult ?? {});
-  //     console.log("PATCH /result 응답:", {
-  //       status: (patchRes as any)?.status,
-  //       data:
-  //         typeof (patchRes as any)?.data !== "undefined"
-  //           ? (patchRes as any).data
-  //           : patchRes,
-  //     });
-  //   } catch (err) {
-  //     console.error("PATCH /result 실패:", err);
-  //     alert("결과 업데이트 실패");
-  //     throw err;
-  //   }
-
-  //   // 2. POST runner-events
-  //   const postUrl = `/plays/${encodedPlayId}/runner-events`;
-  //   let postRes;
-  //   try {
-  //     // 전송 직전에만 startBase === endBase인 entry 제거
-  //     const sanitizeCombinedRequest = (
-  //       req: CombinedRequest
-  //     ): CombinedRequest => {
-  //       const filter = (entries: RunnerLogEntry[] = []) =>
-  //         entries.filter((entry) => entry.startBase !== entry.endBase);
-
-  //       const actual = filter(req.actual);
-  //       const virtual =
-  //         req.virtual && req.virtual.length > 0
-  //           ? filter(req.virtual)
-  //           : undefined;
-
-  //       return {
-  //         phase: req.phase,
-  //         actual,
-  //         ...(virtual ? { virtual } : {}),
-  //       };
-  //     };
-
-  //     const finalRequest = sanitizeCombinedRequest(combinedRequest);
-  //     console.log(
-  //       "runner-events POST 요청:",
-  //       postUrl,
-  //       JSON.stringify(finalRequest, null, 2)
-  //     );
-  //     postRes = await API.post(postUrl, finalRequest);
-
-  //     console.log("runner-events POST 응답:", {
-  //       status: (postRes as any)?.status,
-  //       data:
-  //         typeof (postRes as any)?.data !== "undefined"
-  //           ? (postRes as any).data
-  //           : postRes,
-  //     });
-
-  //     // localStorage.setItem(`snapshot`, JSON.stringify(postRes.data));
-  //     // updateSnapshot(postRes.data);
-  //     // saveAndReloadSnapshot(postRes.data);
-  //     updateSnapshot?.(postRes.data);
-  //   } catch (err) {
-  //     console.error("runner-events 전송 실패:", err);
-  //     alert("runner-events 전송 실패");
-  //     throw err;
-  //   }
-
-  //   return { patchRes, postRes };
-  // }, [combinedRequest]);
-
-// ... existing code ...
-
-// const sendRunnerEvents = useCallback(async () => {
-//   if (!combinedRequest) {
-//     console.warn("combinedRequest이 없어서 전송을 스킵합니다.");
-//     return;
-//   }
-
-//   // snapshot에서 playId만 꺼냄 (절대 다른 키로 대체하지 않음)
-//   const rawSnapshot = localStorage.getItem("snapshot");
-//   if (!rawSnapshot) {
-//     const msg =
-//       "localStorage에 snapshot이 없어 runner-events 요청을 보낼 수 없습니다.";
-//     console.error(msg);
-//     throw new Error(msg);
-//   }
-
-//   let errorFlag = false;
-//   let playIdValue: unknown = null;
-//   try {
-//     const parsed = JSON.parse(rawSnapshot);
-//     errorFlag = !!parsed?.snapshot?.inningStats?.errorFlag;
-//     playIdValue = parsed.snapshot?.playId ?? null;
-//   } catch (e) {
-//     console.warn("snapshot JSON 파싱 실패:", e);
-//   }
-
-//   // ⛔️ 여기서 preflight: PATCH 전에 차단
-//   if (errorFlag) {
-//     const hasBB = (arr?: RunnerLogEntry[]) =>
-//       (arr ?? []).some((e) => e.startBase === "B" && e.endBase === "B");
-
-//     const virtualExists =
-//       Array.isArray(combinedRequest.virtual) &&
-//       combinedRequest.virtual.length > 0;
-
-//     const hasBBActual = hasBB(combinedRequest.actual);
-//     const hasBBVirtual = hasBB(combinedRequest.virtual);
-
-//     // 1) 가상 이동 자체가 비어있는 경우
-//     if (!virtualExists) {
-//       alert("이닝의 재구성을 해주세요");
-//       const err: any = new Error("PRE_FLIGHT_NO_VIRTUAL");
-//       err.code = "PRE_FLIGHT_BLOCK";
-//       err.reason = "NO_VIRTUAL";
-//       throw err; // 🚫 여기서 중단
-//     }
-
-//     // 2) B→B 항목이 포함된 경우 (actual/virtual 각각 다른 문구)
-//     if (hasBBActual || hasBBVirtual) {
-//       const target = hasBBActual ? "실제 기록(actual)" : "재구성(virtual)";
-//       alert(`타자를 먼저 이동해주세요`);
-//       const err: any = new Error("PRE_FLIGHT_HAS_BB");
-//       err.code = "PRE_FLIGHT_BLOCK";
-//       err.reason = hasBBActual ? "HAS_BB_ACTUAL" : "HAS_BB_VIRTUAL";
-//       throw err; // �� 여기서 중단
-//     }
-//   }
-//   // ⛔️ preflight 끝 — 이 아래로 내려오면 유효하므로 PATCH/POST 진행
-
-//   if (playIdValue == null) {
-//     const msg =
-//       "localStorage의 snapshot에서 snapshot.playId를 찾을 수 없어 runner-events 요청을 보낼 수 없습니다.";
-//     console.error(msg);
-//     throw new Error(msg);
-//   }
-
-//   const encodedPlayId = encodeURIComponent(String(playIdValue));
-
-//   // plateAppearanceResult 가져오기
-//   const rawPlateAppearance = localStorage.getItem("plateAppearanceResult");
-//   let plateAppearanceResult: any = null;
-//   if (rawPlateAppearance != null) {
-//     try {
-//       plateAppearanceResult = JSON.parse(rawPlateAppearance);
-//     } catch {
-//       plateAppearanceResult = rawPlateAppearance;
-//     }
-//   } else {
-//     console.warn(
-//       "localStorage에 plateAppearanceResult가 없습니다. PATCH body를 빈 객체로 보냅니다."
-//     );
-//   }
-
-//   // 1. PATCH /plays/{playId}/result 먼저
-//   const patchUrl = `/plays/${encodedPlayId}/result`;
-//   let patchRes;
-//   try {
-//     console.log("PATCH /result 요청:", patchUrl, plateAppearanceResult);
-//     patchRes = await API.patch(patchUrl, plateAppearanceResult ?? {});
-//     console.log("PATCH /result 응답:", {
-//       status: (patchRes as any)?.status,
-//       data:
-//         typeof (patchRes as any)?.data !== "undefined"
-//           ? (patchRes as any).data
-//           : patchRes,
-//     });
-//   } catch (err) {
-//     console.error("PATCH /result 실패:", err);
-//     alert("결과 업데이트 실패");
-//     throw err;
-//   }
-
-//   // 2. POST runner-events
-//   const postUrl = `/plays/${encodedPlayId}/runner-events`;
-//   let postRes;
-//   try {
-//     // 전송 직전에만 startBase === endBase인 entry 제거
-//     const sanitizeCombinedRequest = (
-//       req: CombinedRequest
-//     ): CombinedRequest => {
-//       const filter = (entries: RunnerLogEntry[] = []) =>
-//         entries.filter((entry) => entry.startBase !== entry.endBase);
-
-//       const actual = filter(req.actual);
-//       const virtual =
-//         req.virtual && req.virtual.length > 0
-//           ? filter(req.virtual)
-//           : undefined;
-
-//       return {
-//         phase: req.phase,
-//         actual,
-//         ...(virtual ? { virtual } : {}),
-//       };
-//     };
-
-//     const finalRequest = sanitizeCombinedRequest(combinedRequest);
-//     console.log(
-//       "runner-events POST 요청:",
-//       postUrl,
-//       JSON.stringify(finalRequest, null, 2)
-//     );
-//     postRes = await API.post(postUrl, finalRequest);
-
-//     console.log("runner-events POST 응답:", {
-//       status: (postRes as any)?.status,
-//       data:
-//         typeof (postRes as any)?.data !== "undefined"
-//           ? (postRes as any).data
-//           : postRes,
-//     });
-
-//     // �� 새로운 데이터를 모달 내부 상태에 반영
-//     // const newSnapshotData = postRes.data;
-//     // setSnapshotData(newSnapshotData);
-//        // 🆕 새로운 데이터를 localStorage에 저장하고 커스텀 이벤트 발생
-//        const newSnapshotData = postRes.data;
-//        localStorage.setItem("snapshot", JSON.stringify(newSnapshotData));
-//         // �� 커스텀 이벤트 발생 (같은 탭에서 localStorage 변경 감지용)
-//     window.dispatchEvent(new CustomEvent('localStorageChange', {
-//       detail: { newData: newSnapshotData }
-//     }));
-    
-//     // �� 새로운 타자 정보 업데이트
-//     const newBatterName = 
-//       newSnapshotData?.snapshot?.currentAtBat?.batter?.name ??
-//       newSnapshotData?.currentAtBat?.batter?.name ??
-//       null;
-//     const newBatterId = 
-//       newSnapshotData?.snapshot?.currentAtBat?.batter?.id ??
-//       newSnapshotData?.currentAtBat?.batter?.id ??
-//       null;
-//     setCurrentBatterName(newBatterName);
-//     setCurrentBatterId(newBatterId);
-
-//     // 🆕 새로운 데이터로 syncRunnersOnBase 실행
-//     // 다음 프레임에서 실행하여 상태 업데이트가 완료된 후 동작하도록 함
-//     requestAnimationFrame(() => {
-//       syncRunnersOnBase();
-//     });
-
-//     // 부모 컴포넌트에도 알림
-//     updateSnapshot?.(newSnapshotData);
-//   } catch (err) {
-//     console.error("runner-events 전송 실패:", err);
-//     alert("runner-events 전송 실패");
-//     throw err;
-//   }
-
-//   return { patchRes, postRes };
-// }, [combinedRequest, syncRunnersOnBase, updateSnapshot]);
-
-
-//   const handleSubmit = useCallback(async () => {
-//     setIsSubmitting(true);
-//     try {
-//       await sendRunnerEvents();
-//       clearAllSnapsAndExitReconstructMode();
-//       await onSuccess?.();
-//       resetWhiteBadges();
-//       handleClose();
-//     } catch (e) {
-//       // ✋ preflight 차단 에러는 그냥 삼켜서 모달 유지
-//       if (e?.code !== "PRE_FLIGHT_BLOCK") {
-//         setError(e as Error); // 진짜 오류만 ErrorAlert로 노출
-//       }
-//     } finally {
-//       setIsSubmitting(false);
-//     }
-//   }, [sendRunnerEvents, onSuccess, handleClose]);
 
 const sendRunnerEvents = useCallback(async () => {
   if (!combinedRequest) {
@@ -2012,6 +1639,52 @@ const sendRunnerEvents = useCallback(async () => {
     console.error(msg);
     throw new Error(msg);
   }
+    let errorFlag = false;
+  // let playIdValue: unknown = null;
+  try {
+    const parsed = JSON.parse(rawSnapshot);
+    errorFlag = !!parsed?.snapshot?.inningStats?.errorFlag;
+    playIdValue = parsed.snapshot?.playId ?? null;
+  } catch (e) {
+    console.warn("snapshot JSON 파싱 실패:", e);
+  }
+
+  // ⛔️ 여기서 preflight: PATCH 전에 차단
+  // if (errorFlag) {
+    const hasBB = (arr?: RunnerLogEntry[]) =>
+      (arr ?? []).some((e) => e.startBase === "B" && e.endBase === "B");
+
+    const virtualExists =
+      Array.isArray(combinedRequest.virtual) &&
+      combinedRequest.virtual.length > 0;
+
+    const hasBBActual = hasBB(combinedRequest.actual);
+    const hasBBVirtual = hasBB(combinedRequest.virtual);
+
+        // 2) B→B 항목이 포함된 경우 (actual/virtual 각각 다른 문구)
+        if (hasBBActual || hasBBVirtual) {
+          const target = hasBBActual ? "실제 기록(actual)" : "재구성(virtual)";
+          alert(`타자를 먼저 이동해주세요`);
+          const err: any = new Error("PRE_FLIGHT_HAS_BB");
+          err.code = "PRE_FLIGHT_BLOCK";
+          err.reason = hasBBActual ? "HAS_BB_ACTUAL" : "HAS_BB_VIRTUAL";
+          // throw err; // �� 여기서 중단
+          return null
+        }
+    // 1) 가상 이동 자체가 비어있는 경우
+    if (!virtualExists) {
+      alert("이닝의 재구성을 해주세요");
+      const err: any = new Error("PRE_FLIGHT_NO_VIRTUAL");
+      err.code = "PRE_FLIGHT_BLOCK";
+      err.reason = "NO_VIRTUAL";
+
+      // throw err; // 🚫 여기서 중단
+      return null
+    }
+
+
+  // }
+  // ⛔️ preflight 끝 — 이 아래로 내려오면 유효하므로 PATCH/POST 진행
 
   const encodedPlayId = encodeURIComponent(String(playIdValue));
 
@@ -2142,7 +1815,7 @@ const sendRunnerEvents = useCallback(async () => {
     // 부모 컴포넌트에도 알림
      // �� 무식하게: API 응답을 저장하고 화면 리로드
      updateSnapshot(postRes.data);
-     window.location.reload();
+    //  window.location.reload();
   } catch (err) {
     console.error("runner-events 전송 실패:", err);
     alert("runner-events 전송 실패");
@@ -2155,10 +1828,16 @@ const sendRunnerEvents = useCallback(async () => {
 const handleSubmit = useCallback(async () => {
   setIsSubmitting(true);
   try {
-    await sendRunnerEvents();
-    clearAllSnapsAndExitReconstructMode();
-    await onSuccess?.();
-    handleClose();
+    const result = await sendRunnerEvents();
+    
+    // 🎯 sendRunnerEvents가 성공적으로 완료된 경우에만 모달 닫기
+    if (result) {
+      clearAllSnapsAndExitReconstructMode();
+      await onSuccess?.();
+      handleClose();
+    }
+    // �� return으로 종료된 경우는 모달을 닫지 않음
+    
   } catch (e) {
     if (e?.code !== "PRE_FLIGHT_BLOCK") {
       setError(e as Error);

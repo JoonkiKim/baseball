@@ -197,7 +197,7 @@ export const TableTitle = styled.div`
 export const RecordTable = styled.table`
   width: 100%;
   border-collapse: collapse;
-  min-width: 500px;
+  min-width: 600px;
   text-align: center;
   border-top: 1px solid #000;
   border-bottom: 1px solid #000;
@@ -209,7 +209,6 @@ export const RecordTable = styled.table`
   th {
     font-weight: 500;
     border-bottom: 1px solid #000;
-    /* background-color: #f9f9f9; */
   }
   ${small} {
     font-size: 12px;
@@ -220,21 +219,85 @@ export const RecordTable = styled.table`
   ${large}, ${xlarge} {
     font-size: 15px;
   }
-  /* 순번, 이름 열 너비 지정 */
+  
+  /* �� 수정된 순서에 맞게 각 컬럼 너비 조정 */
+  /* 순번 */
   th:nth-of-type(1),
   td:nth-of-type(1) {
     width: 4vh;
   }
+  /* 이름 */
   th:nth-of-type(2),
   td:nth-of-type(2) {
     width: 8vh;
+  }
+  /* 타석 */
+  th:nth-of-type(3),
+  td:nth-of-type(3) {
+    width: 5vh;
+  }
+  /* 타수 */
+  th:nth-of-type(4),
+  td:nth-of-type(4) {
+    width: 5vh;
+  }
+  /* 안타 */
+  th:nth-of-type(5),
+  td:nth-of-type(5) {
+    width: 5vh;
+  }
+  /* 2루타 */
+  th:nth-of-type(6),
+  td:nth-of-type(6) {
+    width: 6vh;
+  }
+  /* 3루타 */
+  th:nth-of-type(7),
+  td:nth-of-type(7) {
+    width: 6vh;
+  }
+  /* 홈런 */
+  th:nth-of-type(8),
+  td:nth-of-type(8) {
+    width: 6vh;
+  }
+  /* 타점 */
+  th:nth-of-type(9),
+  td:nth-of-type(9) {
+    width: 5vh;
+  }
+  /* 득점 */
+  th:nth-of-type(10),
+  td:nth-of-type(10) {
+    width: 5vh;
+  }
+  /* 볼넷 */
+  th:nth-of-type(11),
+  td:nth-of-type(11) {
+    width: 5vh;
+  }
+  /* 삼진 */
+  th:nth-of-type(12),
+  td:nth-of-type(12) {
+    width: 5vh;
+  }
+  /* 희플 */
+  th:nth-of-type(13),
+  td:nth-of-type(13) {
+    width: 5vh;
+  }
+  /* 희번 */
+  th:nth-of-type(14),
+  td:nth-of-type(14) {
+    width: 5vh;
   }
 `;
 
 // 투수 기록 테이블
 export const RecordTableP = styled.table`
   width: 100%;
-  border-collapse: collapse;
+    border-collapse: collapse;
+  // min-width: 400px;
   text-align: center;
   border-top: 1px solid #000;
   border-bottom: 1px solid #000;
@@ -255,7 +318,7 @@ export const RecordTableP = styled.table`
   }
   th:nth-of-type(2),
   td:nth-of-type(2) {
-    width: 10vh;
+    width: 8vh;
   }
   ${small} {
     font-size: 12px;
