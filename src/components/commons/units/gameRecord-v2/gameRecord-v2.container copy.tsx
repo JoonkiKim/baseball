@@ -401,14 +401,13 @@ export default function GameRecordPageV2() {
   //     setSnapshotData(data); // recoil 상태도 함께 갱신
   //   } catch {}
   // };
-  // const persistSnapshot = (data: any) => {
-  //   const boxed = data?.snapshot ? data : { snapshot: data };
-  //   try {
-  //     localStorage.setItem("snapshot", JSON.stringify(boxed));
-  //   } catch {}
-  //   setSnapshotData(boxed);
-  // };
-  const persistSnapshot = (data: any) => updateSnapshot(data);
+  const persistSnapshot = (data: any) => {
+    const boxed = data?.snapshot ? data : { snapshot: data };
+    try {
+      localStorage.setItem("snapshot", JSON.stringify(boxed));
+    } catch {}
+    setSnapshotData(boxed);
+  };
   // 컴포넌트 상단 어딘가
   const shouldFetchOnThisLoadRef = useRef(false);
 
@@ -440,7 +439,6 @@ export default function GameRecordPageV2() {
         const data =
           typeof res.data === "string" ? JSON.parse(res.data) : res.data;
         persistSnapshot(data); // → localStorage('snapshot') 저장 + recoil 반영
-        updateSnapshot(res.data);
         console.log("GET snapshot/umpire 저장완료");
       } catch (err) {
         console.error("GET snapshot/umpire 실패:", err);
@@ -454,12 +452,10 @@ export default function GameRecordPageV2() {
 
   // 읽어오기 경로
   // 공통 뷰(항상 이걸로 접근)
-  // const snap = useMemo(
-  //   () => (snapshotData?.snapshot ?? snapshotData ?? null) as any,
-  //   [snapshotData]
-  // );
-  // 매 렌더마다 즉시 언랩해서 씀 (메모 안 함)
-  const snap = (snapshotData as any)?.snapshot ?? snapshotData ?? null;
+  const snap = useMemo(
+    () => (snapshotData?.snapshot ?? snapshotData ?? null) as any,
+    [snapshotData]
+  );
 
   // 공격/수비 판정 (값 없을 땐 안전하게 false)
   const half = snap?.gameSummary?.inningHalf?.toUpperCase?.();
@@ -1484,13 +1480,16 @@ export default function GameRecordPageV2() {
   //   [setSnapshotData]
   // );
 
-  const updateSnapshot = useCallback((next: any) => {
-    const boxed = next?.snapshot ? next : { snapshot: next };
-    setSnapshotData((prev) => (prev === boxed ? { ...boxed } : boxed)); // 새 레퍼런스 보장
-    try {
-      localStorage.setItem("snapshot", JSON.stringify(boxed));
-    } catch {}
-  }, []);
+  const updateSnapshot = useCallback(
+    (next: any) => {
+      const boxed = next?.snapshot ? next : { snapshot: next };
+      setSnapshotData(boxed);
+      try {
+        localStorage.setItem("snapshot", JSON.stringify(boxed));
+      } catch {}
+    },
+    [setSnapshotData]
+  );
 
   // 타자 이름 바꾸기
   // useEffect(() => {
@@ -1896,23 +1895,10 @@ export default function GameRecordPageV2() {
       });
     });
   }, [reconstructMode]);
-
-  const runnersSig = useMemo(
-    () =>
-      JSON.stringify({
-        a: snap?.inningStats?.actual?.runnersOnBase ?? [],
-        v: snap?.inningStats?.virtual?.runnersOnBase ?? [],
-      }),
-    [
-      snap?.inningStats?.actual?.runnersOnBase,
-      snap?.inningStats?.virtual?.runnersOnBase,
-    ]
-  );
-
   useEffect(() => {
     if (!snapshotData) return;
     syncRunnersOnBase();
-  }, [runnersSig, snapshotData, reconstructMode]);
+  }, [snapshotData, reconstructMode]);
 
   // useEffect(() => {
   //   if (!snapshotData) return;
@@ -2499,15 +2485,13 @@ export default function GameRecordPageV2() {
       setFinishedBadgesVirtual(new Set());
       setHomeSnappedBadgesActual(new Set());
       setHomeSnappedBadgesVirtual(new Set());
-      softResetWhiteBadges();
     });
   }, [badgeConfigs]);
 
   // const saveAndReloadSnapshot = useCallback(
   //   (next: any) => {
-  //     const boxed = next?.snapshot ? next : { snapshot: next };
-  //     localStorage.setItem("snapshot", JSON.stringify(boxed));
-  //     loadSnapshot();
+  //     localStorage.setItem("snapshot", JSON.stringify(next));
+  //     loadSnapshot(); // 항상 로컬스토리지 → state 싱크
   //   },
   //   [loadSnapshot]
   // );
@@ -2578,7 +2562,7 @@ export default function GameRecordPageV2() {
     }
 
     const encodedPlayId = encodeURIComponent(String(playIdValue));
-    softResetWhiteBadges();
+
     // 2. POST runner-events
     const postUrl = `/plays/${encodedPlayId}/runner-events`;
     let postRes;
@@ -2613,7 +2597,7 @@ export default function GameRecordPageV2() {
       );
       postRes = await API.post(postUrl, finalRequest);
       // ⬇️ 먼저 화면 상태를 싹 비움 (스냅샷 읽지 않음)
-
+      softResetWhiteBadges();
       console.log("runner-events POST 응답:", {
         status: (postRes as any)?.status,
         data:
@@ -2625,8 +2609,7 @@ export default function GameRecordPageV2() {
       // localStorage.setItem(`snapshot`, JSON.stringify(postRes.data));
       // // ② 상태도 즉시 갱신 (이 한 줄이 포인트!)
       // setSnapshotData(postRes.data);
-      // saveAndReloadSnapshot(postRes.data);
-      updateSnapshot(postRes.data);
+      saveAndReloadSnapshot(postRes.data);
     } catch (err) {
       console.error("runner-events 전송 실패:", err);
       alert("runner-events 전송 실패");
