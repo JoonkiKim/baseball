@@ -35,7 +35,7 @@ export const ArrowUp: React.FC<ArrowProps> = ({ color = "#B8B8B8" }) => (
         y="-0.5"
         width="12.1973"
         height="16.5"
-        filterUnits="userSpaceOnUse"
+        filterUnits="objectBoundingBox"
         colorInterpolationFilters="sRGB"
       >
         <feFlood floodOpacity="0" result="BackgroundImageFix" />

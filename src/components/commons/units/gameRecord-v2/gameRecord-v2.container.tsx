@@ -229,22 +229,22 @@ export default function GameRecordPageV2() {
   const [thisInningScore, setThisInningScore] = useState(0);
 
   // 현재 타자/투수
-  const [batter, setBatter] = useState({
-    battingOrder: 0,
-    playerId: 0,
-    playerName: "-",
-    isElite: false,
-    isWc: false,
-    position: "-",
-  });
-  const [pitcher, setPitcher] = useState({
-    battingOrder: 0,
-    playerId: 0,
-    playerName: "-",
-    isElite: false,
-    isWc: false,
-    position: "P",
-  });
+  // const [batter, setBatter] = useState({
+  //   battingOrder: 0,
+  //   playerId: 0,
+  //   playerName: "-",
+  //   isElite: false,
+  //   isWc: false,
+  //   position: "-",
+  // });
+  // const [pitcher, setPitcher] = useState({
+  //   battingOrder: 0,
+  //   playerId: 0,
+  //   playerName: "-",
+  //   isElite: false,
+  //   isWc: false,
+  //   position: "P",
+  // });
 
   // 대기타석 표시용 라인업
   const awayExample = {
@@ -392,6 +392,37 @@ export default function GameRecordPageV2() {
       isWC: false,
     },
   };
+
+  // 초기 스냅샷 GET
+  const didFetchUmpireRef = useRef(false);
+  const persistSnapshot = (data: any) => {
+    try {
+      localStorage.setItem("snapshot", JSON.stringify(data));
+    } catch {}
+    setSnapshotData(data); // recoil 상태도 함께 갱신
+  };
+  useEffect(() => {
+    if (!router.isReady) return;
+    const gameId = router.query.recordId;
+    if (!gameId) return;
+
+    // React 18 Strict Mode 중복 호출 방지
+    if (didFetchUmpireRef.current) return;
+    didFetchUmpireRef.current = true;
+
+    (async () => {
+      try {
+        const res = await API.get(`/games/${gameId}/snapshot/umpire`);
+        const data =
+          typeof res.data === "string" ? JSON.parse(res.data) : res.data;
+        persistSnapshot(data); // → localStorage('snapshot') 저장 + recoil 반영
+        console.log("GET snapshot/umpire 저장완료");
+      } catch (err) {
+        console.error("GET snapshot/umpire 실패:", err);
+        setError(err as any); // ErrorAlert로 노출
+      }
+    })();
+  }, [router.isReady, router.query.recordId]);
 
   // 초기 타자 및 주자의 위치
   const [snapshotData, setSnapshotData] = useRecoilState(snapshotState);
@@ -1518,13 +1549,13 @@ export default function GameRecordPageV2() {
 
   const badgeSnapsRef = useRef<typeof badgeSnaps>(badgeSnaps);
 
-  useEffect(() => {
-    badgeSnapsRef.current = badgeSnaps;
-  }, [badgeSnaps]);
+  // useEffect(() => {
+  //   badgeSnapsRef.current = badgeSnaps;
+  // }, [badgeSnaps]);
   const scheduleOccupancyLog = () => {
     requestAnimationFrame(() => {
       const occ = computeBaseOccupancy(badgeSnapsRef.current);
-      console.log("Base occupancy after handleDrop:", occ);
+      // console.log("Base occupancy after handleDrop:", occ);
     });
   };
 
@@ -1709,10 +1740,10 @@ export default function GameRecordPageV2() {
         }
       });
 
-    console.log(
-      `runner assignment (${reconstructMode ? "virtual" : "actual"}):`,
-      baseAssignment
-    );
+    // console.log(
+    //   `runner assignment (${reconstructMode ? "virtual" : "actual"}):`,
+    //   baseAssignment
+    // );
   }, [
     getRunnersOnBase,
     activeBadges,
@@ -1804,10 +1835,10 @@ export default function GameRecordPageV2() {
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         const occ = computeBaseOccupancy(badgeSnapsRef.current);
-        console.log(
-          `Base occupancy after reconstructMode=${reconstructMode}:`,
-          occ
-        );
+        // console.log(
+        //   `Base occupancy after reconstructMode=${reconstructMode}:`,
+        //   occ
+        // );
       });
     });
   }, [reconstructMode]);
@@ -2094,7 +2125,7 @@ export default function GameRecordPageV2() {
       // badgeSnaps 업데이트가 비동기라 다음 프레임에 occupancy 계산
       requestAnimationFrame(() => {
         const occ = computeBaseOccupancy(badgeSnapsRef.current);
-        console.log("Base occupancy after reconstruct toggle:", occ);
+        // console.log("Base occupancy after reconstruct toggle:", occ);
       });
     },
 
@@ -2266,14 +2297,14 @@ export default function GameRecordPageV2() {
     ) {
       setActualRequest(filteredActualArray); // 추가된 저장
       prevActualLogRef.current = serializedActual;
-      console.log("filteredActualArray", filteredActualArray);
+      // console.log("filteredActualArray", filteredActualArray);
       // actual만 있는 경우 combinedRequest 구성
       const single: CombinedRequest = {
         phase: "PREV",
         actual: filteredActualArray,
       };
       setCombinedRequest(single);
-      console.log("actual only", JSON.stringify(single, null, 2));
+      // console.log("actual only", JSON.stringify(single, null, 2));
     }
   }, [
     badgeSnaps,
@@ -2336,10 +2367,10 @@ export default function GameRecordPageV2() {
       virtual: virtualRequest,
     };
     setCombinedRequest(combined);
-    console.log("최종입니다", JSON.stringify(combined, null, 2));
+    // console.log("최종입니다", JSON.stringify(combined, null, 2));
   }, [virtualRequest, reconstructMode, actualRequest]);
 
-  console.log("combinedRequest", combinedRequest);
+  // console.log("combinedRequest", combinedRequest);
 
   function isBaseOccupied(
     targetBase: BaseId,
@@ -2360,11 +2391,11 @@ export default function GameRecordPageV2() {
     const occupiedEntries = Object.entries(badgeSnaps)
       .filter(([, snap]) => snap != null)
       .map(([id, snap]) => `${id} → ${snap!.base}`);
-    console.log("badgeSnaps contents:", occupiedEntries);
-    console.log("computed occupancy from badgeSnaps:", occupancy);
+    // console.log("badgeSnaps contents:", occupiedEntries);
+    // console.log("computed occupancy from badgeSnaps:", occupancy);
   }, [badgeSnaps, occupancy]);
   useEffect(() => {
-    console.log("Base occupancy:", occupancy);
+    // console.log("Base occupancy:", occupancy);
   }, [occupancy]);
   // 마운트 시 snapshot 먼저 불러오기
   useEffect(() => {
@@ -2492,7 +2523,7 @@ export default function GameRecordPageV2() {
       };
 
       const finalRequest = sanitizeCombinedRequest(combinedRequest);
-      console.log("finalRequest", finalRequest);
+      // console.log("finalRequest", finalRequest);
 
       console.log(
         "runner-events POST 요청:",
