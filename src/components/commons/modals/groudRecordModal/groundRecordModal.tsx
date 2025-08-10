@@ -1402,7 +1402,7 @@ const GroundRecordModal = forwardRef<
     // console.log("최종입니다", JSON.stringify(combined, null, 2));
   }, [virtualRequest, reconstructMode, actualRequest]);
 
-  // console.log("combinedRequest", combinedRequest);
+  console.log("combinedRequest", combinedRequest);
 
   useImperativeHandle(
     ref,
