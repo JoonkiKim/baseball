@@ -2769,7 +2769,11 @@ export default function GameRecordPageV2() {
       setReconstructMode(false);
       clearAllSnapsAndExitReconstructMode();
       // bumpBadgesVersion();
-      resetWhiteBadges();
+      // resetWhiteBadges();
+        // 대신 새로운 데이터가 반영된 후 syncRunnersOnBase 실행
+    requestAnimationFrame(() => {
+      syncRunnersOnBase();
+    });
     } catch (e) {
       // ✋ preflight 차단 에러는 그냥 삼켜서 모달 유지
       if (e?.code !== "PRE_FLIGHT_BLOCK") {

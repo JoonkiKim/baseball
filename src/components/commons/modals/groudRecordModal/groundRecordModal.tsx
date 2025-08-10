@@ -629,6 +629,7 @@ const GroundRecordModal = forwardRef<
     }
   }, [isOpen]);
 
+  
   // 초기 타자 및 주자의 위치
   const [snapshotData, setSnapshotData] = useState<any>(null);
   const initialSnapsRef = useRef<Record<string, SnapInfo | null>>({});
@@ -1821,8 +1822,15 @@ const sendRunnerEvents = useCallback(async () => {
     });
 
     // �� 새로운 데이터를 모달 내부 상태에 반영
-    const newSnapshotData = postRes.data;
-    setSnapshotData(newSnapshotData);
+    // const newSnapshotData = postRes.data;
+    // setSnapshotData(newSnapshotData);
+       // 🆕 새로운 데이터를 localStorage에 저장하고 커스텀 이벤트 발생
+       const newSnapshotData = postRes.data;
+       localStorage.setItem("snapshot", JSON.stringify(newSnapshotData));
+        // �� 커스텀 이벤트 발생 (같은 탭에서 localStorage 변경 감지용)
+    window.dispatchEvent(new CustomEvent('localStorageChange', {
+      detail: { newData: newSnapshotData }
+    }));
     
     // �� 새로운 타자 정보 업데이트
     const newBatterName = 
@@ -1902,6 +1910,53 @@ const sendRunnerEvents = useCallback(async () => {
     // console.log("badgeSnaps contents:", occupiedEntries);
     // console.log("computed occupancy from badgeSnaps:", occupancy);
   }, [badgeSnaps, occupancy]);
+
+
+
+
+  // �� localStorage 변경 감지용 useEffect 추가
+useEffect(() => {
+  if (!isOpen) return;
+
+  const handleStorageChange = () => {
+    try {
+      const raw = localStorage.getItem("snapshot");
+      const parsed = raw ? JSON.parse(raw) : null;
+      
+      // 이전 데이터와 다른 경우에만 업데이트
+      if (JSON.stringify(parsed) !== JSON.stringify(snapshotData)) {
+        setSnapshotData(parsed);
+        
+        const batterName =
+          parsed?.snapshot?.currentAtBat?.batter?.name ??
+          parsed?.currentAtBat?.batter?.name ??
+          null;
+        const batterId =
+          parsed?.snapshot?.currentAtBat?.batter?.id ??
+          parsed?.currentAtBat?.batter?.id ??
+          null;
+        setCurrentBatterName(batterName);
+        setCurrentBatterId(batterId);
+      }
+    } catch (e) {
+      console.warn("snapshot 파싱 에러:", e);
+    }
+  };
+
+  // storage 이벤트 리스너 등록
+  window.addEventListener('storage', handleStorageChange);
+  
+  // 같은 탭에서의 localStorage 변경도 감지하기 위한 커스텀 이벤트
+  const handleCustomStorageChange = (e: CustomEvent) => {
+    handleStorageChange();
+  };
+  window.addEventListener('localStorageChange', handleCustomStorageChange as EventListener);
+
+  return () => {
+    window.removeEventListener('storage', handleStorageChange);
+    window.removeEventListener('localStorageChange', handleCustomStorageChange as EventListener);
+  };
+}, [isOpen, snapshotData]);
 
   useEffect(() => {
     if (isOpen) {
