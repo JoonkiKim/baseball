@@ -401,7 +401,7 @@ export default function MainCalendarPage() {
 
               const showRecordButton =
                 match.status === "SCHEDULED"
-                  ? apiCanRecord || apiCanSubmit.home || apiCanSubmit.away
+                  ? apiCanRecord
                   : match.status === "FINALIZED" || match.status === "EDITING";
 
               const team1Score = match.homeTeam.score;
@@ -524,7 +524,7 @@ export default function MainCalendarPage() {
                     <RecordButton
                       onClick={async () => {
                         // 나중에 요건 없애기!
-                        await temporaryStartGameAndStore(match.id);
+                        // await temporaryStartGameAndStore(match.id);
 
                         /* ① recoil-persist(로컬스토리지)에서 마지막 경로 가져오기 */
                         const persistedRoute = (() => {
@@ -569,36 +569,29 @@ export default function MainCalendarPage() {
                         }
 
                         /* ④ 이동 경로 결정 — 요 부분이 변경됨 */
-                        let route = `/matches/${match.id}/records`;
+                        // let route = `/matches/${match.id}/records`;
                         // [요거 다시 켜기!!]
-                        // let route = ``;
-                        // if (
-                        //   match.status === "FINALIZED" ||
-                        //   match.status === "EDITING"
-                        // ) {
-                        //   // 종료된 경기 결과 보기
-                        //   route = `/matches/${match.id}/result`;
-                        // } else if (match.status === "IN_PROGRESS") {
-                        //   // 진행 중 경기 기록 입력
-                        //   route = `/matches/${match.id}/records`;
-                        // } else if (match.status === "SCHEDULED") {
-                        //   // 예정 경기: 라벨이 "라인업제출"일 때
-                        //   if (
-                        //     !apiCanRecord &&
-                        //     (apiCanSubmit.home || apiCanSubmit.away)
-                        //   ) {
-                        //     route = apiCanSubmit.home
-                        //       ? `/matches/${match.id}/homeTeamRegistration`
-                        //       : `/matches/${match.id}/awayTeamRegistration`;
-                        //   } else {
-                        //     // 예정 경기이지만 실제 기록(스코어) 작성 권한이 있는 경우
-                        //     route =
-                        //       persistedRoute &&
-                        //       persistedRoute.includes(String(match.id))
-                        //         ? persistedRoute
-                        //         : `/matches/${match.id}/homeTeamRegistration`;
-                        //   }
-                        // }
+                        /* ④ 이동 경로 결정 — 수정된 부분 */
+                        /* ④ 이동 경로 결정 — 수정된 부분 */
+                        let route = ``;
+
+                        if (match.status === "SCHEDULED") {
+                          // SCHEDULED이면서 canRecord가 true일 때만 버튼이 표시되므로
+                          route = `/matches/${match.id}/awayTeamRegistration`;
+                        } else if (
+                          match.status === "FINALIZED" ||
+                          match.status === "EDITING"
+                        ) {
+                          // FINALIZED/EDITING일 때는 항상 result로 이동
+                          route = `/matches/${match.id}/result`;
+                        } else if (match.status === "IN_PROGRESS") {
+                          // IN_PROGRESS일 때는 canRecord에 따라 다르게 이동
+                          if (apiCanRecord) {
+                            route = `/matches/${match.id}/records`;
+                          } else {
+                            route = `/matches/${match.id}/view`;
+                          }
+                        }
 
                         /* ⑤ 최종 라우팅 */
                         router.push(route);
