@@ -539,11 +539,12 @@ export default function MainCalendarPage() {
                       </TeamScore>
                     </Team>
                   </TeamsContainer>
+
                   {showRecordButton ? (
                     <RecordButton
                       onClick={async () => {
                         // 나중에 요건 없애기!
-                        // await temporaryStartGameAndStore(match.id);
+                        await temporaryStartGameAndStore(match.id);
 
                         /* ① recoil-persist(로컬스토리지)에서 마지막 경로 가져오기 */
                         const persistedRoute = (() => {
@@ -588,29 +589,28 @@ export default function MainCalendarPage() {
                         }
 
                         /* ④ 이동 경로 결정 — 요 부분이 변경됨 */
-                        // let route = `/matches/${match.id}/records`;
+                        let route = `/matches/${match.id}/records`;
                         // [요거 다시 켜기!!]
-                        /* ④ 이동 경로 결정 — 수정된 부분 */
-                        /* ④ 이동 경로 결정 — 수정된 부분 */
-                        let route = ``;
 
-                        if (match.status === "SCHEDULED") {
-                          // SCHEDULED이면서 canRecord가 true일 때만 버튼이 표시되므로
-                          route = `/matches/${match.id}/awayTeamRegistration`;
-                        } else if (
-                          match.status === "FINALIZED" ||
-                          match.status === "EDITING"
-                        ) {
-                          // FINALIZED/EDITING일 때는 항상 result로 이동
-                          route = `/matches/${match.id}/result`;
-                        } else if (match.status === "IN_PROGRESS") {
-                          // IN_PROGRESS일 때는 canRecord에 따라 다르게 이동
-                          if (apiCanRecord) {
-                            route = `/matches/${match.id}/records`;
-                          } else {
-                            route = `/matches/${match.id}/view`;
-                          }
-                        }
+                        // let route = ``;
+
+                        // if (match.status === "SCHEDULED") {
+                        //   // SCHEDULED이면서 canRecord가 true일 때만 버튼이 표시되므로
+                        //   route = `/matches/${match.id}/awayTeamRegistration`;
+                        // } else if (
+                        //   match.status === "FINALIZED" ||
+                        //   match.status === "EDITING"
+                        // ) {
+                        //   // FINALIZED/EDITING일 때는 항상 result로 이동
+                        //   route = `/matches/${match.id}/result`;
+                        // } else if (match.status === "IN_PROGRESS") {
+                        //   // IN_PROGRESS일 때는 canRecord에 따라 다르게 이동
+                        //   if (apiCanRecord) {
+                        //     route = `/matches/${match.id}/records`;
+                        //   } else {
+                        //     route = `/matches/${match.id}/view`;
+                        //   }
+                        // }
 
                         /* ⑤ 최종 라우팅 */
                         router.push(route);
