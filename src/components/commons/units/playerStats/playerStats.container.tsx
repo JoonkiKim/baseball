@@ -37,7 +37,7 @@ export default function StatsPage() {
   useEffect(() => {
     const fetchBatters = async () => {
       try {
-        const res = await API.get("/tournaments/1/records/batter");
+        const res = await API.get("/tournaments/1/records/batters");
         // console.log(API.defaults.baseURL);
         // console.log("responseURL:", (res.request as any).responseURL);
         console.log(res.data);
@@ -56,7 +56,7 @@ export default function StatsPage() {
   useEffect(() => {
     const fetchPitchers = async () => {
       try {
-        const res = await API.get("/tournaments/1/records/pitcher");
+        const res = await API.get("/tournaments/1/records/pitchers");
         // console.log(res.data.batters);
         const sorted = res.data.pitchers.sort((a, b) => b.K - a.K);
         setPitcherData(sorted);
