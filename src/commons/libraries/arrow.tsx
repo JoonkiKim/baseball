@@ -4,14 +4,13 @@ import styled from "@emotion/styled";
 type ArrowProps = { color?: string };
 
 const Svg = styled.svg`
-  /* box-sizing: border-box; */
-  border-radius: 0;
+  display: block; // 인라인 요소의 기본 동작 방지
   width: 0.5rem;
   height: 0.5rem;
-  /* position: relative; */
-  /* transform: translate(-2.1px, -0.5px); */
   overflow: visible;
-  /* background-color: red; */
+  /* 중앙 정렬을 위한 추가 스타일 */
+  // margin: auto;
+  flex-shrink: 0; // flex 컨테이너에서 크기 고정
 `;
 
 export const ArrowUp: React.FC<ArrowProps> = ({ color = "#B8B8B8" }) => (

@@ -1732,6 +1732,38 @@ const GroundRecordModal = forwardRef<
       console.warn("snapshot JSON 파싱 실패:", e);
     }
     console.log("errorFlag", errorFlag);
+
+    // plateAppearanceResult 가져오기
+    const rawPlateAppearance = localStorage.getItem("plateAppearanceResult");
+    let plateAppearanceResult: any = null;
+    if (rawPlateAppearance != null) {
+      try {
+        plateAppearanceResult = JSON.parse(rawPlateAppearance);
+      } catch {
+        plateAppearanceResult = rawPlateAppearance;
+      }
+    }
+
+    // resultCode 확인
+    const resultCode = plateAppearanceResult?.resultCode;
+    const requiresReconstruction =
+      resultCode && ["SO_DROP", "IF", "E"].includes(resultCode);
+
+    // ⛔️ SO_DROP, IF, E 체크 (errorFlag와 관계없이)
+    if (requiresReconstruction) {
+      const virtualExists =
+        Array.isArray(combinedRequest.virtual) &&
+        combinedRequest.virtual.length > 0;
+
+      if (!virtualExists) {
+        alert("낫아웃, 인터페어, 에러인 경우 \n 이닝의 재구성을 해주세요");
+        const err: any = new Error("PRE_FLIGHT_NO_VIRTUAL_FOR_SPECIAL_RESULT");
+        err.code = "PRE_FLIGHT_BLOCK";
+        err.reason = "NO_VIRTUAL_FOR_SPECIAL_RESULT";
+        return null;
+      }
+    }
+
     // ⛔️ 여기서 preflight: PATCH 전에 차단
     if (errorFlag) {
       const hasBB = (arr?: RunnerLogEntry[]) =>
@@ -1754,14 +1786,14 @@ const GroundRecordModal = forwardRef<
         // throw err; // �� 여기서 중단
         return null;
       }
+
       // 1) 가상 이동 자체가 비어있는 경우
       if (!virtualExists) {
         alert("이닝의 재구성을 해주세요");
+
         const err: any = new Error("PRE_FLIGHT_NO_VIRTUAL");
         err.code = "PRE_FLIGHT_BLOCK";
         err.reason = "NO_VIRTUAL";
-
-        // throw err; // 🚫 여기서 중단
         return null;
       }
     }
@@ -1770,15 +1802,15 @@ const GroundRecordModal = forwardRef<
     const encodedPlayId = encodeURIComponent(String(playIdValue));
 
     // plateAppearanceResult 가져오기
-    const rawPlateAppearance = localStorage.getItem("plateAppearanceResult");
-    let plateAppearanceResult: any = null;
-    if (rawPlateAppearance != null) {
-      try {
-        plateAppearanceResult = JSON.parse(rawPlateAppearance);
-      } catch {
-        plateAppearanceResult = rawPlateAppearance;
-      }
-    }
+    // const rawPlateAppearance = localStorage.getItem("plateAppearanceResult");
+    // let plateAppearanceResult: any = null;
+    // if (rawPlateAppearance != null) {
+    //   try {
+    //     plateAppearanceResult = JSON.parse(rawPlateAppearance);
+    //   } catch {
+    //     plateAppearanceResult = rawPlateAppearance;
+    //   }
+    // }
 
     // 1. PATCH /plays/{playId}/result 먼저
     const patchUrl = `/plays/${encodedPlayId}/result`;
