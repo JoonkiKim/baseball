@@ -209,9 +209,9 @@ export default function SubPlayerSelectionModal({
   const teamType = router.query.isHomeTeam === "false" ? "away" : "home";
   const minimalRaw = localStorage.getItem(`lineup_${teamType}`);
   const minimal = minimalRaw ? JSON.parse(minimalRaw) : { batters: [] };
-  const originalBatters: { battingOrder: number; playerId: number }[] =
+  const originalBatters: { battingOrder: number; id: number }[] =
     minimal.batters || [];
-  const originalPitcherId: number | null = minimal.pitcher?.playerId ?? null;
+  const originalPitcherId: number | null = minimal.pitcher?.id ?? null;
   const players = isAway ? awayTeamPlayers : homeTeamPlayers;
   const sortedPlayers = useMemo(
     () => [...players].sort((a, b) => a.name.localeCompare(b.name, "ko")),
@@ -248,7 +248,7 @@ export default function SubPlayerSelectionModal({
               if (isPitcher) {
                 // P행: 원래 타자나 원래 투수는 반드시 선택 가능
                 const isOriginalBatter = originalBatters.some(
-                  (b) => b.playerId === player.id
+                  (b) => b.id === player.id
                 );
                 if (isOriginalBatter || player.id === originalPitcherId) {
                   disabled = false;
@@ -272,12 +272,12 @@ export default function SubPlayerSelectionModal({
                   // 그 외 교체 불가능 타자는
                   // 해당 자리에서 교체된 원래 타자만 선택 가능
                   const substitutedOut = originalBatters.filter(
-                    (b) => !selectedPlayerIds.includes(b.playerId)
+                    (b) => !selectedPlayerIds.includes(b.id)
                   );
                   const candidate = substitutedOut.find(
                     (b) => b.battingOrder === rowOrder
                   );
-                  disabled = !(candidate && candidate.playerId === player.id);
+                  disabled = !(candidate && candidate.id === player.id);
                 }
               }
 
