@@ -291,6 +291,24 @@ export const PlayersRow = styled.div`
 //   align-items: center;
 //   background-color: red;
 // `;
+// export const BatterPlayerBox = styled.div<{ $compact?: boolean }>`
+//   width: 70%;
+//   display: flex;
+//   height: 90%;
+//   flex-direction: column;
+
+//   /* 👇 3개 미만일 때 상단 붙이기 */
+//   justify-content: ${({ $compact }) =>
+//     $compact ? "flex-start" : "space-evenly"};
+//   align-items: ${({ $compact }) => ($compact ? "stretch" : "center")};
+
+//   /* 간격/패딩 보정 */
+//   gap: ${({ $compact }) => ($compact ? "1.2vh" : "0")};
+//   padding-top: ${({ $compact }) => ($compact ? "1vh" : "0")};
+
+//   /* background-color: red; */
+// `;
+
 export const BatterPlayerBox = styled.div<{ $compact?: boolean }>`
   width: 70%;
   display: flex;
@@ -303,15 +321,19 @@ export const BatterPlayerBox = styled.div<{ $compact?: boolean }>`
   align-items: ${({ $compact }) => ($compact ? "stretch" : "center")};
 
   /* 간격/패딩 보정 */
-  gap: ${({ $compact }) => ($compact ? "1.2vh" : "0")};
+  gap: ${({ $compact }) => ($compact ? "0.5vh" : "0")};
   padding-top: ${({ $compact }) => ($compact ? "1vh" : "0")};
 
-  /* background-color: red; */
+  /* scroll */
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 `;
 export const BatterPlayerSingleBox = styled.div<{ $compact?: boolean }>`
   width: 100%;
   display: flex;
-
+  // background-color: red;
   /* 👇 compact 모드에서는 고정 높이 제거 */
   height: ${({ $compact }) => ($compact ? "auto" : "35%")};
 `;
@@ -358,6 +380,15 @@ export const Divider = styled.div`
   height: 0.3px;
   background-color: #2c333b;
   opacity: 0.3;
+  // margin-bottom: 1vh;
+  /* margin: 8px 0; */
+`;
+
+export const DividerForPitcher = styled.div`
+  width: 90%;
+  height: 0.3px;
+  background-color: #2c333b;
+  opacity: 0.3;
   /* margin: 8px 0; */
 `;
 
@@ -372,20 +403,25 @@ export const BatterGroup = styled.div`
   width: 100%; /* ≈ 209px @ 375px-wide reference */
   height: 100%; /* ≈ 131px @ 812px-tall reference */
   overflow: hidden;
+  // background-color: red;
 `;
 
-export const BatterRow = styled.div`
+export const BatterRow = styled.div<{ $isLast?: boolean }>`
   display: flex;
   flex-direction: row; /* lay out circle / who / today horizontally */
   align-items: center;
   justify-content: space-between;
   width: 85%; /* fill the full width of the group */
   padding: 0 0.27vw; /* ≈ 1px left/right padding @ 375px base */
-  gap: 1.87vw; /* ≈ 7px gap between items */
+  // gap: 1.87vw; /* ≈ 7px gap between items */
   /* height will auto-size to its children; remove absolute sizing */
   /* background-color: green; */
-`;
+  padding-bottom: 1vh;
 
+  /* 마지막 요소가 아닐 때만 border-bottom 적용 - DividerForPitcher와 동일한 스타일 */
+  border-bottom: ${({ $isLast }) =>
+    $isLast ? "none" : "0.3px solid rgba(44, 51, 59, 0.3)"};
+`;
 export const OrderCircle = styled.div`
   color: #000;
   text-align: center;
@@ -423,12 +459,15 @@ export const NameResultContainer = styled.div`
   /* background-color: green; */
 `;
 
-export const PlayerName = styled.div`
+export const PlayerName = styled.div<{ $nameLength?: number }>`
   color: #000;
   /* text-align: center; */
   font-family: "Pretendard";
 
-  font-size: 1rem; /* 16px */
+  font-size: ${({ $nameLength }) =>
+    $nameLength && $nameLength >= 4
+      ? "0.85rem"
+      : "1rem"}; /* 4글자 이상이면 14px, 아니면 16px */
   font-weight: 700;
   width: 13vw; /* 45px */
   height: 2.09vh; /* 17px */
@@ -551,12 +590,12 @@ export const PitcherGroup = styled.div`
   flex-direction: column;
 
   align-items: center;
-  justify-content: flex-start;
+  justify-content: space-between;
   width: 24.27vw; /* 91px */
   height: 16vh; /* 131px */
   /* position: relative; */
   /* overflow: hidden; */
-  /* background-color: red; */
+  // background-color: red;
 `;
 
 export const PitcherWho = styled.div`
@@ -567,8 +606,9 @@ export const PitcherWho = styled.div`
   justify-content: space-evenly;
   width: 21.87vw; /* 82px */
   height: 4vh; /* 39px */
-  margin-bottom: 2.1vh;
-  /* background-color: green; */
+  // margin-bottom: 2.1vh;
+  // background-color: green;
+  // padding-bottom: 1vh;
 `;
 
 export const PitcherName = styled.div`
@@ -643,7 +683,7 @@ export const PitcherStatsGrid = styled.div`
   gap: 4vw;
   grid-template-columns: repeat(2, 1fr);
   grid-auto-rows: minmax(4vh, auto);
-  /* background-color: aqua; */
+  // background-color: aqua;
 `;
 
 export const StatCell = styled.div`

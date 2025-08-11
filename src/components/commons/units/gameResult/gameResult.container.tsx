@@ -168,12 +168,21 @@ export default function FinalGameRecordPage() {
   // scoreboard DOM 컨테이너 ref
   const scoreboardRef = useRef<HTMLDivElement>(null);
 
+  // canRecord 상태 추가
+  const [canRecord, setCanRecord] = useState<boolean>(false);
   const fetchResults = useCallback(async () => {
     if (!recordId) return;
     try {
       const { data } = await API.get(`/games/${recordId}/result`);
-      const { scoreboard, teamSummary, batterStats, pitcherStats } = data;
-
+      const {
+        canRecord: apiCanRecord,
+        scoreboard,
+        teamSummary,
+        batterStats,
+        pitcherStats,
+      } = data;
+      // canRecord 상태 설정
+      setCanRecord(apiCanRecord);
       // 🎯 새로운 scoreboard 구조 처리
       const newA = Array(9).fill("");
       const newB = Array(9).fill("");
@@ -252,21 +261,22 @@ export default function FinalGameRecordPage() {
   };
 
   // (1) 스코어보드 셀 클릭 → 모달 열기 (mode="score")
-  const handleScoreCellClick = (
-    score: string,
-    team: "A" | "B",
-    idx: number
-  ) => {
-    if (!score || score === "-" || idx === 7 || idx === 8) return;
-    setSelectedCell({ cellValue: score, team, cellIndex: idx });
-    setModalMode("score");
-    setAlertMessage("");
-    setIsScorePatchModalOpen(true);
-  };
+  // const handleScoreCellClick = (
+  //   score: string,
+  //   team: "A" | "B",
+  //   idx: number
+  // ) => {
+  //   if (!score || score === "-" || idx === 7 || idx === 8) return;
+  //   setSelectedCell({ cellValue: score, team, cellIndex: idx });
+  //   setModalMode("score");
+  //   setAlertMessage("");
+  //   setIsScorePatchModalOpen(true);
+  // };
   const [selectedStatId, setSelectedStatId] = useState<number | null>(null);
 
   // (2) 타자 칸 클릭 → 모달 열기 (mode="batter")
   const handleBatterClick = (player: any) => {
+    if (!canRecord) return;
     setSelectedStatId(player.id);
     const msg =
       `id: ${player.id}\n` +
@@ -291,6 +301,7 @@ export default function FinalGameRecordPage() {
 
   // (3) 투수 칸 클릭 → 모달 열기 (mode="pitcher")
   const handlePitcherClick = (pitcher: any) => {
+    if (!canRecord) return;
     setSelectedStatId(pitcher.id);
     const msg =
       `id: ${pitcher.id}\n` +
@@ -363,11 +374,11 @@ export default function FinalGameRecordPage() {
             <TeamScoreCell
               key={idx}
               className="score-cell"
-              onClick={
-                isFinalized
-                  ? undefined
-                  : () => handleScoreCellClick(score, "A", idx)
-              }
+              // onClick={
+              //   isFinalized
+              //     ? undefined
+              //     : () => handleScoreCellClick(score, "A", idx)
+              // }
             >
               <EditableInputScore type="number" value={score} readOnly />
             </TeamScoreCell>
@@ -381,11 +392,11 @@ export default function FinalGameRecordPage() {
             <TeamScoreCell
               key={idx}
               className="score-cell"
-              onClick={
-                isFinalized
-                  ? undefined
-                  : () => handleScoreCellClick(score, "B", idx)
-              }
+              // onClick={
+              //   isFinalized
+              //     ? undefined
+              //     : () => handleScoreCellClick(score, "B", idx)
+              // }
             >
               <EditableInputScore type="number" value={score} readOnly />
             </TeamScoreCell>
@@ -427,7 +438,9 @@ export default function FinalGameRecordPage() {
                     value={player.PA || 0}
                     readOnly
                     onClick={
-                      isFinalized ? undefined : () => handleBatterClick(player)
+                      isFinalized || !canRecord
+                        ? undefined
+                        : () => handleBatterClick(player)
                     }
                   />
                 </td>
@@ -437,7 +450,9 @@ export default function FinalGameRecordPage() {
                     value={player.AB || 0}
                     readOnly
                     onClick={
-                      isFinalized ? undefined : () => handleBatterClick(player)
+                      isFinalized || !canRecord
+                        ? undefined
+                        : () => handleBatterClick(player)
                     }
                   />
                 </td>
@@ -447,7 +462,9 @@ export default function FinalGameRecordPage() {
                     value={player.H || 0}
                     readOnly
                     onClick={
-                      isFinalized ? undefined : () => handleBatterClick(player)
+                      isFinalized || !canRecord
+                        ? undefined
+                        : () => handleBatterClick(player)
                     }
                   />
                 </td>
@@ -458,7 +475,9 @@ export default function FinalGameRecordPage() {
                     value={player["2B"] || 0}
                     readOnly
                     onClick={
-                      isFinalized ? undefined : () => handleBatterClick(player)
+                      isFinalized || !canRecord
+                        ? undefined
+                        : () => handleBatterClick(player)
                     }
                   />
                 </td>
@@ -478,7 +497,9 @@ export default function FinalGameRecordPage() {
                     value={player.HR || 0}
                     readOnly
                     onClick={
-                      isFinalized ? undefined : () => handleBatterClick(player)
+                      isFinalized || !canRecord
+                        ? undefined
+                        : () => handleBatterClick(player)
                     }
                   />
                 </td>
@@ -498,7 +519,9 @@ export default function FinalGameRecordPage() {
                     value={player.RBI || 0}
                     readOnly
                     onClick={
-                      isFinalized ? undefined : () => handleBatterClick(player)
+                      isFinalized || !canRecord
+                        ? undefined
+                        : () => handleBatterClick(player)
                     }
                   />
                 </td>
@@ -508,7 +531,9 @@ export default function FinalGameRecordPage() {
                     value={player.BB || 0}
                     readOnly
                     onClick={
-                      isFinalized ? undefined : () => handleBatterClick(player)
+                      isFinalized || !canRecord
+                        ? undefined
+                        : () => handleBatterClick(player)
                     }
                   />
                 </td>
@@ -518,7 +543,9 @@ export default function FinalGameRecordPage() {
                     value={player.SO || 0}
                     readOnly
                     onClick={
-                      isFinalized ? undefined : () => handleBatterClick(player)
+                      isFinalized || !canRecord
+                        ? undefined
+                        : () => handleBatterClick(player)
                     }
                   />
                 </td>
@@ -528,7 +555,9 @@ export default function FinalGameRecordPage() {
                     value={player.SH || 0}
                     readOnly
                     onClick={
-                      isFinalized ? undefined : () => handleBatterClick(player)
+                      isFinalized || !canRecord
+                        ? undefined
+                        : () => handleBatterClick(player)
                     }
                   />
                 </td>
@@ -538,7 +567,9 @@ export default function FinalGameRecordPage() {
                     value={player.SF || 0}
                     readOnly
                     onClick={
-                      isFinalized ? undefined : () => handleBatterClick(player)
+                      isFinalized || !canRecord
+                        ? undefined
+                        : () => handleBatterClick(player)
                     }
                   />
                 </td>
@@ -574,7 +605,7 @@ export default function FinalGameRecordPage() {
                     value={formatInnings(pitcher.IP || 0)}
                     readOnly
                     onClick={
-                      isFinalized
+                      isFinalized || !canRecord
                         ? undefined
                         : () => handlePitcherClick(pitcher)
                     }
@@ -586,7 +617,7 @@ export default function FinalGameRecordPage() {
                     value={pitcher.R || 0}
                     readOnly
                     onClick={
-                      isFinalized
+                      isFinalized || !canRecord
                         ? undefined
                         : () => handlePitcherClick(pitcher)
                     }
@@ -598,7 +629,7 @@ export default function FinalGameRecordPage() {
                     value={pitcher.ER || 0}
                     readOnly
                     onClick={
-                      isFinalized
+                      isFinalized || !canRecord
                         ? undefined
                         : () => handlePitcherClick(pitcher)
                     }
@@ -610,7 +641,7 @@ export default function FinalGameRecordPage() {
                     value={pitcher.K || 0}
                     readOnly
                     onClick={
-                      isFinalized
+                      isFinalized || !canRecord
                         ? undefined
                         : () => handlePitcherClick(pitcher)
                     }
@@ -622,7 +653,7 @@ export default function FinalGameRecordPage() {
                     value={pitcher.BB || 0}
                     readOnly
                     onClick={
-                      isFinalized
+                      isFinalized || !canRecord
                         ? undefined
                         : () => handlePitcherClick(pitcher)
                     }
@@ -668,7 +699,9 @@ export default function FinalGameRecordPage() {
                     value={player.PA || 0}
                     readOnly
                     onClick={
-                      isFinalized ? undefined : () => handleBatterClick(player)
+                      isFinalized || !canRecord
+                        ? undefined
+                        : () => handleBatterClick(player)
                     }
                   />
                 </td>
@@ -678,7 +711,9 @@ export default function FinalGameRecordPage() {
                     value={player.AB || 0}
                     readOnly
                     onClick={
-                      isFinalized ? undefined : () => handleBatterClick(player)
+                      isFinalized || !canRecord
+                        ? undefined
+                        : () => handleBatterClick(player)
                     }
                   />
                 </td>
@@ -688,7 +723,9 @@ export default function FinalGameRecordPage() {
                     value={player.H || 0}
                     readOnly
                     onClick={
-                      isFinalized ? undefined : () => handleBatterClick(player)
+                      isFinalized || !canRecord
+                        ? undefined
+                        : () => handleBatterClick(player)
                     }
                   />
                 </td>
@@ -699,7 +736,9 @@ export default function FinalGameRecordPage() {
                     value={player["2B"] || 0}
                     readOnly
                     onClick={
-                      isFinalized ? undefined : () => handleBatterClick(player)
+                      isFinalized || !canRecord
+                        ? undefined
+                        : () => handleBatterClick(player)
                     }
                   />
                 </td>
@@ -709,7 +748,9 @@ export default function FinalGameRecordPage() {
                     value={player["3B"] || 0}
                     readOnly
                     onClick={
-                      isFinalized ? undefined : () => handleBatterClick(player)
+                      isFinalized || !canRecord
+                        ? undefined
+                        : () => handleBatterClick(player)
                     }
                   />
                 </td>
@@ -729,7 +770,9 @@ export default function FinalGameRecordPage() {
                     value={player.R || 0}
                     readOnly
                     onClick={
-                      isFinalized ? undefined : () => handleBatterClick(player)
+                      isFinalized || !canRecord
+                        ? undefined
+                        : () => handleBatterClick(player)
                     }
                   />
                 </td>
@@ -739,7 +782,9 @@ export default function FinalGameRecordPage() {
                     value={player.RBI || 0}
                     readOnly
                     onClick={
-                      isFinalized ? undefined : () => handleBatterClick(player)
+                      isFinalized || !canRecord
+                        ? undefined
+                        : () => handleBatterClick(player)
                     }
                   />
                 </td>
@@ -749,7 +794,9 @@ export default function FinalGameRecordPage() {
                     value={player.BB || 0}
                     readOnly
                     onClick={
-                      isFinalized ? undefined : () => handleBatterClick(player)
+                      isFinalized || !canRecord
+                        ? undefined
+                        : () => handleBatterClick(player)
                     }
                   />
                 </td>
@@ -759,7 +806,9 @@ export default function FinalGameRecordPage() {
                     value={player.SO || 0}
                     readOnly
                     onClick={
-                      isFinalized ? undefined : () => handleBatterClick(player)
+                      isFinalized || !canRecord
+                        ? undefined
+                        : () => handleBatterClick(player)
                     }
                   />
                 </td>
@@ -769,7 +818,9 @@ export default function FinalGameRecordPage() {
                     value={player.SH || 0}
                     readOnly
                     onClick={
-                      isFinalized ? undefined : () => handleBatterClick(player)
+                      isFinalized || !canRecord
+                        ? undefined
+                        : () => handleBatterClick(player)
                     }
                   />
                 </td>
@@ -779,7 +830,9 @@ export default function FinalGameRecordPage() {
                     value={player.SF || 0}
                     readOnly
                     onClick={
-                      isFinalized ? undefined : () => handleBatterClick(player)
+                      isFinalized || !canRecord
+                        ? undefined
+                        : () => handleBatterClick(player)
                     }
                   />
                 </td>
@@ -815,7 +868,7 @@ export default function FinalGameRecordPage() {
                     value={formatInnings(pitcher.IP || 0)}
                     readOnly
                     onClick={
-                      isFinalized
+                      isFinalized || !canRecord
                         ? undefined
                         : () => handlePitcherClick(pitcher)
                     }
@@ -827,7 +880,7 @@ export default function FinalGameRecordPage() {
                     value={pitcher.R || 0}
                     readOnly
                     onClick={
-                      isFinalized
+                      isFinalized || !canRecord
                         ? undefined
                         : () => handlePitcherClick(pitcher)
                     }
@@ -839,7 +892,7 @@ export default function FinalGameRecordPage() {
                     value={pitcher.ER || 0}
                     readOnly
                     onClick={
-                      isFinalized
+                      isFinalized || !canRecord
                         ? undefined
                         : () => handlePitcherClick(pitcher)
                     }
@@ -851,7 +904,7 @@ export default function FinalGameRecordPage() {
                     value={pitcher.K || 0}
                     readOnly
                     onClick={
-                      isFinalized
+                      isFinalized || !canRecord
                         ? undefined
                         : () => handlePitcherClick(pitcher)
                     }
@@ -863,7 +916,7 @@ export default function FinalGameRecordPage() {
                     value={pitcher.BB || 0}
                     readOnly
                     onClick={
-                      isFinalized
+                      isFinalized || !canRecord
                         ? undefined
                         : () => handlePitcherClick(pitcher)
                     }

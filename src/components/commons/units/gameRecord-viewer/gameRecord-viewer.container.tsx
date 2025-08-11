@@ -76,6 +76,7 @@ import {
   StatFrame2,
   ResultBox,
   NameResultContainer,
+  DividerForPitcher,
 } from "./gameRecord-viewer.style";
 
 import {
@@ -356,100 +357,6 @@ export default function GameRecordPageViewer() {
   // attack 쿼리 동기화를 위한 state
   const [attackVal, setAttackVal] = useState("");
 
-  // 예시 데이터 객체
-  const exampleScores = {
-    scoreboard: [
-      { inning: 1, inningHalf: "TOP", runs: 1 },
-      { inning: 1, inningHalf: "BOTTOM", runs: 1 },
-      { inning: 2, inningHalf: "TOP", runs: 2 },
-      { inning: 2, inningHalf: "BOTTOM", runs: 1 },
-      // … 3~7 이닝까지 필요하면 추가
-    ],
-    teamSummary: {
-      away: { runs: 3, hits: 5 },
-      home: { runs: 1, hits: 4 },
-    },
-  };
-
-  // ── 1) 이닝 점수 GET ──
-  // const fetchInningScores = useCallback(async () => {
-  //   if (!recordId) return;
-  //   try {
-  //     // 실제 호출은 잠시 주석 처리
-  //     // const res = await API.get(`/games/${recordId}/scores`);
-  //     // const response = res.data;
-
-  //     const response = exampleScores;
-  //     // console.log("스코어보드 응답도착");
-  //     const newA = Array(9).fill("");
-  //     const newB = Array(9).fill("");
-
-  //     if (Array.isArray(response.scoreboard)) {
-  //       response.scoreboard.forEach((entry) => {
-  //         const idx = entry.inning - 1;
-  //         if (idx >= 0 && idx < 7) {
-  //           if (entry.inningHalf === "TOP") newA[idx] = entry.runs;
-  //           else newB[idx] = entry.runs;
-  //         }
-  //       });
-  //     }
-
-  //     // R, H 컬럼
-  //     newA[7] = response.teamSummary.away.runs;
-  //     newA[8] = response.teamSummary.away.hits;
-  //     newB[7] = response.teamSummary.home.runs;
-  //     newB[8] = response.teamSummary.home.hits;
-
-  //     setTeamAScores(newA);
-  //     setTeamBScores(newB);
-
-  //     // attackVal 계산
-  //     let newAttack = "away";
-  //     if (Array.isArray(response.scoreboard) && response.scoreboard.length) {
-  //       const last = response.scoreboard[response.scoreboard.length - 1];
-  //       newAttack = last.inningHalf === "TOP" ? "home" : "away";
-  //     }
-  //     setAttackVal(newAttack);
-  //     return newAttack;
-  //   } catch (err) {
-  //     console.error("이닝 점수 로드 실패:", err);
-  //     setError(err);
-  //   }
-  // }, [router.query.recordId, attackVal]);
-
-  // ── 마운트 및 의존성 변경 시 호출 ──
-  // useEffect(() => {
-  //   // 팀 이름 로컬스토리지에서
-  //   const matchStr = localStorage.getItem("selectedMatch");
-  //   if (matchStr) {
-  //     try {
-  //       const { awayTeam, homeTeam } = JSON.parse(matchStr);
-  //       setTeamAName(awayTeam.name);
-  //       setTeamBName(homeTeam.name);
-  //     } catch {
-  //       console.error("selectedMatch 파싱 실패");
-  //     }
-  //   }
-  //   fetchInningScores();
-  // }, [fetchInningScores]);
-
-  // ── 4) attack 쿼리 실제 동기화 ──
-  // useEffect(() => {
-  //   if (!recordId) return;
-  //   if (router.query.attack !== attackVal) {
-  //     router.replace({
-  //       pathname: router.pathname,
-  //       query: { ...router.query, attack: attackVal },
-  //     });
-  //   }
-  // }, [recordId, attackVal, router.query.attack, router]);
-
-  // ── 기록 액션 ──
-
-  // ① POST + alert 후에 resolve 되는 async 함수로 변경
-  // → 여기에 모든 “공수교대” 로직을 몰아서 처리
-
-  // 에러 상태
   const [validationError, setValidationError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -661,7 +568,7 @@ export default function GameRecordPageViewer() {
     initialTop: string; // e.g. '85%'
   }
   const badgeConfigs: BadgeConfig[] = [
-    { id: "badge-1", label: "", initialLeft: "50%", initialTop: "80%" },
+    { id: "badge-1", label: "", initialLeft: "60%", initialTop: "80%" },
     { id: "badge-2", label: "", initialLeft: "80%", initialTop: "75%" },
     { id: "badge-3", label: "", initialLeft: "80%", initialTop: "85%" },
     { id: "badge-4", label: "", initialLeft: "80%", initialTop: "95%" },
@@ -1099,10 +1006,9 @@ export default function GameRecordPageViewer() {
     [sseData?.playerRecords?.pitcher]
   );
 
-  const VISIBLE_ROWS = 3;
   const batterRows3 = useMemo(() => {
-    const list = (battersForUI ?? []).slice().reverse();
-    return Array.from({ length: VISIBLE_ROWS }, (_, i) => list[i] ?? null);
+    const list = (battersForUI ?? []).slice();
+    return list; // 모든 타자 데이터 반환
   }, [battersForUI]);
 
   return (
@@ -1314,16 +1220,18 @@ export default function GameRecordPageViewer() {
       </GraphicWrapper>
 
       <PlayersRow>
-        <BatterPlayerBox>
+        <BatterPlayerBox $compact={(batterRows3?.length ?? 0) > 3}>
           {batterRows3.map((b, idx) => (
             <Fragment key={b ? b.id : `empty-${idx}`}>
               <BatterPlayerSingleBox>
                 {b && (
                   <BatterGroup>
-                    <BatterRow>
+                    <BatterRow $isLast={idx === batterRows3.length - 1}>
                       <WhoContainer>
                         <NameResultContainer>
-                          <PlayerName>{b.name}</PlayerName>
+                          <PlayerName $nameLength={b.name?.length}>
+                            {b.name}
+                          </PlayerName>
                           {b.battingResult && (
                             <ResultBox $isOut={isOutResult(b.battingResult)}>
                               {getResultLabel(b.battingResult)}
@@ -1366,7 +1274,7 @@ export default function GameRecordPageViewer() {
                   </BatterGroup>
                 )}
               </BatterPlayerSingleBox>
-              {idx < 2 && <Divider />}
+              <DividerForPitcher />
             </Fragment>
           ))}
         </BatterPlayerBox>
@@ -1393,7 +1301,7 @@ export default function GameRecordPageViewer() {
                 </StatFrame2>
               </PitcherToday>
             </PitcherWho>
-
+            <DividerForPitcher />
             <PitcherStatsGrid>
               {[
                 { name: "이닝", value: lastPitcher?.todayStats?.IP },
