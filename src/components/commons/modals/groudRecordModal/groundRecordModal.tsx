@@ -1645,12 +1645,14 @@ const sendRunnerEvents = useCallback(async () => {
     const parsed = JSON.parse(rawSnapshot);
     errorFlag = !!parsed?.snapshot?.inningStats?.errorFlag;
     playIdValue = parsed.snapshot?.playId ?? null;
+
+    
   } catch (e) {
     console.warn("snapshot JSON 파싱 실패:", e);
   }
-
+console.log("errorFlag",errorFlag);
   // ⛔️ 여기서 preflight: PATCH 전에 차단
-  // if (errorFlag) {
+  if (errorFlag) {
     const hasBB = (arr?: RunnerLogEntry[]) =>
       (arr ?? []).some((e) => e.startBase === "B" && e.endBase === "B");
 
@@ -1683,7 +1685,7 @@ const sendRunnerEvents = useCallback(async () => {
     }
 
 
-  // }
+  }
   // ⛔️ preflight 끝 — 이 아래로 내려오면 유효하므로 PATCH/POST 진행
 
   const encodedPlayId = encodeURIComponent(String(playIdValue));

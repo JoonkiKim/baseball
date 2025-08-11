@@ -1909,6 +1909,10 @@ export default function GameRecordPageV2() {
   //   syncRunnersOnBase();
   // }, [snapshotData]);
 
+
+  // let errorFlag = false;
+  
+
   const handleDrop = (e: DragEndEvent) => {
     const badgeId = e.active.id as string;
 
@@ -2538,11 +2542,13 @@ export default function GameRecordPageV2() {
       const core = parsed?.snapshot ?? parsed;
       // errorFlag = !!parsed?.snapshot?.inningStats?.errorFlag;
       // playIdValue = parsed.snapshot?.playId ?? null;
-      errorFlag = !!core?.inningStats?.errorFlag;
+      errorFlag = core?.inningStats?.errorFlag;
+      console.log("errorFlag",errorFlag);
       playIdValue = core?.playId ?? null;
     } catch (e) {
       console.warn("snapshot JSON 파싱 실패:", e);
     }
+    
 
     // ⛔️ 여기서 preflight: PATCH 전에 차단
     if (errorFlag) {
