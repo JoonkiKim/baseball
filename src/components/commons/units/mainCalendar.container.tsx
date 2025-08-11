@@ -402,17 +402,36 @@ export default function MainCalendarPage() {
               const showRecordButton =
                 match.status === "SCHEDULED"
                   ? apiCanRecord
-                  : match.status === "FINALIZED" || match.status === "EDITING";
+                  : match.status === "FINALIZED" ||
+                    match.status === "EDITING" ||
+                    match.status === "IN_PROGRESS";
 
               const team1Score = match.homeTeam.score;
               const team2Score = match.awayTeam.score;
 
-              const buttonLabel =
-                match.status === "SCHEDULED" &&
-                !apiCanRecord &&
-                (apiCanSubmit.home || apiCanSubmit.away)
-                  ? "라인업제출"
-                  : "경기기록";
+              // const buttonLabel =
+              //   match.status === "SCHEDULED" &&
+              //   !apiCanRecord &&
+              //   (apiCanSubmit.home || apiCanSubmit.away)
+              //     ? "라인업제출"
+              //     : "경기기록";
+              const buttonLabel = (() => {
+                if (match.status === "SCHEDULED") {
+                  if (apiCanRecord) {
+                    return "라인업";
+                  } else if (apiCanSubmit.home || apiCanSubmit.away) {
+                    return "라인업제출";
+                  } else {
+                    return "";
+                  }
+                } else if (match.status === "FINALIZED") {
+                  return "기록";
+                } else if (match.status === "IN_PROGRESS") {
+                  return "중계";
+                } else {
+                  return ""; // 기본값
+                }
+              })();
 
               let displayHomeScore: number | string | null = team1Score;
               let displayAwayScore: number | string | null = team2Score;
