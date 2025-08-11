@@ -307,6 +307,22 @@ const GroundRecordModal = forwardRef<
         ).length;
         return whiteLeft > 0 ? next : prev;
       });
+      // ⬇️ 추가: out으로 나간 배지를 baseToBadgeId 매핑에서도 지워야
+      setBaseToBadgeIdCurrent((prev) => {
+        const next = { ...prev };
+        Object.entries(prev).forEach(([baseNum, bId]) => {
+          if (bId === badgeId) delete next[Number(baseNum)];
+        });
+        return next;
+      });
+
+      // (선택) runnerInfoByBadge에서도 정리하면 더 안전
+      setRunnerInfoByBadgeCurrent((prev) => {
+        if (!prev[badgeId]) return prev;
+        const next = { ...prev };
+        delete next[badgeId];
+        return next;
+      });
       setBadgeSnaps((prev) => ({ ...prev, [badgeId]: null }));
       groundRef.current?.classList.remove("out-zone-active");
       scheduleOccupancyLog();
@@ -722,10 +738,16 @@ const GroundRecordModal = forwardRef<
       ),
     [activeBadges, outBadgesCurrent, homeSnappedBadges]
   );
-  const batterWhiteBadgeId = useMemo(
-    () => allWhiteBadges[0]?.id ?? null,
-    [allWhiteBadges]
-  );
+  // const batterWhiteBadgeId = useMemo(
+  //   () => allWhiteBadges[0]?.id ?? null,
+  //   [allWhiteBadges]
+  // );
+  const batterWhiteBadgeId = useMemo(() => {
+    const firstWhite = badgeConfigsForModal.find(
+      (c) => !c.id.startsWith("black-badge")
+    );
+    return firstWhite?.id ?? null;
+  }, []);
 
   // 주자 위치 시키는 로직
   // const getRunnersOnBase = useCallback(() => {
@@ -768,7 +790,7 @@ const GroundRecordModal = forwardRef<
     : setFinishedBadgesActual;
 
   // 실제 / 재구성 기준으로 배지 매핑 및 스냅 초기화
-
+  const nextRunnerInfo: Record<string, { runnerId: number; name: string }> = {};
   const syncRunnersOnBase = useCallback(() => {
     console.log("🔄 syncRunnersOnBase 실행됨");
     console.log("📊 실행 시점의 snap:", snap);
@@ -820,7 +842,8 @@ const GroundRecordModal = forwardRef<
     // 5. baseToBadgeId 갱신
     // const newMap: Record<number, string> = { ...baseToBadgeId };
     const newMap: Record<number, string> = {};
-    const usedBadges = new Set(Object.values(newMap));
+    // const usedBadges = new Set(Object.values(newMap));
+    const usedBadges = new Set<string>();
 
     runners.forEach((runner: any) => {
       if (!newMap[runner.base]) {
@@ -836,6 +859,7 @@ const GroundRecordModal = forwardRef<
     //   setBaseToBadgeIdCurrent(newMap);
     // }
     setBaseToBadgeIdCurrent(newMap);
+    setRunnerInfoByBadgeCurrent(nextRunnerInfo);
 
     // 6. 스냅 초기화 및 runnerInfo 설정
     runners.forEach((runner: any) => {
@@ -866,10 +890,9 @@ const GroundRecordModal = forwardRef<
 
         initialSnapsRef.current[badgeId] = snap;
         setBadgeSnaps((prev) => ({ ...prev, [badgeId]: snap }));
-        setRunnerInfoByBadgeCurrent((prev) => ({
-          ...prev,
-          [badgeId]: { runnerId: runner.id, name: runner.name },
-        }));
+
+        // ... runners 루프 안에서 매핑된 배지에 대해:
+        nextRunnerInfo[badgeId] = { runnerId: runner.id, name: runner.name };
       };
       tryInit();
     });
@@ -898,21 +921,30 @@ const GroundRecordModal = forwardRef<
     });
 
     // 8. 매핑되지 않은 후보 배지들은 excluded 처리
+    // const mappedBadges = new Set(Object.values(newMap));
+    // whiteBadgeCandidates
+    //   .filter((id) => id !== batterWhiteBadgeId)
+    //   .forEach((badgeId) => {
+    //     if (!mappedBadges.has(badgeId)) {
+    //       setRunnerInfoByBadgeCurrent((prev) => {
+    //         const existing = prev[badgeId];
+    //         if (existing && existing.runnerId === EXCLUDED_RUNNER_ID)
+    //           return prev;
+    //         return {
+    //           ...prev,
+    //           [badgeId]: { runnerId: EXCLUDED_RUNNER_ID, name: "할당 제외" },
+    //         };
+    //       });
+    //     }
+    //   });
     const mappedBadges = new Set(Object.values(newMap));
     whiteBadgeCandidates
-      .filter((id) => id !== batterWhiteBadgeId)
+      .filter((id) => id !== batterWhiteBadgeId && !mappedBadges.has(id))
       .forEach((badgeId) => {
-        if (!mappedBadges.has(badgeId)) {
-          setRunnerInfoByBadgeCurrent((prev) => {
-            const existing = prev[badgeId];
-            if (existing && existing.runnerId === EXCLUDED_RUNNER_ID)
-              return prev;
-            return {
-              ...prev,
-              [badgeId]: { runnerId: EXCLUDED_RUNNER_ID, name: "할당 제외" },
-            };
-          });
-        }
+        nextRunnerInfo[badgeId] = {
+          runnerId: EXCLUDED_RUNNER_ID,
+          name: "할당 제외",
+        };
       });
 
     // console.log(
@@ -1933,6 +1965,8 @@ const GroundRecordModal = forwardRef<
     [badgeSnaps]
   );
 
+  // 청소하기 로직직
+
   // useEffect(() => {
   //   console.log("Base occupancy:", occupancy);
   // }, [occupancy]);
@@ -2160,7 +2194,8 @@ const GroundRecordModal = forwardRef<
                 .filter((cfg) => {
                   // active한 것만
                   if (!activeBadges.includes(cfg.id)) return false;
-
+                  // ⬇️ 추가: out으로 표시된 배지는 렌더하지 않음
+                  if (outBadgesCurrent.has(cfg.id)) return false;
                   // 타자 배지: currentBatterId가 있어야 보여줌
                   if (cfg.id === batterWhiteBadgeId) {
                     return currentBatterId != null;

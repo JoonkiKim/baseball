@@ -1212,15 +1212,18 @@ export default function GameRecordPageV2() {
     initialLeft,
     initialTop,
     snapInfo,
+    disabled = false,
   }: {
     id: string;
     label: string;
     initialLeft: string;
     initialTop: string;
     snapInfo: SnapInfo | null;
+    disabled?: boolean;
   }) => {
     const { attributes, listeners, setNodeRef, transform } = useDraggable({
       id,
+      disabled,
     });
     // console.log("main badge render");
     const combinedRef = (el: HTMLElement | null) => {
@@ -1251,9 +1254,11 @@ export default function GameRecordPageV2() {
           left,
           top,
           transform: styleTransform,
+          cursor: disabled ? "default" : "grab", // UX 보정
         }}
-        {...attributes}
-        {...listeners}
+        // 안전하게: disabled일 땐 드래그 핸들러도 안 붙이기
+        {...(!disabled ? attributes : {})}
+        {...(!disabled ? listeners : {})}
       >
         {label}
       </NameBadge>
@@ -1646,7 +1651,7 @@ export default function GameRecordPageV2() {
   const setFinishedBadgesCurrent = reconstructMode
     ? setFinishedBadgesVirtual
     : setFinishedBadgesActual;
-
+  const nextRunnerInfo: Record<string, { runnerId: number; name: string }> = {};
   // 실제 / 재구성 기준으로 배지 매핑 및 스냅 초기화
   const syncRunnersOnBase = useCallback(() => {
     // 1. 원본 runners 가져오기 (actual / virtual 구분은 getRunnersOnBase가 처리)
@@ -1702,8 +1707,10 @@ export default function GameRecordPageV2() {
     );
 
     // 5. baseToBadgeId 갱신
-    const newMap: Record<number, string> = { ...baseToBadgeId };
-    const usedBadges = new Set(Object.values(newMap));
+    // const newMap: Record<number, string> = { ...baseToBadgeId };
+    // const usedBadges = new Set(Object.values(newMap));
+    const newMap: Record<number, string> = {};
+    const usedBadges = new Set<string>();
 
     runners.forEach((runner: any) => {
       if (!newMap[runner.base]) {
@@ -1748,10 +1755,8 @@ export default function GameRecordPageV2() {
 
         initialSnapsRef.current[badgeId] = snap;
         setBadgeSnaps((prev) => ({ ...prev, [badgeId]: snap }));
-        setRunnerInfoByBadgeCurrent((prev) => ({
-          ...prev,
-          [badgeId]: { runnerId: runner.id, name: runner.name },
-        }));
+        nextRunnerInfo[badgeId] = { runnerId: runner.id, name: runner.name };
+        setRunnerInfoByBadgeCurrent(nextRunnerInfo);
       };
       tryInit();
     });
@@ -1954,6 +1959,15 @@ export default function GameRecordPageV2() {
         ).length;
         return whiteLeft > 0 ? next : prev;
       });
+      setBaseToBadgeIdCurrent((prev) => {
+        const next = { ...prev };
+        Object.entries(prev).forEach(([baseNum, bId]) => {
+          if (bId === badgeId) {
+            delete next[Number(baseNum) as any];
+          }
+        });
+        return next;
+      });
       setBadgeSnaps((prev) => ({ ...prev, [badgeId]: null }));
       groundRef.current?.classList.remove("out-zone-active");
       scheduleOccupancyLog();
@@ -2149,6 +2163,8 @@ export default function GameRecordPageV2() {
 
   // 모달 성능 최적화 (렌더링 최소화)
   const groundModalRef = useRef<GroundRecordModalHandle>(null);
+  const [modalEpoch, setModalEpoch] = useState(0);
+
   // onSuccess 콜백 예시
   const afterRecord = async () => {
     // const newAttack = await fetchInningScores();
@@ -2655,6 +2671,8 @@ export default function GameRecordPageV2() {
       await sendRunnerEvents(); // 여기서 updateSnapshot만 수행
       // await sendRunnerEvents();
       setReconstructMode(false);
+      setModalEpoch((v) => v + 1);
+
       // clearAllSnapsAndExitReconstructMode();
       // // bumpBadgesVersion();
       // resetWhiteBadges();
@@ -2828,6 +2846,7 @@ export default function GameRecordPageV2() {
   useEffect(() => {
     badgeSnapsRef.current = badgeSnaps;
   }, [badgeSnaps]);
+  const outSet = reconstructMode ? outBadgesVirtual : outBadgesActual;
 
   return (
     <GameRecordContainer ref={containerRef}>
@@ -3077,7 +3096,7 @@ export default function GameRecordPageV2() {
             {badgeConfigs
               .filter((cfg) => {
                 if (!activeBadges.includes(cfg.id)) return false;
-
+                if (outSet.has(cfg.id)) return false;
                 // 타자 배지는 기존 로직 그대로
                 if (cfg.id === batterWhiteBadgeId) {
                   return currentBatterId != null;
@@ -3107,6 +3126,7 @@ export default function GameRecordPageV2() {
                     initialLeft={cfg.initialLeft}
                     initialTop={cfg.initialTop}
                     snapInfo={badgeSnaps[cfg.id]}
+                    disabled={cfg.id === batterWhiteBadgeId}
                   />
                 );
               })}
@@ -3211,6 +3231,7 @@ export default function GameRecordPageV2() {
 
       {/* ⚠️ 꼭 마지막에 항상 렌더, 내부에서만 isOpen 제어 */}
       <GroundRecordModal
+        key={modalEpoch}
         ref={groundModalRef}
         onSuccess={afterRecord}
         updateSnapshot={updateSnapshot}
