@@ -235,26 +235,36 @@ export const AwayTeamPlayerListState = atom<IHAPlayer[]>({
 
 // 타자 기록 데이터 인터페이스
 export interface HitterStat {
-  playerName: string;
-  teamName: string;
-  teamGameCount: number;
-  PA: number;
-  AB: number;
-  H: number;
-  "2B": number;
-  "3B": number;
-  HR: number;
-  BB: number;
-  AVG: string;
-  OBP: string;
-  SLG: string;
-  OPS: string;
+  "rank": number,
+  "name": string,
+  "team": string,
+  "teamGameCount": number,
+  "AVG": string,
+  "PA": number,
+  "AB": number,
+  "H": number,
+  "2B": number,
+  "3B": number,
+  "HR": number,
+  "RBI": number,
+  "R": number,
+  "BB": number,
+  "SO": number,
+  "OBP": string,
+  "SLG": string,
+  "OPS": string
 }
 // 투수 기록 데이터 인터페이스
 export interface PitcherStat {
-  playerName: string;
-  teamName: string;
-  K: number;
+  "rank": number,
+  "name": string,
+  "team": string,
+  "ERA": number,
+  "IP": number,
+  "R": number,
+  "ER": number,
+  "K": number,
+  "BB": number,
 }
 
 // Recoil atom에 타입 적용

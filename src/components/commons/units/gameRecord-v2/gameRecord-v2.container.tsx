@@ -1909,10 +1909,6 @@ export default function GameRecordPageV2() {
   //   syncRunnersOnBase();
   // }, [snapshotData]);
 
-
-  // let errorFlag = false;
-  
-
   const handleDrop = (e: DragEndEvent) => {
     const badgeId = e.active.id as string;
 
@@ -2069,13 +2065,13 @@ export default function GameRecordPageV2() {
       baseRect = candidates[0].baseRect;
     }
 
-      // 타자 배지는 베이스에 스냅할 수 없도록 체크
-  if (dropBase && badgeId === batterWhiteBadgeId) {
-    console.log(" 타자 배지는 베이스에 스냅할 수 없습니다");
-    scheduleOccupancyLog();
-    return;
-  }
-  
+    // 타자 배지는 베이스에 스냅할 수 없도록 체크
+    if (dropBase && badgeId === batterWhiteBadgeId) {
+      console.log(" 타자 배지는 베이스에 스냅할 수 없습니다");
+      scheduleOccupancyLog();
+      return;
+    }
+
     if (!dropBase || !baseRect) return;
 
     // excluded 배지는 스냅 불가
@@ -2373,7 +2369,7 @@ export default function GameRecordPageV2() {
         actual: filteredActualArray,
       };
       setCombinedRequest(single);
-      // console.log("actual only", JSON.stringify(single, null, 2));
+      console.log("actual only", JSON.stringify(single, null, 2));
     }
   }, [
     badgeSnaps,
@@ -2542,13 +2538,11 @@ export default function GameRecordPageV2() {
       const core = parsed?.snapshot ?? parsed;
       // errorFlag = !!parsed?.snapshot?.inningStats?.errorFlag;
       // playIdValue = parsed.snapshot?.playId ?? null;
-      errorFlag = core?.inningStats?.errorFlag;
-      console.log("errorFlag",errorFlag);
+      errorFlag = !!core?.inningStats?.errorFlag;
       playIdValue = core?.playId ?? null;
     } catch (e) {
       console.warn("snapshot JSON 파싱 실패:", e);
     }
-    
 
     // ⛔️ 여기서 preflight: PATCH 전에 차단
     if (errorFlag) {
@@ -2590,7 +2584,10 @@ export default function GameRecordPageV2() {
       ): CombinedRequest => {
         // B→B만 제거, 나머지(예: 1→1, 2→2 등)는 유지
         const filter = (entries: RunnerLogEntry[] = []) =>
-          entries.filter((e) => !(e.startBase === "B" && e.endBase === "B"));
+          entries.filter(
+            (e) =>
+              !(e.startBase === "B" && e.endBase === "B") && e.endBase !== "B"
+          );
         const actual = filter(req.actual);
         const virtual =
           req.virtual && req.virtual.length > 0
@@ -2622,19 +2619,23 @@ export default function GameRecordPageV2() {
             ? (postRes as any).data
             : postRes,
       });
-      
 
       // localStorage.setItem(`snapshot`, JSON.stringify(postRes.data));
       // // ② 상태도 즉시 갱신 (이 한 줄이 포인트!)
       // setSnapshotData(postRes.data);
       // saveAndReloadSnapshot(postRes.data);
 
-
-      localStorage.setItem('snapshot', JSON.stringify(postRes.data));
-window.dispatchEvent(new CustomEvent('localStorageChange', { detail: { key: 'snapshot' } }));
-      updateSnapshot(postRes.data);
-      setSnapshotData(postRes.data);
+      // localStorage.setItem("snapshot", JSON.stringify(postRes.data));
+      // window.dispatchEvent(
+      //   new CustomEvent("localStorageChange", { detail: { key: "snapshot" } })
+      // );
+      // updateSnapshot(postRes.data);
+      // setSnapshotData(postRes.data);
       // window.location.reload();
+      updateSnapshot(postRes.data);
+      window.dispatchEvent(
+        new CustomEvent("localStorageChange", { detail: { key: "snapshot" } })
+      );
     } catch (err) {
       console.error("runner-events 전송 실패:", err);
       alert("runner-events 전송 실패");
@@ -2654,7 +2655,7 @@ window.dispatchEvent(new CustomEvent('localStorageChange', { detail: { key: 'sna
       await sendRunnerEvents(); // 여기서 updateSnapshot만 수행
       // await sendRunnerEvents();
       setReconstructMode(false);
-      clearAllSnapsAndExitReconstructMode();
+      // clearAllSnapsAndExitReconstructMode();
       // // bumpBadgesVersion();
       // resetWhiteBadges();
     } catch (e) {
@@ -2707,7 +2708,7 @@ window.dispatchEvent(new CustomEvent('localStorageChange', { detail: { key: 'sna
   }, [snap?.inningStats?.actual?.outs]);
 
   useEffect(() => {
-    const snap = snapshotData?.snapshot;
+    const snap = (snapshotData as any)?.snapshot ?? snapshotData;
     if (!snap) return;
 
     // 1) 렌더 가드/표식들을 리셋
@@ -2721,7 +2722,7 @@ window.dispatchEvent(new CustomEvent('localStorageChange', { detail: { key: 'sna
     setBaseToBadgeIdActual({});
     setBaseToBadgeIdVirtual({});
 
-    // 2) 스냅 좌표 초기화
+    // 1) 상태 리셋
     setBadgeSnaps(
       badgeConfigs.reduce((acc, c) => {
         acc[c.id] = null;
@@ -2729,9 +2730,18 @@ window.dispatchEvent(new CustomEvent('localStorageChange', { detail: { key: 'sna
       }, {} as Record<string, SnapInfo | null>)
     );
 
+    // 2) 새 스냅샷으로 동기화
     // 3) 새 스냅샷으로 주자/좌표 다시 매핑
     syncRunnersOnBase();
-  }, [snapshotData?.snapshot?.playId, reconstructMode]); // playId 등 "한 플레이" 단위 키를 의존성으로
+    // 2) 다음 프레임에 폴리곤/래퍼 rect 갱신
+    requestAnimationFrame(() => {
+      refreshRects();
+      // 3) 그 다음 프레임에 스냅 동기화 (rect 준비 보장)
+      requestAnimationFrame(() => {
+        syncRunnersOnBase();
+      });
+    });
+  }, [snapshotData?.snapshot, reconstructMode]); // playId 등 "한 플레이" 단위 키를 의존성으로
 
   // 주자 새로 불러오기
   // 최신 runnersOnBase (actual/virtual 중 모드에 따라 선택)

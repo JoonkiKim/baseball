@@ -5,7 +5,6 @@ import {
   RankingContainer,
   TableWrapper,
   RankingTable,
-  RankingTableP,
   TableTitle,
   ArrowIcon,
   MoreButton,
@@ -27,7 +26,7 @@ export default function StatsPage() {
   // 타자 기록 Recoil
   const [hitterData, setHitterData] = useRecoilState(hitterStatsState);
   const [hitterSortKey, setHitterSortKey] =
-    React.useState<keyof (typeof hitterData)[0]>("H");
+    React.useState<keyof (typeof hitterData)[0]>("AVG");
 
   // 투수 기록 Recoil
   const [pitcherData, setPitcherData] = useRecoilState(pitcherStatsState);
@@ -38,11 +37,11 @@ export default function StatsPage() {
   useEffect(() => {
     const fetchBatters = async () => {
       try {
-        const res = await API.get("/records/batters");
+        const res = await API.get("/tournaments/1/batter-stats");
         // console.log(API.defaults.baseURL);
         // console.log("responseURL:", (res.request as any).responseURL);
         console.log(res.data);
-        const sorted = res.data.batters.sort((a, b) => b.H - a.H);
+        const sorted = res.data.batters.sort((a, b) => b.AVG - a.AVG);
         setHitterData(sorted);
       } catch (e) {
         setError(e);
@@ -57,7 +56,7 @@ export default function StatsPage() {
   useEffect(() => {
     const fetchPitchers = async () => {
       try {
-        const res = await API.get("/records/pitchers");
+        const res = await API.get("/tournaments/1/pitcher-stats");
         // console.log(res.data.batters);
         const sorted = res.data.pitchers.sort((a, b) => b.K - a.K);
         setPitcherData(sorted);
@@ -77,21 +76,25 @@ export default function StatsPage() {
     hitterData.forEach((p) => {
       if (p.PA >= p.teamGameCount * 2) {
         console.log(
-          `${p.playerName} (${p.teamName}) — PA: ${p.PA}, teamGameCount: ${p.teamGameCount}`
+          `${p.name} (${p.team}) — PA: ${p.PA}, teamGameCount: ${p.teamGameCount}`
         );
       }
     });
   }, [hitterData]);
 
   type HitterNumericKey =
-    | "PA"
+    | "AVG"
     | "AB"
+    | "PA"
     | "H"
     | "2B"
     | "3B"
     | "HR"
     | "BB"
-    | "AVG"
+    | "RBI"
+    | "R"
+    | "BB"
+    | "SO"
     | "OBP"
     | "SLG"
     | "OPS";
@@ -107,7 +110,7 @@ export default function StatsPage() {
     setHitterData(sorted);
   };
 
-  type PitcherNumericKey = "K";
+  type PitcherNumericKey = "ERA" | "IP" | "R" | "ER" | "K" | "BB";
   const handleSortPitcher = (key: PitcherNumericKey) => {
     setPitcherSortKey(key);
     const sorted = [...pitcherData].sort((a, b) => b[key] - a[key]);
@@ -123,7 +126,7 @@ export default function StatsPage() {
   console.log("비율키 정렬 적용 후 남은 선수 수:", filtered.length);
   console.table(
     filtered.map((p) => ({
-      name: p.playerName,
+      name: p.name,
       PA: p.PA,
       teamGC: p.teamGameCount,
     }))
@@ -139,6 +142,9 @@ export default function StatsPage() {
             <tr>
               <th>순위</th>
               <th style={{ width: "25vw", textAlign: "left" }}>선수</th>
+              <th onClick={() => handleSortHitter("AVG")}>
+                타율 <ArrowIcon>{getArrow(hitterSortKey, "AVG")}</ArrowIcon>
+              </th>
               <th onClick={() => handleSortHitter("PA")}>
                 타석 <ArrowIcon>{getArrow(hitterSortKey, "PA")}</ArrowIcon>
               </th>
@@ -147,9 +153,6 @@ export default function StatsPage() {
               </th>
               <th onClick={() => handleSortHitter("H")}>
                 안타 <ArrowIcon>{getArrow(hitterSortKey, "H")}</ArrowIcon>
-              </th>
-              <th onClick={() => handleSortHitter("AVG")}>
-                타율 <ArrowIcon>{getArrow(hitterSortKey, "AVG")}</ArrowIcon>
               </th>
               <th onClick={() => handleSortHitter("2B")}>
                 2루타 <ArrowIcon>{getArrow(hitterSortKey, "2B")}</ArrowIcon>
@@ -160,8 +163,17 @@ export default function StatsPage() {
               <th onClick={() => handleSortHitter("HR")}>
                 홈런 <ArrowIcon>{getArrow(hitterSortKey, "HR")}</ArrowIcon>
               </th>
+              <th onClick={() => handleSortHitter("R")}>
+                득점 <ArrowIcon>{getArrow(hitterSortKey, "R")}</ArrowIcon>
+              </th>
+              <th onClick={() => handleSortHitter("RBI")}>
+                타점 <ArrowIcon>{getArrow(hitterSortKey, "RBI")}</ArrowIcon>
+              </th>
               <th onClick={() => handleSortHitter("BB")}>
                 볼넷 <ArrowIcon>{getArrow(hitterSortKey, "BB")}</ArrowIcon>
+              </th>
+              <th onClick={() => handleSortHitter("SO")}>
+                삼진 <ArrowIcon>{getArrow(hitterSortKey, "SO")}</ArrowIcon>
               </th>
               <th onClick={() => handleSortHitter("OBP")}>
                 출루율 <ArrowIcon>{getArrow(hitterSortKey, "OBP")}</ArrowIcon>
@@ -199,7 +211,11 @@ export default function StatsPage() {
                   <tr key={idx}>
                     <td>{currentRank}</td>
                     <td style={{ textAlign: "left" }}>
-                      {item.playerName} ({item.teamName.slice(0, 3)})
+                      {item.name} ({item.team?.slice(0, 3) || "N/A"})
+                    </td>
+                    <td>
+                      {item.AVG}
+                      <ArrowIconNone> ▽ </ArrowIconNone>
                     </td>
                     <td>
                       {item.PA}
@@ -211,10 +227,6 @@ export default function StatsPage() {
                     </td>
                     <td>
                       {item.H}
-                      <ArrowIconNone> ▽ </ArrowIconNone>
-                    </td>
-                    <td>
-                      {item.AVG}
                       <ArrowIconNone> ▽ </ArrowIconNone>
                     </td>
                     <td>
@@ -230,7 +242,19 @@ export default function StatsPage() {
                       <ArrowIconNone> ▽ </ArrowIconNone>
                     </td>
                     <td>
+                      {item.R}
+                      <ArrowIconNone> ▽ </ArrowIconNone>
+                    </td>
+                    <td>
+                      {item.RBI}
+                      <ArrowIconNone> ▽ </ArrowIconNone>
+                    </td>
+                    <td>
                       {item.BB}
+                      <ArrowIconNone> ▽ </ArrowIconNone>
+                    </td>
+                    <td>
+                      {item.SO}
                       <ArrowIconNone> ▽ </ArrowIconNone>
                     </td>
                     <td>
@@ -261,16 +285,29 @@ export default function StatsPage() {
       {/* ── 투수기록 ── */}
       <TableWrapper>
         <TableTitle>투수기록</TableTitle>
-        <RankingTableP>
+        <RankingTable>
           <thead>
             <tr>
               <th>순위</th>
               <th style={{ width: "25vw", textAlign: "left" }}>선수</th>
-              <th
-                onClick={() => handleSortPitcher("K")}
-                style={{ textAlign: "left" }}
-              >
+              <th onClick={() => handleSortPitcher("ERA")}>
+                평균자책{" "}
+                <ArrowIcon>{getArrow(pitcherSortKey, "ERA")}</ArrowIcon>
+              </th>
+              <th onClick={() => handleSortPitcher("IP")}>
+                이닝 <ArrowIcon>{getArrow(pitcherSortKey, "IP")}</ArrowIcon>
+              </th>
+              <th onClick={() => handleSortPitcher("R")}>
+                실점 <ArrowIcon>{getArrow(pitcherSortKey, "R")}</ArrowIcon>
+              </th>
+              <th onClick={() => handleSortPitcher("ER")}>
+                자책 <ArrowIcon>{getArrow(pitcherSortKey, "ER")}</ArrowIcon>
+              </th>
+              <th onClick={() => handleSortPitcher("K")}>
                 삼진 <ArrowIcon>{getArrow(pitcherSortKey, "K")}</ArrowIcon>
+              </th>
+              <th onClick={() => handleSortPitcher("BB")}>
+                사사구 <ArrowIcon>{getArrow(pitcherSortKey, "BB")}</ArrowIcon>
               </th>
             </tr>
           </thead>
@@ -295,10 +332,30 @@ export default function StatsPage() {
                   <tr key={idx}>
                     <td>{currentRank}</td>
                     <td style={{ textAlign: "left" }}>
-                      {item.playerName} ({item.teamName.slice(0, 3)})
+                      {item.name} ({item.team?.slice(0, 3) || "N/A"})
                     </td>
-                    <td style={{ textAlign: "left" }}>
+                    <td>
+                      {item.ERA}
+                      <ArrowIconNone> ▽ </ArrowIconNone>
+                    </td>
+                    <td>
+                      {item.IP}
+                      <ArrowIconNone> ▽ </ArrowIconNone>
+                    </td>
+                    <td>
+                      {item.R}
+                      <ArrowIconNone> ▽ </ArrowIconNone>
+                    </td>
+                    <td>
+                      {item.ER}
+                      <ArrowIconNone> ▽ </ArrowIconNone>
+                    </td>
+                    <td>
                       {item.K}
+                      <ArrowIconNone> ▽ </ArrowIconNone>
+                    </td>
+                    <td>
+                      {item.BB}
                       <ArrowIconNone> ▽ </ArrowIconNone>
                     </td>
                   </tr>
@@ -306,7 +363,7 @@ export default function StatsPage() {
               });
             })()}
           </tbody>
-        </RankingTableP>
+        </RankingTable>
       </TableWrapper>
       <div style={{ textAlign: "center", marginBottom: "30px" }}>
         <Link href="/playerStats/playerStatsPitcherDetail">

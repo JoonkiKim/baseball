@@ -787,12 +787,13 @@ export default function StatsPageBatterDetail() {
 
   // const [hitterStats] = useRecoilState<HitterStat[]>(hitterStatsState);
   const [hitterData, setHitterData] = useState<HitterStat[]>([]);
-  const [hitterSortKey, setHitterSortKey] = useState<keyof HitterStat>("H");
+  const [hitterSortKey, setHitterSortKey] =
+    React.useState<keyof (typeof hitterData)[0]>("AVG");
 
-  useEffect(() => {
-    const sortedData = [...hitterStats].sort((a, b) => b.H - a.H);
-    setHitterData(sortedData);
-  }, []);
+  // useEffect(() => {
+  //   const sortedData = [...hitterStats].sort((a, b) => b.AVG - a.AVG);
+  //   setHitterData(sortedData);
+  // }, []);
   // API연결이 안된다면 여기 hitterStats를 의존성 배열에 넣기
 
   console.log(hitterData);
@@ -804,14 +805,18 @@ export default function StatsPageBatterDetail() {
   const filtered = hitterData.filter((p) => p.PA >= p.teamGameCount * 2);
 
   type HitterNumericKey =
-    | "PA"
+    | "AVG"
     | "AB"
+    | "PA"
     | "H"
     | "2B"
     | "3B"
     | "HR"
     | "BB"
-    | "AVG"
+    | "RBI"
+    | "R"
+    | "BB"
+    | "SO"
     | "OBP"
     | "SLG"
     | "OPS";
@@ -836,6 +841,9 @@ export default function StatsPageBatterDetail() {
             <tr>
               <th>순위</th>
               <th style={{ width: "25vw", textAlign: "left" }}>선수</th>
+              <th onClick={() => handleSortHitter("AVG")}>
+                타율 <ArrowIcon>{getArrow(hitterSortKey, "AVG")}</ArrowIcon>
+              </th>
               <th onClick={() => handleSortHitter("PA")}>
                 타석 <ArrowIcon>{getArrow(hitterSortKey, "PA")}</ArrowIcon>
               </th>
@@ -844,9 +852,6 @@ export default function StatsPageBatterDetail() {
               </th>
               <th onClick={() => handleSortHitter("H")}>
                 안타 <ArrowIcon>{getArrow(hitterSortKey, "H")}</ArrowIcon>
-              </th>
-              <th onClick={() => handleSortHitter("AVG")}>
-                타율 <ArrowIcon>{getArrow(hitterSortKey, "AVG")}</ArrowIcon>
               </th>
               <th onClick={() => handleSortHitter("2B")}>
                 2루타 <ArrowIcon>{getArrow(hitterSortKey, "2B")}</ArrowIcon>
@@ -857,8 +862,17 @@ export default function StatsPageBatterDetail() {
               <th onClick={() => handleSortHitter("HR")}>
                 홈런 <ArrowIcon>{getArrow(hitterSortKey, "HR")}</ArrowIcon>
               </th>
+              <th onClick={() => handleSortHitter("R")}>
+                득점 <ArrowIcon>{getArrow(hitterSortKey, "R")}</ArrowIcon>
+              </th>
+              <th onClick={() => handleSortHitter("RBI")}>
+                타점 <ArrowIcon>{getArrow(hitterSortKey, "RBI")}</ArrowIcon>
+              </th>
               <th onClick={() => handleSortHitter("BB")}>
                 볼넷 <ArrowIcon>{getArrow(hitterSortKey, "BB")}</ArrowIcon>
+              </th>
+              <th onClick={() => handleSortHitter("SO")}>
+                삼진 <ArrowIcon>{getArrow(hitterSortKey, "SO")}</ArrowIcon>
               </th>
               <th onClick={() => handleSortHitter("OBP")}>
                 출루율 <ArrowIcon>{getArrow(hitterSortKey, "OBP")}</ArrowIcon>
@@ -896,7 +910,7 @@ export default function StatsPageBatterDetail() {
                   <tr key={index}>
                     <td>{currentRank}</td>
                     <td style={{ textAlign: "left" }}>
-                      {item.playerName} ({item.teamName.slice(0, 3)})
+                      {item.name} ({item.team.slice(0, 3)})
                     </td>
                     <td>
                       {item.PA}
