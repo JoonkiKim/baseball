@@ -5,6 +5,7 @@ import {
   RankingTableP,
   TableTitle,
   ArrowIcon,
+  RankingTable,
 } from "./playerStatsPitcherDetail.style"; // 스타일 임포트
 import { useRecoilState } from "recoil";
 import { pitcherStatsState } from "../../../../commons/stores";
@@ -12,40 +13,40 @@ import { ArrowIconNone } from "../playerStats/playerStats.style";
 
 export default function StatsPagePitcherDetail() {
   // Recoil의 pitcherStatsState에서 투수 기록 데이터를 불러옴
-  // const [pitcherStats] = useRecoilState(pitcherStatsState);
+  const [pitcherStats] = useRecoilState(pitcherStatsState);
 
-  const pitcherStats = [
-    { playerName: "김민수", teamName: "관악사", K: 12 },
-    { playerName: "이준호", teamName: "포톤스", K: 10 },
-    { playerName: "박지훈", teamName: "자연대", K: 8 },
-    { playerName: "최유진", teamName: "사회대", K: 8 },
-    { playerName: "정수빈", teamName: "공대", K: 9 },
-    { playerName: "한지민", teamName: "사범대", K: 11 },
-    { playerName: "장민호", teamName: "키움", K: 7 },
-    { playerName: "오세훈", teamName: "삼성", K: 10 },
-    { playerName: "윤지우", teamName: "관악사", K: 8 },
-    { playerName: "배진영", teamName: "포톤스", K: 9 },
-    { playerName: "서지훈", teamName: "자연대", K: 12 },
-    { playerName: "문지훈", teamName: "사회대", K: 6 },
-    { playerName: "조현우", teamName: "공대", K: 8 },
-    { playerName: "양지민", teamName: "사범대", K: 10 },
-    { playerName: "홍예진", teamName: "키움", K: 9 },
-    { playerName: "임수정", teamName: "삼성", K: 11 },
-    { playerName: "권혁진", teamName: "관악사", K: 7 },
-    { playerName: "정윤호", teamName: "포톤스", K: 8 },
-    { playerName: "이하은", teamName: "자연대", K: 9 },
-    { playerName: "박시은", teamName: "사회대", K: 10 },
-    { playerName: "노윤서", teamName: "공대", K: 11 },
-    { playerName: "강하늘", teamName: "사범대", K: 7 },
-    { playerName: "김서윤", teamName: "키움", K: 8 },
-    { playerName: "이채은", teamName: "삼성", K: 9 },
-    { playerName: "조윤호", teamName: "관악사", K: 10 },
-    { playerName: "신채원", teamName: "포톤스", K: 11 },
-    { playerName: "황정민", teamName: "자연대", K: 7 },
-    { playerName: "백승우", teamName: "사회대", K: 8 },
-    { playerName: "서지민", teamName: "공대", K: 9 },
-    { playerName: "남도현", teamName: "사범대", K: 10 },
-  ];
+  // const pitcherStats = [
+  //   { playerName: "김민수", teamName: "관악사", K: 12 },
+  //   { playerName: "이준호", teamName: "포톤스", K: 10 },
+  //   { playerName: "박지훈", teamName: "자연대", K: 8 },
+  //   { playerName: "최유진", teamName: "사회대", K: 8 },
+  //   { playerName: "정수빈", teamName: "공대", K: 9 },
+  //   { playerName: "한지민", teamName: "사범대", K: 11 },
+  //   { playerName: "장민호", teamName: "키움", K: 7 },
+  //   { playerName: "오세훈", teamName: "삼성", K: 10 },
+  //   { playerName: "윤지우", teamName: "관악사", K: 8 },
+  //   { playerName: "배진영", teamName: "포톤스", K: 9 },
+  //   { playerName: "서지훈", teamName: "자연대", K: 12 },
+  //   { playerName: "문지훈", teamName: "사회대", K: 6 },
+  //   { playerName: "조현우", teamName: "공대", K: 8 },
+  //   { playerName: "양지민", teamName: "사범대", K: 10 },
+  //   { playerName: "홍예진", teamName: "키움", K: 9 },
+  //   { playerName: "임수정", teamName: "삼성", K: 11 },
+  //   { playerName: "권혁진", teamName: "관악사", K: 7 },
+  //   { playerName: "정윤호", teamName: "포톤스", K: 8 },
+  //   { playerName: "이하은", teamName: "자연대", K: 9 },
+  //   { playerName: "박시은", teamName: "사회대", K: 10 },
+  //   { playerName: "노윤서", teamName: "공대", K: 11 },
+  //   { playerName: "강하늘", teamName: "사범대", K: 7 },
+  //   { playerName: "김서윤", teamName: "키움", K: 8 },
+  //   { playerName: "이채은", teamName: "삼성", K: 9 },
+  //   { playerName: "조윤호", teamName: "관악사", K: 10 },
+  //   { playerName: "신채원", teamName: "포톤스", K: 11 },
+  //   { playerName: "황정민", teamName: "자연대", K: 7 },
+  //   { playerName: "백승우", teamName: "사회대", K: 8 },
+  //   { playerName: "서지민", teamName: "공대", K: 9 },
+  //   { playerName: "남도현", teamName: "사범대", K: 10 },
+  // ];
 
   // 로컬 상태에서 정렬된 데이터를 관리 (초기 정렬 기준: 삼진(K))
   const [pitcherData, setPitcherData] = useState(
@@ -67,22 +68,49 @@ export default function StatsPagePitcherDetail() {
     );
     setPitcherData(sortedData);
   };
+  // getArrow 함수 추가 (타자 기록과 동일한 패턴)
+  const getArrow = (currentKey: string, columnKey: string) =>
+    currentKey === columnKey ? "▼" : "▲";
+  const formatInnings = (ip: number): string => {
+    if (!ip || ip === 0) return "0";
 
+    const fullInnings = Math.floor(ip / 3);
+    const outs = ip % 3;
+
+    if (outs === 0) {
+      return fullInnings.toString();
+    } else {
+      return `${fullInnings} ${outs}/3`;
+    }
+  };
   return (
     <RankingContainer>
       {/* 투수기록 섹션 */}
       <TableTitle>투수기록</TableTitle>
       <TableWrapper>
-        <RankingTableP>
+        <RankingTable>
           <thead>
             <tr>
               <th>순위</th>
               <th style={{ width: "25vw", textAlign: "left" }}>선수</th>
-              <th
-                onClick={() => handleSortPitcher("K")}
-                style={{ textAlign: "left" }}
-              >
-                삼진 <ArrowIcon>▼</ArrowIcon>
+              <th onClick={() => handleSortPitcher("ERA")}>
+                평균자책{" "}
+                <ArrowIcon>{getArrow(pitcherSortKey, "ERA")}</ArrowIcon>
+              </th>
+              <th onClick={() => handleSortPitcher("IP")}>
+                이닝 <ArrowIcon>{getArrow(pitcherSortKey, "IP")}</ArrowIcon>
+              </th>
+              <th onClick={() => handleSortPitcher("R")}>
+                실점 <ArrowIcon>{getArrow(pitcherSortKey, "R")}</ArrowIcon>
+              </th>
+              <th onClick={() => handleSortPitcher("ER")}>
+                자책 <ArrowIcon>{getArrow(pitcherSortKey, "ER")}</ArrowIcon>
+              </th>
+              <th onClick={() => handleSortPitcher("K")}>
+                삼진 <ArrowIcon>{getArrow(pitcherSortKey, "K")}</ArrowIcon>
+              </th>
+              <th onClick={() => handleSortPitcher("BB")}>
+                사사구 <ArrowIcon>{getArrow(pitcherSortKey, "BB")}</ArrowIcon>
               </th>
             </tr>
           </thead>
@@ -111,17 +139,33 @@ export default function StatsPagePitcherDetail() {
                   <tr key={index}>
                     <td>{currentRank}</td>
                     <td style={{ textAlign: "left" }}>
-                      {item.playerName} ({item.teamName.slice(0, 3)})
+                      {item.name} ({item.team.slice(0, 3)})
                     </td>
-                    <td style={{ textAlign: "left" }}>
+                    <td>
+                      {item.ERA} <ArrowIconNone> ▽ </ArrowIconNone>
+                    </td>
+                    <td>
+                      {formatInnings(item.IP)}
+                      <ArrowIconNone> ▽ </ArrowIconNone>
+                    </td>
+                    <td>
+                      {item.R} <ArrowIconNone> ▽ </ArrowIconNone>
+                    </td>
+                    <td>
+                      {item.ER} <ArrowIconNone> ▽ </ArrowIconNone>
+                    </td>
+                    <td>
                       {item.K} <ArrowIconNone> ▽ </ArrowIconNone>
+                    </td>
+                    <td>
+                      {item.BB} <ArrowIconNone> ▽ </ArrowIconNone>
                     </td>
                   </tr>
                 );
               });
             })()}
           </tbody>
-        </RankingTableP>
+        </RankingTable>
       </TableWrapper>
     </RankingContainer>
   );

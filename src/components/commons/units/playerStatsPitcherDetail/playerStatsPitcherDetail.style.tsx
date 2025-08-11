@@ -51,6 +51,73 @@ export const TableWrapper = styled.div`
   }
 `;
 
+export const RankingTable = styled.table`
+  /* 기존 width: 100% 대신, 내용이 많아질 때 확장되도록 max-content 적용 */
+  width: max-content;
+  border-collapse: separate;
+  border-spacing: 0;
+
+  thead {
+    tr {
+      th {
+        position: sticky;
+        top: 0;
+        background: #fff; /* header 배경색: 내용이 스크롤될 때 가려지지 않도록 */
+        z-index: 10; /* 적절히 높게 설정 */
+        font-family: "KBO-Dia-Gothic_medium";
+        color: #000;
+        padding: 12px;
+        text-align: center;
+        border-bottom: 1px solid #000;
+        border-top: 1px solid #000;
+
+        ${small} {
+          font-size: 12px;
+          padding: 8px;
+        }
+        ${medium} {
+          font-size: 14px;
+        }
+        ${large}, ${xlarge} {
+          font-size: 16px;
+        }
+      }
+    }
+  }
+
+  tbody {
+    tr {
+      /* background-color: red; */
+      border-bottom: 1px solid #e8e8e8;
+
+      &:last-of-type {
+        border-bottom: none; /* 마지막 행에는 경계선 제거 */
+      }
+
+      td {
+        /* background-color: red; */
+        font-family: "KBO-Dia-Gothic_medium";
+        /* font-weight: 400; */
+        color: #000;
+        text-align: left;
+        padding: 12px;
+        text-align: center;
+
+        ${small} {
+          font-size: 12px;
+          padding: 8px;
+        }
+        ${medium} {
+          font-size: 14px;
+        }
+        ${large}, ${xlarge} {
+          font-size: 16px;
+        }
+      }
+    }
+  }
+`;
+
 // 테이블 스타일
 export const RankingTableP = styled.table`
   width: 100%;

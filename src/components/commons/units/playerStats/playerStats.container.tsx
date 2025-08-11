@@ -132,6 +132,18 @@ export default function StatsPage() {
     }))
   );
 
+  const formatInnings = (ip: number): string => {
+    if (!ip || ip === 0) return "0";
+
+    const fullInnings = Math.floor(ip / 3);
+    const outs = ip % 3;
+
+    if (outs === 0) {
+      return fullInnings.toString();
+    } else {
+      return `${fullInnings} ${outs}/3`;
+    }
+  };
   return (
     <RankingContainer>
       {/* ── 타자기록 ── */}
@@ -339,7 +351,7 @@ export default function StatsPage() {
                       <ArrowIconNone> ▽ </ArrowIconNone>
                     </td>
                     <td>
-                      {item.IP}
+                      {formatInnings(item.IP)}
                       <ArrowIconNone> ▽ </ArrowIconNone>
                     </td>
                     <td>

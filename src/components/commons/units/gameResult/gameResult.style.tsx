@@ -219,7 +219,7 @@ export const RecordTable = styled.table`
   ${large}, ${xlarge} {
     font-size: 15px;
   }
-  
+
   /* �� 수정된 순서에 맞게 각 컬럼 너비 조정 */
   /* 순번 */
   th:nth-of-type(1),
@@ -296,7 +296,7 @@ export const RecordTable = styled.table`
 // 투수 기록 테이블
 export const RecordTableP = styled.table`
   width: 100%;
-    border-collapse: collapse;
+  border-collapse: collapse;
   // min-width: 400px;
   text-align: center;
   border-top: 1px solid #000;
@@ -319,6 +319,11 @@ export const RecordTableP = styled.table`
   th:nth-of-type(2),
   td:nth-of-type(2) {
     width: 8vh;
+  }
+
+  th:nth-of-type(3),
+  td:nth-of-type(3) {
+    width: 9vh;
   }
   ${small} {
     font-size: 12px;
