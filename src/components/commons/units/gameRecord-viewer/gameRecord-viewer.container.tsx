@@ -1221,66 +1221,77 @@ export default function GameRecordPageViewer() {
 
       <PlayersRow>
         <BatterPlayerBox $compact={(batterRows3?.length ?? 0) > 3}>
-          {batterRows3.map((b, idx) => (
-            <Fragment key={b ? b.id : `empty-${idx}`}>
-              <BatterPlayerSingleBox>
-                {b && (
-                  <BatterGroup>
-                    <BatterRow $isLast={idx === batterRows3.length - 1}>
-                      <WhoContainer>
-                        <NameResultContainer>
-                          <PlayerName $nameLength={b.name?.length}>
-                            {b.name}
-                          </PlayerName>
-                          {b.battingResult && (
-                            <ResultBox $isOut={isOutResult(b.battingResult)}>
-                              {getResultLabel(b.battingResult)}
-                            </ResultBox>
-                          )}
-                        </NameResultContainer>
-                        <AvgFrame>
-                          <BattingOrderLabel>
-                            {b.battingOrder}번타자
-                          </BattingOrderLabel>
-                          <AvgText>
-                            <AvgLabel>타율</AvgLabel>
-                            <AvgValue>{Number(b.avg).toFixed(3)}</AvgValue>
-                          </AvgText>
-                        </AvgFrame>
-                      </WhoContainer>
-                      <TodayContainer>
-                        <TodayFrame>
-                          <TodayLabel>타석</TodayLabel>
-                          <TodayValue>{b.today.PA}</TodayValue>
-                        </TodayFrame>
-                        <TodayFrame>
-                          <TodayLabel>타수</TodayLabel>
-                          <TodayValue>{b.today.AB}</TodayValue>
-                        </TodayFrame>
-                        <TodayFrame>
-                          <TodayLabel>안타</TodayLabel>
-                          <TodayValue>{b.today.H}</TodayValue>
-                        </TodayFrame>
-                        <TodayFrame>
-                          <TodayLabel>득점</TodayLabel>
-                          <TodayValue>{b.today.R}</TodayValue>
-                        </TodayFrame>
-                        <TodayFrame>
-                          <TodayLabel>타점</TodayLabel>
-                          <TodayValue>{b.today.RBI}</TodayValue>
-                        </TodayFrame>
-                      </TodayContainer>
-                    </BatterRow>
-                  </BatterGroup>
-                )}
-              </BatterPlayerSingleBox>
-              <DividerForPitcher />
-            </Fragment>
-          ))}
+          {/* 최소 3개의 박스를 보장하기 위해 배열을 확장 */}
+          {Array.from(
+            { length: Math.max(3, batterRows3?.length ?? 0) },
+            (_, idx) => {
+              const b = batterRows3?.[idx];
+              return (
+                <Fragment key={b ? b.id : `empty-${idx}`}>
+                  <BatterPlayerSingleBox id="batter-player-single-box">
+                    {b && (
+                      <BatterGroup>
+                        <BatterRow
+                          $isLast={idx === (batterRows3?.length ?? 0) - 1}
+                        >
+                          <WhoContainer>
+                            <NameResultContainer>
+                              <PlayerName $nameLength={b.name?.length}>
+                                {b.name}
+                              </PlayerName>
+                              {b.battingResult && (
+                                <ResultBox
+                                  $isOut={isOutResult(b.battingResult)}
+                                >
+                                  {getResultLabel(b.battingResult)}
+                                </ResultBox>
+                              )}
+                            </NameResultContainer>
+                            <AvgFrame>
+                              <BattingOrderLabel>
+                                {b.battingOrder}번타자
+                              </BattingOrderLabel>
+                              <AvgText>
+                                <AvgLabel>타율</AvgLabel>
+                                <AvgValue>{Number(b.avg).toFixed(3)}</AvgValue>
+                              </AvgText>
+                            </AvgFrame>
+                          </WhoContainer>
+                          <TodayContainer>
+                            <TodayFrame>
+                              <TodayLabel>타석</TodayLabel>
+                              <TodayValue>{b.today.PA}</TodayValue>
+                            </TodayFrame>
+                            <TodayFrame>
+                              <TodayLabel>타수</TodayLabel>
+                              <TodayValue>{b.today.AB}</TodayValue>
+                            </TodayFrame>
+                            <TodayFrame>
+                              <TodayLabel>안타</TodayLabel>
+                              <TodayValue>{b.today.H}</TodayValue>
+                            </TodayFrame>
+                            <TodayFrame>
+                              <TodayLabel>득점</TodayLabel>
+                              <TodayValue>{b.today.R}</TodayValue>
+                            </TodayFrame>
+                            <TodayFrame>
+                              <TodayLabel>타점</TodayLabel>
+                              <TodayValue>{b.today.RBI}</TodayValue>
+                            </TodayFrame>
+                          </TodayContainer>
+                        </BatterRow>
+                      </BatterGroup>
+                    )}
+                  </BatterPlayerSingleBox>
+                  <DividerForPitcher />
+                </Fragment>
+              );
+            }
+          )}
         </BatterPlayerBox>
         <PitcherPlayerBox>
           <PitcherGroup>
-            <PitcherWho>
+            <PitcherWho id="pitcher-who">
               <PitcherName>
                 {" "}
                 {/* {sseData?.playerRecords?.pitcher?.at(-1)?.name ?? "-"} */}
@@ -1301,7 +1312,7 @@ export default function GameRecordPageViewer() {
                 </StatFrame2>
               </PitcherToday>
             </PitcherWho>
-            <DividerForPitcher />
+            {/* <DividerForPitcher /> */}
             <PitcherStatsGrid>
               {[
                 { name: "이닝", value: lastPitcher?.todayStats?.IP },

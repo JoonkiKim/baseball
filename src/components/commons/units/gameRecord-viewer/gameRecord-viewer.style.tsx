@@ -314,7 +314,7 @@ export const BatterPlayerBox = styled.div<{ $compact?: boolean }>`
   display: flex;
   height: 90%;
   flex-direction: column;
-
+  background-color: blue;
   /* 👇 3개 미만일 때 상단 붙이기 */
   justify-content: ${({ $compact }) =>
     $compact ? "flex-start" : "space-evenly"};
@@ -346,7 +346,7 @@ export const PlaceholderRow = styled.div`
   align-items: center;
   gap: 0.6vw;
   opacity: 0.6;
-  background-color: red;
+  // background-color: red;
 
   &::before,
   &::after {
@@ -403,7 +403,7 @@ export const BatterGroup = styled.div`
   width: 100%; /* ≈ 209px @ 375px-wide reference */
   height: 100%; /* ≈ 131px @ 812px-tall reference */
   overflow: hidden;
-  // background-color: red;
+  background-color: red;
 `;
 
 export const BatterRow = styled.div<{ $isLast?: boolean }>`
@@ -576,23 +576,21 @@ export const TodayValue = styled(TodayLabel)``;
 export const PitcherPlayerBox = styled.div`
   width: 30%;
   display: flex;
-  height: 75%;
+  height: 90%;
   flex-direction: column;
   justify-content: flex-start;
   align-items: center;
-  /* background-color: red; */
+  background-color: aqua;
 `;
 
 export const PitcherGroup = styled.div`
-  /* box-sizing: border-box; */
-  /* padding: 0 0.27vw 0 1.07vw; */
   display: flex;
   flex-direction: column;
 
   align-items: center;
-  justify-content: space-between;
+  // justify-content: space-between;
   width: 24.27vw; /* 91px */
-  height: 16vh; /* 131px */
+  height: 100%; /* 131px */
   /* position: relative; */
   /* overflow: hidden; */
   // background-color: red;
@@ -605,10 +603,11 @@ export const PitcherWho = styled.div`
   align-items: center;
   justify-content: space-evenly;
   width: 21.87vw; /* 82px */
-  height: 4vh; /* 39px */
-  // margin-bottom: 2.1vh;
-  // background-color: green;
-  // padding-bottom: 1vh;
+  height: 35%; /* 39px */
+
+  background-color: green;
+
+  border-bottom: 0.3px solid rgba(44, 51, 59, 0.3);
 `;
 
 export const PitcherName = styled.div`
@@ -617,11 +616,12 @@ export const PitcherName = styled.div`
   font-family: "Pretendard";
   font-size: 1rem; /* 16px */
   font-weight: 700;
-  width: 12vw; /* 45px */
+  width: 15vw; /* 45px */
   height: 2.09vh; /* 17px */
   display: flex;
   align-items: center;
   justify-content: center;
+  // background-color: red;
 `;
 
 export const PitcherToday = styled.div`
@@ -631,7 +631,7 @@ export const PitcherToday = styled.div`
   align-items: center;
   justify-content: space-evenly;
   width: 20vw; /* 78px */
-  /* background-color: red; */
+  // background-color: red;
 `;
 
 export const StatFrame = styled.div`
