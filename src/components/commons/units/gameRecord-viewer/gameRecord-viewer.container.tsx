@@ -252,6 +252,8 @@ export default function GameRecordPageViewer() {
 
             setSseData(snap);
             applySnapshot(snap);
+            console.log("sseData 수신완료");
+            console.log("sseData", sseData);
           } catch (e) {
             console.warn("[SSE/fetch] invalid JSON:", dataStr);
           }
@@ -315,7 +317,7 @@ export default function GameRecordPageViewer() {
   //   })();
   // }, [router.isReady, recordId, applySnapshot]);
 
-  console.log("sseData", sseData);
+  // console.log("sseData", sseData);
 
   const [error, setError] = useState(null);
 
@@ -822,20 +824,27 @@ export default function GameRecordPageViewer() {
   }
 
   // 타자 이름 결정
+  // const currentBatterName = useMemo(() => {
+  //   const arr = sseData?.playerRecords?.batters;
+  //   if (!Array.isArray(arr) || arr.length === 0) return null;
+  //   return arr[arr.length - 1]?.name ?? null;
+  // }, [sseData?.playerRecords?.batters]);
   const currentBatterName = useMemo(() => {
     const arr = sseData?.playerRecords?.batters;
     if (!Array.isArray(arr) || arr.length === 0) return null;
-    return arr[arr.length - 1]?.name ?? null;
+    return arr[0]?.name ?? null; // arr[arr.length - 1]에서 arr[0]으로 변경
   }, [sseData?.playerRecords?.batters]);
 
+  console.log("currentBatterName", currentBatterName);
+
   const RESULT_LABELS: Record<string, string> = {
-    "1B": "1루타",
+    "1B": "안타",
     "2B": "2루타",
     "3B": "3루타",
     HR: "홈런",
     BB: "볼넷",
     SF: "희플",
-    SAC: "희생번트",
+    SAC: "희번",
     SO: "삼진",
     O: "아웃",
     SO_DROP: "낫아웃",
@@ -1010,6 +1019,32 @@ export default function GameRecordPageViewer() {
     const list = (battersForUI ?? []).slice();
     return list; // 모든 타자 데이터 반환
   }, [battersForUI]);
+
+  // SSE 데이터 수신 후 모든 배지 상태 완전 업데이트
+  useEffect(() => {
+    if (!sseData) return;
+
+    // 1. 타자 배지 업데이트
+    const currentBatter = sseData?.playerRecords?.batters?.at(-1);
+    if (currentBatter && batterWhiteBadgeId) {
+      // 타자 배지 활성화 및 라벨 업데이트
+    }
+
+    // 2. 주자 배지 완전 업데이트
+    const runners = sseData?.runnersOnBase ?? [];
+
+    // 3. 수비수 배지 업데이트 (이미 구현됨)
+
+    // 4. 배지 활성화/비활성화 상태 업데이트
+    const activeBadgeIds = [];
+    if (currentBatter) activeBadgeIds.push(batterWhiteBadgeId);
+    runners.forEach((_, index) => {
+      if (allWhiteBadges[index + 1]) {
+        activeBadgeIds.push(allWhiteBadges[index + 1].id);
+      }
+    });
+    setActiveBadges(activeBadgeIds);
+  }, [sseData]);
 
   return (
     <GameRecordContainer>

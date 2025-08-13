@@ -469,7 +469,7 @@ export const PlayerName = styled.div<{ $nameLength?: number }>`
       ? "0.85rem"
       : "1rem"}; /* 4글자 이상이면 14px, 아니면 16px */
   font-weight: 700;
-  width: 13vw; /* 45px */
+  width: 17vw; /* 45px */
   height: 2.09vh; /* 17px */
 
   display: flex;
@@ -483,7 +483,7 @@ export const ResultBox = styled.div<{ $isOut?: boolean }>`
   height: 1.6vh;
   background-color: ${({ $isOut }) => ($isOut ? "red" : "#007AFF")};
   font-family: "Pretendard";
-  font-size: 0.5rem;
+  font-size: 0.4rem;
   font-weight: 700;
   color: #ffffff;
   border-radius: 3.125rem;

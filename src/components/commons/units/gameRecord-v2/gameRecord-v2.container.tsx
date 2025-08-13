@@ -433,7 +433,22 @@ export default function GameRecordPageV2() {
     if (!router.isReady) return;
     const gameId = router.query.recordId;
     if (!gameId) return;
-    if (!shouldFetchOnThisLoadRef.current) return;
+
+    // homeTeamRegistration 관련 페이지에서 이동해온 경우 요청 안 날리기
+    const referrer = document.referrer;
+    const skipReferrers = [
+      "/homeTeamRegistration",
+      "/homeTeamSubRegistration",
+      "/awayTeamRegistration",
+      "/awayTeamSubRegistration",
+    ];
+
+    if (skipReferrers.some((skipPath) => referrer.includes(skipPath))) {
+      console.log("팀 등록 페이지에서 이동해와서 요청을 건너뜁니다");
+      return;
+    }
+
+    // if (!shouldFetchOnThisLoadRef.current) return;
     (async () => {
       try {
         const res = await API.get(`/games/${gameId}/snapshot/umpire`);
@@ -441,7 +456,8 @@ export default function GameRecordPageV2() {
           typeof res.data === "string" ? JSON.parse(res.data) : res.data;
         persistSnapshot(data); // → localStorage('snapshot') 저장 + recoil 반영
         updateSnapshot(res.data);
-        console.log("GET snapshot/umpire 저장완료");
+        setSnapshotData(data);
+        console.log("GET 요청 저장 완료");
       } catch (err) {
         console.error("GET snapshot/umpire 실패:", err);
         setError(err as any); // ErrorAlert로 노출
@@ -2772,6 +2788,7 @@ export default function GameRecordPageV2() {
     reconstructMode,
     snap?.inningStats?.actual?.runnersOnBase,
     snap?.inningStats?.virtual?.runnersOnBase,
+    snapshotData,
   ]);
 
   const freshRunnerByBadge = useMemo(() => {
@@ -2795,7 +2812,14 @@ export default function GameRecordPageV2() {
       });
 
     return byBadge;
-  }, [freshRunners, baseToBadgeId, batterWhiteBadgeId, badgeConfigs]);
+  }, [
+    freshRunners,
+    baseToBadgeId,
+    batterWhiteBadgeId,
+    badgeConfigs,
+    snapshotData,
+  ]);
+
   const [badgesVersion, setBadgesVersion] = useState(0);
 
   const softResetWhiteBadges = useCallback(() => {
