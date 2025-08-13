@@ -30,6 +30,7 @@ import {
 import { formatDate2, formatDateToYMD } from "../../../commons/libraries/utils";
 import API from "../../../commons/apis/api";
 import {
+  authCheckedState,
   authMe,
   // gameId,
   lastRouteState,
@@ -116,33 +117,48 @@ export default function MainCalendarPage() {
 
   const [fromDate, setFromDate] = useState("2025-07-31");
   const [toDate, setToDate] = useState("2025-08-30");
-
+  const [authChecked] = useRecoilState(authCheckedState);
   useEffect(() => {
+    // 인증 체크가 완료되지 않았으면 API 요청하지 않음
+    if (!authChecked) {
+      return;
+    }
+
+    let isMounted = true; // 마운트 상태 추적
+
     const fetchMatches = async () => {
       if (!router) return;
       setIsLoading(true);
       try {
-        const res = await API.get(
-          `/games?from=${fromDate}&to=${toDate}`
-          // , {
-          //   withCredentials: true,
-          // }
-        );
+        const res = await API.get(`/games?from=${fromDate}&to=${toDate}`);
         console.log("res.data.days", res);
-        // console.log("res.data.data.days", res.data.data.days);
+        console.log("응답받아옴");
 
-        setAllMatchData(res.data.days);
-        // console.log("allMatchData", allMatchData);
+        // 컴포넌트가 마운트된 상태에서만 상태 업데이트
+        if (isMounted) {
+          setAllMatchData(res.data.days);
+        }
       } catch (err) {
         console.error(err);
-        setError(err);
+        // 컴포넌트가 마운트된 상태에서만 에러 상태 업데이트
+        if (isMounted) {
+          setError(err);
+        }
       } finally {
-        setIsLoading(false);
+        // 컴포넌트가 마운트된 상태에서만 로딩 상태 업데이트
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     };
 
     fetchMatches();
-  }, [fromDate, toDate, router]);
+
+    // cleanup 함수에서 마운트 상태를 false로 설정
+    return () => {
+      isMounted = false;
+    };
+  }, [fromDate, toDate, router, authChecked]);
 
   console.log("allMatchData", allMatchData);
   useEffect(() => {
@@ -295,6 +311,8 @@ export default function MainCalendarPage() {
       return null;
     }
   };
+
+  // 조건부 렌더링
 
   return (
     <Container>
