@@ -38,11 +38,11 @@ export default function TokenInitializer() {
       navEntry?.type === "reload" ||
       (performance as any)?.navigation?.type === 1;
 
-    if (!isReload) {
-      // 새로고침이 아니면 그냥 체크 완료 표시만
-      setChecked(true);
-      return;
-    }
+    // if (!isReload) {
+    //   // 새로고침이 아니면 그냥 체크 완료 표시만
+    //   setChecked(true);
+    //   return;
+    // }
 
     API.post("/auth/refresh")
       .then((res) => {
@@ -51,7 +51,7 @@ export default function TokenInitializer() {
       })
       .catch(() => {
         console.log("리프레시 실패");
-        router.push("/login");
+        // router.push("/login");
         // 여기서 바로 router.push("/login")는 UX에 따라 선택
         // 실패했다고 해서 매번 login으로 강제 이동할 필요가 없으면 주석 유지
       })
