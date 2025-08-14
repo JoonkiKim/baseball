@@ -562,7 +562,7 @@ export default function MainCalendarPage() {
                     <RecordButton
                       onClick={async () => {
                         // 나중에 요건 없애기!
-                        // await temporaryStartGameAndStore(match.id);
+                        await temporaryStartGameAndStore(match.id);
 
                         /* ① recoil-persist(로컬스토리지)에서 마지막 경로 가져오기 */
                         const persistedRoute = (() => {
@@ -607,37 +607,44 @@ export default function MainCalendarPage() {
                         }
 
                         /* ④ 이동 경로 결정 — 요 부분이 변경됨 */
-                        // let route = `/matches/${match.id}/records`;
-                        // [요거 다시 켜기!!]
-
                         let route = ``;
 
-                        if (match.status === "SCHEDULED") {
-                          // SCHEDULED일 때는 persistedRoute를 우선 사용
-                          if (
-                            persistedRoute &&
-                            persistedRoute.includes(`/matches/${match.id}/`)
-                          ) {
-                            // 마지막 경로가 현재 경기와 관련된 경로인 경우
-                            route = persistedRoute;
-                          } else {
-                            // 마지막 경로가 없거나 다른 경기의 경로인 경우 기본값 사용
-                            route = `/matches/${match.id}/awayTeamRegistration`;
-                          }
-                        } else if (
-                          match.status === "FINALIZED" ||
-                          match.status === "EDITING"
-                        ) {
-                          // FINALIZED/EDITING일 때는 항상 result로 이동
-                          route = `/matches/${match.id}/result`;
-                        } else if (match.status === "IN_PROGRESS") {
-                          // IN_PROGRESS일 때는 canRecord에 따라 다르게 이동
-                          if (apiCanRecord) {
-                            route = `/matches/${match.id}/records`;
-                          } else {
-                            route = `/matches/${match.id}/view`;
-                          }
+                        if (apiCanRecord) {
+                          route = `/matches/${match.id}/records`;
+                        } else {
+                          route = `/matches/${match.id}/view`;
                         }
+
+                        // [요거 다시 켜기!!]
+
+                        // let route = ``;
+
+                        // if (match.status === "SCHEDULED") {
+                        //   // SCHEDULED일 때는 persistedRoute를 우선 사용
+                        //   if (
+                        //     persistedRoute &&
+                        //     persistedRoute.includes(`/matches/${match.id}/`)
+                        //   ) {
+                        //     // 마지막 경로가 현재 경기와 관련된 경로인 경우
+                        //     route = persistedRoute;
+                        //   } else {
+                        //     // 마지막 경로가 없거나 다른 경기의 경로인 경우 기본값 사용
+                        //     route = `/matches/${match.id}/awayTeamRegistration`;
+                        //   }
+                        // } else if (
+                        //   match.status === "FINALIZED" ||
+                        //   match.status === "EDITING"
+                        // ) {
+                        //   // FINALIZED/EDITING일 때는 항상 result로 이동
+                        //   route = `/matches/${match.id}/result`;
+                        // } else if (match.status === "IN_PROGRESS") {
+                        //   // IN_PROGRESS일 때는 canRecord에 따라 다르게 이동
+                        //   if (apiCanRecord) {
+                        //     route = `/matches/${match.id}/records`;
+                        //   } else {
+                        //     route = `/matches/${match.id}/view`;
+                        //   }
+                        // }
 
                         /* ⑤ 최종 라우팅 */
                         router.push(route);

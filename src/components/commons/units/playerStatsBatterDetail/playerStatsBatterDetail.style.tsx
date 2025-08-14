@@ -42,6 +42,8 @@ export const TableWrapper = styled.div`
   overflow-y: auto;
 
   max-height: calc(100vh - 280px);
+  position: relative; /* 스크롤 컨텍스트 설정 */
+
   ${small} {
     padding: 0 10px;
   }
@@ -72,6 +74,22 @@ export const RankingTable = styled.table`
         text-align: center;
         border-bottom: 1px solid #000;
         border-top: 1px solid #000;
+
+        /* 순위열 고정 */
+        &:first-child {
+          position: sticky;
+          left: 0;
+          z-index: 30;
+          background: #fff;
+        }
+
+        /* 선수열 고정 */
+        &:nth-child(2) {
+          position: sticky;
+          left: 10vw; /* 순위열 너비만큼 오프셋 */
+          z-index: 30;
+          background: #fff;
+        }
 
         ${small} {
           font-size: 12px;
@@ -104,6 +122,22 @@ export const RankingTable = styled.table`
         text-align: left;
         padding: 12px;
         text-align: center;
+
+        /* 순위열 고정 */
+        &:first-child {
+          position: sticky;
+          left: 0;
+          background: #fff;
+          z-index: 25;
+        }
+
+        /* 선수열 고정 */
+        &:nth-child(2) {
+          position: sticky;
+          left: 10vw; /* 순위열 너비만큼 오프셋 */
+          background: #fff;
+          z-index: 25;
+        }
 
         ${small} {
           font-size: 12px;
@@ -214,4 +248,33 @@ export const MoreButton = styled.button`
   font-family: "KBO-Dia-Gothic_bold";
   font-size: 12px;
   border: none;
+`;
+
+// 기존 스타일에 추가
+export const SearchContainer = styled.div`
+  margin-bottom: 20px;
+  display: flex;
+  width: 90%;
+
+  justify-content: center;
+  // margin-left: 10px;
+`;
+
+export const SearchInput = styled.input`
+  padding: 10px 15px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 16px;
+  width: 300px;
+  max-width: 100%;
+
+  &:focus {
+    outline: none;
+    border-color: #007aff;
+    box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.2);
+  }
+
+  &::placeholder {
+    color: #999;
+  }
 `;

@@ -10,11 +10,28 @@ import {
 import { useRecoilState } from "recoil";
 import { pitcherStatsState } from "../../../../commons/stores";
 import { ArrowIconNone } from "../playerStats/playerStats.style";
+import API from "../../../../commons/apis/api";
 
 export default function StatsPagePitcherDetail() {
   // Recoil의 pitcherStatsState에서 투수 기록 데이터를 불러옴
   const [pitcherStats] = useRecoilState(pitcherStatsState);
-
+  const [error, setError] = useState(null);
+  useEffect(() => {
+    const fetchPitchers = async () => {
+      try {
+        const res = await API.get("/tournaments/1/records/pitchers");
+        // console.log(res.data.batters);
+        const sorted = res.data.pitchers.sort((a, b) => b.K - a.K);
+        setPitcherData(sorted);
+      } catch (e) {
+        setError(e);
+        const errorCode = e?.response?.data?.errorCode; // 에러코드 추출
+        console.error(e, "errorCode:", errorCode);
+        console.error("Error fetching pitcher stats:", e);
+      }
+    };
+    fetchPitchers();
+  }, []);
   // const pitcherStats = [
   //   { playerName: "김민수", teamName: "관악사", K: 12 },
   //   { playerName: "이준호", teamName: "포톤스", K: 10 },
