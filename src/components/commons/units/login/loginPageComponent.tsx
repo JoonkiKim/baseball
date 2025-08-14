@@ -139,7 +139,8 @@ export default function LoginPageComponent() {
         onClose={() => {
           setAlertObj(null);
           if (loginSuccess) {
-            router.push("/mainCalendar");
+            // router.push("/mainCalendar");
+            router.push("/");
           }
         }}
       />

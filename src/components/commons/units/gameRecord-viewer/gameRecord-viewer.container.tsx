@@ -1255,10 +1255,10 @@ export default function GameRecordPageViewer() {
       </GraphicWrapper>
 
       <PlayersRow>
-        <BatterPlayerBox $compact={(batterRows3?.length ?? 0) > 3}>
+        <BatterPlayerBox $compact={(batterRows3?.length ?? 0) < 3}>
           {/* 최소 3개의 박스를 보장하기 위해 배열을 확장 */}
           {Array.from(
-            { length: Math.max(3, batterRows3?.length ?? 0) },
+            { length: Math.max(4, batterRows3?.length ?? 0) },
             (_, idx) => {
               const b = batterRows3?.[idx];
               return (
@@ -1318,7 +1318,7 @@ export default function GameRecordPageViewer() {
                       </BatterGroup>
                     )}
                   </BatterPlayerSingleBox>
-                  <DividerForPitcher />
+                  {/* <DividerForPitcher /> */}
                 </Fragment>
               );
             }
