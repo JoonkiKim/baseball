@@ -115,8 +115,8 @@ export default function MainCalendarPage() {
   // const [fromDate, setFromDate] = useState("2025-05-01");
   // const [toDate, setToDate] = useState("2025-06-10");
 
-  const [fromDate, setFromDate] = useState("2025-07-31");
-  const [toDate, setToDate] = useState("2025-08-30");
+  const [fromDate, setFromDate] = useState("2025-01-01");
+  const [toDate, setToDate] = useState("2025-12-31");
   const [authChecked] = useRecoilState(authCheckedState);
   useEffect(() => {
     // 인증 체크가 완료되지 않았으면 API 요청하지 않음

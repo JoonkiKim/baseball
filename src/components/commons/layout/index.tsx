@@ -15,7 +15,7 @@ const SHOW_NAV = [
   "/playerStats/playerStatsBatterDetail",
   "/playerStats/playerStatsPitcherDetail",
   "/refreeRegistration",
-  // "/mypage",
+  "/mypage",
   "/login/findPassword/resetPassword",
   "/matches/[recordId]/view",
 ];
@@ -28,7 +28,7 @@ const HIDE_HEADER = [
   "/signUp",
   "/login/findPassword",
   "/login/findPassword/resetPassword",
-  "/mypage",
+  // "/mypage",
   "/changePassword",
 ];
 
