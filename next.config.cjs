@@ -18,6 +18,30 @@ const nextConfig = {
     buildActivity: false, // 로딩 스피너 끔
     // buildActivityPosition: "bottom-right" // 위치 바꾸고 싶으면
   },
+
+  // 매니페스트 파일에 대한 헤더 설정 추가
+  async headers() {
+    return [
+      {
+        source: "/manifest.json",
+        headers: [
+          {
+            key: "Content-Type",
+            value: "application/json",
+          },
+          {
+            key: "Access-Control-Allow-Origin",
+            value: "*",
+          },
+          {
+            key: "Cache-Control",
+            value: "public, max-age=3600",
+          },
+        ],
+      },
+    ];
+  },
+
   // ── 여기에만 추가했습니다 ──
   async redirects() {
     return [
