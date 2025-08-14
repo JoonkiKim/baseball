@@ -171,22 +171,15 @@ function MyApp({ Component, pageProps }) {
       <Global styles={pretendardStyles} />
       <RecoilRoot>
         <TokenInitializer />
-        <AuthGate
-          fallback={
-            <LoadingOverlay visible>
-              <LoadingIcon spin fontSize={48} />
-            </LoadingOverlay>
-          }
-        >
-          <LoadingOverlay visible={loadingRoute}>
-            <LoadingIcon spin fontSize={48} />
-          </LoadingOverlay>
 
-          <Layout>
-            {/* 페이지 컴포넌트에도 필요하다면 mobileOnly 전달 */}
-            <Component {...pageProps} />
-          </Layout>
-        </AuthGate>
+        <LoadingOverlay visible={loadingRoute}>
+          <LoadingIcon spin fontSize={48} />
+        </LoadingOverlay>
+
+        <Layout>
+          {/* 페이지 컴포넌트에도 필요하다면 mobileOnly 전달 */}
+          <Component {...pageProps} />
+        </Layout>
       </RecoilRoot>
     </>
   );
