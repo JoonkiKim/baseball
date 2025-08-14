@@ -30,6 +30,7 @@ import {
 import { formatDate2, formatDateToYMD } from "../../../commons/libraries/utils";
 import API from "../../../commons/apis/api";
 import {
+  authCheckedState,
   authMe,
   // gameId,
   lastRouteState,
@@ -114,35 +115,50 @@ export default function MainCalendarPage() {
   // const [fromDate, setFromDate] = useState("2025-05-01");
   // const [toDate, setToDate] = useState("2025-06-10");
 
-  const [fromDate, setFromDate] = useState("2025-07-31");
-  const [toDate, setToDate] = useState("2025-08-30");
-
+  const [fromDate, setFromDate] = useState("2025-01-01");
+  const [toDate, setToDate] = useState("2025-12-31");
+  const [authChecked] = useRecoilState(authCheckedState);
   useEffect(() => {
+    // 인증 체크가 완료되지 않았으면 API 요청하지 않음
+    if (!authChecked) {
+      return;
+    }
+
+    let isMounted = true; // 마운트 상태 추적
+
     const fetchMatches = async () => {
       if (!router) return;
       setIsLoading(true);
       try {
-        const res = await API.get(
-          `/games?from=${fromDate}&to=${toDate}`
-          // , {
-          //   withCredentials: true,
-          // }
-        );
+        const res = await API.get(`/games?from=${fromDate}&to=${toDate}`);
         console.log("res.data.days", res);
-        // console.log("res.data.data.days", res.data.data.days);
+        console.log("응답받아옴");
 
-        setAllMatchData(res.data.days);
-        // console.log("allMatchData", allMatchData);
+        // 컴포넌트가 마운트된 상태에서만 상태 업데이트
+        if (isMounted) {
+          setAllMatchData(res.data.days);
+        }
       } catch (err) {
         console.error(err);
-        setError(err);
+        // 컴포넌트가 마운트된 상태에서만 에러 상태 업데이트
+        if (isMounted) {
+          setError(err);
+        }
       } finally {
-        setIsLoading(false);
+        // 컴포넌트가 마운트된 상태에서만 로딩 상태 업데이트
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     };
 
     fetchMatches();
-  }, [fromDate, toDate, router]);
+
+    // cleanup 함수에서 마운트 상태를 false로 설정
+    return () => {
+      isMounted = false;
+    };
+  }, [fromDate, toDate, router, authChecked]);
 
   console.log("allMatchData", allMatchData);
   useEffect(() => {
@@ -295,6 +311,8 @@ export default function MainCalendarPage() {
       return null;
     }
   };
+
+  // 조건부 렌더링
 
   return (
     <Container>
@@ -589,14 +607,30 @@ export default function MainCalendarPage() {
                         }
 
                         /* ④ 이동 경로 결정 — 요 부분이 변경됨 */
-                        let route = `/matches/${match.id}/records`;
+                        let route = ``;
+
+                        if (apiCanRecord) {
+                          route = `/matches/${match.id}/records`;
+                        } else {
+                          route = `/matches/${match.id}/view`;
+                        }
+
                         // [요거 다시 켜기!!]
 
                         // let route = ``;
 
                         // if (match.status === "SCHEDULED") {
-                        //   // SCHEDULED이면서 canRecord가 true일 때만 버튼이 표시되므로
-                        //   route = `/matches/${match.id}/awayTeamRegistration`;
+                        //   // SCHEDULED일 때는 persistedRoute를 우선 사용
+                        //   if (
+                        //     persistedRoute &&
+                        //     persistedRoute.includes(`/matches/${match.id}/`)
+                        //   ) {
+                        //     // 마지막 경로가 현재 경기와 관련된 경로인 경우
+                        //     route = persistedRoute;
+                        //   } else {
+                        //     // 마지막 경로가 없거나 다른 경기의 경로인 경우 기본값 사용
+                        //     route = `/matches/${match.id}/awayTeamRegistration`;
+                        //   }
                         // } else if (
                         //   match.status === "FINALIZED" ||
                         //   match.status === "EDITING"

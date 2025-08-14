@@ -7,11 +7,11 @@ import styled from "@emotion/styled";
 const SHOW_NAV = [
   "/playerStats",
   "/ranking",
-  // "/",
+  "/",
   "/mainCalendar",
-  "/login",
-  "/login/findPassword",
-  "/signUp",
+  // "/login",
+  // "/login/findPassword",
+  // "/signUp",
   "/playerStats/playerStatsBatterDetail",
   "/playerStats/playerStatsPitcherDetail",
   "/refreeRegistration",
@@ -21,14 +21,14 @@ const SHOW_NAV = [
 ];
 
 const HIDE_HEADER = [
-  "/",
+  // "/",
   "/matches/[recordId]/records",
   "/matches/[recordId]/view",
   "/login",
   "/signUp",
   "/login/findPassword",
   "/login/findPassword/resetPassword",
-  "/mypage",
+  // "/mypage",
   "/changePassword",
 ];
 

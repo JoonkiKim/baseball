@@ -15,8 +15,8 @@ type RetryConfig = InternalAxiosRequestConfig & { _retry?: boolean };
 
 const API = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
-  // withCredentials: true,
-  withCredentials: false,
+  withCredentials: true,
+  // withCredentials: false,
   headers: { "Content-Type": "application/json" },
 });
 

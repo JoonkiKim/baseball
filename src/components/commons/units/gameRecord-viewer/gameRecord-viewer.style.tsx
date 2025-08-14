@@ -282,99 +282,81 @@ export const PlayersRow = styled.div`
   padding: 2vh;
 `;
 
-// export const BatterPlayerBox = styled.div`
-//   width: 70%;
-//   display: flex;
-//   height: 90%;
-//   flex-direction: column;
-//   justify-content: space-evenly;
-//   align-items: center;
-//   background-color: red;
-// `;
-// export const BatterPlayerBox = styled.div<{ $compact?: boolean }>`
-//   width: 70%;
-//   display: flex;
-//   height: 90%;
-//   flex-direction: column;
-
-//   /* 👇 3개 미만일 때 상단 붙이기 */
-//   justify-content: ${({ $compact }) =>
-//     $compact ? "flex-start" : "space-evenly"};
-//   align-items: ${({ $compact }) => ($compact ? "stretch" : "center")};
-
-//   /* 간격/패딩 보정 */
-//   gap: ${({ $compact }) => ($compact ? "1.2vh" : "0")};
-//   padding-top: ${({ $compact }) => ($compact ? "1vh" : "0")};
-
-//   /* background-color: red; */
-// `;
-
 export const BatterPlayerBox = styled.div<{ $compact?: boolean }>`
   width: 70%;
   display: flex;
-  height: 90%;
+  height: 100%;
   flex-direction: column;
-  background-color: blue;
+
+  // background-color: blue;
+
   /* 👇 3개 미만일 때 상단 붙이기 */
   justify-content: ${({ $compact }) =>
-    $compact ? "flex-start" : "space-evenly"};
+    $compact ? "flex-start" : "space-between"};
   align-items: ${({ $compact }) => ($compact ? "stretch" : "center")};
 
   /* 간격/패딩 보정 */
-  gap: ${({ $compact }) => ($compact ? "0.5vh" : "0")};
-  padding-top: ${({ $compact }) => ($compact ? "1vh" : "0")};
+  // gap: ${({ $compact }) => ($compact ? "0.5vh" : "0.5vh")};
+  // padding-top: ${({ $compact }) => ($compact ? "0.5vh" : "0.5vh")};
 
-  /* scroll */
-  overflow-y: auto;
+  /* 스크롤바 공간을 항상 확보하여 레이아웃 일정성 유지 */
+  overflow-y: scroll; /* auto 대신 scroll 사용 */
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
+
+  /* 3개 미만일 때 스크롤 비활성화 (스크롤바는 유지) */
+  pointer-events: ${({ $compact }) => ($compact ? "none" : "auto")};
+
+  /* 스크롤바 스타일링 */
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: ${({ $compact }) =>
+      $compact ? "transparent" : "rgba(0, 0, 0, 0.2)"};
+    border-radius: 3px;
+  }
+
+  /* Firefox용 스크롤바 스타일링 */
+  scrollbar-width: thin;
+  scrollbar-color: ${({ $compact }) =>
+    $compact ? "transparent transparent" : "rgba(0, 0, 0, 0.2) transparent"};
 `;
+
 export const BatterPlayerSingleBox = styled.div<{ $compact?: boolean }>`
   width: 100%;
   display: flex;
   // background-color: red;
-  /* 👇 compact 모드에서는 고정 높이 제거 */
-  height: ${({ $compact }) => ($compact ? "auto" : "35%")};
-`;
-
-// styled-components
-export const PlaceholderRow = styled.div`
-  width: 85%;
-  height: 35%;
-  display: flex;
+  flex-direction: row;
+  // justify-content: space-between;
   align-items: center;
-  gap: 0.6vw;
-  opacity: 0.6;
-  // background-color: red;
+  /* compact 모드에서는 고정 높이 제거 */
+  height: 35%; /* 고정 높이로 설정 */
+  min-height: 35%; /* 최소 높이도 보장 */
+  flex-shrink: 0; /* 스크롤 시에도 높이 축소 방지 */
+  position: relative; /* 가상 요소를 위한 상대 위치 */
 
-  &::before,
+  /* 기존 border 제거하고 가상 요소로 대체 */
+  border-bottom: none;
+
+  /* 가상 요소로 90% 길이의 border 생성 - 중앙 정렬 */
   &::after {
     content: "";
-    display: block;
-    height: 1.4vh;
-    border-radius: 9999px;
-    background: #eee;
-  }
-  /* 이름 바 */
-  &::before {
-    flex: 0 0 13vw;
-  }
-  /* 결과칩 바 */
-  &::after {
-    flex: 0 0 7vw;
+    position: absolute;
+    bottom: 0;
+    left: 50%; /* 중앙에서 시작 */
+    transform: translateX(-50%); /* 자신의 너비의 절반만큼 왼쪽으로 이동 */
+    width: 85%;
+    height: 0.3px;
+    background-color: rgba(44, 51, 59, 0.3);
   }
 `;
-
-// export const BatterPlayerSingleBox = styled.div`
-//   width: 100%;
-//   display: flex;
-//   height: 35%;
-//   /* background-color: red; */
-
-//   /* flex-direction: row;
-//   align-items: center; */
-// `;
 export const Divider = styled.div`
   width: 90%;
   height: 0.3px;
@@ -403,7 +385,7 @@ export const BatterGroup = styled.div`
   width: 100%; /* ≈ 209px @ 375px-wide reference */
   height: 100%; /* ≈ 131px @ 812px-tall reference */
   overflow: hidden;
-  background-color: red;
+  // background-color: red;
 `;
 
 export const BatterRow = styled.div<{ $isLast?: boolean }>`
@@ -416,11 +398,9 @@ export const BatterRow = styled.div<{ $isLast?: boolean }>`
   // gap: 1.87vw; /* ≈ 7px gap between items */
   /* height will auto-size to its children; remove absolute sizing */
   /* background-color: green; */
-  padding-bottom: 1vh;
-
+  // padding-bottom: 1vh;
+  height: 100%;
   /* 마지막 요소가 아닐 때만 border-bottom 적용 - DividerForPitcher와 동일한 스타일 */
-  border-bottom: ${({ $isLast }) =>
-    $isLast ? "none" : "0.3px solid rgba(44, 51, 59, 0.3)"};
 `;
 export const OrderCircle = styled.div`
   color: #000;
@@ -576,7 +556,7 @@ export const TodayValue = styled(TodayLabel)``;
 export const PitcherPlayerBox = styled.div`
   width: 30%;
   display: flex;
-  height: 90%;
+  height: 100%;
   flex-direction: column;
   justify-content: flex-start;
   align-items: center;
@@ -604,8 +584,9 @@ export const PitcherWho = styled.div`
   justify-content: space-evenly;
   width: 21.87vw; /* 82px */
   height: 35%; /* 39px */
-
-  background-color: green;
+  padding-top: 1vh;
+  // margin-bottom: 0.5vh;
+  // background-color: green;
 
   border-bottom: 0.3px solid rgba(44, 51, 59, 0.3);
 `;
@@ -1061,7 +1042,7 @@ export const OverlaySvg = styled.svg`
   width: 50%;
   height: auto;
   overflow: visible;
-  background-color: blue;
+  // background-color: blue;
 `;
 
 export const DiamondSvg = styled.svg`

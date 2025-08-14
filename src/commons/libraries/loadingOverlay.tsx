@@ -14,6 +14,19 @@ export const LoadingOverlay = styled.div<{ visible?: boolean }>`
   z-index: 1000;
 `;
 
+export const LoadingOverlayNoOpacity = styled.div<{ visible?: boolean }>`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255);
+  display: ${({ visible }) => (visible ? "flex" : "none")};
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+`;
+
 // 로딩 아이콘
 export const LoadingIcon = styled(LoadingOutlined)<{
   fontSize?: number;

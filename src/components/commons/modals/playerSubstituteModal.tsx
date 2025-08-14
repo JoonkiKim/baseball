@@ -104,13 +104,15 @@ export default function SubPlayerSelectionModal({
   const [awayTeamPlayers, setAwayTeamPlayers] = useRecoilState(
     AwayTeamPlayerListState
   );
+  const [error, setError] = useState(null);
   const [homeTeamPlayers, setHomeTeamPlayers] = useRecoilState(
     HomeTeamPlayerListState
   );
   const isAway = router.query.isHomeTeam === "false";
+  console.log("isAway", isAway);
 
   const [teamTournamentId, setTeamTournamentId] = useState<number | null>(null);
-  const [isHomeTeam, setIsHomeTeam] = useState(true);
+  const [isHomeTeam, setIsHomeTeam] = useState<boolean | null>(null);
   useEffect(() => {
     if (router.isReady) {
       const queryValue = router.query.isHomeTeam;
@@ -124,8 +126,146 @@ export default function SubPlayerSelectionModal({
     }
   }, [router.isReady, router.query.isHomeTeam]);
   // 팀 ID 결정: isHomeTeam 변경/초기 진입마다 갱신
+  // useEffect(() => {
+  //   if (!router.isReady) return;
+
+  //   let id: number | null = null;
+
+  //   // 1) localStorage(selectedMatch) 우선
+  //   try {
+  //     const s = localStorage.getItem("selectedMatch");
+  //     if (s) {
+  //       const m = JSON.parse(s);
+  //       id = isHomeTeam ? m?.homeTeam?.id ?? null : m?.awayTeam?.id ?? null;
+  //     }
+  //   } catch (e) {
+  //     console.warn("selectedMatch 파싱 실패:", e);
+  //   }
+
+  //   // 2) snapshotData 폴백
+  //   if (id == null) {
+  //     const snapId = isHomeTeam
+  //       ? snapshotData?.snapshot?.gameSummary?.homeTeam?.id
+  //       : snapshotData?.snapshot?.gameSummary?.awayTeam?.id;
+  //     id = typeof snapId === "number" ? snapId : null;
+  //   }
+
+  //   setTeamTournamentId(id);
+  //   console.log(
+  //     "resolved teamTournamentId =",
+  //     id,
+  //     "(isHomeTeam:",
+  //     isHomeTeam,
+  //     ")"
+  //   );
+  // }, [isHomeTeam]);
+  // const [error, setError] = useState(null);
+
+  // useEffect(() => {
+  //   const recordId = router.query.recordId;
+  //   if (!recordId) return;
+  //   if (teamTournamentId == null) return;
+  //   // const teamType = isAway ? "away" : "home";
+  //   const endpoint = isPitcher
+  //     ? "substitutable-pitchers"
+  //     : "substitutable-batters";
+
+  //   API.get(
+  //     // `/games/${recordId}/${endpoint}?teamType=${teamType}`
+  //     `/games/${recordId}/teams/${teamTournamentId}/${endpoint}`
+  //     //   , {
+  //     //   withCredentials: true,
+  //     // }
+  //   )
+  //     .then((res) => {
+  //       const data =
+  //         typeof res.data === "string" ? JSON.parse(res.data) : res.data;
+  //       const list = data.players;
+  //       if (isAway) setAwayTeamPlayers(list);
+  //       else setHomeTeamPlayers(list);
+
+  //       console.log("list", list);
+  //     })
+  //     .catch((err) => {
+  //       const errorCode = err?.response?.data?.errorCode; // 에러코드 추출
+  //       console.error(err, "errorCode:", errorCode);
+  //       setError(err);
+  //     });
+  // }, [
+  //   isAway,
+  //   isPitcher,
+  //   teamTournamentId,
+  //   router.query.recordId,
+  //   setAwayTeamPlayers,
+  //   setHomeTeamPlayers,
+  // ]);
+  // useEffect(() => {
+  //   if (!router.isReady) return;
+
+  //   let id: number | null = null;
+
+  //   // 1) localStorage(selectedMatch) 우선
+  //   try {
+  //     const s = localStorage.getItem("selectedMatch");
+  //     if (s) {
+  //       const m = JSON.parse(s);
+  //       id = isHomeTeam ? m?.homeTeam?.id ?? null : m?.awayTeam?.id ?? null;
+  //     }
+  //   } catch (e) {
+  //     console.warn("selectedMatch 파싱 실패:", e);
+  //   }
+
+  //   // 2) snapshotData 폴백
+  //   if (id == null) {
+  //     const snapId = isHomeTeam
+  //       ? snapshotData?.snapshot?.gameSummary?.homeTeam?.id
+  //       : snapshotData?.snapshot?.gameSummary?.awayTeam?.id;
+  //     id = typeof snapId === "number" ? snapId : null;
+  //   }
+
+  //   setTeamTournamentId(id);
+  //   console.log(
+  //     "resolved teamTournamentId =",
+  //     id,
+  //     "(isHomeTeam:",
+  //     isHomeTeam,
+  //     ")"
+  //   );
+
+  //   // teamTournamentId가 확정된 후에만 API 요청 실행
+  //   if (id != null && router.query.recordId) {
+  //     const endpoint = isPitcher
+  //       ? "substitutable-pitchers"
+  //       : "substitutable-batters";
+
+  //     API.get(`/games/${router.query.recordId}/teams/${id}/${endpoint}`)
+  //       .then((res) => {
+  //         const data =
+  //           typeof res.data === "string" ? JSON.parse(res.data) : res.data;
+  //         const list = data.players;
+  //         if (isAway) setAwayTeamPlayers(list);
+  //         else setHomeTeamPlayers(list);
+
+  //         console.log("list", list);
+  //       })
+  //       .catch((err) => {
+  //         const errorCode = err?.response?.data?.errorCode;
+  //         console.error(err, "errorCode:", errorCode);
+  //         setError(err);
+  //       });
+  //   }
+  // }, [
+  //   router.isReady,
+  //   isHomeTeam,
+  //   isAway,
+  //   isPitcher,
+  //   snapshotData,
+  //   setAwayTeamPlayers,
+  //   setHomeTeamPlayers,
+  // ]);
   useEffect(() => {
     if (!router.isReady) return;
+    if (isHomeTeam === null) return; // isHomeTeam이 확정되기 전까지 대기
 
     let id: number | null = null;
 
@@ -156,44 +296,35 @@ export default function SubPlayerSelectionModal({
       isHomeTeam,
       ")"
     );
-  }, [router.isReady, isHomeTeam]);
-  const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const recordId = router.query.recordId;
-    if (!recordId) return;
-    if (teamTournamentId == null) return;
-    const teamType = isAway ? "away" : "home";
-    const endpoint = isPitcher
-      ? "substitutable-pitchers"
-      : "substitutable-batters";
+    // teamTournamentId가 확정된 후에만 API 요청 실행
+    if (id != null && router.query.recordId) {
+      const endpoint = isPitcher
+        ? "substitutable-pitchers"
+        : "substitutable-batters";
 
-    API.get(
-      // `/games/${recordId}/${endpoint}?teamType=${teamType}`
-      `/games/${recordId}/teams/${teamTournamentId}/${endpoint}`
-      //   , {
-      //   withCredentials: true,
-      // }
-    )
-      .then((res) => {
-        const data =
-          typeof res.data === "string" ? JSON.parse(res.data) : res.data;
-        const list = data.players;
-        if (isAway) setAwayTeamPlayers(list);
-        else setHomeTeamPlayers(list);
+      API.get(`/games/${router.query.recordId}/teams/${id}/${endpoint}`)
+        .then((res) => {
+          const data =
+            typeof res.data === "string" ? JSON.parse(res.data) : res.data;
+          const list = data.players;
+          if (isAway) setAwayTeamPlayers(list);
+          else setHomeTeamPlayers(list);
 
-        console.log("list", list);
-      })
-      .catch((err) => {
-        const errorCode = err?.response?.data?.errorCode; // 에러코드 추출
-        console.error(err, "errorCode:", errorCode);
-        setError(err);
-      });
+          console.log("list", list);
+        })
+        .catch((err) => {
+          const errorCode = err?.response?.data?.errorCode;
+          console.error(err, "errorCode:", errorCode);
+          setError(err);
+        });
+    }
   }, [
+    router.isReady,
+    isHomeTeam, // null이 아닐 때만 실행
     isAway,
     isPitcher,
-    teamTournamentId,
-    router.query.recordId,
+    snapshotData,
     setAwayTeamPlayers,
     setHomeTeamPlayers,
   ]);
@@ -228,7 +359,7 @@ export default function SubPlayerSelectionModal({
   };
 
   console.log("isPitcher", isPitcher);
-  console.log(rowOrder);
+  // console.log(rowOrder);
   return (
     <ModalOverlay onClick={() => setIsModalOpen(false)}>
       <ModalContainer onClick={(e) => e.stopPropagation()}>

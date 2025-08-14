@@ -19,6 +19,10 @@ interface PortalSwitchProps {
 const PORTAL_ROOT_ID = "lightweight-switch-portal-root-for-main";
 
 function ensurePortalRoot() {
+  // SSR 환경 체크 추가
+  if (typeof window === "undefined") {
+    return null;
+  }
   let root = document.getElementById(PORTAL_ROOT_ID);
   if (!root) {
     root = document.createElement("div");
@@ -40,6 +44,10 @@ const PortalSwitch = memo(function PortalSwitch({
   checked,
   anchorRef,
 }: PortalSwitchProps) {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
   const [internalChecked, setInternalChecked] = useState(false);
   const ignoreNextRef = useRef(false);
 

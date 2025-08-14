@@ -284,11 +284,19 @@ export default function SignUpPage() {
               </EmailButton>
             </WrapperForEmail>
             <ErrorMessage>
-              {errors.email
-                ? errors.email.message
-                : verificationToken
-                ? "" // 토큰이 있으면 빈 문자열
-                : "학교 계정이 없을 시 선수 명단 제출 시 사용한 이메일을 입력하세요"}
+              {errors.email ? (
+                errors.email.message
+              ) : verificationToken ? (
+                "" // 토큰이 있으면 빈 문자열
+              ) : (
+                <>
+                  {" "}
+                  <span style={{ color: "#007AFF", opacity: 1 }}>
+                    학교 계정이 없을 시 선수 명단 제출 시 사용한 이메일을
+                    입력하세요
+                  </span>
+                </>
+              )}
             </ErrorMessage>
             {/* 3) Mailcheck 제안 메시지 */}
             {suggestion && (

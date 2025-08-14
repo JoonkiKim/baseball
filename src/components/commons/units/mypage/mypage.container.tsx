@@ -7,6 +7,7 @@ import {
   ValueWrapper,
   EmailWrapper,
   Title,
+  LogoutButton,
 } from "./mypage.style";
 import Link from "next/link";
 import NickNamePutModal from "../../modals/nicknamePutModal";
@@ -57,7 +58,7 @@ export default function MypageComponent() {
 
   return (
     <>
-      <Title>내 정보</Title>
+      {/* <Title></Title> */}
       <PageWrapper>
         <InfoRowWrapper>
           <LabelWrapper>이메일</LabelWrapper>
@@ -81,20 +82,15 @@ export default function MypageComponent() {
           </Link>
         </ActionWrapper> */}
 
-        <ActionWrapper>
-          {/* 3) 클릭하면 모달을 연다 */}
-          <LabelWrapper
-            style={{ cursor: "pointer" }}
-            onClick={() => setIsLogOutModalOpen(true)}
-          >
-            로그아웃
-          </LabelWrapper>
-        </ActionWrapper>
+        {/* 로그아웃 태그를 버튼으로 교체 */}
 
         {/* <ActionWrapper>
           <LabelWrapper>회원탈퇴</LabelWrapper>
         </ActionWrapper> */}
       </PageWrapper>
+      <LogoutButton onClick={() => setIsLogOutModalOpen(true)}>
+        로그아웃
+      </LogoutButton>
       {/* 4) 로그아웃 모달 조건부 렌더링 */}
       {isLogOutModalOpen && (
         <LogOutModal

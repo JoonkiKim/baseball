@@ -46,9 +46,9 @@ export const BottomNavWrapper = styled.div`
 `;
 
 export const BottomNav = styled.div`
-  background: #f2f2f7;
+  background: #0f0f70;
   display: flex;
-  color: #000;
+  color: #ffffff;
   flex-direction: column;
   justify-content: center;
   align-items: center;
@@ -61,27 +61,18 @@ export const BottomNav = styled.div`
 export const NavIcon = styled.img`
   width: 24px;
   height: 24px;
+  font-family: "Pretendard";
+  font-weight: 400;
+  /* 검정색을 흰색으로 변경하는 필터 */
+  filter: brightness(0) invert(1);
 `;
 
 export const NavItem = styled.div`
   margin-top: 10px;
   font-weight: 300;
-  color: #000;
+  color: #ffffff;
   text-align: center;
-  font-size: 16px;
-
-  @media only screen and (max-width: 480px) {
-    font-size: 14px;
-  }
-  @media only screen and (min-width: 481px) and (max-width: 768px) {
-    font-size: 15px;
-  }
-  @media only screen and (min-width: 769px) and (max-width: 1024px) {
-    font-size: 16px;
-  }
-  @media only screen and (min-width: 1025px) {
-    font-size: 16px;
-  }
+  font-size: 1.25rem;
 `;
 
 export default function LayoutNavigation() {
@@ -108,19 +99,19 @@ export default function LayoutNavigation() {
           <Link href="/mainCalendar" passHref>
             <BottomNav as="a">
               <NavIcon src="/images/calendar-new.png" />
-              <NavItem>경기일정</NavItem>
+              <NavItem>일정</NavItem>
             </BottomNav>
           </Link>
           <Link href="/ranking" passHref>
             <BottomNav as="a">
               <NavIcon src="/images/trophy.png" />
-              <NavItem>팀순위</NavItem>
+              <NavItem>순위</NavItem>
             </BottomNav>
           </Link>
           <Link href="/playerStats" passHref>
             <BottomNav as="a">
               <NavIcon src="/images/stat.png" />
-              <NavItem>선수기록</NavItem>
+              <NavItem>기록</NavItem>
             </BottomNav>
           </Link>
           <Link href="mypage" passHref>
