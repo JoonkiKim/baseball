@@ -44,6 +44,10 @@ const PortalSwitch = memo(function PortalSwitch({
   checked,
   anchorRef,
 }: PortalSwitchProps) {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
   const [internalChecked, setInternalChecked] = useState(false);
   const ignoreNextRef = useRef(false);
 
