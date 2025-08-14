@@ -51,7 +51,7 @@ export default function TokenInitializer() {
       })
       .catch(() => {
         console.log("리프레시 실패");
-        // router.push("/login");
+        router.push("/login");
         // 여기서 바로 router.push("/login")는 UX에 따라 선택
         // 실패했다고 해서 매번 login으로 강제 이동할 필요가 없으면 주석 유지
       })
