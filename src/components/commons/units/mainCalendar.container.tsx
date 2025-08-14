@@ -31,7 +31,7 @@ import { formatDate2, formatDateToYMD } from "../../../commons/libraries/utils";
 import API from "../../../commons/apis/api";
 import {
   authCheckedState,
-  authMe,
+  accessTokenState, // authMe 대신 accessTokenState 사용
   // gameId,
   lastRouteState,
   previousDateState,
@@ -108,7 +108,7 @@ export default function MainCalendarPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [timedOut, setTimedOut] = useState(false);
 
-  const [authInfo, setAuthInfo] = useRecoilState(authMe);
+  const [accessToken] = useRecoilState(accessTokenState); // authInfo 대신 accessToken 사용
   // 캘린더 영역 외부 클릭 감지를 위한 ref
   const calendarRef = useRef<HTMLDivElement>(null);
 
@@ -119,8 +119,8 @@ export default function MainCalendarPage() {
   const [toDate, setToDate] = useState("2025-12-31");
   const [authChecked] = useRecoilState(authCheckedState);
   useEffect(() => {
-    // 인증 체크가 완료되지 않았으면 API 요청하지 않음
-    if (!authChecked) {
+    // 인증 체크가 완료되지 않았거나 로그인이 안된 상태면 API 요청하지 않음
+    if (!authChecked || !accessToken) {
       return;
     }
 
@@ -158,7 +158,7 @@ export default function MainCalendarPage() {
     return () => {
       isMounted = false;
     };
-  }, [fromDate, toDate, router, authChecked]);
+  }, [fromDate, toDate, router, authChecked, accessToken]); // authInfo 대신 accessToken 의존성
 
   console.log("allMatchData", allMatchData);
   useEffect(() => {
@@ -395,7 +395,15 @@ export default function MainCalendarPage() {
       </DaysOfWeekContainer>
 
       <MatchCardsContainer>
-        {isLoading ? (
+        {!authChecked ? (
+          <p style={{ textAlign: "center", marginTop: "20px" }}>
+            인증 상태를 확인하는 중입니다...
+          </p>
+        ) : !accessToken ? (
+          <p style={{ textAlign: "center", marginTop: "20px" }}>
+            로그인이 필요한 서비스입니다.
+          </p>
+        ) : isLoading ? (
           <p style={{ textAlign: "center", marginTop: "20px" }}>
             {timedOut
               ? "해당 날짜의 경기가 없습니다."
