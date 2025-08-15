@@ -1046,6 +1046,19 @@ export default function GameRecordPageViewer() {
     setActiveBadges(activeBadgeIds);
   }, [sseData]);
 
+  const formatInnings = (ip: number): string => {
+    if (!ip || ip === 0) return "0";
+
+    const fullInnings = Math.floor(ip / 3);
+    const outs = ip % 3;
+
+    if (outs === 0) {
+      return fullInnings.toString();
+    } else {
+      return `${fullInnings} ${outs}/3`;
+    }
+  };
+
   return (
     <GameRecordContainer>
       <ScoreBoardWrapper>
@@ -1335,8 +1348,10 @@ export default function GameRecordPageViewer() {
               <PitcherToday>
                 <StatFrame>
                   <StatText>
-                    <StatLabel>실점</StatLabel>
-                    <StatValue>{lastPitcher?.todayStats?.R ?? "-"}</StatValue>
+                    <StatLabel>이닝</StatLabel>
+                    <StatValue>
+                      {formatInnings(lastPitcher?.todayStats?.IP) ?? "-"}
+                    </StatValue>
                   </StatText>
                 </StatFrame>
                 <StatFrame2>
@@ -1350,7 +1365,7 @@ export default function GameRecordPageViewer() {
             {/* <DividerForPitcher /> */}
             <PitcherStatsGrid>
               {[
-                { name: "이닝", value: lastPitcher?.todayStats?.IP },
+                { name: "실점", value: lastPitcher?.todayStats?.R },
                 { name: "자책", value: lastPitcher?.todayStats?.ER },
                 { name: "삼진", value: lastPitcher?.todayStats?.K },
                 { name: "볼넷", value: lastPitcher?.todayStats?.BB },
