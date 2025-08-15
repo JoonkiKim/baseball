@@ -560,7 +560,7 @@ export const PitcherPlayerBox = styled.div`
   flex-direction: column;
   justify-content: flex-start;
   align-items: center;
-  background-color: aqua;
+  // background-color: aqua;
 `;
 
 export const PitcherGroup = styled.div`
