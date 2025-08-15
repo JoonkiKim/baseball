@@ -628,7 +628,7 @@ export const StatFrame = styled.div`
 
 export const StatFrame2 = styled.div`
   margin-top: 0.5vh;
-  width: 8.5vw;
+  width: 6.5vw;
   height: 1.5vh; /* 7px */
   /* display: flex;
   flex-direction: row; */

@@ -247,9 +247,26 @@ export default function GameRecordPageViewer() {
           try {
             const payload = JSON.parse(dataStr);
             console.log("payload", payload);
-            // const snap = payload?.snapshot ?? payload;
-            const snap = payload?.data ?? payload;
 
+            // 게임 종료 체크
+            if (payload.type === "GAME_ENDED") {
+              console.log("게임이 종료되었습니다");
+              // 스트림 종료
+              controller.abort();
+              controllerRef.current = null;
+
+              // 게임 종료 상태 설정
+              setGameEnded(true);
+
+              // alert로 게임 종료 메시지 표시
+              alert("경기가가 종료되었습니다");
+              router.push(`/matches/${recordId}/result`);
+              // UI 업데이트를 위한 상태 설정
+              return; // while 루프 종료
+            }
+
+            // 일반적인 스냅샷 데이터 처리
+            const snap = payload?.data ?? payload;
             setSseData(snap);
             applySnapshot(snap);
             console.log("sseData 수신완료");
@@ -259,7 +276,13 @@ export default function GameRecordPageViewer() {
           }
         }
       }
-    })().catch((e) => console.warn("[SSE/fetch] error:", e));
+    })().catch((e) => {
+      if (e.name === "AbortError") {
+        console.log("스트림이 정상적으로 종료되었습니다");
+      } else {
+        console.warn("[SSE/fetch] error:", e);
+      }
+    });
 
     return () => {
       controller.abort();
@@ -518,7 +541,8 @@ export default function GameRecordPageViewer() {
   };
 
   // 대기타석
-  const isHomeAttack = router.query.attack === "home";
+  const half = sseData?.gameSummary?.inningHalf?.toUpperCase?.();
+  const isHomeAttack = half === "BOT";
   const lineupExample = isHomeAttack ? homeExample : awayExample;
   const [onDeckPlayers, setOnDeckPlayers] = useState<
     { playerId: number; playerName: string; battingOrder: number }[]
@@ -1057,6 +1081,10 @@ export default function GameRecordPageViewer() {
       return `${fullInnings} ${outs}/3`;
     }
   };
+
+  // 게임 종료 상태 추가
+  const [gameEnded, setGameEnded] = useState(false);
+  const [gameEndedMessage, setGameEndedMessage] = useState("");
 
   return (
     <GameRecordContainer>
