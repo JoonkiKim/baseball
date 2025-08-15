@@ -74,8 +74,8 @@ export default function SubTeamRegistrationComponent({
   useEffect(() => {
     if (!recordId || !teamId) {
       console.log("요청막힘");
+      return;
     }
-    return;
 
     // if (!teamId) return;
     // const teamType = isHomeTeam ? "home" : "away";
