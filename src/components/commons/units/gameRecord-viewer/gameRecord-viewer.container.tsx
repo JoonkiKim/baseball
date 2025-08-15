@@ -742,8 +742,7 @@ export default function GameRecordPageViewer() {
     // 선택: 라벨만 바꾸는 거라면 blackPositions 초기화는 필요 없음
   }, [
     isHomeAttack,
-    sseData?.lineup?.home,
-    sseData?.lineup?.away,
+    sseData,
     // 스냅샷이 평면형이면 ↓ 이렇게 넓게 걸어도 됨
     // snapshotData,
   ]);
