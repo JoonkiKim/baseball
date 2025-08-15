@@ -61,20 +61,26 @@ export default function SubTeamRegistrationComponent({
 
     if (matchDataString) {
       try {
-        const matchData = JSON.parse(matchDataString);
-        console.log("파싱된 matchData:", matchData);
+        const parsedData = JSON.parse(matchDataString);
+        console.log("파싱된 데이터:", parsedData);
+
+        // 배열인 경우 첫 번째 요소 사용
+        const matchData = Array.isArray(parsedData)
+          ? parsedData[0]
+          : parsedData;
+        console.log("사용할 matchData:", matchData);
         console.log("isHomeTeam:", isHomeTeam);
-        console.log("homeTeam:", matchData.homeTeam);
-        console.log("awayTeam:", matchData.awayTeam);
+        console.log("homeTeam:", matchData?.homeTeam);
+        console.log("awayTeam:", matchData?.awayTeam);
 
         const name = isHomeTeam
-          ? matchData.homeTeam?.name || ""
-          : matchData.awayTeam?.name || "";
+          ? matchData?.homeTeam?.name || ""
+          : matchData?.awayTeam?.name || "";
         setTeamName(name);
 
         const newTeamId = isHomeTeam
-          ? matchData.homeTeam?.id
-          : matchData.awayTeam?.id;
+          ? matchData?.homeTeam?.id
+          : matchData?.awayTeam?.id;
         console.log("설정할 teamId:", newTeamId);
         setTeamId(newTeamId);
       } catch (err: any) {
