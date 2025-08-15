@@ -32,7 +32,7 @@ export default function LogOutModal(props: IModalProps) {
         await API.post(`/auth/logout`);
 
         props.setIsLogOutModalOpen(false);
-        router.push(`/`);
+        router.push(`/login`);
       } finally {
         setIsSubmitting(false);
       }
