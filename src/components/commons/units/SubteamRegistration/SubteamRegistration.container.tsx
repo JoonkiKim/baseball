@@ -96,7 +96,7 @@ export default function SubTeamRegistrationComponent({
         setError(err);
         console.error("선수 목록 불러오기 실패:", err);
       });
-  }, [recordId, teamId, isHomeTeam]);
+  }, [router.asPath, recordId, teamId, isHomeTeam]);
 
   const allPlayersList = router.asPath.includes("homeTeamSubRegistration")
     ? homeTeamPlayers
