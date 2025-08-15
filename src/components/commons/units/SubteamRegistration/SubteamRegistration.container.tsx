@@ -55,19 +55,34 @@ export default function SubTeamRegistrationComponent({
   const [teamId, setTeamId] = useState<number | null>(null);
 
   useEffect(() => {
+    console.log("=== teamId 설정 useEffect ===");
     const matchDataString = localStorage.getItem("selectedMatch");
+    console.log("localStorage 데이터:", matchDataString);
+
     if (matchDataString) {
       try {
         const matchData = JSON.parse(matchDataString);
+        console.log("파싱된 matchData:", matchData);
+        console.log("isHomeTeam:", isHomeTeam);
+        console.log("homeTeam:", matchData.homeTeam);
+        console.log("awayTeam:", matchData.awayTeam);
+
         const name = isHomeTeam
           ? matchData.homeTeam?.name || ""
           : matchData.awayTeam?.name || "";
         setTeamName(name);
-        setTeamId(isHomeTeam ? matchData.homeTeam?.id : matchData.awayTeam?.id);
+
+        const newTeamId = isHomeTeam
+          ? matchData.homeTeam?.id
+          : matchData.awayTeam?.id;
+        console.log("설정할 teamId:", newTeamId);
+        setTeamId(newTeamId);
       } catch (err: any) {
         setError(err);
         console.error("JSON parsing error:", err);
       }
+    } else {
+      console.log("localStorage에 selectedMatch 데이터가 없음");
     }
   }, [router.asPath]);
 
