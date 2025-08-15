@@ -72,13 +72,25 @@ export default function SubTeamRegistrationComponent({
   }, [router.asPath]);
 
   useEffect(() => {
-    if (!recordId || !teamId) {
+    console.log("=== 디버깅 ===");
+    console.log("recordId:", recordId, "type:", typeof recordId);
+    console.log("teamId:", teamId, "type:", typeof teamId);
+
+    // 더 정확한 조건 체크
+    if (
+      !recordId ||
+      recordId === "" ||
+      teamId === null ||
+      teamId === undefined
+    ) {
       console.log("요청막힘");
+      console.log("recordId 없음:", !recordId);
+      console.log("recordId 빈문자열:", recordId === "");
+      console.log("teamId null:", teamId === null);
+      console.log("teamId undefined:", teamId === undefined);
       return;
     }
 
-    // if (!teamId) return;
-    // const teamType = isHomeTeam ? "home" : "away";
     const url = `/games/${recordId}/teams/${teamId}/players-with-in-lineup`;
     console.log("url", url);
     console.log("요청시작");
