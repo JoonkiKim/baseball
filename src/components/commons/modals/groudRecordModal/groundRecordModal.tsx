@@ -317,12 +317,12 @@ const GroundRecordModal = forwardRef<
       });
 
       // (선택) runnerInfoByBadge에서도 정리하면 더 안전
-      setRunnerInfoByBadgeCurrent((prev) => {
-        if (!prev[badgeId]) return prev;
-        const next = { ...prev };
-        delete next[badgeId];
-        return next;
-      });
+      // setRunnerInfoByBadgeCurrent((prev) => {
+      //   if (!prev[badgeId]) return prev;
+      //   const next = { ...prev };
+      //   delete next[badgeId];
+      //   return next;
+      // });
       setBadgeSnaps((prev) => ({ ...prev, [badgeId]: null }));
       groundRef.current?.classList.remove("out-zone-active");
       scheduleOccupancyLog();
@@ -1136,71 +1136,6 @@ const GroundRecordModal = forwardRef<
   }, [badgeSnaps]);
 
   const [applyResetSnapshot, setApplyResetSnapshot] = useState(false);
-  // 5;
-
-  // const resetWhiteBadges = useCallback(() => {
-  //   unstable_batchedUpdates(() => {
-  //     loadSnapshot();
-
-  //     setBadgeSnaps(
-  //       badgeConfigsForModal.reduce((acc, c) => {
-  //         acc[c.id] = null;
-  //         return acc;
-  //       }, {} as Record<string, SnapInfo | null>)
-  //     );
-  //     setActiveBadges(badgeConfigsForModal.map((c) => c.id));
-  //     setOutBadgesActual(new Set());
-  //     setOutBadgesVirtual(new Set());
-  //     setRunnerInfoByBadgeActual({});
-  //     setRunnerInfoByBadgeVirtual({});
-  //     setBaseToBadgeIdActual({});
-  //     setBaseToBadgeIdVirtual({});
-
-  //     // ← 여기를 추가: 홈/완료 상태 초기화
-  //     setFinishedBadgesActual(new Set());
-  //     setFinishedBadgesVirtual(new Set());
-  //     setHomeSnappedBadgesActual(new Set());
-  //     setHomeSnappedBadgesVirtual(new Set());
-
-  //     setApplyResetSnapshot(true);
-  //   });
-  // }, [isOpen, badgeConfigsForModal, loadSnapshot]);
-  // const resetWhiteBadges = useCallback(() => {
-  //   unstable_batchedUpdates(() => {
-  //     loadSnapshot();
-
-  //     // ref들도 즉시 초기화 (이전 스냅/순서 잔재 제거)
-  //     initialSnapsRef.current = badgeConfigsForModal.reduce((acc, c) => {
-  //       acc[c.id] = null;
-  //       return acc;
-  //     }, {} as Record<string, SnapInfo | null>);
-  //     snappedSeqRef.current = badgeConfigsForModal.reduce((acc, c) => {
-  //       acc[c.id] = [];
-  //       return acc;
-  //     }, {} as Record<string, BaseId[]>);
-
-  //     setBadgeSnaps(
-  //       badgeConfigsForModal.reduce((acc, c) => {
-  //         acc[c.id] = null;
-  //         return acc;
-  //       }, {} as Record<string, SnapInfo | null>)
-  //     );
-  //     setActiveBadges(badgeConfigsForModal.map((c) => c.id));
-  //     setOutBadgesActual(new Set());
-  //     setOutBadgesVirtual(new Set());
-  //     setRunnerInfoByBadgeActual({});
-  //     setRunnerInfoByBadgeVirtual({});
-  //     setBaseToBadgeIdActual({});
-  //     setBaseToBadgeIdVirtual({});
-
-  //     setFinishedBadgesActual(new Set());
-  //     setFinishedBadgesVirtual(new Set());
-  //     setHomeSnappedBadgesActual(new Set());
-  //     setHomeSnappedBadgesVirtual(new Set());
-
-  //     setApplyResetSnapshot(true);
-  //   });
-  // }, [isOpen, badgeConfigsForModal, loadSnapshot]);
 
   const resetWhiteBadges = useCallback(() => {
     unstable_batchedUpdates(() => {
@@ -1208,21 +1143,25 @@ const GroundRecordModal = forwardRef<
 
       // refs 초기화 (이전 스냅/순서 제거)
       initialSnapsRef.current = badgeConfigsForModal.reduce((acc, c) => {
-        acc[c.id] = null;
+        // 스냅샷에서 해당 배지의 초기 위치 정보를 가져와서 설정
+        const initialSnap = snap?.inningStats?.actual?.runnersOnBase?.find(
+          (runner: any) => runner.id === c.id
+        );
+        acc[c.id] = initialSnap
+          ? { base: initialSnap.base, pos: { xPct: 0, yPct: 0 } }
+          : null;
         return acc;
       }, {} as Record<string, SnapInfo | null>);
+
       snappedSeqRef.current = badgeConfigsForModal.reduce((acc, c) => {
         acc[c.id] = [];
         return acc;
       }, {} as Record<string, BaseId[]>);
 
-      // 상태 초기화
-      setBadgeSnaps(
-        badgeConfigsForModal.reduce((acc, c) => {
-          acc[c.id] = null;
-          return acc;
-        }, {} as Record<string, SnapInfo | null>)
-      );
+      // badgeSnaps를 initialSnapsRef.current의 값으로 설정 (null로 초기화하지 않음)
+      setBadgeSnaps(initialSnapsRef.current);
+
+      // 다른 상태들 초기화
       setActiveBadges(badgeConfigsForModal.map((c) => c.id));
       setOutBadgesActual(new Set());
       setOutBadgesVirtual(new Set());
@@ -1236,18 +1175,11 @@ const GroundRecordModal = forwardRef<
       setHomeSnappedBadgesVirtual(new Set());
     });
 
-    // 초기 로딩과 동일하게 snapshot 기반 sync 한 번만 수행
+    // syncRunnersOnBase는 여전히 실행하되, 이미 올바른 상태가 설정되어 있음
     requestAnimationFrame(() => {
       syncRunnersOnBase();
-
-      // sync 결과가 반영된 badgeSnaps를 기준으로 initialSnaps / snappedSeq도 갱신
-      initialSnapsRef.current = { ...badgeSnapsRef.current };
-      badgeConfigsForModal.forEach(({ id }) => {
-        const snap = badgeSnapsRef.current[id];
-        snappedSeqRef.current[id] = snap ? [snap.base] : [];
-      });
     });
-  }, [loadSnapshot, badgeConfigsForModal, syncRunnersOnBase]);
+  }, [loadSnapshot, badgeConfigsForModal, syncRunnersOnBase, snap]);
 
   // useEffect(() => {
   //   if (!applyResetSnapshot) return;
@@ -1335,7 +1267,7 @@ const GroundRecordModal = forwardRef<
   const prevVirtualLogRef = useRef<string | null>(null);
 
   // 공통으로 사용하는 runner 상태 배열 생성 헬퍼
-
+  console.log("snapshotData", snapshotData);
   const buildArrayForMode = (
     runnerMap: Record<string, { runnerId: number; name: string }>,
     outBadgesForMode: Set<string>,
@@ -1351,6 +1283,8 @@ const GroundRecordModal = forwardRef<
       endBase: string;
     }> = [];
     const whiteBadgeIds = allWhiteBadges.map((cfg) => cfg.id);
+    // console.log("📊 initialSnapsRef.current:", initialSnapsRef.current);
+    // console.log("📊 badgeSnaps:", badgeSnaps);
 
     whiteBadgeIds.forEach((badgeId) => {
       let startBase: string;
@@ -2215,7 +2149,9 @@ const GroundRecordModal = forwardRef<
 
             <ResetDot
               style={{ left: "63vw", top: "2vh" }}
-              onClick={resetWhiteBadges}
+              onClick={() => {
+                resetWhiteBadges();
+              }}
             />
 
             {/* NameBadge */}
