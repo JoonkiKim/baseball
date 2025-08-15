@@ -637,7 +637,7 @@ export default function MainCalendarPage() {
                             route = persistedRoute;
                           } else {
                             // 마지막 경로가 없거나 다른 경기의 경로인 경우 기본값 사용
-                            route = `/matches/${match.id}/awayTeamRegistration`;
+                            route = `/matches/${match.id}/homeTeamRegistration`;
                           }
                         } else if (
                           match.status === "FINALIZED" ||
