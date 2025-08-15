@@ -23,16 +23,16 @@ interface User {
 
 export default function MypageComponent() {
   // 예시 사용자 데이터
-  // const userExample: User = {
-  //   id: 1,
-  //   nickname: "예시입니다",
-  //   photoUrl: "https://example.com/photo.jpg",
-  //   email: "예시입니다",
-  // };
+  const userExample: User = {
+    id: 1,
+    nickname: "",
+    photoUrl: "",
+    email: "",
+  };
   // 모달 열림 상태 관리
   const [isAskModalOpen, setIsAskModalOpen] = useState<boolean>(false);
   const [isLogOutModalOpen, setIsLogOutModalOpen] = useState<boolean>(false);
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User>(userExample);
   // 1) loadProfile을 useCallback으로 감싸기
   const loadProfile = useCallback(async () => {
     try {
