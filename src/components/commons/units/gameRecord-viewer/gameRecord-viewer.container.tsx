@@ -866,13 +866,13 @@ export default function GameRecordPageViewer() {
     "3B": "3루타",
     HR: "홈런",
     BB: "볼넷",
-    SF: "희플",
-    SAC: "희번",
+    SF: "희생타",
+    SAC: "희생타",
     SO: "삼진",
     O: "아웃",
     SO_DROP: "낫아웃",
-    FC: "야수선택",
-    IF: "타격방해",
+    FC: "ETC",
+    IF: "ETC",
     E: "실책",
   };
 
@@ -903,7 +903,7 @@ export default function GameRecordPageViewer() {
   }, [sseData?.playerRecords?.batters]);
 
   const isCompact = (battersForUI?.length ?? 0) < 3;
-  const OUT_CODES = new Set(["SO", "O", "SO_DROP"]);
+  const OUT_CODES = new Set(["SO", "O", "SO_DROP", "SF", "SAC"]);
   const isOutResult = (code) => OUT_CODES.has(String(code).toUpperCase());
 
   // 타자 주자 위치 결정

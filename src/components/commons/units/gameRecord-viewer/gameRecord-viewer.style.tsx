@@ -617,18 +617,18 @@ export const PitcherToday = styled.div`
 
 export const StatFrame = styled.div`
   margin-top: 0.5vh;
-  width: 6vw;
+  width: 10vw;
   height: 1.5vh; /* 7px */
   /* display: flex;
   flex-direction: row; */
-  /* background-color: red; */
+  // background-color: red;
   /* justify-content: space-between; */
   /* align-items: center; */
 `;
 
 export const StatFrame2 = styled.div`
   margin-top: 0.5vh;
-  width: 6.5vw;
+  width: 10vw;
   height: 1.5vh; /* 7px */
   /* display: flex;
   flex-direction: row; */
@@ -648,7 +648,7 @@ export const StatText = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: space-between;
+  justify-content: space-evenly;
 `;
 
 export const StatLabel = styled.span`
@@ -656,6 +656,7 @@ export const StatLabel = styled.span`
 `;
 export const StatValue = styled.span`
   color: var(--blue-1, #007aff);
+  width: 4vw;
 `;
 
 export const PitcherStatsGrid = styled.div`
