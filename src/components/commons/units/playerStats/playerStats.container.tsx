@@ -122,7 +122,9 @@ export default function StatsPage() {
     hitterSortKey as string
   );
   console.log("전체 선수 수:", hitterData.length);
-  const filtered = hitterData.filter((p) => p.PA >= p.teamGameCount * 2);
+  // const filtered = hitterData.filter((p) => p.PA >= p.teamGameCount * 2);
+
+  const filtered = hitterData;
   console.log("비율키 정렬 적용 후 남은 선수 수:", filtered.length);
   console.table(
     filtered.map((p) => ({
@@ -201,9 +203,10 @@ export default function StatsPage() {
           <tbody>
             {(() => {
               // 필터링
-              const list = isRateKey
-                ? hitterData.filter((p) => p.PA >= p.teamGameCount * 2)
-                : hitterData;
+              // const list = isRateKey
+              //   ? hitterData.filter((p) => p.PA >= p.teamGameCount * 2)
+              //   : hitterData;
+              const list = hitterData;
               let currentRank = 1;
               let tieCount = 0;
               let prevValue: number | null = null;

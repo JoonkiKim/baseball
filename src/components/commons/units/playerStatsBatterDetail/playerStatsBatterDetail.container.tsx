@@ -1592,7 +1592,9 @@ export default function StatsPageBatterDetail() {
   );
 
   // PA 필터링된 데이터
-  const filtered = hitterData.filter((p) => p.PA >= p.teamGameCount * 2);
+  // const filtered = hitterData.filter((p) => p.PA >= p.teamGameCount * 2);
+
+  const filtered = hitterData;
 
   // Debounce 효과
   useEffect(() => {
