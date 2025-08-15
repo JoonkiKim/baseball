@@ -73,7 +73,7 @@ export default function SubTeamRegistrationComponent({
 
   useEffect(() => {
     if (!recordId) return;
-    if (!teamId) return;
+    // if (!teamId) return;
     // const teamType = isHomeTeam ? "home" : "away";
     const url = `/games/${recordId}/teams/${teamId}/players-with-in-lineup`;
     API.get(url)
@@ -93,7 +93,7 @@ export default function SubTeamRegistrationComponent({
         setError(err);
         console.error("선수 목록 불러오기 실패:", err);
       });
-  }, [recordId, teamId]);
+  }, [recordId]);
 
   const allPlayersList = router.asPath.includes("homeTeamSubRegistration")
     ? homeTeamPlayers
