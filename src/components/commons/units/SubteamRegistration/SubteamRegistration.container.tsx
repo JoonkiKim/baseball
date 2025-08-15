@@ -52,6 +52,7 @@ export default function SubTeamRegistrationComponent({
   const [teamName, setTeamName] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<any>(null);
+  const [teamId, setTeamId] = useState<number | null>(null);
 
   useEffect(() => {
     const matchDataString = localStorage.getItem("selectedMatch");
@@ -62,6 +63,7 @@ export default function SubTeamRegistrationComponent({
           ? matchData.homeTeam?.name || ""
           : matchData.awayTeam?.name || "";
         setTeamName(name);
+        setTeamId(isHomeTeam ? matchData.homeTeam?.id : matchData.awayTeam?.id);
       } catch (err: any) {
         setError(err);
         console.error("JSON parsing error:", err);
@@ -71,8 +73,9 @@ export default function SubTeamRegistrationComponent({
 
   useEffect(() => {
     if (!recordId) return;
-    const teamType = isHomeTeam ? "home" : "away";
-    const url = `/games/${recordId}/players-with-in-lineup?teamType=${teamType}`;
+    if (!teamId) return;
+    // const teamType = isHomeTeam ? "home" : "away";
+    const url = `/games/${recordId}/teams/${teamId}/players-with-in-lineup`;
     API.get(url)
       .then((res) => {
         const parsed =
@@ -90,7 +93,7 @@ export default function SubTeamRegistrationComponent({
         setError(err);
         console.error("선수 목록 불러오기 실패:", err);
       });
-  }, [recordId]);
+  }, [recordId, teamId]);
 
   const allPlayersList = router.asPath.includes("homeTeamSubRegistration")
     ? homeTeamPlayers
@@ -122,10 +125,10 @@ export default function SubTeamRegistrationComponent({
       setIsSubmitting(false);
       return;
     }
+    if (!teamId) return;
     const playerIds = selectedPlayers.map((p) => p.id);
     try {
-      const teamType = isHomeTeam ? "home" : "away";
-      await API.post(`/games/${recordId}/substitution?teamType=${teamType}`, {
+      await API.post(`/games/${recordId}/teams/${teamId}/substitution`, {
         playerIds,
       });
       if (isHomeTeam) {
