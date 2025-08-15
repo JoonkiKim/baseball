@@ -69,7 +69,7 @@ export default function SubTeamRegistrationComponent({
         console.error("JSON parsing error:", err);
       }
     }
-  }, [isHomeTeam]);
+  }, [router.asPath]);
 
   useEffect(() => {
     if (!recordId || !teamId) return;
@@ -77,6 +77,8 @@ export default function SubTeamRegistrationComponent({
     // if (!teamId) return;
     // const teamType = isHomeTeam ? "home" : "away";
     const url = `/games/${recordId}/teams/${teamId}/players-with-in-lineup`;
+    console.log("url", url);
+    console.log("요청시작");
     API.get(url)
       .then((res) => {
         const parsed =
