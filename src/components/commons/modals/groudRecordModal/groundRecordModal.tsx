@@ -48,6 +48,7 @@ import {
   ReconstructionTitle,
   ReconstructionWrapper,
   ResetDot,
+  ReconstructionSwitch,
 } from "./groundRecordModal.style";
 import { restrictToParentElement } from "@dnd-kit/modifiers";
 import { ControlButton } from "../playerSelectionModal";
@@ -62,8 +63,6 @@ import {
   BASE_IDS,
   useRectsCache,
 } from "../../units/gameRecord-v2/gameRecord-v2.container";
-import PortalSwitch from "./reconstructionSwitch";
-// import { DraggableBadge } from "../../../../commons/libraries/whiteBadge";
 import { unstable_batchedUpdates } from "react-dom";
 
 // 모달 컨트롤용 핸들러 타입
@@ -2040,22 +2039,12 @@ const GroundRecordModal = forwardRef<
             <ReconstructionWrapper>
               <ReconstructionTitle>이닝의 재구성</ReconstructionTitle>
               <ReconstructionButtonWrapper>
-                <div
-                  ref={switchAnchorRef}
-                  style={{
-                    width: "11vw",
-                    height: "3vh",
-                    position: "relative",
-                    // (기본 자리 표시용; 실제 스위치는 포털로 올라감)
-                  }}
-                />
-
-                <PortalSwitch
-                  anchorRef={switchAnchorRef}
+                {/* anchor div 제거하고 직접 Switch 렌더링 */}
+                <ReconstructionSwitch
                   checked={reconstructMode}
                   onChange={handleReconstructToggle}
+                  aria-checked={reconstructMode}
                 />
-                {/* </div> */}
               </ReconstructionButtonWrapper>
             </ReconstructionWrapper>
             <ModalBottomRunnerWrapper>
