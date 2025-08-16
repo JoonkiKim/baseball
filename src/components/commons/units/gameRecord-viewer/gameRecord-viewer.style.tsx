@@ -628,7 +628,7 @@ export const StatFrame = styled.div`
 
 export const StatFrame2 = styled.div`
   margin-top: 0.5vh;
-  width: 10vw;
+  width: 8vw;
   height: 1.5vh; /* 7px */
   /* display: flex;
   flex-direction: row; */
@@ -644,7 +644,7 @@ export const StatText = styled.div`
   font-family: "Pretendard";
   font-size: 0.5rem; /* 8px */
   font-weight: 600;
-  /* background-color: red; */
+  background-color: red;
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -657,8 +657,12 @@ export const StatLabel = styled.span`
 export const StatValue = styled.span`
   color: var(--blue-1, #007aff);
   width: 4vw;
+  background-color: blue;
+  /* id가 ip인 요소만 다른 width 적용 */
+  &#ip {
+    width: 6vw; /* 또는 원하는 크기 */
+  }
 `;
-
 export const PitcherStatsGrid = styled.div`
   /* margin-top: 0.5vh; */
   display: grid;

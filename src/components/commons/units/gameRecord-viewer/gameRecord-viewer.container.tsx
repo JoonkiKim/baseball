@@ -91,6 +91,8 @@ import {
 import { ArrowUp } from "../../../../commons/libraries/arrow";
 import ArrowDown from "../../../../commons/libraries/arrowDown";
 import { getAccessToken } from "../../../../commons/libraries/token";
+import { authCheckedState } from "../../../../commons/stores";
+import { useRecoilValue } from "recoil";
 
 // 타자 주자 초기 세팅
 
@@ -202,8 +204,15 @@ export default function GameRecordPageViewer() {
     setAttackVal(half === "TOP" ? "away" : "home");
   }, []);
 
+  const authChecked = useRecoilValue(authCheckedState);
   useEffect(() => {
-    if (!router.isReady || !recordId) return;
+    if (!router.isReady || !recordId || !authChecked) return;
+
+    const token = getAccessToken();
+    if (!token) {
+      console.log("토큰이 없어서 스트림을 시작하지 않습니다");
+      return;
+    }
 
     const base = process.env.NEXT_PUBLIC_API_URL ?? "";
     const url = `${base}/games/${recordId}/snapshot/stream`;
@@ -215,7 +224,7 @@ export default function GameRecordPageViewer() {
       const res = await fetch(url, {
         method: "GET",
         headers: {
-          Authorization: `Bearer ${getAccessToken() || ""}`,
+          Authorization: `Bearer ${token}`,
           Accept: "text/event-stream",
         },
         signal: controller.signal,
@@ -259,7 +268,7 @@ export default function GameRecordPageViewer() {
               setGameEnded(true);
 
               // alert로 게임 종료 메시지 표시
-              alert("경기가가 종료되었습니다");
+              alert("경기가 종료되었습니다");
               router.push(`/matches/${recordId}/result`);
               // UI 업데이트를 위한 상태 설정
               return; // while 루프 종료
@@ -288,7 +297,7 @@ export default function GameRecordPageViewer() {
       controller.abort();
       controllerRef.current = null;
     };
-  }, [router.isReady, recordId, applySnapshot]);
+  }, [router.isReady, authChecked, recordId, applySnapshot]);
 
   // 연결용 GET
   // StrictMode에서 useEffect가 2번 도는 것을 방지
@@ -1376,7 +1385,7 @@ export default function GameRecordPageViewer() {
                 <StatFrame>
                   <StatText>
                     <StatLabel>이닝</StatLabel>
-                    <StatValue>
+                    <StatValue id="ip">
                       {formatInnings(lastPitcher?.todayStats?.IP) ?? "-"}
                     </StatValue>
                   </StatText>
