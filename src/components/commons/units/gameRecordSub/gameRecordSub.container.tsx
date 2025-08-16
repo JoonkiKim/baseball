@@ -172,9 +172,13 @@ export default function TeamRegistrationPageComponent() {
   }, [router.isReady, router.query.isHomeTeam]);
 
   const [teamTournamentId, setTeamTournamentId] = useState<number | null>(null);
-  // 팀 ID 결정: isHomeTeam 변경/초기 진입마다 갱신
+
+  // 팀 ID 결정: isHomeTeam이 확정된 후에만 실행
   useEffect(() => {
     if (!router.isReady) return;
+
+    // isHomeTeam이 아직 설정되지 않았으면 대기
+    if (router.query.isHomeTeam === undefined) return;
 
     let id: number | null = null;
 
@@ -205,7 +209,7 @@ export default function TeamRegistrationPageComponent() {
       isHomeTeam,
       ")"
     );
-  }, [router.isReady, isHomeTeam]);
+  }, [router.isReady, router.query.isHomeTeam, isHomeTeam]); // isHomeTeam 의존성 추가
 
   // localStorage에서 selectedMatch 읽고 팀 선수 목록(API) 호출
   useEffect(() => {

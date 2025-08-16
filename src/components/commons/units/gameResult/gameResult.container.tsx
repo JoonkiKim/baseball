@@ -199,11 +199,11 @@ export default function FinalGameRecordPage() {
       }
 
       // R, H 컬럼 처리 (scoreboard.totals 사용)
-      if (scoreboard?.totals) {
-        newA[7] = String(scoreboard.totals.away?.runs ?? "");
-        newA[8] = String(scoreboard.totals.away?.hits ?? "");
-        newB[7] = String(scoreboard.totals.home?.runs ?? "");
-        newB[8] = String(scoreboard.totals.home?.hits ?? "");
+      if (teamSummary) {
+        newA[7] = String(teamSummary.away?.runs ?? "");
+        newA[8] = String(teamSummary.away?.hits ?? "");
+        newB[7] = String(teamSummary.home?.runs ?? "");
+        newB[8] = String(teamSummary.home?.hits ?? "");
       }
 
       // 마지막 이닝 정보 저장 (기존 로직 유지)
