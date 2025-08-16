@@ -492,7 +492,7 @@ export default function GameRecordPageV2() {
 
   // const applySnapshot = useCallback((nextSnap: any) => {
   //   localStorage.setItem("snapshot", JSON.stringify(nextSnap));
-  //   setSnapshotData(nextSnap); // ← 이게 ‘단일 진실 소스’
+  //   setSnapshotData(nextSnap); // ← 이게 '단일 진실 소스'
   // }, []);
 
   useEffect(() => {
@@ -2919,23 +2919,12 @@ export default function GameRecordPageV2() {
           <ReconstructionWrapper>
             <ReconstructionTitle>이닝의 재구성</ReconstructionTitle>
             <ReconstructionButtonWrapper>
-              <div
-                ref={switchAnchorRefForMain}
-                style={{
-                  width: "11vw",
-                  height: "3vh",
-                  position: "relative",
-                  zIndex: 0,
-                  // (기본 자리 표시용; 실제 스위치는 포털로 올라감)
-                }}
-              />
-
-              <PortalSwitch
-                anchorRef={switchAnchorRefForMain}
+              {/* anchor div 제거하고 직접 Switch 렌더링 */}
+              <ReconstructionSwitch
                 checked={reconstructMode}
                 onChange={handleReconstructToggle}
+                aria-checked={reconstructMode}
               />
-              {/* </div> */}
             </ReconstructionButtonWrapper>
           </ReconstructionWrapper>
           <ControlButtonWhite onClick={handleSubmit}>
