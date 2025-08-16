@@ -20,12 +20,52 @@ export const Container = styled.div`
   padding: 20px;
 `;
 
+export const TitleWrapper = styled.div`
+  width: 80%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  // background-color: red;
+`;
+
+export const TitleInsideWrapper = styled.div`
+  width: 100%;
+  height: 10vh;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  // background-color: red;
+`;
+
 export const Title = styled.h1`
   font-size: 1.5rem; /* 24px → 1.5rem */
-  margin-bottom: 40px;
+  // margin-bottom: 40px;
+
   text-align: center;
   font-weight: bold;
   font-family: "KBO-Dia-Gothic_bold";
+`;
+
+export const BackButton = styled.button`
+  width: 1.5rem;
+  height: 1.5rem;
+  background-image: url("/images/backKey.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  cursor: pointer;
+  border: none;
+  background-color: transparent;
+  padding: 0;
+`;
+
+export const BackButtonNone = styled.div`
+  width: 1.5rem;
+  height: 1.5rem;
+  background-color: transparent;
+  padding: 0;
 `;
 
 /* 폼 전체를 감싸는 컨테이너 */

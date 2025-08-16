@@ -22,7 +22,7 @@ export const Container = styled.div`
 
 export const Title = styled.h1`
   font-size: 1.5rem; /* 24px → 1.5rem */
-  margin-bottom: 40px;
+  // margin-bottom: 40px;
   text-align: center;
   font-weight: bold;
   font-family: "KBO-Dia-Gothic_bold";

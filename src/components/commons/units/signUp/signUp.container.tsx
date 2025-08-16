@@ -19,6 +19,10 @@ import {
   EmailInput,
   EmailButton,
   SuggestionMessage,
+  TitleWrapper,
+  TitleInsideWrapper,
+  BackButton,
+  BackButtonNone,
 } from "./sigunUp.style";
 import API from "../../../../commons/apis/api";
 import {
@@ -29,6 +33,8 @@ import {
 import { setAccessToken } from "../../../../commons/libraries/token";
 import { useRouter } from "next/router";
 import axios from "axios";
+// import { LeftOutlined } from "@ant-design/icons";
+import Link from "next/link";
 
 // 폼에서 다룰 데이터 타입 정의
 interface SignUpFormData {
@@ -253,8 +259,15 @@ export default function SignUpPage() {
         }}
       />
       <Container>
-        <Title>회원가입</Title>
-
+        <TitleWrapper>
+          <TitleInsideWrapper>
+            <Link href="/login" passHref>
+              <BackButton as="a" />
+            </Link>
+            <Title>회원가입</Title>
+            <BackButtonNone></BackButtonNone>
+          </TitleInsideWrapper>
+        </TitleWrapper>
         {/* 회원가입 폼 */}
         <Form onSubmit={handleSubmit(onSubmit)}>
           {/* 이메일 입력 */}

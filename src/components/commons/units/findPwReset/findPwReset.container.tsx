@@ -3,6 +3,8 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import {
+  BackButton,
+  BackButtonNone,
   Container,
   ErrorMessage,
   FieldWrapper,
@@ -12,6 +14,8 @@ import {
   PasswordToggle,
   PasswordWrapper,
   Title,
+  TitleInsideWrapper,
+  TitleWrapper,
   ToggleImage,
 } from "./findPwReset.style";
 import API from "../../../../commons/apis/api";
@@ -21,6 +25,7 @@ import {
 } from "../../../../commons/libraries/loadingOverlay";
 import { useRouter } from "next/router";
 import ShowAlert from "../../../../commons/libraries/showAlertModal";
+import Link from "next/link";
 
 // 폼에서 다룰 데이터 타입 정의
 interface LoginFormData {
@@ -118,7 +123,15 @@ export default function ResetPwPageComponent() {
           setAlertObj(null);
         }}
       />
-      <Title>비밀번호 변경</Title>
+      <TitleWrapper>
+        <TitleInsideWrapper>
+          <Link href="/login" passHref>
+            <BackButton as="a" />
+          </Link>
+          <Title>비밀번호 변경</Title>
+          <BackButtonNone></BackButtonNone>
+        </TitleInsideWrapper>
+      </TitleWrapper>
       <form onSubmit={handleSubmit(onSubmit)}>
         <FieldWrapper>
           <Label>새로운 비밀번호를 입력하세요</Label>

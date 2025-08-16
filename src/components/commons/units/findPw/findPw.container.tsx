@@ -19,6 +19,13 @@ import {
 } from "../../../../commons/libraries/loadingOverlay";
 import { useRouter } from "next/router";
 import ShowAlert from "../../../../commons/libraries/showAlertModal";
+import {
+  BackButton,
+  BackButtonNone,
+  TitleInsideWrapper,
+  TitleWrapper,
+} from "../findPwReset/findPwReset.style";
+import Link from "next/link";
 
 // 폼에서 다룰 데이터 타입 정의
 interface LoginFormData {
@@ -96,7 +103,15 @@ export default function FindPwPageComponent() {
           setAlertObj(null);
         }}
       />
-      <Title>비밀번호 재설정</Title>
+      <TitleWrapper>
+        <TitleInsideWrapper>
+          <Link href="/login" passHref>
+            <BackButton as="a" />
+          </Link>
+          <Title>비밀번호 재설정</Title>
+          <BackButtonNone></BackButtonNone>
+        </TitleInsideWrapper>
+      </TitleWrapper>
       <form onSubmit={handleSubmit(onSubmit)}>
         {/* 이메일 주소 입력 */}
         <FieldWrapper>
