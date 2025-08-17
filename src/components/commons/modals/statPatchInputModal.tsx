@@ -178,36 +178,92 @@ IStatPatchInputModalProps) {
           </div>
         )}
 
-        {Object.entries(stat).map(([key, value]) => {
-          if (key === "id" || key === "플레이어" || key === "playerName")
-            return null;
-          return (
-            <div
-              key={key}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                marginBottom: 25,
-              }}
-            >
-              <label
-                style={{
-                  width: "20vw",
-                  marginRight: 6,
-                  textAlign: "left",
-                  fontWeight: 600,
-                }}
-              >
-                {key}
-              </label>
-              <StatPatchInput
-                type="number"
-                value={stat[key] as string | number}
-                onChange={(e) => handleChange(key, e.target.value)}
-              />
-            </div>
-          );
-        })}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: "25px 10px",
+            marginBottom: 25,
+          }}
+        >
+          {/* 왼쪽 열: 타석~홈런 */}
+          <div>
+            {Object.entries(stat).map(([key, value]) => {
+              if (key === "id" || key === "플레이어" || key === "playerName")
+                return null;
+              if (
+                ["타석", "타수", "안타", "2루타", "3루타", "홈런"].includes(key)
+              ) {
+                return (
+                  <div
+                    key={key}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      marginBottom: 25,
+                    }}
+                  >
+                    <label
+                      style={{
+                        width: "20vw",
+                        marginRight: 6,
+                        textAlign: "left",
+                        fontWeight: 600,
+                      }}
+                    >
+                      {key}
+                    </label>
+                    <StatPatchInput
+                      type="number"
+                      value={stat[key] as string | number}
+                      onChange={(e) => handleChange(key, e.target.value)}
+                    />
+                  </div>
+                );
+              }
+              return null;
+            })}
+          </div>
+
+          {/* 오른쪽 열: 타점~희번 */}
+          <div>
+            {Object.entries(stat).map(([key, value]) => {
+              if (key === "id" || key === "플레이어" || key === "playerName")
+                return null;
+              if (
+                ["타점", "득점", "볼넷", "삼진", "희플", "희번"].includes(key)
+              ) {
+                return (
+                  <div
+                    key={key}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      marginBottom: 25,
+                    }}
+                  >
+                    <label
+                      style={{
+                        width: "20vw",
+                        marginRight: 6,
+                        textAlign: "left",
+                        fontWeight: 600,
+                      }}
+                    >
+                      {key}
+                    </label>
+                    <StatPatchInput
+                      type="number"
+                      value={stat[key] as string | number}
+                      onChange={(e) => handleChange(key, e.target.value)}
+                    />
+                  </div>
+                );
+              }
+              return null;
+            })}
+          </div>
+        </div>
 
         <ModalButton onClick={handleSubmit} disabled={isSubmitting}>
           수정하기

@@ -193,7 +193,7 @@ export default function FinalGameRecordPage() {
           const idx = inning.inning - 1; // 0-based index
           if (idx >= 0 && idx < 7) {
             newA[idx] = String(inning.away ?? "");
-            newB[idx] = String(inning.home ?? "");
+            newB[idx] = inning.home === null ? "-" : String(inning.home);
           }
         });
       }
@@ -306,7 +306,7 @@ export default function FinalGameRecordPage() {
     const msg =
       `id: ${pitcher.id}\n` +
       `플레이어: ${pitcher.name}\n` +
-      `아웃: ${pitcher.IP}\n` +
+      `이닝: ${pitcher.IP}\n` +
       `실점: ${pitcher.R}\n` +
       `자책: ${pitcher.ER}\n` +
       `삼진: ${pitcher.K}\n` +
