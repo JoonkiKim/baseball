@@ -1390,7 +1390,7 @@ export default function GameRecordPageViewer() {
                     </StatValue>
                   </StatText>
                 </StatFrame>
-                <StatFrame2>
+                <StatFrame2 $isWide={String(lastPitcher?.ERA ?? "").length > 3}>
                   <StatText>
                     <StatLabel>ERA</StatLabel>
                     <StatValue>{lastPitcher?.ERA ?? "-"}</StatValue>

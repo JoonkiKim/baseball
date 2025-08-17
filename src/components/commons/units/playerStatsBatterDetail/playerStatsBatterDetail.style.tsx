@@ -255,7 +255,7 @@ export const SearchContainer = styled.div`
   display: flex;
   width: 90%;
 
-  justify-content: center;
+  justify-content: flex-start;
   // margin-left: 10px;
 `;
 
