@@ -189,7 +189,7 @@ export default function StatsPagePitcherDetail() {
               <tr key={index}>
                 <td>{getOverallRank(item)}</td>
                 <td style={{ textAlign: "left" }}>
-                  {item.name} ({item.team.slice(0, 3)})
+                  {item.name?.slice(0, 3)} ({item.team?.slice(0, 3) || "N/A"})
                 </td>
                 <td>
                   {item.K} <ArrowIconNone> ▽ </ArrowIconNone>

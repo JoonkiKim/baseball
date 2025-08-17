@@ -341,7 +341,8 @@ export default function StatsPage() {
                   <tr key={idx}>
                     <td>{currentRank}</td>
                     <td style={{ textAlign: "left" }}>
-                      {item.name} ({item.team?.slice(0, 3) || "N/A"})
+                      {item.name?.slice(0, 3)} (
+                      {item.team?.slice(0, 3) || "N/A"})
                     </td>
                     <td>
                       {item.K}
