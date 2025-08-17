@@ -19,19 +19,18 @@ export const ArrowIcon = styled.span`
   margin-left: 2px;
 `;
 export const TableTitle = styled.div`
-  /* position: sticky; */
   z-index: 10;
   font-size: 12px;
   font-family: "KBO-Dia-Gothic_bold";
-  margin: 0 auto 0;
+  margin: 0px auto 0px;
   margin-bottom: 10px;
-
-  padding: 0 20px;
+  width: 90%;
+  // padding: 0 20px;
 `;
 
 // 테이블을 감싸는 래퍼
 export const TableWrapper = styled.div`
-  width: 95%;
+  width: 90%;
   margin: 0px auto 0px;
   /* mar */
   /* padding: 0 20px; */
@@ -44,15 +43,15 @@ export const TableWrapper = styled.div`
   max-height: calc(100vh - 280px);
   position: relative; /* 스크롤 컨텍스트 설정 */
 
-  ${small} {
-    padding: 0 10px;
-  }
-  ${medium} {
-    padding: 0 15px;
-  }
-  ${large}, ${xlarge} {
-    padding: 0 20px;
-  }
+  // ${small} {
+  //   padding: 0 10px;
+  // }
+  // ${medium} {
+  //   padding: 0 15px;
+  // }
+  // ${large}, ${xlarge} {
+  //   padding: 0 20px;
+  // }
 `;
 
 export const RankingTable = styled.table`
@@ -76,7 +75,7 @@ export const RankingTable = styled.table`
         border-top: 1px solid #000;
 
         /* 순위열 고정 */
-        &:first-child {
+        &:first-of-type {
           position: sticky;
           left: 0;
           z-index: 30;
@@ -84,10 +83,10 @@ export const RankingTable = styled.table`
         }
 
         /* 선수열 고정 */
-        &:nth-child(2) {
+        &:nth-of-type(2) {
           position: sticky;
-          left: 10vw; /* 순위열 너비만큼 오프셋 */
-          z-index: 30;
+          left: 11vw; /* 순위열 너비만큼 오프셋 */
+          z-index: 31;
           background: #fff;
         }
 
@@ -124,7 +123,7 @@ export const RankingTable = styled.table`
         text-align: center;
 
         /* 순위열 고정 */
-        &:first-child {
+        &:first-of-type {
           position: sticky;
           left: 0;
           background: #fff;
@@ -132,9 +131,9 @@ export const RankingTable = styled.table`
         }
 
         /* 선수열 고정 */
-        &:nth-child(2) {
+        &:nth-of-type(2) {
           position: sticky;
-          left: 10vw; /* 순위열 너비만큼 오프셋 */
+          left: 11vw; /* 순위열 너비만큼 오프셋 */
           background: #fff;
           z-index: 25;
         }
@@ -263,7 +262,7 @@ export const SearchContainer = styled.div`
 export const SearchInput = styled.input`
   padding: 10px 15px;
   border: 1px solid #ddd;
-  border-radius: 5px;
+  // border-radius: 5px;
   font-size: 16px;
   width: 300px;
   max-width: 100%;

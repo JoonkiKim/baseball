@@ -193,7 +193,7 @@ export default function FinalGameRecordPage() {
           const idx = inning.inning - 1; // 0-based index
           if (idx >= 0 && idx < 7) {
             newA[idx] = String(inning.away ?? "");
-            newB[idx] = inning.home === null ? "-" : String(inning.home);
+            newB[idx] = String(inning.home ?? "");
           }
 
           console.log(

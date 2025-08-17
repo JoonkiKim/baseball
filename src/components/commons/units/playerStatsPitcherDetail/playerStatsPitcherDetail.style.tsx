@@ -22,15 +22,15 @@ export const TableTitle = styled.div`
   z-index: 10;
   font-size: 12px;
   font-family: "KBO-Dia-Gothic_bold";
-  margin: 0 auto 0;
+  margin: 0px auto 0px;
   margin-bottom: 10px;
-
-  padding: 0 20px;
+  width: 90%;
+  // padding: 0 20px;
 `;
 
 // 테이블을 감싸는 래퍼
 export const TableWrapper = styled.div`
-  width: 95%;
+  width: 90%;
   margin: 0px auto 0px;
   /* padding: 0 20px; */
   /* 열이 많을 경우 가로 스크롤을 보여주기 위해 추가 */
@@ -40,15 +40,15 @@ export const TableWrapper = styled.div`
   overflow-y: auto;
   max-height: calc(100vh - 280px);
 
-  ${small} {
-    padding: 0 10px;
-  }
-  ${medium} {
-    padding: 0 15px;
-  }
-  ${large}, ${xlarge} {
-    padding: 0 20px;
-  }
+  // ${small} {
+  //   padding: 0 10px;
+  // }
+  // ${medium} {
+  //   padding: 0 15px;
+  // }
+  // ${large}, ${xlarge} {
+  //   padding: 0 20px;
+  // }
 `;
 
 export const RankingTable = styled.table`
@@ -70,6 +70,22 @@ export const RankingTable = styled.table`
         text-align: center;
         border-bottom: 1px solid #000;
         border-top: 1px solid #000;
+
+        /* 순위열 고정 */
+        &:first-of-type {
+          position: sticky;
+          left: 0;
+          z-index: 30;
+          background: #fff;
+        }
+
+        /* 선수열 고정 */
+        &:nth-of-type(2) {
+          position: sticky;
+          left: 11vw; /* 순위열 너비만큼 오프셋 */
+          z-index: 31;
+          background: #fff;
+        }
 
         ${small} {
           font-size: 12px;
@@ -102,6 +118,22 @@ export const RankingTable = styled.table`
         text-align: left;
         padding: 12px;
         text-align: center;
+
+        /* 순위열 고정 */
+        &:first-of-type {
+          position: sticky;
+          left: 0;
+          background: #fff;
+          z-index: 25;
+        }
+
+        /* 선수열 고정 */
+        &:nth-of-type(2) {
+          position: sticky;
+          left: 11vw; /* 순위열 너비만큼 오프셋 */
+          background: #fff;
+          z-index: 25;
+        }
 
         ${small} {
           font-size: 12px;
