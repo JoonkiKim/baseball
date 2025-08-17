@@ -477,7 +477,7 @@ export const AvgFrame = styled.div`
   /* flex-shrink: 0; */
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
+  justify-content: space-evenly;
   align-items: flex-start;
   width: 18vw;
   height: 0.86vh; /* 7px */
