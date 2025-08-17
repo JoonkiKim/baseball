@@ -108,7 +108,7 @@ IStatPatchInputModalProps) {
         "2루타": "2B",
         "3루타": "3B",
         홈런: "HR",
-        타점: "RBI",
+        // 타점: "RBI",
         득점: "R",
         볼넷: "BB",
         삼진: "SO",
@@ -181,58 +181,99 @@ IStatPatchInputModalProps) {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: "25px 10px",
+            gridTemplateColumns: mode === "batter" ? "1fr 1fr" : "1fr",
+            gap: mode === "batter" ? "1.5rem 2rem" : "1.5rem 0",
             marginBottom: 25,
+            // backgroundColor: "red",
+            // justifyContent: "space-evenly",
           }}
         >
-          {/* 왼쪽 열: 타석~홈런 */}
-          <div>
-            {Object.entries(stat).map(([key, value]) => {
-              if (key === "id" || key === "플레이어" || key === "playerName")
-                return null;
-              if (
-                ["타석", "타수", "안타", "2루타", "3루타", "홈런"].includes(key)
-              ) {
-                return (
-                  <div
-                    key={key}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      marginBottom: 25,
-                    }}
-                  >
-                    <label
+          {/* 왼쪽 열: 타석~홈런 (타자 모드에서만) */}
+          {mode === "batter" && (
+            <div>
+              {Object.entries(stat).map(([key, value]) => {
+                if (key === "id" || key === "플레이어" || key === "playerName")
+                  return null;
+                if (
+                  ["타석", "타수", "안타", "2루타", "3루타", "홈런"].includes(
+                    key
+                  )
+                ) {
+                  return (
+                    <div
+                      key={key}
                       style={{
-                        width: "20vw",
-                        marginRight: 6,
-                        textAlign: "left",
-                        fontWeight: 600,
+                        display: "flex",
+                        alignItems: "center",
+                        marginBottom: 25,
                       }}
                     >
-                      {key}
-                    </label>
-                    <StatPatchInput
-                      type="number"
-                      value={stat[key] as string | number}
-                      onChange={(e) => handleChange(key, e.target.value)}
-                    />
-                  </div>
-                );
-              }
-              return null;
-            })}
-          </div>
+                      <label
+                        style={{
+                          width: "15vw",
+                          textAlign: "left",
+                          fontWeight: 600,
+                        }}
+                      >
+                        {key}
+                      </label>
+                      <StatPatchInput
+                        type="number"
+                        value={stat[key] as string | number}
+                        onChange={(e) => handleChange(key, e.target.value)}
+                      />
+                    </div>
+                  );
+                }
+                return null;
+              })}
+            </div>
+          )}
 
-          {/* 오른쪽 열: 타점~희번 */}
-          <div>
-            {Object.entries(stat).map(([key, value]) => {
-              if (key === "id" || key === "플레이어" || key === "playerName")
+          {/* 오른쪽 열: 타점~희번 (타자 모드에서만) */}
+          {mode === "batter" && (
+            <div>
+              {Object.entries(stat).map(([key, value]) => {
+                if (key === "id" || key === "플레이어" || key === "playerName")
+                  return null;
+                if (["득점", "볼넷", "삼진", "희플", "희번"].includes(key)) {
+                  return (
+                    <div
+                      key={key}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        marginBottom: 25,
+                      }}
+                    >
+                      <label
+                        style={{
+                          width: "15vw",
+                          textAlign: "left",
+                          fontWeight: 600,
+                        }}
+                      >
+                        {key}
+                      </label>
+                      <StatPatchInput
+                        type="number"
+                        value={stat[key] as string | number}
+                        onChange={(e) => handleChange(key, e.target.value)}
+                      />
+                    </div>
+                  );
+                }
                 return null;
-              if (
-                ["타점", "득점", "볼넷", "삼진", "희플", "희번"].includes(key)
-              ) {
+              })}
+            </div>
+          )}
+
+          {/* 투수 모드: 1줄로 표시 */}
+          {mode === "pitcher" && (
+            <div>
+              {Object.entries(stat).map(([key, value]) => {
+                if (key === "id" || key === "플레이어" || key === "playerName")
+                  return null;
                 return (
                   <div
                     key={key}
@@ -244,8 +285,7 @@ IStatPatchInputModalProps) {
                   >
                     <label
                       style={{
-                        width: "20vw",
-                        marginRight: 6,
+                        width: "15vw",
                         textAlign: "left",
                         fontWeight: 600,
                       }}
@@ -259,10 +299,9 @@ IStatPatchInputModalProps) {
                     />
                   </div>
                 );
-              }
-              return null;
-            })}
-          </div>
+              })}
+            </div>
+          )}
         </div>
 
         <ModalButton onClick={handleSubmit} disabled={isSubmitting}>

@@ -195,6 +195,14 @@ export default function FinalGameRecordPage() {
             newA[idx] = String(inning.away ?? "");
             newB[idx] = inning.home === null ? "-" : String(inning.home);
           }
+
+          console.log(
+            `이닝 ${inning.inning}: home=${
+              inning.home
+            }, home type=${typeof inning.home}, home === null: ${
+              inning.home === null
+            }`
+          );
         });
       }
 
@@ -287,7 +295,6 @@ export default function FinalGameRecordPage() {
       `2루타: ${player["2B"]}\n` +
       `3루타: ${player["3B"]}\n` +
       `홈런: ${player["HR"]}\n` +
-      `타점: ${player["RBI"]}\n` +
       `득점: ${player["R"]}\n` +
       `볼넷: ${player.BB}\n` +
       `삼진: ${player["SO"]}\n` +
@@ -380,7 +387,11 @@ export default function FinalGameRecordPage() {
               //     : () => handleScoreCellClick(score, "A", idx)
               // }
             >
-              <EditableInputScore type="number" value={score} readOnly />
+              <EditableInputScore
+                type={score === "-" ? "text" : "number"}
+                value={score}
+                readOnly
+              />
             </TeamScoreCell>
           ))}
         </TeamRow>
@@ -398,7 +409,11 @@ export default function FinalGameRecordPage() {
               //     : () => handleScoreCellClick(score, "B", idx)
               // }
             >
-              <EditableInputScore type="number" value={score} readOnly />
+              <EditableInputScore
+                type={score === "-" ? "text" : "number"}
+                value={score}
+                readOnly
+              />
             </TeamScoreCell>
           ))}
         </TeamRow>
@@ -420,7 +435,6 @@ export default function FinalGameRecordPage() {
               <th>3루타</th>
               <th>홈런</th>
               <th>득점</th>
-              <th>타점</th>
               <th>볼넷</th>
               <th>삼진</th>
               <th>희플</th>
@@ -503,16 +517,7 @@ export default function FinalGameRecordPage() {
                     }
                   />
                 </td>
-                <td>
-                  <EditableInput
-                    type="number"
-                    value={player.RBI || 0}
-                    readOnly
-                    onClick={
-                      !canRecord ? undefined : () => handleBatterClick(player)
-                    }
-                  />
-                </td>
+
                 <td>
                   <EditableInput
                     type="number"
@@ -651,7 +656,6 @@ export default function FinalGameRecordPage() {
               <th>3루타</th>
               <th>홈런</th>
               <th>득점</th>
-              <th>타점</th>
               <th>볼넷</th>
               <th>삼진</th>
               <th>희플</th>
@@ -734,16 +738,7 @@ export default function FinalGameRecordPage() {
                     }
                   />
                 </td>
-                <td>
-                  <EditableInput
-                    type="number"
-                    value={player.RBI || 0}
-                    readOnly
-                    onClick={
-                      !canRecord ? undefined : () => handleBatterClick(player)
-                    }
-                  />
-                </td>
+
                 <td>
                   <EditableInput
                     type="number"
