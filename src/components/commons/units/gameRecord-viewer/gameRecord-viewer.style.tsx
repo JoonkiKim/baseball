@@ -628,7 +628,7 @@ export const StatFrame = styled.div<{ $isWide?: boolean }>`
 
 export const StatFrame2 = styled.div<{ $isWide?: boolean }>`
   margin-top: 0.5vh;
-  width: ${(props) => (props.$isWide ? "10vw" : "8vw")};
+  width: ${(props) => (props.$isWide ? "13vw" : "8vw")};
   height: 1.5vh; /* 7px */
   /* display: flex;
   flex-direction: row; */
