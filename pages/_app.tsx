@@ -170,7 +170,7 @@ function MyApp({ Component, pageProps }) {
       </Head>
       <Global styles={pretendardStyles} />
       <RecoilRoot>
-        <TokenInitializer />
+        {/* <TokenInitializer /> */}
 
         <LoadingOverlay visible={loadingRoute}>
           <LoadingIcon spin fontSize={48} />

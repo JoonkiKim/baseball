@@ -1359,8 +1359,8 @@ export default function GameRecordPageViewer() {
                               <TodayValue>{b.today.R}</TodayValue>
                             </TodayFrame>
                             <TodayFrame>
-                              <TodayLabel>타점</TodayLabel>
-                              <TodayValue>{b.today.RBI}</TodayValue>
+                              <TodayLabel>볼넷</TodayLabel>
+                              <TodayValue>{b.today.BB}</TodayValue>
                             </TodayFrame>
                           </TodayContainer>
                         </BatterRow>

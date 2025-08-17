@@ -1627,7 +1627,6 @@ export default function StatsPageBatterDetail() {
     | "3B"
     | "HR"
     | "R"
-    | "RBI"
     | "BB"
     | "SO"
     | "OBP"
@@ -1733,9 +1732,7 @@ export default function StatsPageBatterDetail() {
               <th onClick={() => handleSortHitter("R")}>
                 득점 <ArrowIcon>{getArrow(hitterSortKey, "R")}</ArrowIcon>
               </th>
-              <th onClick={() => handleSortHitter("RBI")}>
-                타점 <ArrowIcon>{getArrow(hitterSortKey, "RBI")}</ArrowIcon>
-              </th>
+
               <th onClick={() => handleSortHitter("BB")}>
                 볼넷 <ArrowIcon>{getArrow(hitterSortKey, "BB")}</ArrowIcon>
               </th>
@@ -1787,9 +1784,7 @@ export default function StatsPageBatterDetail() {
                 <td>
                   {item.R} <ArrowIconNone> ▽ </ArrowIconNone>
                 </td>
-                <td>
-                  {item.RBI} <ArrowIconNone> ▽ </ArrowIconNone>
-                </td>
+
                 <td>
                   {item.BB} <ArrowIconNone> ▽ </ArrowIconNone>
                 </td>
