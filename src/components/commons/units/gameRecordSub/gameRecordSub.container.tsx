@@ -215,11 +215,14 @@ export default function TeamRegistrationPageComponent() {
   useEffect(() => {
     if (!router.query.recordId) return;
     if (teamTournamentId == null) return; // ← 이것 때문에 undefined로 안 나갑니다.
+    if (isHomeTeam === undefined) return;
+
     const selectedMatchStr = localStorage.getItem("selectedMatch");
     if (!selectedMatchStr) {
       console.error("selectedMatch 데이터가 없습니다.");
       return;
     }
+
     try {
       const selectedMatch = JSON.parse(selectedMatchStr);
       if (isHomeTeam) {
