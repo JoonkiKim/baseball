@@ -905,8 +905,8 @@ export default function GameRecordPageViewer() {
         PA: b.todayStats?.PA ?? 0,
         AB: b.todayStats?.AB ?? 0,
         H: b.todayStats?.H ?? 0,
+        BB: b.todayStats?.BB ?? 0,
         R: b.todayStats?.R ?? 0,
-        RBI: b.todayStats?.RBI ?? 0,
       },
     }));
   }, [sseData?.playerRecords?.batters]);
