@@ -446,7 +446,7 @@ export const PlayerName = styled.div<{ $nameLength?: number }>`
 
   font-size: ${({ $nameLength }) =>
     $nameLength && $nameLength >= 4
-      ? "0.85rem"
+      ? "0.8rem"
       : "1rem"}; /* 4글자 이상이면 14px, 아니면 16px */
   font-weight: 700;
   width: 17vw; /* 45px */
@@ -597,7 +597,7 @@ export const PitcherName = styled.div`
   font-family: "Pretendard";
   font-size: 1rem; /* 16px */
   font-weight: 700;
-  width: 15vw; /* 45px */
+  width: 17vw; /* 45px */
   height: 2.09vh; /* 17px */
   display: flex;
   align-items: center;
@@ -615,28 +615,25 @@ export const PitcherToday = styled.div`
   // background-color: red;
 `;
 
-export const StatFrame = styled.div`
+export const StatFrame = styled.div<{ $isWide?: boolean }>`
   margin-top: 0.5vh;
-  width: 10vw;
+  width: ${(props) => (props.$isWide ? "10vw" : "8vw")};
   height: 1.5vh; /* 7px */
   /* display: flex;
   flex-direction: row; */
   // background-color: red;
   /* justify-content: space-between; */
-  /* align-items: center; */
 `;
 
-export const StatFrame2 = styled.div`
+export const StatFrame2 = styled.div<{ $isWide?: boolean }>`
   margin-top: 0.5vh;
-  width: 8vw;
+  width: ${(props) => (props.$isWide ? "10vw" : "8vw")};
   height: 1.5vh; /* 7px */
   /* display: flex;
   flex-direction: row; */
   /* background-color: red; */
-  /* justify-content: space-between; */
+  // justify-content: space-evenly;
   /* align-items: center; */
-
-  /* background-color: red; */
 `;
 
 export const StatText = styled.div`
@@ -644,7 +641,7 @@ export const StatText = styled.div`
   font-family: "Pretendard";
   font-size: 0.5rem; /* 8px */
   font-weight: 600;
-  // background-color: red;
+  // background-color: aqua;
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -656,15 +653,12 @@ export const StatLabel = styled.span`
 `;
 export const StatValue = styled.span`
   color: var(--blue-1, #007aff);
-  width: 4vw;
-  // background-color: blue;
+  // width: 3vw;
+  // background-color: red;
   /* id가 ip인 요소만 다른 width 적용 */
-  &#ip {
-    width: 6vw; /* 또는 원하는 크기 */
-  }
 `;
 export const PitcherStatsGrid = styled.div`
-  /* margin-top: 0.5vh; */
+  margin-top: 0.5vh;
   display: grid;
   gap: 4vw;
   grid-template-columns: repeat(2, 1fr);
