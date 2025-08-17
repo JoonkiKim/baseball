@@ -305,49 +305,50 @@ export default function GameRecordPageViewer() {
 
   // ✅ 화면 로드시 한 번만: GET /games/{gameId}/snapshot/umpire → localStorage('snapshot') 저장 + 화면 반영
   // 나중에 지우기
-  // useEffect(() => {
-  //   if (!router.isReady || !recordId) return;
-  //   if (fetchedOnceRef.current) return;
-  //   fetchedOnceRef.current = true;
 
-  //   (async () => {
-  //     try {
-  //       const base = process.env.NEXT_PUBLIC_API_URL ?? "";
-  //       const url = `${base}/games/${recordId}/snapshot/stream`;
+  useEffect(() => {
+    if (!router.isReady || !recordId) return;
+    if (fetchedOnceRef.current) return;
+    fetchedOnceRef.current = true;
 
-  //       const res = await fetch(url, {
-  //         method: "GET",
-  //         headers: {
-  //           Authorization: `Bearer ${getAccessToken?.() || ""}`,
-  //           Accept: "application/json",
-  //         },
-  //         // credentials: "include", // 쿠키 기반이면 주석 해제
-  //       });
+    (async () => {
+      try {
+        const base = process.env.NEXT_PUBLIC_API_URL ?? "";
+        const url = `${base}/games/${recordId}/snapshot/stream`;
 
-  //       if (!res.ok) {
-  //         throw new Error(`GET snapshot/stream failed: ${res.status}`);
-  //       }
+        const res = await fetch(url, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${getAccessToken?.() || ""}`,
+            Accept: "application/json",
+          },
+          // credentials: "include", // 쿠키 기반이면 주석 해제
+        });
 
-  //       const json = await res.json();
-  //       // 응답 래핑 형태 유연 처리
-  //       const snap = json?.data ?? json;
-  //       console.log("snap", snap);
-  //       setSseData(snap);
-  //       // 1) localStorage 저장
-  //       try {
-  //         localStorage.setItem("snapshot", JSON.stringify(snap));
-  //       } catch (e) {
-  //         console.warn("localStorage(snapshot) 저장 실패:", e);
-  //       }
-  //       console.log("연결용 GET /snapshot/stream 저장완료");
-  //       // 2) 화면 상태 반영
-  //       applySnapshot(snap);
-  //     } catch (err) {
-  //       console.error("GET /snapshot/stream error:", err);
-  //       setError(err);
-  //     }
-  //   })();
-  // }, [router.isReady, recordId, applySnapshot]);
+        if (!res.ok) {
+          throw new Error(`GET snapshot/stream failed: ${res.status}`);
+        }
+
+        const json = await res.json();
+        // 응답 래핑 형태 유연 처리
+        const snap = json?.data ?? json;
+        console.log("snap", snap);
+        setSseData(snap);
+        // 1) localStorage 저장
+        try {
+          localStorage.setItem("snapshot", JSON.stringify(snap));
+        } catch (e) {
+          console.warn("localStorage(snapshot) 저장 실패:", e);
+        }
+        console.log("연결용 GET /snapshot/stream 저장완료");
+        // 2) 화면 상태 반영
+        applySnapshot(snap);
+      } catch (err) {
+        console.error("GET /snapshot/stream error:", err);
+        setError(err);
+      }
+    })();
+  }, [router.isReady, recordId, applySnapshot]);
 
   // console.log("sseData", sseData);
 
@@ -1078,16 +1079,21 @@ export default function GameRecordPageViewer() {
     setActiveBadges(activeBadgeIds);
   }, [sseData]);
 
-  const formatInnings = (ip: number): string => {
-    if (!ip || ip === 0) return "0";
+  const formatInnings = (ip: number): { display: string; width: string } => {
+    if (!ip || ip === 0) return { display: "0", width: "3vw" };
 
     const fullInnings = Math.floor(ip / 3);
     const outs = ip % 3;
 
     if (outs === 0) {
-      return fullInnings.toString();
+      // 3의 배수일 때 (예: 3, 6, 9...)
+      return { display: fullInnings.toString(), width: "3vw" };
     } else {
-      return `${fullInnings} ${outs}/3`;
+      // 3의 배수가 아닐 때 (예: 3 1/3, 6 2/3...)
+      return {
+        display: `${fullInnings} ${outs}/3`,
+        width: "9vw",
+      };
     }
   };
 
@@ -1382,15 +1388,22 @@ export default function GameRecordPageViewer() {
                 {lastPitcher?.name ?? "-"}
               </PitcherName>
               <PitcherToday>
-                <StatFrame>
+                <StatFrame $isWide={lastPitcher?.todayStats?.IP % 3 !== 0}>
                   <StatText>
                     <StatLabel>이닝</StatLabel>
                     <StatValue id="ip">
-                      {formatInnings(lastPitcher?.todayStats?.IP) ?? "-"}
+                      <span
+                        style={{
+                          width: formatInnings(lastPitcher?.todayStats?.IP)
+                            .width,
+                        }}
+                      >
+                        {formatInnings(lastPitcher?.todayStats?.IP).display}
+                      </span>
                     </StatValue>
                   </StatText>
                 </StatFrame>
-                <StatFrame2>
+                <StatFrame2 $isWide={String(lastPitcher?.ERA ?? "").length > 3}>
                   <StatText>
                     <StatLabel>ERA</StatLabel>
                     <StatValue>{lastPitcher?.ERA ?? "-"}</StatValue>
