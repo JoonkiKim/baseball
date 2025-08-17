@@ -618,7 +618,7 @@ export const PitcherToday = styled.div`
 
 export const StatFrame = styled.div<{ $isWide?: boolean }>`
   margin-top: 0.5vh;
-  width: ${(props) => (props.$isWide ? "14vw" : "8vw")};
+  width: ${(props) => (props.$isWide ? "15vw" : "8vw")};
   height: 1.5vh; /* 7px */
   /* display: flex;
   flex-direction: row; */
