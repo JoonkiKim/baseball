@@ -65,6 +65,10 @@ const schema = yup.object().shape({
       /(?=.*[A-Z])/,
       "비밀번호에는 하나 이상의 대문자를 포함해야 합니다."
     )
+    .matches(
+      /(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?])/,
+      "비밀번호에는 특수문자가 하나 이상 포함되어야 합니다."
+    )
     .required("비밀번호는 필수 입력 항목입니다."),
   confirmPassword: yup
     .string()
@@ -361,7 +365,7 @@ export default function SignUpPage() {
               <Input
                 id="password"
                 type="password"
-                placeholder="영문, 숫자가 포함된 8~20자 입력"
+                placeholder="영문, 숫자, 특수문자가 포함된 8~20자 입력"
                 {...register("password")}
                 onChange={async (e) => {
                   register("password").onChange(e);
