@@ -1393,7 +1393,7 @@ export default function GameRecordPageViewer() {
                 <StatFrame2>
                   <StatText>
                     <StatLabel>ERA</StatLabel>
-                    <StatValue>{lastPitcher?.todayStats?.ERA ?? "-"}</StatValue>
+                    <StatValue>{lastPitcher?.ERA ?? "-"}</StatValue>
                   </StatText>
                 </StatFrame2>
               </PitcherToday>
