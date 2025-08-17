@@ -1706,7 +1706,7 @@ export default function StatsPageBatterDetail() {
         <RankingTable>
           <thead>
             <tr>
-              <th style={{ width: "10vw" }}></th>
+              <th style={{ width: "11vw" }}>순위</th>
               <th style={{ width: "25vw", textAlign: "left" }}>선수</th>
               <th onClick={() => handleSortHitter("AVG")}>
                 타율 <ArrowIcon>{getArrow(hitterSortKey, "AVG")}</ArrowIcon>
