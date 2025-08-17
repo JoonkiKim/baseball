@@ -25,6 +25,7 @@ export const TableTitle = styled.div`
   margin: 0px auto 0px;
   margin-bottom: 10px;
   width: 90%;
+  text-align: left; // 텍스트를 왼쪽 정렬
   // padding: 0 20px;
 `;
 
@@ -253,10 +254,11 @@ export const MoreButton = styled.button`
 export const SearchContainer = styled.div`
   margin-bottom: 20px;
   display: flex;
+  flex-direction: row;
   width: 90%;
-
+  margin-left: auto; // 중앙 정렬
+  margin-right: auto; // 중앙 정렬
   justify-content: flex-start;
-  // margin-left: 10px;
 `;
 
 export const SearchInput = styled.input`
