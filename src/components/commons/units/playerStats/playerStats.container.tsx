@@ -299,9 +299,11 @@ export default function StatsPage() {
             <tr>
               <th>순위</th>
               <th style={{ width: "25vw", textAlign: "left" }}>선수</th>
+              <th onClick={() => handleSortPitcher("K")}>
+                삼진 <ArrowIcon>{getArrow(pitcherSortKey, "K")}</ArrowIcon>
+              </th>
               <th onClick={() => handleSortPitcher("ERA")}>
-                평균자책{" "}
-                <ArrowIcon>{getArrow(pitcherSortKey, "ERA")}</ArrowIcon>
+                ERA <ArrowIcon>{getArrow(pitcherSortKey, "ERA")}</ArrowIcon>
               </th>
               <th onClick={() => handleSortPitcher("IP")}>
                 이닝 <ArrowIcon>{getArrow(pitcherSortKey, "IP")}</ArrowIcon>
@@ -312,9 +314,7 @@ export default function StatsPage() {
               <th onClick={() => handleSortPitcher("ER")}>
                 자책 <ArrowIcon>{getArrow(pitcherSortKey, "ER")}</ArrowIcon>
               </th>
-              <th onClick={() => handleSortPitcher("K")}>
-                삼진 <ArrowIcon>{getArrow(pitcherSortKey, "K")}</ArrowIcon>
-              </th>
+
               <th onClick={() => handleSortPitcher("BB")}>
                 사사구 <ArrowIcon>{getArrow(pitcherSortKey, "BB")}</ArrowIcon>
               </th>
@@ -344,6 +344,10 @@ export default function StatsPage() {
                       {item.name} ({item.team?.slice(0, 3) || "N/A"})
                     </td>
                     <td>
+                      {item.K}
+                      <ArrowIconNone> ▽ </ArrowIconNone>
+                    </td>
+                    <td>
                       {item.ERA}
                       <ArrowIconNone> ▽ </ArrowIconNone>
                     </td>
@@ -359,10 +363,7 @@ export default function StatsPage() {
                       {item.ER}
                       <ArrowIconNone> ▽ </ArrowIconNone>
                     </td>
-                    <td>
-                      {item.K}
-                      <ArrowIconNone> ▽ </ArrowIconNone>
-                    </td>
+
                     <td>
                       {item.BB}
                       <ArrowIconNone> ▽ </ArrowIconNone>

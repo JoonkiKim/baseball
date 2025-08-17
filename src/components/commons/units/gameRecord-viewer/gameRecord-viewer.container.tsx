@@ -1382,7 +1382,7 @@ export default function GameRecordPageViewer() {
                 {lastPitcher?.name ?? "-"}
               </PitcherName>
               <PitcherToday>
-                <StatFrame>
+                <StatFrame $isWide={lastPitcher?.todayStats?.IP % 3 !== 0}>
                   <StatText>
                     <StatLabel>이닝</StatLabel>
                     <StatValue id="ip">
