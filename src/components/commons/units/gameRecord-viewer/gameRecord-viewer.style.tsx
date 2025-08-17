@@ -280,7 +280,7 @@ export const PlayersRow = styled.div`
   justify-content: center;
   align-items: center;
   padding: 2vh;
-  margin-bottom: 10vh;
+  margin-bottom: 12vh;
 `;
 
 export const BatterPlayerBox = styled.div<{ $compact?: boolean }>`
