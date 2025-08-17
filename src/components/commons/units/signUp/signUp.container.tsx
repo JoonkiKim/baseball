@@ -365,7 +365,7 @@ export default function SignUpPage() {
               <Input
                 id="password"
                 type="password"
-                placeholder="영문, 숫자, 특수문자가 포함된 8~20자 입력"
+                placeholder="영문 대소문자, 숫자, 특수문자가 포함된 8~20자 입력"
                 {...register("password")}
                 onChange={async (e) => {
                   register("password").onChange(e);

@@ -122,7 +122,7 @@ export const Input = styled.input<{ $completed?: boolean }>`
   }
   &::placeholder {
     color: rgba(0, 0, 0, 0.3);
-    font-size: 0.875rem; /* 14px → 0.875rem */
+    font-size: 0.7rem; /* 14px → 0.875rem */
   }
 
   &[id="verificationCode"]:disabled {
