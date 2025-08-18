@@ -251,17 +251,17 @@ export default function FinalGameRecordPage() {
   }, [fetchResults]);
 
   // Manual DOM fallback if needed
-  useLayoutEffect(() => {
-    const entry = lastEntryRef.current;
-    const root = scoreboardRef.current;
-    if (!entry || entry.inningHalf !== "TOP" || !root) return;
-    const rows = root.querySelectorAll<HTMLElement>(".team-row");
-    const idx = entry.inning - 1;
-    if (rows.length > 1) {
-      const botCells = rows[1].querySelectorAll<HTMLElement>(".score-cell");
-      if (botCells[idx]) botCells[idx].textContent = "-";
-    }
-  }, [teamAScores, teamBScores]);
+  // useLayoutEffect(() => {
+  //   const entry = lastEntryRef.current;
+  //   const root = scoreboardRef.current;
+  //   if (!entry || entry.inningHalf !== "TOP" || !root) return;
+  //   const rows = root.querySelectorAll<HTMLElement>(".team-row");
+  //   const idx = entry.inning - 1;
+  //   if (rows.length > 1) {
+  //     const botCells = rows[1].querySelectorAll<HTMLElement>(".score-cell");
+  //     if (botCells[idx]) botCells[idx].textContent = "-";
+  //   }
+  // }, [teamAScores, teamBScores]);
 
   // 제출 버튼
   const handleSubmitClick = () => {
