@@ -214,7 +214,7 @@ export default function TeamRegistrationPageComponent() {
   // localStorage에서 selectedMatch 읽고 팀 선수 목록(API) 호출
   useEffect(() => {
     if (!router.query.recordId) return;
-    if (teamTournamentId == null) return; // ← 이것 때문에 undefined로 안 나갑니다.
+    if (teamTournamentId === null) return; // ← 이것 때문에 undefined로 안 나갑니다.
     if (isHomeTeam === undefined) return;
 
     const selectedMatchStr = localStorage.getItem("selectedMatch");
@@ -296,7 +296,8 @@ export default function TeamRegistrationPageComponent() {
     const fetchTeamPlayers = async () => {
       const queryValue = router.query.isHomeTeam;
       if (!router.query.recordId) return;
-      if (teamTournamentId == null) return; // ← 이것 때문에 undefined로 안 나갑니다.
+      if (teamTournamentId === null) return; // ← 이것 때문에 undefined로 안 나갑니다.
+      if (isHomeTeam === undefined) return;
       const teamType = router.query.isHomeTeam === "true" ? "home" : "away";
       // const homeTeamId = snapshotData.snapshot.gameSummary.homeTeam.id;
       try {
