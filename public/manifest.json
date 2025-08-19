@@ -1,7 +1,7 @@
 {
-  "name": "SNUBaseballTracker",
-  "short_name": "SNUTRK",
-  "description": "SNU 야구대회 기록을 위한 앱",
+  "name": "SNUbaseball",
+  "short_name": "SNU BB",
+  "description": "서울대학교 야구 동아리 통합 플랫폼",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
