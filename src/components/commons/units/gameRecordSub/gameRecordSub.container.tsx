@@ -224,7 +224,9 @@ export default function TeamRegistrationPageComponent() {
     }
 
     try {
-      const selectedMatch = JSON.parse(selectedMatchStr);
+      const parsed = JSON.parse(selectedMatchStr);
+      // 배열인 경우 첫 번째 요소 사용, 객체인 경우 그대로 사용
+      const selectedMatch = Array.isArray(parsed) ? parsed[0] : parsed;
       if (isHomeTeam) {
         // const homeTeamId = snapshotData.snapshot.gameSummary.homeTeam.id;
 
@@ -289,7 +291,7 @@ export default function TeamRegistrationPageComponent() {
       console.error(error, "errorCode:", errorCode);
       console.error("로컬스토리지 파싱 에러:", error);
     }
-  }, [isHomeTeam, teamTournamentId]);
+  }, [isHomeTeam, teamTournamentId, router.query.recordId]);
 
   // 라인업 API 호출 & recoil 업데이트
   useEffect(() => {
@@ -409,7 +411,7 @@ export default function TeamRegistrationPageComponent() {
       }
     };
     fetchTeamPlayers();
-  }, [router, teamTournamentId]);
+  }, [router, teamTournamentId, isHomeTeam]);
 
   useEffect(() => {
     console.log("Updated homeTeamPlayers:", homeTeamPlayers);
