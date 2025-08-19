@@ -167,7 +167,7 @@ function MyApp({ Component, pageProps }) {
           content="서울대학교 야구 동아리 통합 플랫폼입니다. 실시간 경기 중계, 일정, 선수 정보, 랭킹을 확인하세요."
         />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="/icons/app-logo.png" />
+        <link rel="icon" href="/icons/app-logo-round.png" />
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#000000" />
         {/* Open Graph 태그 - 전역 설정 */}
