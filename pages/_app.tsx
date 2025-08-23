@@ -142,27 +142,31 @@ function MyApp({ Component, pageProps }) {
     };
   }, []);
 
-  // ✅ GA4: 수동 page_view 전송 (초기 1회 + 라우트 전환마다)
+  // ✅ GA4: page_path(실제 URL) + screen_name(그룹 차원) 동시 전송
   useEffect(() => {
-    const handleRouteChange = (url) => {
+    const trackPageView = () => {
+      const pagePath = router.asPath; // 예: /games/123?tab=box
+      const routePattern = router.pathname; // 예: /games/[id]  ← 그룹 차원
+
       // @ts-ignore
       window.gtag?.("event", "page_view", {
-        page_path: url,
+        page_path: pagePath,
         page_title: document.title,
         page_location: window.location.href,
+        screen_name: routePattern, // ← GA4 맞춤 차원으로 등록해서 사용
       });
     };
-    // 최초 진입 1회
-    handleRouteChange(router.asPath);
-    // 이후 라우트 변경
-    router.events.on("routeChangeComplete", handleRouteChange);
-    return () => router.events.off("routeChangeComplete", handleRouteChange);
-    // router.asPath를 deps에 넣어 초기 1회 보장
-  }, [router.events, router.asPath]);
+
+    // 최초 1회
+    trackPageView();
+    // 라우트 변경마다
+    router.events.on("routeChangeComplete", trackPageView);
+    return () => router.events.off("routeChangeComplete", trackPageView);
+  }, [router.events, router.asPath, router.pathname]);
 
   return (
     <>
-      {/* ✅ GA 스크립트는 afterInteractive로 로드, 자동 page_view는 끄기 */}
+      {/* GA 스크립트 로드 + 자동 page_view 비활성화 */}
       {GA_ID && (
         <>
           <Script
