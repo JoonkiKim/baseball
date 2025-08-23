@@ -22,7 +22,13 @@ export default function Document() {
       <Head>
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#000000" />
-
+        {/* ✅ GA 네트워크 최적화 */}
+        <link rel="preconnect" href="https://www.googletagmanager.com" />
+        <link
+          rel="preconnect"
+          href="https://www.google-analytics.com"
+          crossOrigin=""
+        />
         <link
           rel="prefetch"
           as="image"
@@ -38,22 +44,6 @@ export default function Document() {
         />
         <link rel="prefetch" as="image" href="/images/diamond.png" />
         <link rel="prefetch" as="image" href="/images/reset.png" />
-
-        {/* Google tag (gtag.js) */}
-        <script
-          async
-          src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID}`}
-        ></script>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-              gtag('config', '${process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID}');
-            `,
-          }}
-        />
       </Head>
       <body>
         <Main />

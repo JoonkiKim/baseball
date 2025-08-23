@@ -1,4 +1,4 @@
-// _app.tsx
+// pages/_app.tsx
 import { Global, css } from "@emotion/react";
 import { RecoilRoot } from "recoil";
 import Layout from "../src/components/commons/layout";
@@ -6,6 +6,7 @@ import "../styles/globals.css";
 import Head from "next/head";
 import { Router, useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import Script from "next/script"; // ✅ 추가
 
 import TokenInitializer from "../src/commons/libraries/TokenInitializer";
 import {
@@ -13,23 +14,25 @@ import {
   LoadingOverlay,
 } from "../src/commons/libraries/loadingOverlay";
 import AuthGate from "../src/commons/hooks/authGate";
+
+const GA_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID ?? "";
+
 function MyApp({ Component, pageProps }) {
   const router = useRouter();
   const isResultPage = router.pathname === "/result";
-  // console.log("분기 합침 테스트");
 
   /* --------- Service Worker 등록 --------- */
   useEffect(() => {
     if ("serviceWorker" in navigator) {
       const onLoad = () =>
-        navigator.serviceWorker.register("/sw.js").catch(console.error); // 등록 실패 시 콘솔 확인
+        navigator.serviceWorker.register("/sw.js").catch(console.error);
       window.addEventListener("load", onLoad);
       return () => window.removeEventListener("load", onLoad);
     }
   }, []);
-
   /* ---------------------------------------- */
 
+  // viewport height CSS 변수 세팅
   useEffect(() => {
     function setRealVh() {
       const h = window.visualViewport
@@ -37,9 +40,7 @@ function MyApp({ Component, pageProps }) {
         : window.innerHeight;
       document.documentElement.style.setProperty("--vh", `${h * 0.01}px`);
     }
-
-    setRealVh(); // 초기 1회
-
+    setRealVh();
     const vv = window.visualViewport;
     if (vv) {
       vv.addEventListener("resize", setRealVh);
@@ -53,8 +54,9 @@ function MyApp({ Component, pageProps }) {
       return () => window.removeEventListener("resize", setRealVh);
     }
   }, []);
+
   const pretendardStyles = css`
-    /* Thin (100) */
+    /* 폰트 선언들 생략 없이 그대로 유지 */
     @font-face {
       font-family: "Pretendard";
       src: url("/fonts/Pretendard-Thin.otf") format("opentype");
@@ -62,8 +64,6 @@ function MyApp({ Component, pageProps }) {
       font-style: normal;
       font-display: swap;
     }
-
-    /* ExtraLight (200) */
     @font-face {
       font-family: "Pretendard";
       src: url("/fonts/Pretendard-ExtraLight.otf") format("opentype");
@@ -71,8 +71,6 @@ function MyApp({ Component, pageProps }) {
       font-style: normal;
       font-display: swap;
     }
-
-    /* Light (300) */
     @font-face {
       font-family: "Pretendard";
       src: url("/fonts/Pretendard-Light.otf") format("opentype");
@@ -80,8 +78,6 @@ function MyApp({ Component, pageProps }) {
       font-style: normal;
       font-display: swap;
     }
-
-    /* Regular (400) */
     @font-face {
       font-family: "Pretendard";
       src: url("/fonts/Pretendard-Regular.otf") format("opentype");
@@ -89,8 +85,6 @@ function MyApp({ Component, pageProps }) {
       font-style: normal;
       font-display: swap;
     }
-
-    /* Medium (500) */
     @font-face {
       font-family: "Pretendard";
       src: url("/fonts/Pretendard-Medium.otf") format("opentype");
@@ -98,8 +92,6 @@ function MyApp({ Component, pageProps }) {
       font-style: normal;
       font-display: swap;
     }
-
-    /* SemiBold (600) */
     @font-face {
       font-family: "Pretendard";
       src: url("/fonts/Pretendard-SemiBold.otf") format("opentype");
@@ -107,8 +99,6 @@ function MyApp({ Component, pageProps }) {
       font-style: normal;
       font-display: swap;
     }
-
-    /* Bold (700) */
     @font-face {
       font-family: "Pretendard";
       src: url("/fonts/Pretendard-Bold.otf") format("opentype");
@@ -116,8 +106,6 @@ function MyApp({ Component, pageProps }) {
       font-style: normal;
       font-display: swap;
     }
-
-    /* ExtraBold (800) */
     @font-face {
       font-family: "Pretendard";
       src: url("/fonts/Pretendard-ExtraBold.otf") format("opentype");
@@ -125,8 +113,6 @@ function MyApp({ Component, pageProps }) {
       font-style: normal;
       font-display: swap;
     }
-
-    /* Black (900) */
     @font-face {
       font-family: "Pretendard";
       src: url("/fonts/Pretendard-Black.otf") format("opentype");
@@ -134,8 +120,6 @@ function MyApp({ Component, pageProps }) {
       font-style: normal;
       font-display: swap;
     }
-
-    /* 전역 기본 폰트 지정 */
     html,
     body,
     #__next {
@@ -143,8 +127,8 @@ function MyApp({ Component, pageProps }) {
     }
   `;
 
+  // 라우팅 로딩 오버레이
   const [loadingRoute, setLoadingRoute] = useState(false);
-
   useEffect(() => {
     const handleStart = () => setLoadingRoute(true);
     const handleComplete = () => setLoadingRoute(false);
@@ -158,8 +142,45 @@ function MyApp({ Component, pageProps }) {
     };
   }, []);
 
+  // ✅ GA4: 수동 page_view 전송 (초기 1회 + 라우트 전환마다)
+  useEffect(() => {
+    const handleRouteChange = (url) => {
+      // @ts-ignore
+      window.gtag?.("event", "page_view", {
+        page_path: url,
+        page_title: document.title,
+        page_location: window.location.href,
+      });
+    };
+    // 최초 진입 1회
+    handleRouteChange(router.asPath);
+    // 이후 라우트 변경
+    router.events.on("routeChangeComplete", handleRouteChange);
+    return () => router.events.off("routeChangeComplete", handleRouteChange);
+    // router.asPath를 deps에 넣어 초기 1회 보장
+  }, [router.events, router.asPath]);
+
   return (
     <>
+      {/* ✅ GA 스크립트는 afterInteractive로 로드, 자동 page_view는 끄기 */}
+      {GA_ID && (
+        <>
+          <Script
+            id="ga-src"
+            src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
+            strategy="afterInteractive"
+          />
+          <Script id="ga-init" strategy="afterInteractive">
+            {`
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', '${GA_ID}', { send_page_view: false });
+            `}
+          </Script>
+        </>
+      )}
+
       <Head>
         <title>SNU Baseball</title>
         <meta
@@ -170,7 +191,7 @@ function MyApp({ Component, pageProps }) {
         <link rel="icon" href="/icons/app-logo-round.png" />
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#000000" />
-        {/* Open Graph 태그 - 전역 설정 */}
+        {/* Open Graph */}
         <meta property="og:title" content="SNU baseball" />
         <meta
           property="og:description"
@@ -185,6 +206,7 @@ function MyApp({ Component, pageProps }) {
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
       </Head>
+
       <Global styles={pretendardStyles} />
       <RecoilRoot>
         <TokenInitializer />
@@ -194,7 +216,6 @@ function MyApp({ Component, pageProps }) {
         </LoadingOverlay>
 
         <Layout>
-          {/* 페이지 컴포넌트에도 필요하다면 mobileOnly 전달 */}
           <Component {...pageProps} />
         </Layout>
       </RecoilRoot>
