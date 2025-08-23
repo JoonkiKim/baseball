@@ -206,6 +206,11 @@ export default function SignUpPage() {
   console.log(verificationToken);
   // 폼 제출 핸들러
   const onSubmit: SubmitHandler<SignUpFormData> = async (data) => {
+    // 인증 토큰 확인
+    if (!verificationToken) {
+      setAlertInfo({ message: "이메일 인증을 완료해주세요." });
+      return;
+    }
     console.log("🔥 onSubmit 시작", data);
     if (isSubmitting) return;
     setIsSubmitting(true);
