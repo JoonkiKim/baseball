@@ -211,207 +211,276 @@ export default function TeamRegistrationPageComponent() {
     );
   }, [router.isReady, router.query.isHomeTeam, isHomeTeam]); // isHomeTeam 의존성 추가
 
-  // localStorage에서 selectedMatch 읽고 팀 선수 목록(API) 호출
+  // // localStorage에서 selectedMatch 읽고 팀 선수 목록(API) 호출
+  // useEffect(() => {
+  //   if (!router.query.recordId) return;
+  //   if (teamTournamentId === null) return; // ← 이것 때문에 undefined로 안 나갑니다.
+  //   if (isHomeTeam === undefined) return;
+
+  //   const selectedMatchStr = localStorage.getItem("selectedMatch");
+  //   if (!selectedMatchStr) {
+  //     console.error("selectedMatch 데이터가 없습니다.");
+  //     return;
+  //   }
+
+  //   try {
+  //     const parsed = JSON.parse(selectedMatchStr);
+  //     // 배열인 경우 첫 번째 요소 사용, 객체인 경우 그대로 사용
+  //     const selectedMatch = Array.isArray(parsed) ? parsed[0] : parsed;
+  //     if (isHomeTeam) {
+  //       // const homeTeamId = snapshotData.snapshot.gameSummary.homeTeam.id;
+
+  //       const homeTeamId = selectedMatch.homeTeam.id;
+  //       // setTeamTournamentId(homeTeamId);
+  //       console.log(homeTeamId);
+  //       if (homeTeamId) {
+  //         API.get(
+  //           // `/games/${router.query.recordId}/players?teamType=home`,
+  //           `/games/${router.query.recordId}/teams/${homeTeamId}/lineup`,
+
+  //           {
+  //             // withCredentials: true,
+  //           }
+  //         )
+  //           .then((res) => {
+  //             const parsedData =
+  //               typeof res.data === "string" ? JSON.parse(res.data) : res.data;
+  //             // setTeamPlayersData(parsedData.players);
+
+  //             setTeamPlayersData(parsedData);
+  //             console.log("HomeTeam Players (team API):", parsedData);
+  //           })
+  //           .catch((error) => {
+  //             setError(error);
+  //             const errorCode = error?.response?.data?.errorCode; // 에러코드 추출
+  //             console.error(error, "errorCode:", errorCode);
+  //             console.error("Error fetching homeTeam players:", error);
+  //           });
+  //       }
+  //     } else {
+  //       // const awayTeamId = snapshotData.snapshot.gameSummary.awayTeam.id;
+  //       const awayTeamId = selectedMatch.awayTeam.id;
+  //       // setTeamTournamentId(awayTeamId);
+  //       if (awayTeamId) {
+  //         API.get(
+  //           // `/games/${router.query.recordId}/players?teamType=away`,
+  //           `/games/${router.query.recordId}/teams/${awayTeamId}/lineup`,
+
+  //           {
+  //             // withCredentials: true,
+  //           }
+  //         )
+  //           .then((res) => {
+  //             const parsedData =
+  //               typeof res.data === "string" ? JSON.parse(res.data) : res.data;
+  //             // setTeamPlayersData(parsedData.players);
+  //             setTeamPlayersData(parsedData);
+  //             console.log("AwayTeam Players (team API):", parsedData);
+  //           })
+  //           .catch((error) => {
+  //             setError(error);
+  //             const errorCode = error?.response?.data?.errorCode; // 에러코드 추출
+  //             console.error(error, "errorCode:", errorCode);
+  //             console.error("Error fetching awayTeam players:", error);
+  //           });
+  //       }
+  //     }
+  //   } catch (error) {
+  //     setError(error);
+  //     const errorCode = error?.response?.data?.errorCode; // 에러코드 추출
+  //     console.error(error, "errorCode:", errorCode);
+  //     console.error("로컬스토리지 파싱 에러:", error);
+  //   }
+  // }, [isHomeTeam, teamTournamentId, router.query.recordId]);
+
+  // // 라인업 API 호출 & recoil 업데이트
+  // useEffect(() => {
+  //   const fetchTeamPlayers = async () => {
+  //     const queryValue = router.query.isHomeTeam;
+  //     if (!router.query.recordId) return;
+  //     if (teamTournamentId === null) return; // ← 이것 때문에 undefined로 안 나갑니다.
+  //     if (isHomeTeam === undefined) return;
+  //     const teamType = router.query.isHomeTeam === "true" ? "home" : "away";
+  //     // const homeTeamId = snapshotData.snapshot.gameSummary.homeTeam.id;
+  //     try {
+  //       if (queryValue === "true") {
+  //         // 홈팀
+  //         const res = await API.get(
+  //           // `/games/${router.query.recordId}/lineup?teamType=home`
+  //           `/games/${router.query.recordId}/teams/${teamTournamentId}/lineup`
+  //           // { withCredentials: true }
+  //         );
+  //         const dataObj =
+  //           typeof res.data === "string" ? JSON.parse(res.data) : res.data;
+  //         console.log("홈팀 응답 (lineup API):", dataObj);
+  //         // ★ 이 부분을 추가 ★
+  //         const minimalLineup = {
+  //           batters: dataObj.batters.map(({ battingOrder, id, name }: any) => ({
+  //             battingOrder,
+  //             id,
+  //             name,
+  //           })),
+  //           // 만약 투수 정보도 저장하고 싶으면 아래 주석 해제
+  //           pitcher: {
+  //             id: dataObj.pitcher.id,
+  //             name: dataObj.pitcher.name,
+  //           },
+  //         };
+  //         localStorage.setItem(
+  //           `lineup_${teamType}`,
+  //           JSON.stringify(minimalLineup)
+  //         );
+  //         // API의 pitcher row 값을 그대로 사용
+  //         let lineupPlayers = [
+  //           ...dataObj.batters.map((batter: any) => ({
+  //             battingOrder: batter.battingOrder,
+  //             name: batter.name,
+  //             position: batter.position,
+  //             id: batter.id,
+  //             selectedViaModal: false,
+  //             isWc: batter.isWc ?? false,
+  //           })),
+  //           {
+  //             battingOrder: "P",
+  //             name: dataObj.pitcher.name,
+  //             position: "P",
+  //             id: dataObj.pitcher.id,
+  //             selectedViaModal: false,
+  //             isWc: dataObj.pitcher.isWc ?? false,
+  //           },
+  //         ];
+  //         // 기존에는 DH가 없으면 P행을 초기화했지만, 이제 API의 pitcher 값을 그대로 유지합니다.
+  //         setHomeTeamPlayers(lineupPlayers);
+  //         setLineupPlayersData(lineupPlayers);
+  //       } else {
+  //         // 원정팀
+  //         // const awayTeamId = snapshotData.snapshot.gameSummary.awayTeam.id;
+  //         const res = await API.get(
+  //           // `/games/${router.query.recordId}/lineup?teamType=away`
+  //           `/games/${router.query.recordId}/teams/${teamTournamentId}/lineup`
+  //           // { withCredentials: true }
+  //         );
+
+  //         const dataObj =
+  //           typeof res.data === "string" ? JSON.parse(res.data) : res.data;
+  //         console.log("원정팀 응답 (lineup API):", dataObj);
+  //         const minimalLineup = {
+  //           batters: dataObj.batters.map(({ battingOrder, id, name }: any) => ({
+  //             battingOrder,
+  //             id,
+  //             name,
+  //           })),
+  //           // 만약 투수 정보도 저장하고 싶으면 아래 주석 해제
+  //           pitcher: {
+  //             id: dataObj.pitcher.id,
+  //             name: dataObj.pitcher.name,
+  //           },
+  //         };
+  //         localStorage.setItem(
+  //           `lineup_${teamType}`,
+  //           JSON.stringify(minimalLineup)
+  //         );
+  //         let lineupPlayers = [
+  //           ...dataObj.batters.map((batter: any) => ({
+  //             battingOrder: batter.battingOrder,
+  //             name: batter.name,
+  //             position: batter.position,
+  //             id: batter.id,
+  //             selectedViaModal: false,
+  //             isWc: batter.isWc ?? false,
+  //           })),
+  //           {
+  //             battingOrder: "P",
+  //             name: dataObj.pitcher.name,
+  //             position: "P",
+  //             id: dataObj.pitcher.id,
+  //             selectedViaModal: false,
+  //             isWc: dataObj.pitcher.isWc ?? false,
+  //           },
+  //         ];
+  //         // 원정팀도 DH 여부 상관없이 API의 pitcher 값을 그대로 사용합니다.
+  //         setAwayTeamPlayers(lineupPlayers);
+  //         setLineupPlayersData(lineupPlayers);
+  //         console.log("awayTeamPlayers", awayTeamPlayers);
+  //       }
+  //     } catch (err) {
+  //       setError(err);
+  //       const errorCode = err?.response?.data?.errorCode; // 에러코드 추출
+  //       console.error(err, "errorCode:", errorCode);
+  //       console.error("팀 선수 목록 요청 에러:", err);
+  //     }
+  //   };
+  //   fetchTeamPlayers();
+  // }, [router, teamTournamentId, isHomeTeam]);
+
   useEffect(() => {
     if (!router.query.recordId) return;
-    if (teamTournamentId === null) return; // ← 이것 때문에 undefined로 안 나갑니다.
+    if (teamTournamentId === null) return;
     if (isHomeTeam === undefined) return;
 
-    const selectedMatchStr = localStorage.getItem("selectedMatch");
-    if (!selectedMatchStr) {
-      console.error("selectedMatch 데이터가 없습니다.");
-      return;
-    }
-
-    try {
-      const parsed = JSON.parse(selectedMatchStr);
-      // 배열인 경우 첫 번째 요소 사용, 객체인 경우 그대로 사용
-      const selectedMatch = Array.isArray(parsed) ? parsed[0] : parsed;
-      if (isHomeTeam) {
-        // const homeTeamId = snapshotData.snapshot.gameSummary.homeTeam.id;
-
-        const homeTeamId = selectedMatch.homeTeam.id;
-        // setTeamTournamentId(homeTeamId);
-        console.log(homeTeamId);
-        if (homeTeamId) {
-          API.get(
-            // `/games/${router.query.recordId}/players?teamType=home`,
-            `/games/${router.query.recordId}/teams/${homeTeamId}/lineup`,
-
-            {
-              // withCredentials: true,
-            }
-          )
-            .then((res) => {
-              const parsedData =
-                typeof res.data === "string" ? JSON.parse(res.data) : res.data;
-              // setTeamPlayersData(parsedData.players);
-
-              setTeamPlayersData(parsedData);
-              console.log("HomeTeam Players (team API):", parsedData);
-            })
-            .catch((error) => {
-              setError(error);
-              const errorCode = error?.response?.data?.errorCode; // 에러코드 추출
-              console.error(error, "errorCode:", errorCode);
-              console.error("Error fetching homeTeam players:", error);
-            });
-        }
-      } else {
-        // const awayTeamId = snapshotData.snapshot.gameSummary.awayTeam.id;
-        const awayTeamId = selectedMatch.awayTeam.id;
-        // setTeamTournamentId(awayTeamId);
-        if (awayTeamId) {
-          API.get(
-            // `/games/${router.query.recordId}/players?teamType=away`,
-            `/games/${router.query.recordId}/teams/${awayTeamId}/lineup`,
-
-            {
-              // withCredentials: true,
-            }
-          )
-            .then((res) => {
-              const parsedData =
-                typeof res.data === "string" ? JSON.parse(res.data) : res.data;
-              // setTeamPlayersData(parsedData.players);
-              setTeamPlayersData(parsedData);
-              console.log("AwayTeam Players (team API):", parsedData);
-            })
-            .catch((error) => {
-              setError(error);
-              const errorCode = error?.response?.data?.errorCode; // 에러코드 추출
-              console.error(error, "errorCode:", errorCode);
-              console.error("Error fetching awayTeam players:", error);
-            });
-        }
-      }
-    } catch (error) {
-      setError(error);
-      const errorCode = error?.response?.data?.errorCode; // 에러코드 추출
-      console.error(error, "errorCode:", errorCode);
-      console.error("로컬스토리지 파싱 에러:", error);
-    }
-  }, [isHomeTeam, teamTournamentId, router.query.recordId]);
-
-  // 라인업 API 호출 & recoil 업데이트
-  useEffect(() => {
     const fetchTeamPlayers = async () => {
-      const queryValue = router.query.isHomeTeam;
-      if (!router.query.recordId) return;
-      if (teamTournamentId === null) return; // ← 이것 때문에 undefined로 안 나갑니다.
-      if (isHomeTeam === undefined) return;
-      const teamType = router.query.isHomeTeam === "true" ? "home" : "away";
-      // const homeTeamId = snapshotData.snapshot.gameSummary.homeTeam.id;
       try {
-        if (queryValue === "true") {
-          // 홈팀
-          const res = await API.get(
-            // `/games/${router.query.recordId}/lineup?teamType=home`
-            `/games/${router.query.recordId}/teams/${teamTournamentId}/lineup`
-            // { withCredentials: true }
-          );
-          const dataObj =
-            typeof res.data === "string" ? JSON.parse(res.data) : res.data;
-          console.log("홈팀 응답 (lineup API):", dataObj);
-          // ★ 이 부분을 추가 ★
-          const minimalLineup = {
-            batters: dataObj.batters.map(({ battingOrder, id, name }: any) => ({
-              battingOrder,
-              id,
-              name,
-            })),
-            // 만약 투수 정보도 저장하고 싶으면 아래 주석 해제
-            pitcher: {
-              id: dataObj.pitcher.id,
-              name: dataObj.pitcher.name,
-            },
-          };
-          localStorage.setItem(
-            `lineup_${teamType}`,
-            JSON.stringify(minimalLineup)
-          );
-          // API의 pitcher row 값을 그대로 사용
-          let lineupPlayers = [
-            ...dataObj.batters.map((batter: any) => ({
-              battingOrder: batter.battingOrder,
-              name: batter.name,
-              position: batter.position,
-              id: batter.id,
-              selectedViaModal: false,
-              isWc: batter.isWc ?? false,
-            })),
-            {
-              battingOrder: "P",
-              name: dataObj.pitcher.name,
-              position: "P",
-              id: dataObj.pitcher.id,
-              selectedViaModal: false,
-              isWc: dataObj.pitcher.isWc ?? false,
-            },
-          ];
-          // 기존에는 DH가 없으면 P행을 초기화했지만, 이제 API의 pitcher 값을 그대로 유지합니다.
-          setHomeTeamPlayers(lineupPlayers);
-          setLineupPlayersData(lineupPlayers);
-        } else {
-          // 원정팀
-          // const awayTeamId = snapshotData.snapshot.gameSummary.awayTeam.id;
-          const res = await API.get(
-            // `/games/${router.query.recordId}/lineup?teamType=away`
-            `/games/${router.query.recordId}/teams/${teamTournamentId}/lineup`
-            // { withCredentials: true }
-          );
+        const res = await API.get(
+          `/games/${router.query.recordId}/teams/${teamTournamentId}/lineup`
+        );
 
-          const dataObj =
-            typeof res.data === "string" ? JSON.parse(res.data) : res.data;
-          console.log("원정팀 응답 (lineup API):", dataObj);
-          const minimalLineup = {
-            batters: dataObj.batters.map(({ battingOrder, id, name }: any) => ({
-              battingOrder,
-              id,
-              name,
-            })),
-            // 만약 투수 정보도 저장하고 싶으면 아래 주석 해제
-            pitcher: {
-              id: dataObj.pitcher.id,
-              name: dataObj.pitcher.name,
-            },
-          };
-          localStorage.setItem(
-            `lineup_${teamType}`,
-            JSON.stringify(minimalLineup)
-          );
-          let lineupPlayers = [
-            ...dataObj.batters.map((batter: any) => ({
-              battingOrder: batter.battingOrder,
-              name: batter.name,
-              position: batter.position,
-              id: batter.id,
-              selectedViaModal: false,
-              isWc: batter.isWc ?? false,
-            })),
-            {
-              battingOrder: "P",
-              name: dataObj.pitcher.name,
-              position: "P",
-              id: dataObj.pitcher.id,
-              selectedViaModal: false,
-              isWc: dataObj.pitcher.isWc ?? false,
-            },
-          ];
-          // 원정팀도 DH 여부 상관없이 API의 pitcher 값을 그대로 사용합니다.
+        const dataObj =
+          typeof res.data === "string" ? JSON.parse(res.data) : res.data;
+
+        // 데이터 처리 및 상태 업데이트
+        const lineupPlayers = [
+          ...dataObj.batters.map((batter: any) => ({
+            battingOrder: batter.battingOrder,
+            name: batter.name,
+            position: batter.position,
+            id: batter.id,
+            selectedViaModal: false,
+            isWc: batter.isWc ?? false,
+          })),
+          {
+            battingOrder: "P",
+            name: dataObj.pitcher.name,
+            position: "P",
+            id: dataObj.pitcher.id,
+            selectedViaModal: false,
+            isWc: dataObj.pitcher.isWc ?? false,
+          },
+        ];
+
+        // localStorage 저장
+        const teamType = isHomeTeam ? "home" : "away";
+        const minimalLineup = {
+          batters: dataObj.batters.map(({ battingOrder, id, name }: any) => ({
+            battingOrder,
+            id,
+            name,
+          })),
+          pitcher: {
+            id: dataObj.pitcher.id,
+            name: dataObj.pitcher.name,
+          },
+        };
+        localStorage.setItem(
+          `lineup_${teamType}`,
+          JSON.stringify(minimalLineup)
+        );
+
+        // 상태 업데이트
+        if (isHomeTeam) {
+          setHomeTeamPlayers(lineupPlayers);
+        } else {
           setAwayTeamPlayers(lineupPlayers);
-          setLineupPlayersData(lineupPlayers);
-          console.log("awayTeamPlayers", awayTeamPlayers);
         }
-      } catch (err) {
-        setError(err);
-        const errorCode = err?.response?.data?.errorCode; // 에러코드 추출
-        console.error(err, "errorCode:", errorCode);
-        console.error("팀 선수 목록 요청 에러:", err);
+        setLineupPlayersData(lineupPlayers);
+        setTeamPlayersData(dataObj);
+      } catch (error) {
+        setError(error);
+        console.error("팀 선수 목록 요청 에러:", error);
       }
     };
+
     fetchTeamPlayers();
-  }, [router, teamTournamentId, isHomeTeam]);
+  }, [router.query.recordId, teamTournamentId, isHomeTeam]);
 
   useEffect(() => {
     console.log("Updated homeTeamPlayers:", homeTeamPlayers);
