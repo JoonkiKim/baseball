@@ -388,19 +388,31 @@ export default function Bracket() {
     const awayName = away.name ?? "";
     const homeName = home.name ?? "";
 
-    // 점수: winnerTeamId가 null 이면 "-" 고정, 아니면 실제 score 또는 "-"
-    const scoreAway =
-      g.winnerTeamId != null && awayName !== ""
-        ? away.score != null
-          ? String(away.score)
-          : "-"
-        : "-";
-    const scoreHome =
-      g.winnerTeamId != null && homeName !== ""
-        ? home.score != null
-          ? String(home.score)
-          : "-"
-        : "-";
+    // 몰수승 처리 로직 추가
+    let scoreAway = "-";
+    let scoreHome = "-";
+
+    if (g.winnerTeamId != null && awayName !== "" && homeName !== "") {
+      // winnerTeamId가 있고 양 팀 모두 이름이 있는 경우
+      if (away.score != null && home.score != null) {
+        // 양 팀 모두 스코어가 있는 경우 (일반 경기)
+        scoreAway = String(away.score);
+        scoreHome = String(home.score);
+      } else if (away.score == null && home.score == null) {
+        // 양 팀 모두 스코어가 null인 경우 (몰수승)
+        if (g.winnerTeamId === away.id) {
+          scoreAway = "몰수승";
+          scoreHome = "-";
+        } else if (g.winnerTeamId === home.id) {
+          scoreAway = "-";
+          scoreHome = "몰수승";
+        }
+      } else {
+        // 한 팀만 스코어가 있는 경우 (혼재 상황)
+        scoreAway = away.score != null ? String(away.score) : "-";
+        scoreHome = home.score != null ? String(home.score) : "-";
+      }
+    }
 
     return {
       labelAway: awayName,
@@ -1170,6 +1182,22 @@ export default function Bracket() {
               const right = getTeamByQfWinner("QF_2", "SF_1");
               const sf1 = findGame("SF_1");
 
+              // 몰수승 처리 함수
+              const getScoreDisplay = (team, game) => {
+                if (!team || !game) return "-";
+
+                if (game.winnerTeamId && team.score == null) {
+                  // winnerTeamId가 있고 해당 팀의 스코어가 null이면 몰수승 처리
+                  if (game.winnerTeamId === team.id) {
+                    return "몰수승";
+                  } else {
+                    return "-";
+                  }
+                }
+
+                return team.score != null ? String(team.score) : "-";
+              };
+
               return (
                 <>
                   {left && (
@@ -1177,7 +1205,7 @@ export default function Bracket() {
                       x="36"
                       y="99"
                       label={left.name}
-                      score={left.score != null ? String(left.score) : "-"}
+                      score={getScoreDisplay(left, sf1)}
                       isWinner={sf1?.winnerTeamId === left.id}
                     />
                   )}
@@ -1186,7 +1214,7 @@ export default function Bracket() {
                       x="196"
                       y="99"
                       label={right.name}
-                      score={right.score != null ? String(right.score) : "-"}
+                      score={getScoreDisplay(right, sf1)}
                       isWinner={sf1?.winnerTeamId === right.id}
                     />
                   )}
@@ -1199,6 +1227,21 @@ export default function Bracket() {
               const right = getTeamByQfWinner("QF_4", "SF_2");
               const sf2 = findGame("SF_2");
 
+              // 몰수승 처리 함수
+              const getScoreDisplay = (team, game) => {
+                if (!team || !game) return "-";
+
+                if (game.winnerTeamId && team.score == null) {
+                  if (game.winnerTeamId === team.id) {
+                    return "몰수승";
+                  } else {
+                    return "-";
+                  }
+                }
+
+                return team.score != null ? String(team.score) : "-";
+              };
+
               return (
                 <>
                   {left && (
@@ -1206,7 +1249,7 @@ export default function Bracket() {
                       x="36"
                       y="297"
                       label={left.name}
-                      score={left.score != null ? String(left.score) : "-"}
+                      score={getScoreDisplay(left, sf2)}
                       isWinner={sf2?.winnerTeamId === left.id}
                     />
                   )}
@@ -1215,7 +1258,7 @@ export default function Bracket() {
                       x="195"
                       y="297"
                       label={right.name}
-                      score={right.score != null ? String(right.score) : "-"}
+                      score={getScoreDisplay(right, sf2)}
                       isWinner={sf2?.winnerTeamId === right.id}
                     />
                   )}
@@ -1288,21 +1331,42 @@ export default function Bracket() {
               const topTeam = getWinnerTeam("SF_1"); // 위쪽 EndMarker용
               const bottomTeam = getWinnerTeam("SF_2"); // 아래쪽 EndMarker용
 
-              /* 결승전 스코어를 팀 기준으로 뽑아주는 헬퍼 */
-              const scoreOf = (team) =>
-                !team
-                  ? "-"
-                  : finalGame
-                  ? finalGame.homeTeam?.id === team.id
-                    ? finalGame.homeTeam.score ?? "-"
-                    : finalGame.awayTeam?.id === team.id
-                    ? finalGame.awayTeam.score ?? "-"
-                    : team.score ?? "-"
-                  : team.score ?? "-";
+              // 몰수승 처리 함수
+              const getScoreDisplay = (team, game) => {
+                if (!team || !game) return "-";
+
+                if (game.winnerTeamId && team.score == null) {
+                  if (game.winnerTeamId === team.id) {
+                    return "몰수승";
+                  } else {
+                    return "-";
+                  }
+                }
+
+                return team.score != null ? String(team.score) : "-";
+              };
+
+              const scoreOf = (team) => {
+                if (!team) return "-";
+
+                if (finalGame) {
+                  const finalTeam =
+                    finalGame.homeTeam?.id === team.id
+                      ? finalGame.homeTeam
+                      : finalGame.awayTeam?.id === team.id
+                      ? finalGame.awayTeam
+                      : null;
+
+                  if (finalTeam) {
+                    return getScoreDisplay(finalTeam, finalGame);
+                  }
+                }
+
+                return getScoreDisplay(team, finalGame);
+              };
 
               return (
                 <>
-                  {/* 결승 – HOME(위쪽) : SF_1 승자 */}
                   {topTeam && (
                     <>
                       {/* EndMarker 본체 — 점수는 숨김 */}
@@ -1413,6 +1477,21 @@ export default function Bracket() {
               const topTeam = tp ? tp.awayTeam : getLoserTeam("SF_1"); // 위쪽 EndMarker 팀
               const botTeam = tp ? tp.homeTeam : getLoserTeam("SF_2"); // 아래쪽 EndMarker 팀
 
+              // 몰수승 처리 함수
+              const getScoreDisplay = (team, game) => {
+                if (!team || !game) return "-";
+
+                if (game.winnerTeamId && team.score == null) {
+                  if (game.winnerTeamId === team.id) {
+                    return "몰수승";
+                  } else {
+                    return "-";
+                  }
+                }
+
+                return team.score != null ? String(team.score) : "-";
+              };
+
               return (
                 <>
                   {topTeam && (
@@ -1420,9 +1499,7 @@ export default function Bracket() {
                       x="240"
                       y="165"
                       label={topTeam.name}
-                      score={
-                        topTeam.score != null ? String(topTeam.score) : "-"
-                      }
+                      score={getScoreDisplay(topTeam, tp)}
                       isWinner={tpWinner !== null && tpWinner === topTeam.id}
                     />
                   )}
@@ -1431,9 +1508,7 @@ export default function Bracket() {
                       x="240"
                       y="228"
                       label={botTeam.name}
-                      score={
-                        botTeam.score != null ? String(botTeam.score) : "-"
-                      }
+                      score={getScoreDisplay(botTeam, tp)}
                       isWinner={tpWinner !== null && tpWinner === botTeam.id}
                     />
                   )}
