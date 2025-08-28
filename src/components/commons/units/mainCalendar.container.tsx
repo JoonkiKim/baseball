@@ -426,11 +426,12 @@ export default function MainCalendarPage() {
               };
 
               const showRecordButton =
-                match.status === "SCHEDULED"
+                !match.isForfeit && // isForfeit가 true면 버튼 숨김
+                (match.status === "SCHEDULED"
                   ? apiCanRecord
                   : match.status === "FINALIZED" ||
                     match.status === "EDITING" ||
-                    match.status === "IN_PROGRESS";
+                    match.status === "IN_PROGRESS");
 
               const team1Score = match.homeTeam.score;
               const team2Score = match.awayTeam.score;
