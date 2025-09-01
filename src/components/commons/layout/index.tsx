@@ -57,9 +57,9 @@ export default function Layout(props: ILayoutProps): JSX.Element {
 
   return (
     <>
-      {!isHideHead && <LayoutHeader />}
+      {/* {!isHideHead && <LayoutHeader />} */}
       <div style={{ backgroundColor: "white" }}>{props.children}</div>
-      {isShowNav && <LayoutNavigation />}
+      {/* {isShowNav && <LayoutNavigation />} */}
     </>
   );
 }

@@ -78,7 +78,7 @@ export default function EndPage() {
     <>
       <GlobalStyles />
       <EndWrapper>
-        <Message>2025 총장배 야구대회가 종료되었습니다</Message>
+        <Message>2025 스누나래 야구대회가 종료되었습니다</Message>
         <Message>다음 대회에서 만나요!</Message>
       </EndWrapper>
     </>
