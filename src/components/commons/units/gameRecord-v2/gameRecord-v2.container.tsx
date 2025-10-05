@@ -2916,17 +2916,17 @@ export default function GameRecordPageV2() {
 
       <ControlButtonsRow>
         <ControlButtonsWrapper>
-          <ReconstructionWrapper>
+          {/* <ReconstructionWrapper>
             <ReconstructionTitle>이닝의 재구성</ReconstructionTitle>
             <ReconstructionButtonWrapper>
-              {/* anchor div 제거하고 직접 Switch 렌더링 */}
+            
               <ReconstructionSwitch
                 checked={reconstructMode}
                 onChange={handleReconstructToggle}
                 aria-checked={reconstructMode}
               />
             </ReconstructionButtonWrapper>
-          </ReconstructionWrapper>
+          </ReconstructionWrapper> */}
           <ControlButtonWhite onClick={handleSubmit}>
             저장하기
           </ControlButtonWhite>

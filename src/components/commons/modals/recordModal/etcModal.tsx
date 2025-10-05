@@ -25,7 +25,6 @@ const mapping: Record<string, string> = {
   낫아웃: "SO_DROP",
   야수선택: "FC",
   인터페어: "IF",
-  에러: "E",
 };
 // const [error, setError] = useState(null);
 
@@ -102,12 +101,6 @@ export default function EtcModal(props: IModalProps) {
           disabled={isSubmitting}
         >
           인터페어
-        </ModalButton>
-        <ModalButton
-          onClick={() => handleTypeSelect("에러")}
-          disabled={isSubmitting}
-        >
-          에러
         </ModalButton>
       </ModalContainer>
 

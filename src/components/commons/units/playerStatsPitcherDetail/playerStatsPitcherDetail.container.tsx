@@ -166,18 +166,18 @@ export default function StatsPagePitcherDetail() {
               <th onClick={() => handleSortPitcher("K")}>
                 삼진 <ArrowIcon>{getArrow(pitcherSortKey, "K")}</ArrowIcon>
               </th>
-              <th onClick={() => handleSortPitcher("ERA")}>
+              {/* <th onClick={() => handleSortPitcher("ERA")}>
                 ERA <ArrowIcon>{getArrow(pitcherSortKey, "ERA")}</ArrowIcon>
-              </th>
+              </th> */}
               <th onClick={() => handleSortPitcher("IP")}>
                 이닝 <ArrowIcon>{getArrow(pitcherSortKey, "IP")}</ArrowIcon>
               </th>
               <th onClick={() => handleSortPitcher("R")}>
                 실점 <ArrowIcon>{getArrow(pitcherSortKey, "R")}</ArrowIcon>
               </th>
-              <th onClick={() => handleSortPitcher("ER")}>
+              {/* <th onClick={() => handleSortPitcher("ER")}>
                 자책 <ArrowIcon>{getArrow(pitcherSortKey, "ER")}</ArrowIcon>
-              </th>
+              </th> */}
 
               <th onClick={() => handleSortPitcher("BB")}>
                 사사구 <ArrowIcon>{getArrow(pitcherSortKey, "BB")}</ArrowIcon>
@@ -194,9 +194,9 @@ export default function StatsPagePitcherDetail() {
                 <td>
                   {item.K} <ArrowIconNone> ▽ </ArrowIconNone>
                 </td>
-                <td>
+                {/* <td>
                   {item.ERA} <ArrowIconNone> ▽ </ArrowIconNone>
-                </td>
+                </td> */}
                 <td>
                   {formatInnings(item.IP)}
                   <ArrowIconNone> ▽ </ArrowIconNone>
@@ -204,9 +204,9 @@ export default function StatsPagePitcherDetail() {
                 <td>
                   {item.R} <ArrowIconNone> ▽ </ArrowIconNone>
                 </td>
-                <td>
+                {/* <td>
                   {item.ER} <ArrowIconNone> ▽ </ArrowIconNone>
-                </td>
+                </td> */}
 
                 <td>
                   {item.BB} <ArrowIconNone> ▽ </ArrowIconNone>

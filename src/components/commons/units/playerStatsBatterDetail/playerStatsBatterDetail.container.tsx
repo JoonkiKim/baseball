@@ -1762,13 +1762,14 @@ export default function StatsPageBatterDetail() {
                   <ArrowIconNone> ▽ </ArrowIconNone>
                 </td>
                 <td>
-                  {item.AB}
-                  <ArrowIconNone> ▽ </ArrowIconNone>
-                </td>
-                <td>
                   {item.PA}
                   <ArrowIconNone> ▽ </ArrowIconNone>
                 </td>
+                <td>
+                  {item.AB}
+                  <ArrowIconNone> ▽ </ArrowIconNone>
+                </td>
+
                 <td>
                   {item.H} <ArrowIconNone> ▽ </ArrowIconNone>
                 </td>

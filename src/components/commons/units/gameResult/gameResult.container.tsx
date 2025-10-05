@@ -574,7 +574,7 @@ export default function FinalGameRecordPage() {
               <th>이름</th>
               <th>이닝</th>
               <th>실점</th>
-              <th>자책</th>
+              {/* <th>자책</th> */}
               <th>삼진</th>
               <th>볼넷</th>
             </tr>
@@ -604,7 +604,7 @@ export default function FinalGameRecordPage() {
                     }
                   />
                 </td>
-                <td>
+                {/* <td>
                   <EditableInput
                     type="number"
                     value={pitcher.ER || 0}
@@ -613,7 +613,7 @@ export default function FinalGameRecordPage() {
                       !canRecord ? undefined : () => handlePitcherClick(pitcher)
                     }
                   />
-                </td>
+                </td> */}
                 <td>
                   <EditableInput
                     type="number"
@@ -795,7 +795,7 @@ export default function FinalGameRecordPage() {
               <th>이름</th>
               <th>이닝</th>
               <th>실점</th>
-              <th>자책</th>
+              {/* <th>자책</th> */}
               <th>삼진</th>
               <th>볼넷</th>
             </tr>
@@ -825,7 +825,7 @@ export default function FinalGameRecordPage() {
                     }
                   />
                 </td>
-                <td>
+                {/* <td>
                   <EditableInput
                     type="number"
                     value={pitcher.ER || 0}
@@ -834,7 +834,7 @@ export default function FinalGameRecordPage() {
                       !canRecord ? undefined : () => handlePitcherClick(pitcher)
                     }
                   />
-                </td>
+                </td> */}
                 <td>
                   <EditableInput
                     type="number"

@@ -2035,11 +2035,11 @@ const GroundRecordModal = forwardRef<
               />
             </button>
           </CancelButtonWrapper>
-          <ModalBottomWrapper>
+          {/* <ModalBottomWrapper>
             <ReconstructionWrapper>
               <ReconstructionTitle>이닝의 재구성</ReconstructionTitle>
               <ReconstructionButtonWrapper>
-                {/* anchor div 제거하고 직접 Switch 렌더링 */}
+            
                 <ReconstructionSwitch
                   checked={reconstructMode}
                   onChange={handleReconstructToggle}
@@ -2052,7 +2052,7 @@ const GroundRecordModal = forwardRef<
               <ModalBottomRunnerTitle>주자</ModalBottomRunnerTitle>
               <RightPolygon />
             </ModalBottomRunnerWrapper>
-          </ModalBottomWrapper>
+          </ModalBottomWrapper> */}
           <GraphicWrapper
             // as="svg"
             ref={wrapperRef}
