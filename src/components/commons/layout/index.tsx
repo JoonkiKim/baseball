@@ -7,7 +7,7 @@ import styled from "@emotion/styled";
 const SHOW_NAV = [
   "/playerStats",
   "/ranking",
-  "/",
+  // "/",
   "/mainCalendar",
   // "/login",
   // "/login/findPassword",
@@ -21,7 +21,7 @@ const SHOW_NAV = [
 ];
 
 const HIDE_HEADER = [
-  // "/",
+  "/",
   "/matches/[recordId]/records",
   "/matches/[recordId]/view",
   "/login",
