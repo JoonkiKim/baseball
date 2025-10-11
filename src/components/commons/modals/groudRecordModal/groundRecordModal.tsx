@@ -1769,12 +1769,21 @@ const GroundRecordModal = forwardRef<
     const postUrl = `/plays/${encodedPlayId}/runner-events`;
     let postRes;
     try {
+      // ✅ 전송용 객체 생성: actual을 events로 키 이름만 변경
+      const runnerFinalRequest = {
+        phase: combinedRequest.phase,
+        events: combinedRequest.actual, // actual → events로 키 이름 변경
+        ...(combinedRequest.virtual
+          ? { virtual: combinedRequest.virtual }
+          : {}),
+      };
+
       console.log(
         "runner-events POST 요청:",
         postUrl,
-        JSON.stringify(combinedRequest, null, 2)
+        JSON.stringify(runnerFinalRequest, null, 2)
       );
-      postRes = await API.post(postUrl, combinedRequest);
+      postRes = await API.post(postUrl, runnerFinalRequest);
 
       console.log("runner-events POST 응답:", {
         status: (postRes as any)?.status,

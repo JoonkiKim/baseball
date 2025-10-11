@@ -1084,6 +1084,7 @@ export default function GameRecordPageV2() {
     const { attributes, listeners, setNodeRef, transform, isDragging } =
       useDraggable({
         id: cfg.id,
+        disabled: true,
       });
 
     // dnd-kit nodeRef + our ref 동시 설정
@@ -2636,12 +2637,19 @@ export default function GameRecordPageV2() {
       const finalRequest = sanitizeCombinedRequest(combinedRequest);
       // console.log("finalRequest", finalRequest);
 
+      // ✅ 전송용 객체 생성: actual을 events로 키 이름만 변경
+      const runnerFinalRequest = {
+        phase: finalRequest.phase,
+        events: finalRequest.actual, // actual → events로 키 이름 변경
+        ...(finalRequest.virtual ? { virtual: finalRequest.virtual } : {}),
+      };
+
       console.log(
         "runner-events POST 요청:",
         postUrl,
-        JSON.stringify(finalRequest, null, 2)
+        JSON.stringify(runnerFinalRequest, null, 2) // finalRequest → runnerFinalRequest
       );
-      postRes = await API.post(postUrl, finalRequest);
+      postRes = await API.post(postUrl, runnerFinalRequest);
       // ⬇️ 먼저 화면 상태를 싹 비움 (스냅샷 읽지 않음)
       // softResetWhiteBadges();
       console.log("runner-events POST 응답:", {

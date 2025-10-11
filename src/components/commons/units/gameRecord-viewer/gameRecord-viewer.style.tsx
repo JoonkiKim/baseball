@@ -268,23 +268,104 @@ export const ScoreDisplay = styled.div`
  *  5) 현재 타자 / 투수 정보 섹션
  * ───────────────────────────────────────────────────────── */
 
-export const PlayersRow = styled.div`
+export const InningRow = styled.div`
   display: flex;
   width: 90%;
-  height: 25vh;
+  height: 3vh;
   border-bottom: 1px solid #ccc;
   background-color: #ffffff;
-  border-radius: 2vh;
+  border-radius: 5px;
   margin-top: 1vh;
+  padding-left: 1vw;
+  padding-right: 1vw;
+  flex-direction: row;
+  justify-content: space-evenly;
+  align-items: center;
+`;
+
+export const InningItem = styled.div<{
+  $isSelected?: boolean;
+  $hasData?: boolean;
+}>`
+  cursor: ${({ $hasData }) => ($hasData ? "pointer" : "default")};
+  padding: 0.5vh 1vw;
+  font-family: "Pretendard";
+  font-weight: 500;
+  font-size: 0.75rem;
+  color: ${({ $isSelected, $hasData }) => {
+    if (!$hasData) return "#DADADA"; // 데이터 없으면 회색
+    if ($isSelected) return "#007AFF"; // 선택되면 파란색
+    return "#000"; // 기본 검은색
+  }};
+
+  // 호버 효과 (선택사항)
+  &:hover {
+    opacity: 0.7;
+  }
+
+  // 활성화 상태 (선택사항)
+  &:active {
+    transform: scale(0.95);
+  }
+`;
+
+export const InningDividerContainer = styled.div<{ $isBot?: boolean }>`
+  width: 85%;
+  height: 2vh;
+  display: flex;
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  padding: 2vh;
+  margin-top: ${({ $isBot }) => ($isBot ? "1.5vh" : "0")};
+`;
+export const InningDividerText = styled.div`
+  height: 2vh;
+  font-family: "Pretendard";
+  font-weight: 700;
+  font-size: 0.5rem;
+  color: #000;
+  white-space: nowrap; // 텍스트가 줄바꿈되지 않도록
+  margin-right: 1vw; // 텍스트와 선 사이 간격
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+`;
+
+export const InningDividerLine = styled.div`
+  height: 2vh;
+  flex: 1; // 남은 공간을 모두 차지
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+`;
+
+export const InningDividerReal = styled.div`
+  width: 100%; // flex: 1인 부모의 전체 너비 사용
+  height: 0.3px;
+  background-color: #2c333b;
+  opacity: 0.3;
+`;
+
+export const PlayersRow = styled.div`
+  display: flex;
+  width: 90%;
+  height: 20vh;
+  border-bottom: 1px solid #ccc;
+  background-color: #ffffff;
+  border-radius: 10px;
+  margin-top: 1vh;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding-top: 2vh;
+  padding-bottom: 2vh;
   margin-bottom: 12vh;
 `;
 
 export const BatterPlayerBox = styled.div<{ $compact?: boolean }>`
-  width: 70%;
+  width: 100%;
   display: flex;
   height: 100%;
   flex-direction: column;
@@ -330,7 +411,10 @@ export const BatterPlayerBox = styled.div<{ $compact?: boolean }>`
     $compact ? "transparent transparent" : "rgba(0, 0, 0, 0.2) transparent"};
 `;
 
-export const BatterPlayerSingleBox = styled.div<{ $compact?: boolean }>`
+export const BatterPlayerSingleBox = styled.div<{
+  $compact?: boolean;
+  $isLast?: boolean;
+}>`
   width: 100%;
   display: flex;
   // background-color: red;
@@ -347,6 +431,7 @@ export const BatterPlayerSingleBox = styled.div<{ $compact?: boolean }>`
   border-bottom: none;
 
   /* 가상 요소로 90% 길이의 border 생성 - 중앙 정렬 */
+  /* 마지막 요소가 아닐 때만 border 표시 */
   &::after {
     content: "";
     position: absolute;
@@ -356,6 +441,8 @@ export const BatterPlayerSingleBox = styled.div<{ $compact?: boolean }>`
     width: 85%;
     height: 0.3px;
     background-color: rgba(44, 51, 59, 0.3);
+    /* 마지막 요소면 border 숨김 */
+    display: ${({ $isLast }) => ($isLast ? "none" : "block")};
   }
 `;
 export const Divider = styled.div`
@@ -419,26 +506,44 @@ export const OrderCircle = styled.div`
 
 export const WhoContainer = styled.div`
   display: flex;
-  flex-direction: column;
-  /* gap: 0.53vw; */
-  align-items: flex-start;
-  justify-content: space-evenly;
-  width: 13.6vw; /* 51px */
-  height: 3.5vh; /* 37px */
-
-  /* background-color: red; */
-`;
-
-export const NameResultContainer = styled.div`
-  display: flex;
   flex-direction: row;
-  /* gap: 0.53vw; */
-  align-items: center;
-  justify-content: space-between;
-  width: 18vw; /* 51px */
-  margin-bottom: 0.5vh;
-  /* background-color: green; */
+  gap: 1vw; // 두 컨테이너 사이 간격
+  align-items: flex-start;
+  justify-content: space-between; // space-evenly 대신 space-between 사용
+  width: 18vw; // 16vw에서 30vw로 증가 (또는 필요에 따라 조정)
+  height: 3.5vh;
+
+  // background-color: red;
 `;
+
+export const NameAvgContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5vh;
+  align-items: flex-start;
+  justify-content: flex-start;
+`;
+
+export const ResultOrderContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  // gap: 0.5vh;
+  height: 100%;
+  align-items: center;
+
+  justify-content: space-between;
+`;
+
+// export const NameResultContainer = styled.div`
+//   display: flex;
+//   flex-direction: row;
+//   /* gap: 0.53vw; */
+//   align-items: center;
+//   justify-content: space-between;
+//   width: 18vw; /* 51px */
+//   margin-bottom: 0.5vh;
+//   background-color: green;
+// `;
 
 export const PlayerName = styled.div<{ $nameLength?: number }>`
   color: #000;
@@ -447,16 +552,18 @@ export const PlayerName = styled.div<{ $nameLength?: number }>`
 
   font-size: ${({ $nameLength }) =>
     $nameLength && $nameLength >= 4
-      ? "0.8rem"
-      : "1rem"}; /* 4글자 이상이면 14px, 아니면 16px */
+      ? "0.5rem"
+      : "0.625rem"}; /* 4글자 이상이면 14px, 아니면 16px */
   font-weight: 700;
-  width: 17vw; /* 45px */
+  width: 9vw; /* 45px */
   height: 2.09vh; /* 17px */
 
   display: flex;
   flex-direction: row;
-  align-items: center;
+  align-items: flex-start;
+  padding-top: 0.125rem;
   justify-content: flex-start;
+  // background-color: green;
 `;
 
 export const ResultBox = styled.div<{ $isOut?: boolean }>`
@@ -488,9 +595,11 @@ export const AvgFrame = styled.div`
 `;
 
 export const AvgText = styled.div`
+  color: #2c333b;
+  opacity: 50%;
   text-align: center;
   font-family: "Pretendard";
-  font-size: 0.5rem; /* 8px */
+  font-size: 0.4375rem; /* 8px */
   font-weight: 600;
 
   display: flex;
@@ -501,15 +610,16 @@ export const AvgText = styled.div`
 
 export const BattingOrderLabel = styled.div`
   color: #2c333b;
-  opacity: 50%;
+  // opacity: 50%;
   text-align: center;
   font-family: "Pretendard";
-  font-size: 0.5rem; /* 8px */
+  font-size: 0.4375rem; /* 8px */
   font-weight: 600;
 
   display: flex;
-
+  flex-direction: column;
   align-items: center;
+  justify-content: center;
   /* justify-content: space-evenly; */
 `;
 
@@ -523,7 +633,7 @@ export const AvgValue = styled.span`
 // ── 오늘 성적 ──
 export const TodayContainer = styled.div`
   display: flex;
-  width: 60%;
+  width: 40%;
   flex-direction: row;
   /* gap: 2.13vw; */
   align-items: center;
@@ -542,6 +652,34 @@ export const TodayFrame = styled.div`
   width: 20%; /* 13px */
   /* height: auto; */
   /* background-color: red; */
+`;
+
+export const OpponentPitcherFrame = styled.div`
+  display: flex;
+  flex-direction: row;
+
+  height: 80%;
+  align-items: center;
+  justify-content: space-evenly;
+  width: 30%; /* 13px */
+
+  font-family: "Pretendard";
+  font-size: 0.75rem; /* 8px */
+  font-weight: 600;
+`;
+
+export const OpponentPitcherLabel = styled.span`
+  color: #707070;
+  font-family: "Pretendard";
+  font-weight: 600;
+  font-size: 0.625rem; // 필요에 따라 조정
+`;
+
+export const OpponentPitcherName = styled.span`
+  color: #000; // 또는 기본 텍스트 색상
+  font-family: "Pretendard";
+  font-weight: 600;
+  font-size: 0.625rem; // 필요에 따라 조정
 `;
 
 export const TodayLabel = styled.div`

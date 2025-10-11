@@ -75,8 +75,18 @@ import {
   BattingOrderLabel,
   StatFrame2,
   ResultBox,
-  NameResultContainer,
   DividerForPitcher,
+  NameAvgContainer,
+  ResultOrderContainer,
+  InningRow,
+  InningItem,
+  OpponentPitcherFrame,
+  OpponentPitcherLabel,
+  OpponentPitcherName,
+  InningDividerContainer,
+  InningDividerLine,
+  InningDividerText,
+  InningDividerReal,
 } from "./gameRecord-viewer.style";
 
 import {
@@ -305,49 +315,49 @@ export default function GameRecordPageViewer() {
 
   // ✅ 화면 로드시 한 번만: GET /games/{gameId}/snapshot/umpire → localStorage('snapshot') 저장 + 화면 반영
   // 나중에 지우기
-  // useEffect(() => {
-  //   if (!router.isReady || !recordId) return;
-  //   if (fetchedOnceRef.current) return;
-  //   fetchedOnceRef.current = true;
+  useEffect(() => {
+    if (!router.isReady || !recordId) return;
+    if (fetchedOnceRef.current) return;
+    fetchedOnceRef.current = true;
 
-  //   (async () => {
-  //     try {
-  //       const base = process.env.NEXT_PUBLIC_API_URL ?? "";
-  //       const url = `${base}/games/${recordId}/snapshot/stream`;
+    (async () => {
+      try {
+        const base = process.env.NEXT_PUBLIC_API_URL ?? "";
+        const url = `${base}/games/${recordId}/snapshot/stream`;
 
-  //       const res = await fetch(url, {
-  //         method: "GET",
-  //         headers: {
-  //           Authorization: `Bearer ${getAccessToken?.() || ""}`,
-  //           Accept: "application/json",
-  //         },
-  //         // credentials: "include", // 쿠키 기반이면 주석 해제
-  //       });
+        const res = await fetch(url, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${getAccessToken?.() || ""}`,
+            Accept: "application/json",
+          },
+          // credentials: "include", // 쿠키 기반이면 주석 해제
+        });
 
-  //       if (!res.ok) {
-  //         throw new Error(`GET snapshot/stream failed: ${res.status}`);
-  //       }
+        if (!res.ok) {
+          throw new Error(`GET snapshot/stream failed: ${res.status}`);
+        }
 
-  //       const json = await res.json();
-  //       // 응답 래핑 형태 유연 처리
-  //       const snap = json?.data ?? json;
-  //       console.log("snap", snap);
-  //       setSseData(snap);
-  //       // 1) localStorage 저장
-  //       try {
-  //         localStorage.setItem("snapshot", JSON.stringify(snap));
-  //       } catch (e) {
-  //         console.warn("localStorage(snapshot) 저장 실패:", e);
-  //       }
-  //       console.log("연결용 GET /snapshot/stream 저장완료");
-  //       // 2) 화면 상태 반영
-  //       applySnapshot(snap);
-  //     } catch (err) {
-  //       console.error("GET /snapshot/stream error:", err);
-  //       setError(err);
-  //     }
-  //   })();
-  // }, [router.isReady, recordId, applySnapshot]);
+        const json = await res.json();
+        // 응답 래핑 형태 유연 처리
+        const snap = json?.data ?? json;
+        console.log("snap", snap);
+        setSseData(snap);
+        // 1) localStorage 저장
+        try {
+          localStorage.setItem("snapshot", JSON.stringify(snap));
+        } catch (e) {
+          console.warn("localStorage(snapshot) 저장 실패:", e);
+        }
+        console.log("연결용 GET /snapshot/stream 저장완료");
+        // 2) 화면 상태 반영
+        applySnapshot(snap);
+      } catch (err) {
+        console.error("GET /snapshot/stream error:", err);
+        setError(err);
+      }
+    })();
+  }, [router.isReady, recordId, applySnapshot]);
 
   // console.log("sseData", sseData);
 
@@ -861,14 +871,18 @@ export default function GameRecordPageViewer() {
   //   if (!Array.isArray(arr) || arr.length === 0) return null;
   //   return arr[arr.length - 1]?.name ?? null;
   // }, [sseData?.playerRecords?.batters]);
-  const currentBatterName = useMemo(() => {
-    const arr = sseData?.playerRecords?.batters;
-    if (!Array.isArray(arr) || arr.length === 0) return null;
-    return arr[0]?.name ?? null; // arr[arr.length - 1]에서 arr[0]으로 변경
-  }, [sseData?.playerRecords?.batters]);
+  // const currentBatterName = useMemo(() => {
+  //   const arr = sseData?.playerRecords?.batters;
+  //   if (!Array.isArray(arr) || arr.length === 0) return null;
+  //   return arr[0]?.name ?? null; // arr[arr.length - 1]에서 arr[0]으로 변경
+  // }, [sseData?.playerRecords?.batters]);
 
-  console.log("currentBatterName", currentBatterName);
+  // console.log("currentBatterName", currentBatterName);
 
+  // 상단에 state 추가 (이미 있음)
+  const [selectedInning, setSelectedInning] = useState<number | null>(null);
+  const [opponentPitcherName, setOpponentPitcherName] =
+    useState<string>("최원태");
   const RESULT_LABELS: Record<string, string> = {
     "1B": "안타",
     "2B": "2루타",
@@ -894,24 +908,91 @@ export default function GameRecordPageViewer() {
 
   // batters 원본 → UI에서 쓰기 좋은 형태로 매핑
   const battersForUI = useMemo(() => {
-    const list = sseData?.playerRecords?.batters ?? [];
-    return list.map((b) => ({
-      id: b.id,
-      name: b.name,
-      battingOrder: b.battingOrder,
-      avg: b.battingAverage ?? 0,
-      battingResult: b.battingResult ?? "",
-      today: {
-        PA: b.todayStats?.PA ?? 0,
-        AB: b.todayStats?.AB ?? 0,
-        H: b.todayStats?.H ?? 0,
-        BB: b.todayStats?.BB ?? 0,
-        R: b.todayStats?.R ?? 0,
-      },
-    }));
-  }, [sseData?.playerRecords?.batters]);
+    const innings = sseData?.playerRecords?.innings ?? [];
 
-  const isCompact = (battersForUI?.length ?? 0) < 3;
+    // 선택된 이닝이 없으면 빈 객체 반환 (일관된 타입 유지)
+    if (selectedInning === null) return { top: [], bot: [] };
+
+    // 선택된 이닝의 TOP과 BOT 데이터 가져오기
+    const topData = innings.find(
+      (inn) => inn.inning === selectedInning && inn.inningHalf === "TOP"
+    );
+    const botData = innings.find(
+      (inn) => inn.inning === selectedInning && inn.inningHalf === "BOT"
+    );
+
+    // TOP과 BOT의 타자들을 가져오기 (역순 정렬 제거)
+    const topBatters = topData?.batters ?? [];
+    const botBatters = botData?.batters ?? [];
+
+    // TOP과 BOT를 분리해서 반환
+    return {
+      top: topBatters.map((b) => ({
+        id: b.id,
+        name: b.name,
+        battingOrder: b.battingOrder,
+        avg: b.battingAverage ?? 0,
+        battingResult: b.battingResult ?? "",
+        inningHalf: b.inningHalf,
+        today: {
+          PA: b.todayStats?.PA ?? 0,
+          AB: b.todayStats?.AB ?? 0,
+          H: b.todayStats?.H ?? 0,
+          BB: 0,
+          R: b.todayStats?.R ?? 0,
+        },
+        opponentPitcher: b.opposingPitcher?.name ?? "-",
+      })),
+      bot: botBatters.map((b) => ({
+        id: b.id,
+        name: b.name,
+        battingOrder: b.battingOrder,
+        avg: b.battingAverage ?? 0,
+        battingResult: b.battingResult ?? "",
+        inningHalf: b.inningHalf,
+        today: {
+          PA: b.todayStats?.PA ?? 0,
+          AB: b.todayStats?.AB ?? 0,
+          H: b.todayStats?.H ?? 0,
+          BB: 0,
+          R: b.todayStats?.R ?? 0,
+        },
+        opponentPitcher: b.opposingPitcher?.name ?? "-",
+      })),
+    };
+  }, [sseData?.playerRecords?.innings, selectedInning]);
+  // currentBatterName을 다음과 같이 수정
+  const currentBatterName = useMemo(() => {
+    const innings = sseData?.playerRecords?.innings ?? [];
+    const currentInning = sseData?.gameSummary?.inning;
+    const currentHalf = sseData?.gameSummary?.inningHalf;
+
+    const currentInningData = innings.find(
+      (inn) => inn.inning === currentInning && inn.inningHalf === currentHalf
+    );
+
+    const batters = currentInningData?.batters ?? [];
+
+    // battingResult가 null인 타자 = 현재 타석 중인 타자
+    const currentBatter = batters.find((b) => b.battingResult === null);
+
+    // 없으면 waitingBatters에서 가져오기
+    if (!currentBatter) {
+      const waiting = sseData?.waitingBatters ?? [];
+      return waiting[0]?.name ?? null;
+    }
+
+    return currentBatter.name;
+  }, [
+    sseData?.playerRecords?.innings,
+    sseData?.gameSummary?.inning,
+    sseData?.gameSummary?.inningHalf,
+    sseData?.waitingBatters,
+  ]);
+
+  console.log("currentBatterName", currentBatterName);
+
+  // const isCompact = (battersForUI?.length ?? 0) < 3;
   const OUT_CODES = new Set(["SO", "O", "SO_DROP", "SF", "SAC"]);
   const isOutResult = (code) => OUT_CODES.has(String(code).toUpperCase());
 
@@ -1047,36 +1128,68 @@ export default function GameRecordPageViewer() {
     [sseData?.playerRecords?.pitcher]
   );
 
+  // batterRows3도 수정
   const batterRows3 = useMemo(() => {
-    const list = (battersForUI ?? []).slice();
-    return list; // 모든 타자 데이터 반환
+    // TOP과 BOT를 합쳐서 반환
+    return [...battersForUI.top, ...battersForUI.bot];
   }, [battersForUI]);
 
   // SSE 데이터 수신 후 모든 배지 상태 완전 업데이트
+  // useEffect(() => {
+  //   if (!sseData) return;
+
+  //   // 1. 타자 배지 업데이트
+  //   const currentBatter = sseData?.playerRecords?.batters?.at(-1);
+  //   if (currentBatter && batterWhiteBadgeId) {
+  //     // 타자 배지 활성화 및 라벨 업데이트
+  //   }
+
+  //   // 2. 주자 배지 완전 업데이트
+  //   const runners = sseData?.runnersOnBase ?? [];
+
+  //   // 3. 수비수 배지 업데이트 (이미 구현됨)
+
+  //   // 4. 배지 활성화/비활성화 상태 업데이트
+  //   const activeBadgeIds = [];
+  //   if (currentBatter) activeBadgeIds.push(batterWhiteBadgeId);
+  //   runners.forEach((_, index) => {
+  //     if (allWhiteBadges[index + 1]) {
+  //       activeBadgeIds.push(allWhiteBadges[index + 1].id);
+  //     }
+  //   });
+  //   setActiveBadges(activeBadgeIds);
+  // }, [sseData]);
   useEffect(() => {
     if (!sseData) return;
 
-    // 1. 타자 배지 업데이트
-    const currentBatter = sseData?.playerRecords?.batters?.at(-1);
-    if (currentBatter && batterWhiteBadgeId) {
-      // 타자 배지 활성화 및 라벨 업데이트
+    const activeBadgeIds = [];
+
+    // 1. 타자 배지는 항상 활성화 (currentBatterName 있으면)
+    if (currentBatterName && batterWhiteBadgeId) {
+      activeBadgeIds.push(batterWhiteBadgeId);
     }
 
-    // 2. 주자 배지 완전 업데이트
+    // 2. 주자 배지 활성화
     const runners = sseData?.runnersOnBase ?? [];
-
-    // 3. 수비수 배지 업데이트 (이미 구현됨)
-
-    // 4. 배지 활성화/비활성화 상태 업데이트
-    const activeBadgeIds = [];
-    if (currentBatter) activeBadgeIds.push(batterWhiteBadgeId);
     runners.forEach((_, index) => {
       if (allWhiteBadges[index + 1]) {
         activeBadgeIds.push(allWhiteBadges[index + 1].id);
       }
     });
+
     setActiveBadges(activeBadgeIds);
   }, [sseData]);
+
+  // 초기 이닝 선택 (현재 이닝이 바뀌면 항상 업데이트)
+  useEffect(() => {
+    if (!sseData) return;
+
+    const currentInning = sseData?.gameSummary?.inning;
+
+    if (currentInning) {
+      setSelectedInning(currentInning);
+    }
+  }, [sseData?.gameSummary?.inning]);
 
   const formatInnings = (ip: number): string => {
     if (!ip || ip === 0) return "0";
@@ -1094,6 +1207,14 @@ export default function GameRecordPageViewer() {
   // 게임 종료 상태 추가
   const [gameEnded, setGameEnded] = useState(false);
   const [gameEndedMessage, setGameEndedMessage] = useState("");
+
+  const hasInningData = useCallback(
+    (inning: number) => {
+      const innings = sseData?.playerRecords?.innings ?? [];
+      return innings.some((inn) => inn.inning === inning);
+    },
+    [sseData?.playerRecords?.innings]
+  );
 
   return (
     <GameRecordContainer>
@@ -1287,6 +1408,7 @@ export default function GameRecordPageViewer() {
             let label = cfg.label;
             if (cfg.id === batterWhiteBadgeId && currentBatterName) {
               label = currentBatterName;
+              console.log("타자 배지 렌더링:", label);
             } else if (runnerInfoByBadge[cfg.id]) {
               label = runnerInfoByBadge[cfg.id].name;
             }
@@ -1302,118 +1424,186 @@ export default function GameRecordPageViewer() {
             );
           })}
       </GraphicWrapper>
-
+      <InningRow>
+        {[1, 2, 3, 4, 5, 6, 7].map((inning) => (
+          <InningItem
+            key={inning}
+            $isSelected={selectedInning === inning}
+            $hasData={hasInningData(inning)}
+            onClick={() => {
+              // 데이터가 있는 이닝만 클릭 가능
+              if (hasInningData(inning)) {
+                setSelectedInning(inning);
+                console.log(`${inning}회 클릭됨`);
+              }
+            }}
+          >
+            {inning}회
+          </InningItem>
+        ))}
+      </InningRow>
       <PlayersRow>
         <BatterPlayerBox $compact={(batterRows3?.length ?? 0) < 3}>
-          {/* 최소 3개의 박스를 보장하기 위해 배열을 확장 */}
-          {Array.from(
-            { length: Math.max(3, batterRows3?.length ?? 0) },
-            (_, idx) => {
-              const b = batterRows3?.[idx];
-              return (
-                <Fragment key={b ? b.id : `empty-${idx}`}>
-                  <BatterPlayerSingleBox id="batter-player-single-box">
-                    {b && (
-                      <BatterGroup>
-                        <BatterRow
-                          $isLast={idx === (batterRows3?.length ?? 0) - 1}
-                        >
-                          <WhoContainer>
-                            <NameResultContainer>
-                              <PlayerName $nameLength={b.name?.length}>
-                                {b.name}
-                              </PlayerName>
-                              {b.battingResult && (
-                                <ResultBox
-                                  $isOut={isOutResult(b.battingResult)}
-                                >
-                                  {getResultLabel(b.battingResult)}
-                                </ResultBox>
-                              )}
-                            </NameResultContainer>
-                            <AvgFrame>
-                              <BattingOrderLabel>
-                                {b.battingOrder}번타자
-                              </BattingOrderLabel>
-                              <AvgText>
-                                <AvgLabel>타율</AvgLabel>
-                                <AvgValue>{Number(b.avg).toFixed(3)}</AvgValue>
-                              </AvgText>
-                            </AvgFrame>
-                          </WhoContainer>
-                          <TodayContainer>
-                            <TodayFrame>
-                              <TodayLabel>타석</TodayLabel>
-                              <TodayValue>{b.today.PA}</TodayValue>
-                            </TodayFrame>
-                            <TodayFrame>
-                              <TodayLabel>타수</TodayLabel>
-                              <TodayValue>{b.today.AB}</TodayValue>
-                            </TodayFrame>
-                            <TodayFrame>
-                              <TodayLabel>안타</TodayLabel>
-                              <TodayValue>{b.today.H}</TodayValue>
-                            </TodayFrame>
-                            <TodayFrame>
-                              <TodayLabel>득점</TodayLabel>
-                              <TodayValue>{b.today.R}</TodayValue>
-                            </TodayFrame>
-                            <TodayFrame>
-                              <TodayLabel>볼넷</TodayLabel>
-                              <TodayValue>{b.today.BB}</TodayValue>
-                            </TodayFrame>
-                          </TodayContainer>
-                        </BatterRow>
-                      </BatterGroup>
-                    )}
-                  </BatterPlayerSingleBox>
-                  {/* <DividerForPitcher /> */}
-                </Fragment>
-              );
-            }
+          {/* TOP 이닝 렌더링 */}
+          {battersForUI.top.length > 0 && (
+            <>
+              <InningDividerContainer>
+                <InningDividerText>{selectedInning}회초</InningDividerText>
+                <InningDividerLine>
+                  <InningDividerReal />
+                </InningDividerLine>
+              </InningDividerContainer>
+              {[...battersForUI.top].reverse().map((b, index, array) => (
+                <BatterPlayerSingleBox
+                  key={b.id}
+                  id="batter-player-single-box"
+                  $isLast={index === array.length - 1}
+                >
+                  <BatterGroup>
+                    <BatterRow>
+                      <WhoContainer>
+                        <NameAvgContainer>
+                          <PlayerName $nameLength={b.name?.length}>
+                            {b.name}
+                          </PlayerName>
+                          <AvgText>
+                            <AvgLabel>타율</AvgLabel>
+                            <AvgValue>{Number(b.avg).toFixed(3)}</AvgValue>
+                          </AvgText>
+                        </NameAvgContainer>
+                        <ResultOrderContainer>
+                          <ResultBox
+                            $isOut={isOutResult(b.battingResult)}
+                            style={{
+                              visibility: b.battingResult
+                                ? "visible"
+                                : "hidden",
+                            }}
+                          >
+                            {b.battingResult
+                              ? getResultLabel(b.battingResult)
+                              : ""}
+                          </ResultBox>
+                          <BattingOrderLabel>
+                            {b.battingOrder}번타자
+                          </BattingOrderLabel>
+                        </ResultOrderContainer>
+                      </WhoContainer>
+                      <TodayContainer>
+                        <TodayFrame>
+                          <TodayLabel>타석</TodayLabel>
+                          <TodayValue>{b.today.PA}</TodayValue>
+                        </TodayFrame>
+                        <TodayFrame>
+                          <TodayLabel>타수</TodayLabel>
+                          <TodayValue>{b.today.AB}</TodayValue>
+                        </TodayFrame>
+                        <TodayFrame>
+                          <TodayLabel>안타</TodayLabel>
+                          <TodayValue>{b.today.H}</TodayValue>
+                        </TodayFrame>
+                        <TodayFrame>
+                          <TodayLabel>볼넷</TodayLabel>
+                          <TodayValue>{b.today.BB}</TodayValue>
+                        </TodayFrame>
+                        <TodayFrame>
+                          <TodayLabel>득점</TodayLabel>
+                          <TodayValue>{b.today.R}</TodayValue>
+                        </TodayFrame>
+                      </TodayContainer>
+                      <OpponentPitcherFrame>
+                        <OpponentPitcherLabel>상대투수</OpponentPitcherLabel>
+                        <OpponentPitcherName>
+                          {b.opponentPitcher}
+                        </OpponentPitcherName>
+                      </OpponentPitcherFrame>
+                    </BatterRow>
+                  </BatterGroup>
+                </BatterPlayerSingleBox>
+              ))}
+            </>
+          )}
+
+          {/* BOT 이닝 렌더링 */}
+          {battersForUI.bot.length > 0 && (
+            <>
+              <InningDividerContainer $isBot>
+                <InningDividerText>{selectedInning}회말</InningDividerText>
+                <InningDividerLine>
+                  <InningDividerReal />
+                </InningDividerLine>
+              </InningDividerContainer>
+              {[...battersForUI.bot].reverse().map((b, index, array) => (
+                <BatterPlayerSingleBox
+                  key={b.id}
+                  id="batter-player-single-box"
+                  $isLast={index === array.length - 1}
+                >
+                  <BatterGroup>
+                    <BatterRow>
+                      <WhoContainer>
+                        <NameAvgContainer>
+                          <PlayerName $nameLength={b.name?.length}>
+                            {b.name}
+                          </PlayerName>
+                          <AvgText>
+                            <AvgLabel>타율</AvgLabel>
+                            <AvgValue>{Number(b.avg).toFixed(3)}</AvgValue>
+                          </AvgText>
+                        </NameAvgContainer>
+                        <ResultOrderContainer>
+                          <ResultBox
+                            $isOut={isOutResult(b.battingResult)}
+                            style={{
+                              visibility: b.battingResult
+                                ? "visible"
+                                : "hidden",
+                            }}
+                          >
+                            {b.battingResult
+                              ? getResultLabel(b.battingResult)
+                              : ""}
+                          </ResultBox>
+                          <BattingOrderLabel>
+                            {b.battingOrder}번타자
+                          </BattingOrderLabel>
+                        </ResultOrderContainer>
+                      </WhoContainer>
+                      <TodayContainer>
+                        <TodayFrame>
+                          <TodayLabel>타석</TodayLabel>
+                          <TodayValue>{b.today.PA}</TodayValue>
+                        </TodayFrame>
+                        <TodayFrame>
+                          <TodayLabel>타수</TodayLabel>
+                          <TodayValue>{b.today.AB}</TodayValue>
+                        </TodayFrame>
+                        <TodayFrame>
+                          <TodayLabel>안타</TodayLabel>
+                          <TodayValue>{b.today.H}</TodayValue>
+                        </TodayFrame>
+                        <TodayFrame>
+                          <TodayLabel>볼넷</TodayLabel>
+                          <TodayValue>{b.today.BB}</TodayValue>
+                        </TodayFrame>
+                        <TodayFrame>
+                          <TodayLabel>득점</TodayLabel>
+                          <TodayValue>{b.today.R}</TodayValue>
+                        </TodayFrame>
+                      </TodayContainer>
+                      <OpponentPitcherFrame>
+                        <OpponentPitcherLabel>상대투수</OpponentPitcherLabel>
+                        <OpponentPitcherName>
+                          {b.opponentPitcher}
+                        </OpponentPitcherName>
+                      </OpponentPitcherFrame>
+                    </BatterRow>
+                  </BatterGroup>
+                </BatterPlayerSingleBox>
+              ))}
+            </>
           )}
         </BatterPlayerBox>
-        <PitcherPlayerBox>
-          <PitcherGroup>
-            <PitcherWho id="pitcher-who">
-              <PitcherName>
-                {" "}
-                {/* {sseData?.playerRecords?.pitcher?.at(-1)?.name ?? "-"} */}
-                {lastPitcher?.name ?? "-"}
-              </PitcherName>
-              <PitcherToday>
-                <StatFrame $isWide={lastPitcher?.todayStats?.IP % 3 !== 0}>
-                  <StatText>
-                    <StatLabel>이닝</StatLabel>
-                    <StatValue id="ip">
-                      {formatInnings(lastPitcher?.todayStats?.IP) ?? "-"}
-                    </StatValue>
-                  </StatText>
-                </StatFrame>
-                <StatFrame2 $isWide={String(lastPitcher?.ERA ?? "").length > 1}>
-                  <StatText>
-                    <StatLabel>ERA</StatLabel>
-                    <StatValue>{lastPitcher?.ERA ?? "-"}</StatValue>
-                  </StatText>
-                </StatFrame2>
-              </PitcherToday>
-            </PitcherWho>
-            {/* <DividerForPitcher /> */}
-            <PitcherStatsGrid>
-              {[
-                { name: "실점", value: lastPitcher?.todayStats?.R },
-                { name: "자책", value: lastPitcher?.todayStats?.ER },
-                { name: "삼진", value: lastPitcher?.todayStats?.K },
-                { name: "볼넷", value: lastPitcher?.todayStats?.BB },
-              ].map((s, i) => (
-                <StatCell key={i}>
-                  <StatName>{s.name}</StatName>
-                  <StatNumber>{s.value}</StatNumber>
-                </StatCell>
-              ))}
-            </PitcherStatsGrid>
-          </PitcherGroup>
-        </PitcherPlayerBox>
       </PlayersRow>
 
       <LoadingOverlay visible={isSubmitting}>
