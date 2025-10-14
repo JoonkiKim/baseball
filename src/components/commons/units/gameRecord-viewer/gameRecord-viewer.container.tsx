@@ -1444,16 +1444,16 @@ export default function GameRecordPageViewer() {
       </InningRow>
       <PlayersRow>
         <BatterPlayerBox $compact={(batterRows3?.length ?? 0) < 3}>
-          {/* TOP 이닝 렌더링 */}
-          {battersForUI.top.length > 0 && (
+          {/* BOT 이닝 렌더링 */}
+          {battersForUI.bot.length > 0 && (
             <>
               <InningDividerContainer>
-                <InningDividerText>{selectedInning}회초</InningDividerText>
+                <InningDividerText>{selectedInning}회말</InningDividerText>
                 <InningDividerLine>
                   <InningDividerReal />
                 </InningDividerLine>
               </InningDividerContainer>
-              {[...battersForUI.top].reverse().map((b, index, array) => (
+              {[...battersForUI.bot].reverse().map((b, index, array) => (
                 <BatterPlayerSingleBox
                   key={b.id}
                   id="batter-player-single-box"
@@ -1524,16 +1524,16 @@ export default function GameRecordPageViewer() {
             </>
           )}
 
-          {/* BOT 이닝 렌더링 */}
-          {battersForUI.bot.length > 0 && (
+          {/* TOP 이닝 렌더링 */}
+          {battersForUI.top.length > 0 && (
             <>
-              <InningDividerContainer $isBot>
-                <InningDividerText>{selectedInning}회말</InningDividerText>
+              <InningDividerContainer $isTop={battersForUI.bot.length > 0}>
+                <InningDividerText>{selectedInning}회초</InningDividerText>
                 <InningDividerLine>
                   <InningDividerReal />
                 </InningDividerLine>
               </InningDividerContainer>
-              {[...battersForUI.bot].reverse().map((b, index, array) => (
+              {[...battersForUI.top].reverse().map((b, index, array) => (
                 <BatterPlayerSingleBox
                   key={b.id}
                   id="batter-player-single-box"

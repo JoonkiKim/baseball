@@ -309,23 +309,24 @@ export const InningItem = styled.div<{
   }
 `;
 
-export const InningDividerContainer = styled.div<{ $isBot?: boolean }>`
+export const InningDividerContainer = styled.div<{ $isTop?: boolean }>`
   width: 85%;
   height: 2vh;
   display: flex;
   flex-direction: row;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
-  margin-top: ${({ $isBot }) => ($isBot ? "1.5vh" : "0")};
+  margin-top: ${({ $isTop }) => ($isTop ? "1.5vh" : "0")};
 `;
 export const InningDividerText = styled.div`
+  width: 5%;
   height: 2vh;
   font-family: "Pretendard";
   font-weight: 700;
   font-size: 0.5rem;
   color: #000;
   white-space: nowrap; // 텍스트가 줄바꿈되지 않도록
-  margin-right: 1vw; // 텍스트와 선 사이 간격
+  // margin-right: 1vw; // 텍스트와 선 사이 간격
   display: flex;
   flex-direction: row;
   justify-content: center;
@@ -333,8 +334,9 @@ export const InningDividerText = styled.div`
 `;
 
 export const InningDividerLine = styled.div`
+  width: 90%;
   height: 2vh;
-  flex: 1; // 남은 공간을 모두 차지
+
   display: flex;
   flex-direction: row;
   justify-content: center;
