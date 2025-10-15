@@ -12,28 +12,52 @@ const xlarge = "@media only screen and (min-width: 1025px)";
 // ─── 전체 컨테이너 ─────────────────────────────
 export const Container = styled.div`
   width: 100%;
-  background-color: #f2f2f2;
+  background-color: #f5f5f5;
   margin: 0 auto;
-  margin-top: 120px;
   /* margin-bottom: 50px; */
   display: flex;
   flex-direction: column;
   align-items: center;
+  min-height: 100vh;
+  padding-bottom: 40px;
+`;
+
+// ─── 페이지 타이틀 ─────────────────────────────
+export const PageTitle = styled.h1`
+  font-size: 24px;
+  font-weight: 200;
+  color: #0f0f70;
+  margin: 40px 0 20px 0;
+  text-align: center;
+  font-family: "Futura", "Futura Std", sans-serif;
+  letter-spacing: 2px;
+`;
+
+// ─── 팀 헤더 타이틀 ─────────────────────────────
+export const TeamHeaderTitle = styled.h2`
+  font-size: 20px;
+  font-weight: 500;
+  color: #1a365d;
+  margin: 20px 0;
+  text-align: center;
+  font-family: "KBO-Dia-Gothic_medium";
 `;
 
 // ─── 상단 점수판 영역 ─────────────────────────────
 export const ScoreBoardWrapper = styled.div`
-  width: calc((100% - 2px));
-  /* margin-top: 2vh; */
-  margin-top: calc((100vh - 120px) * 0.01);
+  width: 90%;
   height: calc((100vh - 120px) * 0.2);
-  background-color: #f2f2f2;
+  margin-top: 3vh;
+  margin-bottom: 1vh;
+  background-color: #ffffff;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  border: 1px solid black;
-  border-radius: 4px;
+  border-radius: 10px;
+  box-shadow: 0px 21px 6px rgba(0, 0, 0, 0), 0px 14px 5px rgba(0, 0, 0, 0),
+    0px 8px 5px rgba(0, 0, 0, 0.02), 0px 3px 3px rgba(0, 0, 0, 0.03),
+    0px 1px 2px rgba(0, 0, 0, 0.03);
 `;
 
 /** ─────────────────────────────────────────────────────────
@@ -41,49 +65,41 @@ export const ScoreBoardWrapper = styled.div`
  * ───────────────────────────────────────────────────────── */
 export const InningHeader = styled.div`
   display: grid;
-  grid-template-columns: repeat(10, 1fr);
-  font-family: "KBO-Dia-Gothic_medium";
+  grid-template-columns: 15vw repeat(9, 1fr);
   width: 100%;
   height: 33%;
+  justify-content: center;
   align-items: center;
-  border-bottom: 1px solid #ccc;
-  /* background-color: red; */
+  margin-top: 1vh;
+  > * {
+    padding-bottom: 1vh;
+    border-bottom: 1px solid #ccc;
+  }
+  > *:first-of-type {
+    border-bottom: none;
+  }
+  > *:nth-of-type(9),
+  > *:nth-of-type(10) {
+    color: red;
+  }
+  padding-right: 1vh;
 `;
 
 export const InningCell = styled.div`
   text-align: center;
-  font-family: "KBO-Dia-Gothic_medium";
-  /* padding-top: 1vh; */
-  /* background-color: red; */
-  /* padding-bottom: 1vh; */
-  /* font-weight: 600; */
-
-  ${small} {
-    font-size: 17px;
-  }
-  ${medium} {
-    font-size: 20px;
-  }
-  ${large}, ${xlarge} {
-    font-size: 20px;
-  }
+  font-family: "Pretendard";
+  font-weight: 700;
+  font-size: 1.125rem;
 `;
 
 export const EditableInputScore = styled.input`
   width: 100%;
   border: none;
   text-align: center;
-  font-family: "KBO-Dia-Gothic_light";
-  background-color: #f2f2f2;
-  ${small} {
-    font-size: 17px;
-  }
-  ${medium} {
-    font-size: 20px;
-  }
-  ${large}, ${xlarge} {
-    font-size: 20px;
-  }
+  font-family: "Pretendard";
+  background-color: transparent;
+  color: #1a365d;
+  font-weight: 400;
   &:focus {
     outline: none;
   }
@@ -104,44 +120,32 @@ export const EditableInputScore = styled.input`
  * ───────────────────────────────────────────────────────── */
 export const TeamRow = styled.div`
   display: grid;
-  grid-template-columns: repeat(10, 1fr); /* 12개의 동일한 너비 */
+  grid-template-columns: 15vw repeat(9, 1fr);
   width: 100%;
   align-items: center;
-  /* border-bottom: 1px solid #ccc; */
-  /* background-color: aqua; */
   height: 33%;
+  > *:nth-of-type(9),
+  > *:nth-of-type(10) {
+    color: red;
+    font-weight: 700;
+  }
+  padding-right: 1vh;
 `;
 
 export const TeamNameCell = styled.div`
   text-align: center;
-  padding: 1vh 0;
   font-weight: 500;
-  font-family: "KBO-Dia-Gothic_medium";
-  font-style: normal;
-  margin-left: 4px;
-
-  ${small || medium} {
-    font-size: 12px;
-  }
-  ${large}, ${xlarge} {
-    font-size: 14px;
-  }
+  font-family: "Pretendard";
+  font-size: 0.8125rem;
+  font-weight: 700;
+  padding-left: 2.5vw;
+  padding-right: 1vw;
 `;
 
 export const TeamScoreCell = styled.div`
   text-align: center;
-  font-family: "KBO-Dia-Gothic_light";
-  padding: 1vh 0;
+  font-family: "Pretendard";
   font-weight: 400;
-  ${small} {
-    font-size: 15px;
-  }
-  ${medium} {
-    font-size: 20px;
-  }
-  ${large}, ${xlarge} {
-    font-size: 20px;
-  }
 `;
 
 // ─── 팀명 헤더 ─────────────────────────────
@@ -149,6 +153,7 @@ export const TeamTitle = styled.h2`
   margin: 24px 0 16px 0;
   font-weight: 600;
   text-align: center;
+  color: #1a365d;
   ${small} {
     font-size: 18px;
   }
@@ -163,25 +168,30 @@ export const TeamTitle = styled.h2`
 // ─── 테이블 영역 공통 스타일 ─────────────────────────────
 export const TableWrapper = styled.div`
   width: 90%;
-  margin-bottom: 32px;
-  /* background-color: red; */
-  border-bottom: 1px solid #000;
+  max-width: 800px;
+  margin-bottom: 24px;
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   overflow-x: auto;
-  padding: 0 20px;
+  padding: 20px;
   ${small} {
-    padding: 0 10px;
+    padding: 15px;
   }
   ${medium} {
-    padding: 0 15px;
+    padding: 18px;
   }
   ${large}, ${xlarge} {
-    padding: 0 20px;
+    padding: 20px;
   }
 `;
 
 export const TableTitle = styled.div`
   font-weight: 600;
-  margin-bottom: 8px;
+  margin-bottom: 16px;
+  color: #1a365d;
+  font-size: 18px;
   ${small} {
     font-size: 14px;
   }
@@ -199,16 +209,19 @@ export const RecordTable = styled.table`
   border-collapse: collapse;
   min-width: 600px;
   text-align: center;
-  border-top: 1px solid #000;
-  border-bottom: 1px solid #000;
+  background-color: #ffffff;
   th,
   td {
-    padding: 8px;
-    border-bottom: 1px solid #eee;
+    padding: 12px 8px;
+    border-bottom: 1px solid #f0f0f0;
   }
   th {
-    font-weight: 500;
-    border-bottom: 1px solid #000;
+    font-weight: 600;
+    color: #1a365d;
+    border-bottom: 2px solid #e0e0e0;
+  }
+  tr:hover {
+    background-color: #f8f9fa;
   }
   ${small} {
     font-size: 12px;
@@ -224,8 +237,9 @@ export const RecordTable = styled.table`
   /* 순번 */
   th:nth-of-type(1),
   td:nth-of-type(1) {
-    width: 4vh;
+    width: 5vh;
   }
+
   /* 이름 */
   th:nth-of-type(2),
   td:nth-of-type(2) {
@@ -261,34 +275,29 @@ export const RecordTable = styled.table`
   td:nth-of-type(8) {
     width: 6vh;
   }
-  /* 타점 */
+  /* 득점 */
   th:nth-of-type(9),
   td:nth-of-type(9) {
     width: 5vh;
   }
-  /* 득점 */
+  /* 볼넷 */
   th:nth-of-type(10),
   td:nth-of-type(10) {
     width: 5vh;
   }
-  /* 볼넷 */
+  /* 삼진 */
   th:nth-of-type(11),
   td:nth-of-type(11) {
     width: 5vh;
   }
-  /* 삼진 */
+  /* 희플 */
   th:nth-of-type(12),
   td:nth-of-type(12) {
     width: 5vh;
   }
-  /* 희플 */
+  /* 희번 */
   th:nth-of-type(13),
   td:nth-of-type(13) {
-    width: 5vh;
-  }
-  /* 희번 */
-  th:nth-of-type(14),
-  td:nth-of-type(14) {
     width: 5vh;
   }
 `;
@@ -297,25 +306,26 @@ export const RecordTable = styled.table`
 export const RecordTableP = styled.table`
   width: 100%;
   border-collapse: collapse;
-  // min-width: 400px;
   text-align: center;
-  border-top: 1px solid #000;
-  border-bottom: 1px solid #000;
+  background-color: #ffffff;
   th,
   td {
-    padding: 8px;
-    /* border-top: 1px solid #000; */
-    border-bottom: 1px solid #eee;
+    padding: 12px 8px;
+    border-bottom: 1px solid #f0f0f0;
   }
   th {
-    font-weight: 500;
-    border-bottom: 1px solid #000;
-    /* background-color: #f9f9f9; */
+    font-weight: 600;
+    color: #1a365d;
+    border-bottom: 2px solid #e0e0e0;
+  }
+  tr:hover {
+    background-color: #f8f9fa;
   }
   th:nth-of-type(1),
   td:nth-of-type(1) {
-    width: 4vh;
+    width: 5vh;
   }
+
   th:nth-of-type(2),
   td:nth-of-type(2) {
     width: 8vh;
@@ -376,7 +386,8 @@ export const EditableInput = styled.input`
   border: none;
   font-family: "KBO-Dia-Gothic_medium";
   text-align: center;
-  background-color: #f2f2f2;
+  background-color: transparent;
+  color: #1a365d;
 
   &:focus {
     outline: none;

@@ -25,6 +25,8 @@ import {
   TeamNameCell,
   EditableInput,
   EditableInputScore,
+  PageTitle,
+  TeamHeaderTitle,
 } from "./gameResult.style";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -366,6 +368,9 @@ export default function FinalGameRecordPage() {
 
   return (
     <Container>
+      {/* 페이지 타이틀 */}
+      <PageTitle>GAME RESULT</PageTitle>
+
       {/* 스코어보드 */}
       <ScoreBoardWrapper ref={scoreboardRef}>
         <InningHeader>
@@ -420,13 +425,12 @@ export default function FinalGameRecordPage() {
       </ScoreBoardWrapper>
 
       {/* 원정팀 타자 기록 */}
-      <TeamTitle>{teamAName} 야구부</TeamTitle>
+      <TeamTitle>{teamAName}</TeamTitle>
       <TableWrapper>
-        <TableTitle>타자기록</TableTitle>
         <RecordTable>
           <thead>
             <tr>
-              <th></th>
+              <th>타자</th>
               <th>이름</th>
               <th>타석</th>
               <th>타수</th>
@@ -476,7 +480,6 @@ export default function FinalGameRecordPage() {
                     }
                   />
                 </td>
-
                 <td>
                   <EditableInput
                     type="number"
@@ -566,15 +569,13 @@ export default function FinalGameRecordPage() {
 
       {/* 원정팀 투수 기록 */}
       <TableWrapper>
-        <TableTitle>투수기록</TableTitle>
         <RecordTableP>
           <thead>
             <tr>
-              <th></th>
+              <th>투수</th>
               <th>이름</th>
               <th>이닝</th>
               <th>실점</th>
-              {/* <th>자책</th> */}
               <th>삼진</th>
               <th>볼넷</th>
             </tr>
@@ -604,16 +605,6 @@ export default function FinalGameRecordPage() {
                     }
                   />
                 </td>
-                {/* <td>
-                  <EditableInput
-                    type="number"
-                    value={pitcher.ER || 0}
-                    readOnly
-                    onClick={
-                      !canRecord ? undefined : () => handlePitcherClick(pitcher)
-                    }
-                  />
-                </td> */}
                 <td>
                   <EditableInput
                     type="number"
@@ -641,13 +632,12 @@ export default function FinalGameRecordPage() {
       </TableWrapper>
 
       {/* 홈팀 타자 기록 */}
-      <TeamTitle>{teamBName} 야구부</TeamTitle>
+      <TeamTitle>{teamBName}</TeamTitle>
       <TableWrapper>
-        <TableTitle>타자기록</TableTitle>
         <RecordTable>
           <thead>
             <tr>
-              <th></th>
+              <th>타자</th>
               <th>이름</th>
               <th>타석</th>
               <th>타수</th>
@@ -787,15 +777,13 @@ export default function FinalGameRecordPage() {
 
       {/* 홈팀 투수 기록 */}
       <TableWrapper>
-        <TableTitle>투수기록</TableTitle>
         <RecordTableP>
           <thead>
             <tr>
-              <th></th>
+              <th>투수</th>
               <th>이름</th>
               <th>이닝</th>
               <th>실점</th>
-              {/* <th>자책</th> */}
               <th>삼진</th>
               <th>볼넷</th>
             </tr>
@@ -825,16 +813,6 @@ export default function FinalGameRecordPage() {
                     }
                   />
                 </td>
-                {/* <td>
-                  <EditableInput
-                    type="number"
-                    value={pitcher.ER || 0}
-                    readOnly
-                    onClick={
-                      !canRecord ? undefined : () => handlePitcherClick(pitcher)
-                    }
-                  />
-                </td> */}
                 <td>
                   <EditableInput
                     type="number"
