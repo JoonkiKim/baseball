@@ -309,6 +309,14 @@ export const InningItem = styled.div<{
   }
 `;
 
+export const InningFullContainer = styled.div`
+  // width: 95%;
+
+  // display: flex;
+  // flex-direction: column;
+  // justify-content: space-between;
+  // align-items: center;
+`;
 export const InningDividerContainer = styled.div<{ $isTop?: boolean }>`
   width: 85%;
   height: 2vh;
@@ -317,6 +325,7 @@ export const InningDividerContainer = styled.div<{ $isTop?: boolean }>`
   justify-content: space-between;
   align-items: center;
   margin-top: ${({ $isTop }) => ($isTop ? "1.5vh" : "0")};
+  align-self: center;
 `;
 export const InningDividerText = styled.div`
   width: 5%;

@@ -87,6 +87,7 @@ import {
   InningDividerLine,
   InningDividerText,
   InningDividerReal,
+  InningFullContainer,
 } from "./gameRecord-viewer.style";
 
 import {

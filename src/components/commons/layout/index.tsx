@@ -24,6 +24,7 @@ const HIDE_HEADER = [
   "/",
   "/matches/[recordId]/records",
   "/matches/[recordId]/view",
+  "/matches/[recordId]/result",
   "/login",
   "/signUp",
   "/login/findPassword",
