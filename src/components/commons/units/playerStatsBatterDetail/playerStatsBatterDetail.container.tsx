@@ -1571,7 +1571,7 @@ export default function StatsPageBatterDetail() {
       try {
         const res = await API.get("/tournaments/1/records/batters");
         console.log(res.data);
-        const sorted = res.data.batters.sort((a, b) => b.AVG - a.AVG);
+        const sorted = res.data.batters.sort((a, b) => b.H - a.H);
         setHitterData(sorted);
       } catch (e) {
         setError(e);
@@ -1584,7 +1584,7 @@ export default function StatsPageBatterDetail() {
   }, []);
 
   const [hitterSortKey, setHitterSortKey] =
-    React.useState<keyof (typeof hitterData)[0]>("AVG");
+    React.useState<keyof (typeof hitterData)[0]>("H");
 
   // Rate(비율) 정렬 키인지 체크
   const isRateKey = ["AVG", "OBP", "SLG", "OPS"].includes(

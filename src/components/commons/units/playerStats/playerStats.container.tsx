@@ -26,7 +26,7 @@ export default function StatsPage() {
   // 타자 기록 Recoil
   const [hitterData, setHitterData] = useRecoilState(hitterStatsState);
   const [hitterSortKey, setHitterSortKey] =
-    React.useState<keyof (typeof hitterData)[0]>("AVG");
+    React.useState<keyof (typeof hitterData)[0]>("H");
 
   // 투수 기록 Recoil
   const [pitcherData, setPitcherData] = useRecoilState(pitcherStatsState);
@@ -41,7 +41,7 @@ export default function StatsPage() {
         // console.log(API.defaults.baseURL);
         // console.log("responseURL:", (res.request as any).responseURL);
         console.log(res.data);
-        const sorted = res.data.batters.sort((a, b) => b.AVG - a.AVG);
+        const sorted = res.data.batters.sort((a, b) => b.H - a.H);
         setHitterData(sorted);
       } catch (e) {
         setError(e);
