@@ -891,7 +891,7 @@ export default function GameRecordPageViewer() {
     HR: "홈런",
     BB: "볼넷",
     SF: "희생타",
-    SAC: "희생타",
+    SH: "희생타",
     SO: "삼진",
     O: "아웃",
     SO_DROP: "낫아웃",
@@ -994,7 +994,7 @@ export default function GameRecordPageViewer() {
   console.log("currentBatterName", currentBatterName);
 
   // const isCompact = (battersForUI?.length ?? 0) < 3;
-  const OUT_CODES = new Set(["SO", "O", "SO_DROP", "SF", "SAC"]);
+  const OUT_CODES = new Set(["SO", "O", "SO_DROP", "SF", "SH"]);
   const isOutResult = (code) => OUT_CODES.has(String(code).toUpperCase());
 
   // 타자 주자 위치 결정
