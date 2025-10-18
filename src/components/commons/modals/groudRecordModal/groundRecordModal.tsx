@@ -1682,20 +1682,20 @@ const GroundRecordModal = forwardRef<
     const requiresReconstruction =
       resultCode && ["SO_DROP", "IF", "E"].includes(resultCode);
 
-    // ⛔️ SO_DROP, IF, E 체크 (errorFlag와 관계없이)
-    if (requiresReconstruction) {
-      const virtualExists =
-        Array.isArray(combinedRequest.virtual) &&
-        combinedRequest.virtual.length > 0;
+    // // ⛔️ SO_DROP, IF, E 체크 (errorFlag와 관계없이)
+    // if (requiresReconstruction) {
+    //   const virtualExists =
+    //     Array.isArray(combinedRequest.virtual) &&
+    //     combinedRequest.virtual.length > 0;
 
-      if (!virtualExists) {
-        alert("낫아웃, 인터페어, 에러인 경우 \n 이닝의 재구성을 해주세요");
-        const err: any = new Error("PRE_FLIGHT_NO_VIRTUAL_FOR_SPECIAL_RESULT");
-        err.code = "PRE_FLIGHT_BLOCK";
-        err.reason = "NO_VIRTUAL_FOR_SPECIAL_RESULT";
-        return null;
-      }
-    }
+    //   if (!virtualExists) {
+    //     alert("낫아웃, 인터페어, 에러인 경우 \n 이닝의 재구성을 해주세요");
+    //     const err: any = new Error("PRE_FLIGHT_NO_VIRTUAL_FOR_SPECIAL_RESULT");
+    //     err.code = "PRE_FLIGHT_BLOCK";
+    //     err.reason = "NO_VIRTUAL_FOR_SPECIAL_RESULT";
+    //     return null;
+    //   }
+    // }
 
     // ⛔️ 여기서 preflight: PATCH 전에 차단
 
