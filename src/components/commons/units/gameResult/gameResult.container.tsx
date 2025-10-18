@@ -315,9 +315,9 @@ export default function FinalGameRecordPage() {
     const msg =
       `id: ${pitcher.id}\n` +
       `플레이어: ${pitcher.name}\n` +
-      `이닝: ${pitcher.IP}\n` +
+      `아웃카운트: ${pitcher.IP}\n` +
       `실점: ${pitcher.R}\n` +
-      `자책: ${pitcher.ER}\n` +
+      // `자책: ${pitcher.ER}\n` +
       `삼진: ${pitcher.K}\n` +
       `볼넷: ${pitcher.BB}`;
     setAlertMessage(msg);
