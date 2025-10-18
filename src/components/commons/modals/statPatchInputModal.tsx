@@ -118,7 +118,7 @@ IStatPatchInputModalProps) {
       const pitcherKeyMap: Record<string, string> = {
         이닝: "IP",
         실점: "R",
-        자책: "ER",
+        // 자책: "ER",
         삼진: "K",
         볼넷: "BB",
       };
