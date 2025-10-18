@@ -116,7 +116,7 @@ IStatPatchInputModalProps) {
         희번: "SF",
       };
       const pitcherKeyMap: Record<string, string> = {
-        아웃카운트: "IP",
+        아웃: "IP",
         실점: "R",
         // 자책: "ER",
         삼진: "K",
