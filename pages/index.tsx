@@ -8,9 +8,9 @@ export default function Home() {
   return (
     <>
       <div>
-        {/* <MainCalendarPage /> */}
+        <MainCalendarPage />
 
-        <EndPage />
+        {/* <EndPage /> */}
       </div>
     </>
   );
