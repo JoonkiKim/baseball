@@ -994,7 +994,7 @@ export default function GameRecordPageViewer() {
   console.log("currentBatterName", currentBatterName);
 
   // const isCompact = (battersForUI?.length ?? 0) < 3;
-  const OUT_CODES = new Set(["SO", "O", "SO_DROP", "SF", "SH"]);
+  const OUT_CODES = new Set(["SO", "O", "SF", "SH"]);
   const isOutResult = (code) => OUT_CODES.has(String(code).toUpperCase());
 
   // 타자 주자 위치 결정
