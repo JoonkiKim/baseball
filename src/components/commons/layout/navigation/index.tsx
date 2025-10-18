@@ -105,7 +105,7 @@ export default function LayoutNavigation() {
           <Link href="/ranking" passHref>
             <BottomNav as="a">
               <NavIcon src="/images/trophy.png" />
-              <NavItem>대진</NavItem>
+              <NavItem>순위</NavItem>
             </BottomNav>
           </Link>
           <Link href="/playerStats" passHref>
