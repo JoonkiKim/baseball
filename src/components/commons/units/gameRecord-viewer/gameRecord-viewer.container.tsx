@@ -1465,7 +1465,7 @@ export default function GameRecordPageViewer() {
                       <WhoContainer>
                         <NameAvgContainer>
                           <PlayerName $nameLength={b.name?.length}>
-                            {b.name}
+                            {b.name?.slice(0, 4)}
                           </PlayerName>
                           <AvgText>
                             <AvgLabel>타율</AvgLabel>
@@ -1545,7 +1545,7 @@ export default function GameRecordPageViewer() {
                       <WhoContainer>
                         <NameAvgContainer>
                           <PlayerName $nameLength={b.name?.length}>
-                            {b.name}
+                            {b.name?.slice(0, 4)}
                           </PlayerName>
                           <AvgText>
                             <AvgLabel>타율</AvgLabel>
