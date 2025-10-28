@@ -83,7 +83,7 @@ export default function ResetPwPageComponent() {
         newPassword: data.newPw, // form에서 입력한 새 비밀번호
       };
       console.log(payload);
-      // await API.post("/auth/password/reset", payload);
+      await API.post("/auth/password/reset", payload);
       alert("비밀번호가 성공적으로 \n변경되었습니다.");
       router.push("/login");
     } catch (error: any) {
