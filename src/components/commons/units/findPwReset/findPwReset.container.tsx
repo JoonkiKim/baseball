@@ -139,7 +139,7 @@ export default function ResetPwPageComponent() {
             <Input
               id="newPw"
               type={showPassword ? "text" : "password"}
-              placeholder="영문, 숫자가 포함된 8~20자 입력"
+              placeholder="영문 대소문자, 숫자가 포함된 8~20자 입력"
               {...register("newPw")}
             />
             <PasswordToggle onClick={handleTogglePassword}>
