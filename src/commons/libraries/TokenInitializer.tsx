@@ -31,6 +31,15 @@ export default function TokenInitializer() {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
+    // 인증이 필요하지 않은 페이지들에서는 토큰 갱신을 시도하지 않음
+    const authNotRequiredPaths = ["/login/findPassword/resetPassword"];
+
+    const currentPath = router.pathname;
+    if (authNotRequiredPaths.some((path) => currentPath.startsWith(path))) {
+      setChecked(true);
+      return;
+    }
+
     const navEntry = performance.getEntriesByType("navigation")[0] as
       | PerformanceNavigationTiming
       | undefined;
