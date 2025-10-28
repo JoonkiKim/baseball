@@ -85,7 +85,7 @@ export default function ResetPwPageComponent() {
       console.log(payload);
       // await API.post("/auth/password/reset", payload);
       alert("비밀번호가 성공적으로 \n변경되었습니다.");
-      // router.push("/mainCalendar");
+      router.push("/login");
     } catch (error: any) {
       console.error(error);
       alert(
