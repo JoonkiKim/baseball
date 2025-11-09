@@ -158,13 +158,13 @@ export default function SubTeamRegistrationComponent({
   };
 
   const proceedSubmission = async () => {
-    setIsSubmitting(true);
-    if (!recordId) {
-      console.error("recordId가 존재하지 않습니다.");
-      setIsSubmitting(false);
+    if (!recordId || !teamId) {
+      setValidationError(
+        "팀 정보가 준비되지 않았습니다. 잠시 후 다시 시도하세요."
+      );
       return;
     }
-    if (!teamId) return;
+    setIsSubmitting(true);
     const playerIds = selectedPlayers.map((p) => p.id);
     try {
       await API.post(`/games/${recordId}/teams/${teamId}/substitution`, {
